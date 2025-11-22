@@ -1,11 +1,11 @@
-import EnrollNow from "./components/ui/buttons/EnrollNow"
+import GradiantButton from "./components/ui/buttons/GradiantButton"
 
 function App() {
 
   return (
-    <>
-      <EnrollNow />
-    </>
+    <div>
+      
+    </div>
   )
 }
 
