@@ -1,0 +1,30 @@
+/* 1. Download Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* 2. Initialize Tailwind */
+@import "tailwindcss";
+
+/* 1. Import your custom split files */
+@import './typography.css';
+@import './variables.css';
+@import './animations.css';
+
+/* 3. Any other quick global overrides can go here */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@theme {
+  /* Define Custom Colors here to generate classes like 'bg-brand' or 'text-brand' */
+  --color-brand: #3b82f6;
+  --color-brand-dark: #1d4ed8;
+
+  /* Define Custom Fonts here to link with font-sans */
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Poppins", sans-serif;
+  
+  /* Define Custom Breakpoints if needed */
+  --breakpoint-3xl: 1920px;
+}

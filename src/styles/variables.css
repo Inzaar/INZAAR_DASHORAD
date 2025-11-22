@@ -1,0 +1,13 @@
+:root {
+  /* Layout Constants */
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  
+  /* Z-Index Layers (Good practice to keep them in one place) */
+  --z-modal: 1000;
+  --z-dropdown: 50;
+  --z-sticky: 40;
+}
+
+
+/* <div className="h-[var(--header-height)] w-full">...</div> */

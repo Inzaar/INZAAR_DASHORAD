@@ -1,0 +1,19 @@
+@theme {
+  /* Register the animation name to create utility: 'animate-fade-in-up' */
+  --animate-fade-in-up: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Define the Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Now you can use <div className="animate-fade-in-up"> in your React components. */
