@@ -2,6 +2,7 @@ import GradiantButton from "./components/ui/buttons/GradiantButton"
 import { CourseCard } from "./features/courses"
 import thumbnail from "./assets/images/course2.png"
 import profile from "./assets/icons/profile.png"
+import { LoginPage } from "./features/auth"
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
     <div>
       <GradiantButton className="p-4 rounded-lg h-[100px]">Enroll Now</GradiantButton>
       <CourseCard course={course}/>
+      <LoginPage />
     </div>
   )
 }
