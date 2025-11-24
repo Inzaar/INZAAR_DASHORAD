@@ -12,7 +12,7 @@ function AuthLeft() {
         <Logo />
         {/* <div className='w-[239px] h-[239px] bg-gradient-to-r from-[#D9D9D9BF]/75 to-[#D9D9D933]/20 -rotate-[100deg] rounded-[43px] absolute -top-[145px] -left-[62px]'></div> */}
         <img src={Reactangle2} alt="rectangle 2" className='w-[104px] h-[104px] mt-10 ml-20 absolute left-[340px] top-[350px]'/>
-        <img src={Rectangle3} alt="rectangle 3" className='w-[221px] h-[221px] mt-10 ml-10 absolute bottom-0 -left-10'/>
+        <img src={Rectangle3} alt="rectangle 3" className='w-[150px] h-[221px] mt-10 ml-10 absolute bottom-0 -left-10'/>
         <img src={Rectangle4} alt="rectangle 4" className='w-[240px] h-[200px] mt-10 ml-20 absolute bottom-0 left-[400px]'/>
 
     </div>
