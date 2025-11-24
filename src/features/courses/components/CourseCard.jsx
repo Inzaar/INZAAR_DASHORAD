@@ -4,7 +4,7 @@ import Button from '../../../components/ui/buttons/GradiantButton'; // Import yo
 
 const CourseCard = ({ course }) => {
   return (
-    <Card className="w-[260px] h-[305px] flex flex-col items-start justify-between gap-2 p-4">
+    <Card className="w-[260px] h-[305px] flex flex-col items-start justify-between gap-2">
       <div className="w-full h-[161px] rounded-[10px] relative">
         <img
         src={course.thumbnail}

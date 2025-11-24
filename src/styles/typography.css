@@ -3,20 +3,20 @@
 @layer base {
   html {
     /* This uses the variable we defined in index.css @theme */
-    font-family: var(--font-sans);
+    /* font-family: var(--font-sans); */
     /* Smooth scrolling for anchor links */
-    scroll-behavior: smooth; 
+    /* scroll-behavior: smooth;  */
   }
 
-  h1 {
+  /* h1 {
     @apply text-3xl font-bold text-slate-900 mb-4;
-  }
+  } */
 
-  h2 {
+  /* h2 {
     @apply text-2xl font-semibold text-slate-800 mb-3;
-  }
+  } */
 
-  p {
+  /* p {
     @apply text-slate-600 leading-relaxed;
-  }
+  } */
 }
