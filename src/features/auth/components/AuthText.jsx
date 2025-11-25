@@ -1,7 +1,7 @@
 
-function AuthText() {
+function AuthText({className}) {
   return (
-    <div className="max-w-[383px] h-[60px] flex flex-col items-center justify-center text-center gap-3">
+    <div className={`max-w-[383px] h-[60px] flex flex-col items-center justify-center text-center gap-3 ${className}`}>
       <p className="font-[500] text-[16px] text-gray-800">
         No account? <span className="text-[#B566E7]">Create one</span>
       </p>
