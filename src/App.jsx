@@ -4,6 +4,8 @@ import thumbnail from "./assets/images/course2.png"
 import profile from "./assets/icons/profile.png"
 import { ForgetPassword, LoginPage, RegisterPageP1, RegisterPageP2 } from "./features/auth"
 import ResetPage from "./features/auth/pages/ResetPage"
+import Sideabrbbutton from "./components/ui/buttons/Sideabrbbutton"
+import { Sidebar } from "./features/StudentDashboard"
 
 function App() {
 
@@ -27,6 +29,11 @@ function App() {
       <RegisterPageP2 />
       <ForgetPassword />
       <ResetPage />
+      <Sideabrbbutton>
+        Dashboard
+      </Sideabrbbutton>
+
+      <Sidebar />
     </div>
   )
 }
