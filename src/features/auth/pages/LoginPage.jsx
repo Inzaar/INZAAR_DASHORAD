@@ -1,10 +1,10 @@
 import AuthLeft from '../components/AuthLeft';
-import AuthPage from '../../../components/layouts/AuthPage';
+import AuthPage from '@/components/layouts/AuthPage';
 import RightAuth from '../components/AuthRight';
 import AuthHeading from '../components/AuthHeading';
-import Input1 from '../../../components/ui/inputs/Input1';
-import GradiantButton from '../../../components/ui/buttons/GradiantButton';
-import GrayButton from '../../../components/ui/buttons/GrayButton';
+import Input1 from '@/components/ui/inputs/Input1';
+import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import GrayButton from '@/components/ui/buttons/GrayButton';
 import AuthText from '../components/AuthText';
 
 const LoginPage = () => {
