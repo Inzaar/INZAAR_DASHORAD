@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { TrendingUp } from "lucide-react";
 
 const PerformanceCard = ({
-    percentage = 65,
+    percentage = 60,
     trend = 2.7,
     className
 }) => {

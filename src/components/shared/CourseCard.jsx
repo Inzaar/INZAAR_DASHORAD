@@ -5,7 +5,7 @@ import img from "../../assets/images/course2.png"
 const CourseCard = ({
     title = "Course Title",
     image = img,
-    completed = 8,
+    completed = 6,
     total = 11,
     className
 }) => {

@@ -41,7 +41,7 @@ export function Calendar18() {
                 // day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-full hover:bg-gray-100",
                 // day_today: "text-[#3758EE] font-bold",
                 // day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-                day_disabled: "text-muted-foreground opacity-50",
+                // day_disabled: "text-muted-foreground opacity-50",
                 // day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
                 // day_hidden: "invisible",
             }}
