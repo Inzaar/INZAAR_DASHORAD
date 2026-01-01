@@ -5,6 +5,7 @@ import AuthHeading from '../components/AuthHeading'
 import Input1 from '../../../components/ui/inputs/Input1'
 import PhoneInput from '../../../components/ui/inputs/PhoneInput'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
+import { Link } from 'react-router-dom';
 
 function RegisterPageP1() {
   return (
@@ -18,20 +19,20 @@ function RegisterPageP1() {
         </div>
 
         <div className='max-w-[500px] w-full flex gap-2'>
-          <Input1 name="First Name" placeholder="first name"/>
-          <Input1 name="Last Name" placeholder="second name"/>
+          <Input1 name="First Name" placeholder="first name" />
+          <Input1 name="Last Name" placeholder="second name" />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Username" placeholder="username"/>
+          <Input1 name="Username" placeholder="username" />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Email" placeholder="email"/>
+          <Input1 name="Email" placeholder="email" />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Password" placeholder="8 digit password"/>
+          <Input1 name="Password" placeholder="8 digit password" />
         </div>
 
         <div className='max-w-[500px] w-full mt-[10px]'>
@@ -39,9 +40,11 @@ function RegisterPageP1() {
           <PhoneInput />
         </div>
 
-        <GradiantButton className="max-w-[500px] w-full h-[52px] rounded mt-[10px]">
-          Next
-        </GradiantButton>
+        <Link to="/register/step2" className="w-full max-w-[500px]">
+          <GradiantButton className="w-full h-[52px] rounded mt-[10px]">
+            Next
+          </GradiantButton>
+        </Link>
 
         <div className='max-w-[548px] w-full flex flex-col gap-4 '>
           {/* Checkbox 1 */}

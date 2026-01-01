@@ -1,17 +1,9 @@
 import { useState, useEffect } from "react"
-import GradiantButton from "./components/ui/buttons/GradiantButton"
-import thumbnail from "./assets/images/course2.png"
-import profile from "./assets/icons/profile.png"
-import { ForgetPassword, LoginPage, RegisterPageP1, RegisterPageP2 } from "./features/auth"
+import { Routes, Route, Navigate } from "react-router-dom"
+import { LoginPage, RegisterPageP1, RegisterPageP2, ForgetPassword } from "./features/auth"
 import ResetPage from "./features/auth/pages/ResetPage"
-import Sidebar from "./components/layouts/SideBar"
+import DashboardPage from "./features/StudentDashboard/pages/DashboardPage"
 import Loader from "./components/ui/Loader"
-import { Calendar18 } from "./components/shared/Calender"
-import CourseCard from "./components/shared/CourseCard"
-import PerformanceCard from "./components/shared/PerformanceCard"
-import HoursSpentCard from "./components/shared/HoursSpentCard"
-import LectureCard from "./components/shared/LectureCard"
-import OverviewCard from "./components/shared/OverviewCard"
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -24,40 +16,26 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const course = {
-    title: "Introduction to React",
-    time: "10 Lectures (3 hours, 23 minutes, 24 seconds)",
-    category: "Web Development",
-    description: "Course explains Day of Judgment using Quranic verses and authentic Ahadith.",
-    price: 49.99,
-    thumbnail: thumbnail,
-    icon: profile
-  }
-
   if (loading) {
     return <Loader />;
   }
 
   return (
-    <div>
-      <GradiantButton className="p-4 rounded-lg h-[100px]">Enroll Now</GradiantButton>
-      <LoginPage />
-      <RegisterPageP1 />
-      <RegisterPageP2 />
-      <ForgetPassword />
-      <ResetPage />
-      <Sidebar />
-      {/* <Loader /> */}
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPageP1 />} />
+      <Route path="/register/step2" element={<RegisterPageP2 />} />
+      <Route path="/forgot-password" element={<ForgetPassword />} />
+      <Route path="/reset-password" element={<ResetPage />} />
 
-      <GradiantButton className={"w-[200px] h-[52px]"}>Watch Again</GradiantButton>
-      <Calendar18 />
-      {/* <CourseCard course={course} /> */}
-      <CourseCard />
-      <PerformanceCard />
-      <HoursSpentCard />
-      <LectureCard />
-      <OverviewCard />
-    </div>
+      {/* Default route redirects to login for now, or dashboard if authenticated (logic later) */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      <Route path="/dashboard" element={<DashboardPage />} />
+
+      {/* Catch all - 404 */}
+      <Route path="*" element={<div className="text-white p-10">404 - Page Not Found</div>} />
+    </Routes>
   )
 }
 

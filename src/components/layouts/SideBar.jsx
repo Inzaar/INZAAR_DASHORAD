@@ -12,7 +12,7 @@ function Sidebar() {
   };
 
   return (
-    <div className='w-[240px] h-[700px] p-2 border-[3px] border-[#6984E6] rounded-[6px]'>
+    <div className='fixed left-0 top-0 w-[260px] bg-white p-4 border-1 border-[#3e84f3] flex flex-col justify-between overflow-y-auto z-40'>
       <div className='w-[192px] h-[44px] mx-auto text-[#6A6F78] hover:text-[#265CEB] text-[14px] flex items-center justify-center'>
         Welcome, Muhammad Zain
       </div>
@@ -22,44 +22,44 @@ function Sidebar() {
             1. Check if it matches the activeItem state
             2. Pass a function to update the state on click
         */}
-        
-        <Sideabrbbutton 
-          isActive={activeItem === 'Dashboard'} 
+
+        <Sideabrbbutton
+          isActive={activeItem === 'Dashboard'}
           onClick={() => handleItemClick('Dashboard')}
         >
           Dashboard
         </Sideabrbbutton>
 
-        <Sideabrbbutton 
-          isActive={activeItem === 'My Courses'} 
+        <Sideabrbbutton
+          isActive={activeItem === 'My Courses'}
           onClick={() => handleItemClick('My Courses')}
         >
           My Courses
         </Sideabrbbutton>
 
-        <Sideabrbbutton 
-          isActive={activeItem === 'Certificates'} 
+        <Sideabrbbutton
+          isActive={activeItem === 'Certificates'}
           onClick={() => handleItemClick('Certificates')}
         >
           Certificates
         </Sideabrbbutton>
 
-        <Sideabrbbutton 
-          isActive={activeItem === 'Profile'} 
+        <Sideabrbbutton
+          isActive={activeItem === 'Profile'}
           onClick={() => handleItemClick('Profile')}
         >
           Profile
         </Sideabrbbutton>
 
-        <Sideabrbbutton 
-          isActive={activeItem === 'Notification'} 
+        <Sideabrbbutton
+          isActive={activeItem === 'Notification'}
           onClick={() => handleItemClick('Notification')}
         >
           Notification
         </Sideabrbbutton>
 
-        <Sideabrbbutton 
-          isActive={activeItem === 'Help Center'} 
+        <Sideabrbbutton
+          isActive={activeItem === 'Help Center'}
           onClick={() => handleItemClick('Help Center')}
         >
           Help Center
@@ -67,9 +67,9 @@ function Sidebar() {
 
         <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500]'>
           <div className='mt-2'>USER</div>
-          <Sideabrbbutton 
-             isActive={activeItem === 'Logout'} 
-             onClick={() => handleItemClick('Logout')}
+          <Sideabrbbutton
+            isActive={activeItem === 'Logout'}
+            onClick={() => handleItemClick('Logout')}
           >
             Logout
           </Sideabrbbutton>
