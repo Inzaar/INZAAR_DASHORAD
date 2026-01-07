@@ -13,7 +13,7 @@ function Sidebar() {
 
   return (
     <div className='fixed left-0 top-0 w-[260px] bg-white p-4 border-1 border-[#3e84f3] flex flex-col justify-between overflow-y-auto z-40'>
-      <div className='w-[192px] h-[44px] mx-auto text-[#6A6F78] hover:text-[#265CEB] text-[14px] flex items-center justify-center'>
+      <div className='w-[192px] h-[44px] mx-auto text-[#6A6F78] text-[14px] flex items-center justify-center'>
         Welcome, Muhammad Zain
       </div>
 
