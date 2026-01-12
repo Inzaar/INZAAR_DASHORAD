@@ -10,6 +10,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import MetricCard from '@/components/shared/MetricCard';
 import Navbar from '@/components/layouts/Navbar';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 const DashboardPage = () => {
     const progressPercentage = 40;
@@ -72,7 +73,12 @@ const DashboardPage = () => {
                                     <div className="w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
-                                            <button className="text-sm text-gray-400">Quran Recitation...</button>
+                                            {/* <button className="text-sm text-gray-400">Quran Recitation...</button> */}
+                                            <select className="outline-none bg-gray-100/60 rounded-lg px-6 py-2 shadow-sm">
+                                                <option value="english">Quran Recitation...</option>
+                                                <option value="urdu">Urdu</option>
+                                                <option value="arabic">Arabic</option>
+                                            </select>
                                         </div>
                                         <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
                                             <LectureCard className="shadow-sm" />
@@ -127,7 +133,30 @@ const DashboardPage = () => {
                                 </table> */}
                         <StatusTable />
                         {/* </div> */}
+                        <PaginationContent className="w-full h-10 flex items-center justify-end">
+                            <PaginationItem>
+                                <PaginationPrevious href="#" />
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationLink href="#">1</PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationLink href="#" isActive className="bg-gradient-to-r from-[#A892FF] to-[#6C5DDC] text-white">
+                                    2
+                                </PaginationLink>
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationLink href="#">3</PaginationLink>
+                            </PaginationItem>
+                            {/* <PaginationItem>
+                                <PaginationEllipsis />
+                            </PaginationItem> */}
+                            <PaginationItem>
+                                <PaginationNext href="#" />
+                            </PaginationItem>
+                        </PaginationContent>
                     </div>
+
                 </main>
             </div>
 
