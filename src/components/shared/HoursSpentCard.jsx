@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 const HoursSpentCard = ({
     data = [
         { day: 'Sun', spent: 3, expected: 15 },
-        { day: 'Mon', spent: 15, expected: 28 },
+        { day: 'Mon', spent: 15, expected: 24 },
         { day: 'Tue', spent: 8, expected: 12 },
         { day: 'Wed', spent: 15, expected: 20 },
         { day: 'Thu', spent: 8, expected: 15 },
@@ -51,7 +51,7 @@ const HoursSpentCard = ({
             </div>
 
             {/* Chart Area */}
-            <div className="flex gap-4 h-[200px]">
+            <div className="flex gap-4 h-[150px]">
                 {/* Y-Axis */}
                 <div className="flex flex-col justify-between text-xs text-gray-400 py-1">
                     {yAxisLabels.map((label, i) => (
@@ -97,16 +97,16 @@ const HoursSpentCard = ({
                                 )}
 
                                 {/* Bar Container */}
-                                <div className="relative w-8 sm:w-10 h-full flex items-end justify-center rounded-t-lg overflow-hidden">
+                                <div className="relative w-8 sm:w-10 h-full flex items-end justify-center rounded-lg overflow-hidden">
                                     {/* Expected Bar (Background) */}
                                     <div
-                                        className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-t-lg transition-all duration-500"
+                                        className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-lg transition-all duration-500"
                                         style={{ height: `${expectedHeight}%` }}
                                     ></div>
 
                                     {/* Spent Bar (Foreground) */}
                                     <div
-                                        className="absolute bottom-0 w-full bg-gradient-to-b from-[#B666E7] to-[#3758EE] rounded-t-lg transition-all duration-500"
+                                        className="absolute bottom-0 w-full bg-gradient-to-b from-[#B666E7] to-[#3758EE] transition-all duration-500"
                                         style={{ height: `${spentHeight}%` }}
                                     ></div>
                                 </div>
