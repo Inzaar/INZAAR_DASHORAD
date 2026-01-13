@@ -16,43 +16,43 @@ const OverviewCard = ({
             <h3 className="text-sm text-gray-500 font-normal">Overview</h3>
 
             {/* Stats Row */}
-            <div className="flex items-center justify-between w-full">
+            <div className="flex max-[641px]:flex-col max-[641px]:gap-6 max-[641px]:items-start gap-2 items-center justify-between w-full">
+                <div className="flex flex-2  max-[641px]:w-full min-[973px]:flex-1 min-[1255px]:flex-2 max-[641px]:items-start items-center justify-between">
+                    {/* Completed */}
+                    <div className="flex items-center gap-4 flex-1">
+                        {/* Vertical Bar */}
+                        <div className="w-[2px] h-[48px] bg-[#22C55E] rounded-full"></div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{completed}</span>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#22C55E]"></div>
+                                <span className="text-[#22C55E] text-[11px] [1270px]:text-sm font-medium">Completed</span>
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Completed */}
-                <div className="flex items-center gap-4 flex-1">
-                    {/* Vertical Bar */}
-                    <div className="w-[2px] h-[48px] bg-[#22C55E] rounded-full"></div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-2xl font-bold text-black leading-none">{completed}</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#22C55E]"></div>
-                            <span className="text-[#22C55E] text-sm font-medium">Completed</span>
+                    {/* In Progress */}
+                    <div className="flex items-center gap-4 flex-1 border-l border-gray-100 min-[641px]:pl-8 sm:border-none sm:pl-0">
+                        {/* Vertical Bar */}
+                        <div className="w-[2px] h-[48px] bg-[#3758EE] rounded-full"></div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{inProgress}</span>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#3758EE]"></div>
+                                <span className="text-[#3758EE] text-[12px] [1270px]:text-sm font-medium">In Progress</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                {/* In Progress */}
-                <div className="flex items-center gap-4 flex-1 border-l border-gray-100 pl-8 sm:border-none sm:pl-0">
-                    {/* Vertical Bar */}
-                    <div className="w-[2px] h-[48px] bg-[#3758EE] rounded-full"></div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-2xl font-bold text-black leading-none">{inProgress}</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-[#3758EE]"></div>
-                            <span className="text-[#3758EE] text-sm font-medium">In Progress</span>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Time Spent */}
-                <div className="flex items-center gap-4 flex-1 border-l border-gray-100 pl-8 sm:border-none sm:pl-0">
+                <div className="flex flex-1 items-center gap-4 border-l border-gray-100 min-[641px]:pl-8 sm:border-none sm:pl-0">
                     {/* Vertical Bar */}
                     <div className="w-[2px] h-[48px] bg-[#B666E7] rounded-full"></div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-2xl font-bold text-black leading-none">{timeSpent}</span>
+                        <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{timeSpent}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#B666E7]"></div>
-                            <span className="text-[#B666E7] text-sm font-medium">Time Spent Last week</span>
+                            <span className="text-[#B666E7] text-[12px] [1270px]:text-sm font-medium">Time Spent Last week</span>
                         </div>
                     </div>
                 </div>

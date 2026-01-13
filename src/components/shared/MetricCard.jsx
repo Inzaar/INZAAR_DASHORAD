@@ -31,7 +31,7 @@ const MetricCard = ({
                         <ArrowUpRight className="w-4 h-4 text-emerald-500" />
                     </div>
                     <span className="text-emerald-500 font-medium text-sm">{trend.value}</span>
-                    <span className="text-gray-400 text-sm">{trend.label}</span>
+                    <span className="text-gray-400 text-[11px] min-[430px]:text-sm">{trend.label}</span>
                 </div>
             </div>
 

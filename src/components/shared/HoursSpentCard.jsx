@@ -32,7 +32,7 @@ const HoursSpentCard = ({
 
     return (
         <div className={cn(
-            "w-full max-w-[600px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col gap-6",
+            "w-full bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col gap-6",
             className
         )}>
             {/* Header & Legend */}
