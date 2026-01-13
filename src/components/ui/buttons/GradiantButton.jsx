@@ -1,7 +1,7 @@
 
-function GradiantButton({className, children}) {
+function GradiantButton({ className, children, onClick }) {
   return (
-    <div className={` text-white bg-gradient-to-r from-[#3758EE] to-[#B666E7] flex items-center justify-center ${className}`}>
+    <div onClick={onClick} className={` text-white bg-gradient-to-r from-[#3758EE] to-[#B666E7] flex items-center justify-center ${className}`}>
       {/* Enroll Now */}
       {children}
     </div>

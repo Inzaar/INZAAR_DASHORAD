@@ -1,33 +1,25 @@
 import React from 'react';
 import Sidebar from '@/components/layouts/SideBar';
-import { Calendar18 } from '@/components/shared/Calender';
-import CourseCard from '@/components/shared/CourseCard';
-import PerformanceCard from '@/components/shared/PerformanceCard';
-import HoursSpentCard from '@/components/shared/HoursSpentCard';
-import LectureCard from '@/components/shared/LectureCard';
-import OverviewCard from '@/components/shared/OverviewCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import MetricCard from '@/components/shared/MetricCard';
 import Navbar from '@/components/layouts/Navbar';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 
-const DashboardPage = () => {
+const EnrolledCourses = () => {
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const progressPercentage = 40;
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
-    const navigate = useNavigate();
 
     return (
         /* 1. Added 'h-screen' and 'overflow-hidden' to the wrapper to prevent double scrollbars */
         <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
 
@@ -74,42 +66,10 @@ const DashboardPage = () => {
                                     <Analytics />
 
                                     <div className='flex w-full gap-6'>
-                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
+                                        <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
                                             <EnrolledCourse />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${progressPercentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="hidden min-[680px]:block min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%]">
-                                            <Calendar18 className="w-[200px] h-[200px]" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm" />
-                                        <div className="w-full min-[900px]:w-[50%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
-                                            <div className="flex justify-between items-center">
-                                                <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
-                                                <select className="outline-none bg-gray-100/60 rounded-lg px-6 py-2 shadow-sm">
-                                                    <option value="english">Quran Recitation...</option>
-                                                    <option value="urdu">Urdu</option>
-                                                    <option value="arabic">Arabic</option>
-                                                </select>
-                                            </div>
-                                            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                            </div>
-                                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
                                                     style={{ width: `${progressPercentage}%` }}
@@ -142,4 +102,4 @@ const DashboardPage = () => {
     );
 };
 
-export default DashboardPage;
+export default EnrolledCourses;

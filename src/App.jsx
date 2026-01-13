@@ -4,6 +4,8 @@ import { LoginPage, RegisterPageP1, RegisterPageP2, ForgetPassword } from "./fea
 import ResetPage from "./features/auth/pages/ResetPage"
 import DashboardPage from "./features/StudentDashboard/pages/DashboardPage"
 import Loader from "./components/ui/Loader"
+import EnrolledCourses from "./features/StudentDashboard/pages/EnrolledCourses"
+import Courses from "./features/courses/pages/Courses"
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -27,14 +29,11 @@ function App() {
       <Route path="/register/step2" element={<RegisterPageP2 />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/reset-password" element={<ResetPage />} />
-
-      {/* Default route redirects to login for now, or dashboard if authenticated (logic later) */}
       <Route path="/" element={<Navigate to="/login" replace />} />
-
       <Route path="/dashboard" element={<DashboardPage />} />
-
-      {/* Catch all - 404 */}
+      <Route path="/enrolled-courses" element={<EnrolledCourses />} />
       <Route path="*" element={<div className="text-white p-10">404 - Page Not Found</div>} />
+      <Route path="/courses" element={<Courses />} />
     </Routes>
   )
 }
