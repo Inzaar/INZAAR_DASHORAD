@@ -1,16 +1,11 @@
 import React from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import { Calendar18 } from '@/components/shared/Calender';
-import CourseCard from '@/components/shared/CourseCard';
-import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import LectureCard from '@/components/shared/LectureCard';
-import OverviewCard from '@/components/shared/OverviewCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import MetricCard from '@/components/shared/MetricCard';
 import Navbar from '@/components/layouts/Navbar';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
@@ -25,13 +20,11 @@ const DashboardPage = () => {
     const navigate = useNavigate();
 
     return (
-        /* 1. Added 'h-screen' and 'overflow-hidden' to the wrapper to prevent double scrollbars */
         <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
 
-                    {/* Mobile Sidebar Overlay */}
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -48,23 +41,20 @@ const DashboardPage = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    {/* 2. Used 'scrollbar-hide' and custom inline styles to ensure it's gone in all browsers */}
                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
-                        msOverflowStyle: 'none',  /* IE and Edge */
-                        scrollbarWidth: 'none'    /* Firefox */
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none'
                     }}>
-                        {/* Inner content wrapper */}
                         <div className="py-4 pr-2">
-                            {/* Greeting Section */}
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum Zain 👋</h2>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum Zain 👋🏻</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
+                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     Enrolled New Course
                                 </GradiantButton>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
+                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     +
                                 </GradiantButton>
                             </div>
@@ -120,14 +110,12 @@ const DashboardPage = () => {
                                 </div>
                             </div>
 
-                            {/* Current Status Table */}
                             <StatusTable />
                         </div>
 
                     </main>
                 </div>
 
-                {/* 3. Global CSS to hide scrollbars for Chrome/Safari */}
                 <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;

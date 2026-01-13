@@ -9,9 +9,9 @@ const MetricCard = ({
     trend = {
         value: "2.7%",
         label: "Improvement From last Week",
-        direction: "up" // 'up' | 'down'
+        direction: "up"
     },
-    data = [70, 150, 120], // Sample data for the 3 bars
+    data = [70, 150, 120],
     className
 }) => {
     return (
@@ -36,14 +36,14 @@ const MetricCard = ({
             </div>
 
             {/* Right Chart */}
-            <div className="flex items-end gap-2 h-16 pb-1">
+            <div className="flex items-end gap-2 h-12 min-[500px]:h-16 pb-1">
                 {data.map((height, index) => (
                     <div
                         key={index}
                         style={{ height: `${height}%` }}
                         className={cn(
-                            "w-4 rounded-t",
-                            index === 1 ? "bg-[#5D5FEF]" : "bg-[#B4B5FF]" // Middle bar darker based on image
+                            "w-3 min-[500px]:w-4 rounded-t",
+                            index === 1 ? "bg-[#5D5FEF]" : "bg-[#B4B5FF]"
                         )}
                     />
                 ))}

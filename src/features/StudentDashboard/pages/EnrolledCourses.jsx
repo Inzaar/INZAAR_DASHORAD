@@ -17,13 +17,10 @@ const EnrolledCourses = () => {
     };
 
     return (
-        /* 1. Added 'h-screen' and 'overflow-hidden' to the wrapper to prevent double scrollbars */
         <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
-
-                    {/* Mobile Sidebar Overlay */}
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -39,15 +36,11 @@ const EnrolledCourses = () => {
                         fixed left-0 top-0 h-full lg:max-h-[700px] shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
-
-                    {/* 2. Used 'scrollbar-hide' and custom inline styles to ensure it's gone in all browsers */}
                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
-                        msOverflowStyle: 'none',  /* IE and Edge */
-                        scrollbarWidth: 'none'    /* Firefox */
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none'
                     }}>
-                        {/* Inner content wrapper */}
                         <div className="py-4 pr-2">
-                            {/* Greeting Section */}
                             <div className="flex justify-between items-end mb-8">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum Zain 👋</h2>
@@ -80,14 +73,12 @@ const EnrolledCourses = () => {
                                 </div>
                             </div>
 
-                            {/* Current Status Table */}
                             <StatusTable />
                         </div>
 
                     </main>
                 </div>
 
-                {/* 3. Global CSS to hide scrollbars for Chrome/Safari */}
                 <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;

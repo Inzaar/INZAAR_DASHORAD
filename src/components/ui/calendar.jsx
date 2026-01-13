@@ -50,9 +50,9 @@ function Calendar({
         month_grid: "w-full border-collapse",
         weekdays: "grid grid-cols-7 w-full mb-1",
         weekday: "text-muted-foreground font-normal text-[10px] uppercase text-center select-none",
-        week: "grid grid-cols-7 w-full mt-1",
+        week: "grid grid-cols-7 w-full mt-0",
         day: "flex items-center justify-center p-0 relative",
-        selected: "bg-primary text-primary-foreground rounded-md",
+        selected: "bg-gradient-to-r from-[#A892FF] to-[#6C5DDC] text-white rounded-md",
         today: "bg-accent text-accent-foreground rounded-md",
         outside: "text-muted-foreground/40 opacity-50",
         disabled: "text-muted-foreground opacity-20",
@@ -77,8 +77,8 @@ function CalendarDayButton({ className, day, modifiers, ...props }) {
     <Button
       variant="ghost"
       className={cn(
-        "h-8 w-full p-0 font-normal text-xs transition-all",
-        modifiers.selected && "bg-primary text-primary-foreground hover:bg-primary",
+        "h-10 w-10 p-0 font-normal text-xs transition-all hover:bg-transparent",
+        modifiers.selected && "bg-gradient-to-r from-[#A892FF] to-[#6C5DDC] text-white hover:bg-[#6C5DDC]",
         className,
         defaultClassNames.day,
       )}
