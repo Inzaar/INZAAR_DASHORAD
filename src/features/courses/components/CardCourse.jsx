@@ -3,7 +3,7 @@ import Card from "@/components/ui/Card";
 
 const CardCourse = ({ course }) => {
   return (
-    <Card className={`w-full max-w-[280px] h-auto min-h-[305px] flex flex-col items-start rounded-[10px] justify-between gap-2 p-2 bg-white`}>
+    <Card className={`w-full max-w-[380px] h-auto min-h-[305px] flex flex-col items-start rounded-[10px] justify-between gap-2 p-2 bg-white`}>
       <div className="w-full h-[161px] rounded-[10px] relative">
         <img
           src={course.thumbnail}

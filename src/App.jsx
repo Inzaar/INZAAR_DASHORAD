@@ -25,6 +25,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<RegisterPageP1 />} />
       <Route path="/register" element={<RegisterPageP1 />} />
       <Route path="/register/step2" element={<RegisterPageP2 />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
