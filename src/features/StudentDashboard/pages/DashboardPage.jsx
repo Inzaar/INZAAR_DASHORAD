@@ -9,7 +9,6 @@ import StatusTable from '@/components/ui/statusTable/StatusTable';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
 
 const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
