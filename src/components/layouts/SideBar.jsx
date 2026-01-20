@@ -13,9 +13,10 @@ function Sidebar({ className, onClose }) {
     '/dashboard': 'Dashboard',
     '/enrolled-courses': 'My Courses',
     '/courses': 'My Courses',
+    '/course-view': "My Courses",
+    '/notifications': 'Notifications',
     '/certificates': 'Certificates',
     '/profile': 'Profile',
-    '/notification': 'Notification',
     '/help-center': 'Help Center',
     '/logout': 'Logout'
   };
@@ -39,10 +40,10 @@ function Sidebar({ className, onClose }) {
     if (onClose) onClose();
   };
 
-  const menuItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notification', 'Help Center'];
+  const menuItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   return (
-    <div className={`w-[260px] h-full bg-white p-4 border border-[#3e84f3] flex flex-col z-40 rounded shadow-sm ${className}`}>
+    <div className={`w-[260px] h-full bg-white p-4 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm ${className}`}>
       <div className='w-full flex items-center justify-between lg:justify-center mb-6 lg:mb-0 h-[44px]'>
         <div className='text-[#6A6F78] text-[14px]'>Welcome, Muhammad Zain</div>
         <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">

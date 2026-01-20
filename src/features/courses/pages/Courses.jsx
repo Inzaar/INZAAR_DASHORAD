@@ -53,7 +53,8 @@ const Courses = () => {
             thumbnail: course,
             icon: icon,
             date: "5 Feb 2024",
-            isNew: true
+            isNew: true,
+            link: "/course-view"
         },
         {
             id: 2,
@@ -62,7 +63,9 @@ const Courses = () => {
             description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            isNew: true,
+            link: "/course-view"
         },
         {
             id: 3,
@@ -71,7 +74,8 @@ const Courses = () => {
             description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         },
         {
             id: 4,
@@ -80,7 +84,8 @@ const Courses = () => {
             description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         },
         {
             id: 5,
@@ -89,7 +94,8 @@ const Courses = () => {
             description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         },
         {
             id: 6,
@@ -98,7 +104,8 @@ const Courses = () => {
             description: "Course Explains Day Of Judgment Using Quranic Verses And Authentic Ahadith.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         },
         {
             id: 7,
@@ -107,7 +114,8 @@ const Courses = () => {
             description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         },
         {
             id: 8,
@@ -116,7 +124,8 @@ const Courses = () => {
             description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
             thumbnail: course,
             icon: icon,
-            date: "5 Feb 2024"
+            date: "5 Feb 2024",
+            link: "/course-view"
         }
     ];
 
