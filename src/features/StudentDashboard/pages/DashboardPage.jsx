@@ -4,7 +4,7 @@ import { Calendar18 } from '@/components/shared/Calender';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import LectureCard from '@/components/shared/LectureCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import Navbar from '@/components/layouts/Navbar';
+import Navbar from '@/components/layouts/NavBar';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
