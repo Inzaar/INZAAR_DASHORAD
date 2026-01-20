@@ -13,6 +13,21 @@ const NotificationPage = () => {
     };
     const navigate = useNavigate();
 
+    const mockNotifications = [
+        { id: 1, message: "New Claim Submitted – John Mitchell has submitted a new warranty claim for his Toyota Camry on June 13, 2025.", time: "2 hours ago" },
+        { id: 2, message: "System Update – The dashboard will be undergoing scheduled maintenance tonight from 12:00 AM to 2:00 AM.", time: "5 hours ago" },
+        { id: 3, message: "Course Completed – Congratulations! You have successfully completed 'Advanced React Patterns'.", time: "1 day ago" },
+        { id: 4, message: "New Assignment – A new assignment 'Redux State Management' has been uploaded to your course.", time: "1 day ago" },
+        { id: 5, message: "Profile Updated – Your profile information was successfully updated.", time: "2 days ago" },
+        { id: 6, message: "Welcome Aboard – Welcome to the Inzaar Student Dashboard! We're glad to have you here.", time: "1 week ago" },
+        { id: 7, message: "Reminder – Your subscription is set to renew in 3 days. Please check your payment details.", time: "1 week ago" },
+        { id: 8, message: "New Feature – Check out the new dark mode available in settings!", time: "2 weeks ago" },
+        { id: 9, message: "Feedback Request – We'd love to hear your thoughts on the new dashboard design.", time: "2 weeks ago" },
+        { id: 10, message: "Security Alert – A new login was detected from a new device.", time: "3 weeks ago" },
+        { id: 11, message: "Achievement Unlocked – You've earned the 'Early Bird' badge!", time: "1 month ago" },
+        { id: 12, message: "Exam Schedule – The schedule for the upcoming final exams has been released.", time: "1 month ago" }
+    ];
+
     return (
         <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
@@ -31,7 +46,7 @@ const NotificationPage = () => {
                         className={`
                         transition-transform duration-300 ease-in-out z-40
                         lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:max-h-[700px] shadow-2xl
+                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
@@ -51,26 +66,14 @@ const NotificationPage = () => {
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-6">
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
-                            <Notification />
+                        <div className="flex flex-col">
+                            {mockNotifications.map((notification) => (
+                                <Notification
+                                    key={notification.id}
+                                    message={notification.message}
+                                    time={notification.time}
+                                />
+                            ))}
                         </div>
 
                     </main>

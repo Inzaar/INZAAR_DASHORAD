@@ -33,7 +33,7 @@ const EnrolledCourses = () => {
                         className={`
                         transition-transform duration-300 ease-in-out z-40
                         lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:max-h-[700px] shadow-2xl
+                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{

@@ -8,6 +8,7 @@ import EnrolledCourses from "./features/StudentDashboard/pages/EnrolledCourses"
 import Courses from "./features/courses/pages/Courses"
 import CourseView from "./features/courses/pages/CourseView"
 import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
+import Certificates from "./features/StudentDashboard/pages/Certificates"
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,7 @@ function App() {
       <Route path="*" element={<div className="text-white p-10">404 - Page Not Found</div>} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/notifications" element={<NotificationPage />} />
+      <Route path="/certificates" element={<Certificates />} />
     </Routes>
   )
 }
