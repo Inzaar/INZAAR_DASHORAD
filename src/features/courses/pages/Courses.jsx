@@ -19,9 +19,8 @@ const Courses = () => {
 
     const [activeTab, setActiveTab] = React.useState('all');
     const [currentPage, setCurrentPage] = React.useState(1);
-    const [itemsPerPage, setItemsPerPage] = React.useState(20); // Default to desktop (4 cols * 5 rows)
+    const [itemsPerPage, setItemsPerPage] = React.useState(20);
 
-    // Calculate items per page based on screen width
     React.useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
@@ -43,7 +42,6 @@ const Courses = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Generate more mock data
     const baseCourses = [
         {
             id: 1,
@@ -129,10 +127,8 @@ const Courses = () => {
         }
     ];
 
-    // Create a larger dataset (e.g. 120 items to verify pagination)
     const allCoursesData = Array.from({ length: 120 }, (_, i) => {
         const base = baseCourses[i % baseCourses.length];
-        // Make every 3rd item 'New' for variety if not already set in base
         const isNew = base.isNew || (i % 3 === 0);
         return {
             ...base,
@@ -142,12 +138,10 @@ const Courses = () => {
         };
     });
 
-    // Filter Logic
     const filteredCourses = activeTab === 'new'
         ? allCoursesData.filter(c => c.isNew)
         : allCoursesData;
 
-    // Pagination Logic
     const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentCourses = filteredCourses.slice(startIndex, startIndex + itemsPerPage);
@@ -165,7 +159,6 @@ const Courses = () => {
         }
     };
 
-    // Helper to generate pagination items
     const getPageNumbers = () => {
         const pages = [];
         const maxVisible = 5; // Max visible page buttons (excluding prev/next)
@@ -211,13 +204,11 @@ const Courses = () => {
     };
 
     return (
-        /* 1. Added 'h-screen' and 'overflow-hidden' to the wrapper to prevent double scrollbars */
         <div className="h-screen  w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
 
-                    {/* Mobile Sidebar Overlay */}
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -234,12 +225,10 @@ const Courses = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    {/* 2. Used 'scrollbar-hide' and custom inline styles to ensure it's gone in all browsers */}
                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
-                        msOverflowStyle: 'none',  /* IE and Edge */
-                        scrollbarWidth: 'none'    /* Firefox */
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none'
                     }}>
-                        {/* Inner content wrapper */}
                         <div className="py-4 pr-2">
                             <div className="flex bg-gray-200 w-full max-w-[500px] rounded-lg p-1 mb-8">
                                 {activeTab === 'all' ? (
@@ -323,7 +312,6 @@ const Courses = () => {
                     </main>
                 </div>
 
-                {/* 3. Global CSS to hide scrollbars for Chrome/Safari */}
                 <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
