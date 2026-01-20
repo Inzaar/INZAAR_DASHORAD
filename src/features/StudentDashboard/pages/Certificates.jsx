@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from '@/components/layouts/SideBar';
-import Navbar from '@/components/layouts/Navbar';
+import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 
 const Certificates = () => {
