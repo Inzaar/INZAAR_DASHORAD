@@ -70,6 +70,7 @@ const NotificationPage = () => {
                             <Notification />
                             <Notification />
                             <Notification />
+                            <Notification />
                         </div>
 
                     </main>
