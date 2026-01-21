@@ -70,24 +70,37 @@ const HelpCenter = () => {
 
                             {/* Tabs */}
                             <div className="flex bg-white rounded-lg p-1 w-full border border-gray-100 shadow-sm">
-                                <button
-                                    onClick={() => setActiveTab('contact')}
-                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'contact'
-                                        ? 'bg-gradient-to-r from-[#816AFF] to-[#A05CFF] text-white shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    Contact Support
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('faq')}
-                                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === 'faq'
-                                        ? 'bg-gradient-to-r from-[#816AFF] to-[#A05CFF] text-white shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    Helps & FAQ
-                                </button>
+                                {activeTab === 'contact' ? (
+                                    <GradiantButton
+                                        onClick={() => setActiveTab('contact')}
+                                        className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
+                                    >
+                                        Contact Support
+                                    </GradiantButton>
+                                ) : (
+                                    <button
+                                        onClick={() => setActiveTab('contact')}
+                                        className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                    >
+                                        Contact Support
+                                    </button>
+                                )}
+
+                                {activeTab === 'faq' ? (
+                                    <GradiantButton
+                                        onClick={() => setActiveTab('faq')}
+                                        className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
+                                    >
+                                        Helps & FAQ
+                                    </GradiantButton>
+                                ) : (
+                                    <button
+                                        onClick={() => setActiveTab('faq')}
+                                        className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                    >
+                                        Helps & FAQ
+                                    </button>
+                                )}
                             </div>
 
                             {/* Content Section */}

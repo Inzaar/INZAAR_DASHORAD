@@ -75,7 +75,7 @@ const NotificationPage = () => {
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col">
                             {mockNotifications.map((notification) => (
                                 <Notification
                                     key={notification.id}
