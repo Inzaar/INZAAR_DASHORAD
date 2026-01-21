@@ -29,7 +29,20 @@ function Sidebar({ className, onClose }) {
     }
   }, [location.pathname]);
 
+  const logout = () => {
+    console.log("Logout function called");
+    // Add actual logout logic here
+  };
+
   const handleItemClick = (itemName) => {
+    setActiveItem(itemName);
+
+    if (itemName === 'Logout') {
+      logout();
+      if (onClose) onClose();
+      return;
+    }
+
     // Find the path associated with the clicked name
     const path = Object.keys(pathToName).find(key => pathToName[key] === itemName);
 
@@ -43,7 +56,7 @@ function Sidebar({ className, onClose }) {
   const menuItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   return (
-    <div className={`w-[260px] h-full bg-white p-4 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm ${className}`}>
+    <div className={`w-[260px] bg-white p-4 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm ${className}`}>
       <div className='w-full flex items-center justify-between lg:justify-center mb-6 lg:mb-0 h-[44px]'>
         <div className='text-[#6A6F78] text-[14px]'>Welcome, Muhammad Zain</div>
         <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">

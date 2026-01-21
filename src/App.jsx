@@ -7,8 +7,10 @@ import Loader from "./components/ui/Loader"
 import EnrolledCourses from "./features/StudentDashboard/pages/EnrolledCourses"
 import Courses from "./features/courses/pages/Courses"
 import CourseView from "./features/courses/pages/CourseView"
-import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
+// import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
 import Certificates from "./features/StudentDashboard/pages/Certificates"
+import HelpCenter from "./features/StudentDashboard/pages/HelpCenter"
+import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -37,10 +39,10 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/enrolled-courses" element={<EnrolledCourses />} />
       <Route path="/course-view" element={<CourseView />} />
-      <Route path="*" element={<div className="text-white p-10">404 - Page Not Found</div>} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/notifications" element={<NotificationPage />} />
       <Route path="/certificates" element={<Certificates />} />
+      <Route path="/notifications" element={<NotificationPage />} />
+      <Route path="/courses" element={<Courses />} />
+      <Route path="/help-center" element={<HelpCenter />} />
     </Routes>
   )
 }
