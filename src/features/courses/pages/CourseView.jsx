@@ -253,7 +253,7 @@ const CourseView = () => {
                                 </GradiantButton>
                             </div>
                             <Analytics />
-                            <div className="relative flex flex-col lg:block gap-6">
+                            <div className="relative flex flex-col lg:block gap-6 mt-5">
                                 {/* Ongoing Lecture Section - Left Side */}
                                 <div className="w-full lg:w-[70%] flex flex-col gap-4">
                                     <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
