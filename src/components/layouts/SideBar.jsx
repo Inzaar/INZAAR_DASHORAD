@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react'; // Added useEffect
 import { X } from 'lucide-react';
 import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
+import { useAuth } from '@/context/AuthContext';
+import { logout as apiLogout } from '@/api/auth';
 
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
   const location = useLocation(); // Gets the current URL (e.g., /profile)
   const [activeItem, setActiveItem] = useState('Dashboard');
+  const { logout: contextLogout } = useAuth();
 
   // Map your URL paths to the Display Names
   const pathToName = {
@@ -29,9 +32,20 @@ function Sidebar({ className, onClose }) {
     }
   }, [location.pathname]);
 
-  const logout = () => {
-    console.log("Logout function called");
-    // Add actual logout logic here
+  const logout = async () => {
+    try {
+      console.log("Logout function called");
+      // Call backend API to invalidate session/cookie
+      await apiLogout();
+    } catch (error) {
+      console.error("Logout API failed:", error);
+      // Even if API fails, we should logout locally
+    } finally {
+      // Clear local auth state
+      contextLogout();
+      // Redirect to login page
+      navigate('/login');
+    }
   };
 
   const handleItemClick = (itemName) => {

@@ -60,7 +60,7 @@ const HelpCenter = () => {
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="py-4 pr-2 flex flex-col gap-6 max-w-[1200px]">
+                        <div className="py-4 pr-2 flex flex-col gap-6">
 
                             {/* Header Section */}
                             <div>

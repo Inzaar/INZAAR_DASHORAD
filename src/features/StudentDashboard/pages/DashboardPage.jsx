@@ -9,15 +9,29 @@ import StatusTable from '@/components/ui/statusTable/StatusTable';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isLectureDropdownOpen, setIsLectureDropdownOpen] = React.useState(false);
+    const [selectedLectureFilter, setSelectedLectureFilter] = React.useState("Quran Recitation...");
     const progressPercentage = 40;
+
+    const lectureOptions = [
+        "Quran Recitation...",
+        "Tajweed Basics",
+        "Islamic History"
+    ];
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    if (!user) {
+        navigate('/login');
+    }
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -84,11 +98,45 @@ const DashboardPage = () => {
                                         <div className="w-full min-[900px]:w-[50%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
-                                                <select className="outline-none bg-gray-100/60 rounded-lg px-6 py-2 shadow-sm">
-                                                    <option value="english">Quran Recitation...</option>
-                                                    <option value="urdu">Urdu</option>
-                                                    <option value="arabic">Arabic</option>
-                                                </select>
+                                                <div className="relative z-20">
+                                                    <button
+                                                        onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
+                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-full sm:w-auto justify-between"
+                                                    >
+                                                        <span className="truncate max-w-[150px]">{selectedLectureFilter}</span>
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="16"
+                                                            height="16"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            className={`w-4 h-4 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`}
+                                                        >
+                                                            <path d="m6 9 6 6 6-6" />
+                                                        </svg>
+                                                    </button>
+
+                                                    {isLectureDropdownOpen && (
+                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100">
+                                                            {lectureOptions.map((option) => (
+                                                                <button
+                                                                    key={option}
+                                                                    onClick={() => {
+                                                                        setSelectedLectureFilter(option);
+                                                                        setIsLectureDropdownOpen(false);
+                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
+                                                                >
+                                                                    {option}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
                                                 <LectureCard className="shadow-sm" />

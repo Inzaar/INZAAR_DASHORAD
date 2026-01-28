@@ -7,8 +7,61 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import GrayButton from '@/components/ui/buttons/GrayButton';
 import AuthText from '../components/AuthText';
 import { Link } from 'react-router-dom';
+import { login } from '@/api/auth';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+
+import { useAuth } from '@/context/AuthContext';
+import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (email === '' || password === '') {
+      setError('Please fill all fields');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await login({
+        email: email,
+        password: password,
+      });
+      if (res.data) {
+        authLogin(res.data.user || { loggedIn: true }); // Update context state
+        navigate('/dashboard', { replace: true });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.code === "ERR_NETWORK") {
+        setError("Network error. Please check your internet connection or try again later.");
+      } else if (error.response) {
+        if (error.response.status === 401) {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          console.log(error.response.data.message);
+          setError(error.response.data.message);
+        }
+      } else if (error.request) {
+        setError("No response from server. Please try again later.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthPage>
       <AuthLeft />
@@ -19,11 +72,32 @@ const LoginPage = () => {
           </AuthHeading>
           <p className='text-[#71717A] text-[12px]'>Create your account or sign in.</p>
         </div>
-        <Input1 name="Email" />
-        <Input1 name="Password" />
-        <Link to="/dashboard" className="w-full max-w-[500px]">
-          <GradiantButton className="w-full h-[52px] rounded">Sign in</GradiantButton>
-        </Link>
+
+        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+          <Input1
+            label="Email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input1
+            label="Password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <ErrorAlert message={error} />
+
+          <div className="w-full max-w-[500px]">
+            <GradiantButton onClick={handleSubmit} className="w-full h-[52px] rounded" type="submit">
+              {loading ? 'Signing in...' : 'Sign in'}
+            </GradiantButton>
+          </div>
+        </form>
+
         <p className='text-[#636363] text-[16px]'>Or</p>
         <GrayButton className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-5">
           Continue As A Guest

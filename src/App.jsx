@@ -12,38 +12,36 @@ import Certificates from "./features/StudentDashboard/pages/Certificates"
 import HelpCenter from "./features/StudentDashboard/pages/HelpCenter"
 import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
 
+import { AuthProvider } from "./context/AuthContext"
+import ProtectedRoute from "./components/auth/ProtectedRoute"
+import PublicRoute from "./components/auth/PublicRoute"
+
 function App() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2500); // 2.5 seconds delay
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<RegisterPageP1 />} />
-      <Route path="/register" element={<RegisterPageP1 />} />
-      <Route path="/register/step2" element={<RegisterPageP2 />} />
-      <Route path="/forgot-password" element={<ForgetPassword />} />
-      <Route path="/reset-password" element={<ResetPage />} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/enrolled-courses" element={<EnrolledCourses />} />
-      <Route path="/course-view" element={<CourseView />} />
-      <Route path="/certificates" element={<Certificates />} />
-      <Route path="/notifications" element={<NotificationPage />} />
-      <Route path="/courses" element={<Courses />} />
-      <Route path="/help-center" element={<HelpCenter />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<RegisterPageP1 />} />
+          <Route path="/register" element={<RegisterPageP1 />} />
+          <Route path="/register/step2" element={<RegisterPageP2 />} />
+          <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/reset-password" element={<ResetPage />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/enrolled-courses" element={<EnrolledCourses />} />
+          <Route path="/course-view" element={<CourseView />} />
+          <Route path="/certificates" element={<Certificates />} />
+          <Route path="/notifications" element={<NotificationPage />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/help-center" element={<HelpCenter />} />
+        </Route>
+
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </AuthProvider>
   )
 }
 
