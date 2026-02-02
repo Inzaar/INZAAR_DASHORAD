@@ -55,6 +55,14 @@ const CourseView = () => {
             isLocked: true,
         },
         {
+            id: 2,
+            title: "Tajweed Basics",
+            lectureNo: "04",
+            date: "12-Jan-2025",
+            videoId: "7iy8iB8tu5c",
+            isLocked: false,
+        },
+        {
             id: 4,
             title: "Seerah of Prophet (PBUH)",
             lectureNo: "06",
