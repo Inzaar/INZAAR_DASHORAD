@@ -63,14 +63,6 @@ const CourseView = () => {
             isLocked: false,
         },
         {
-            id: 4,
-            title: "Seerah of Prophet (PBUH)",
-            lectureNo: "06",
-            date: "16-Jan-2025",
-            videoId: "dummy4",
-            isLocked: true,
-        },
-        {
             id: 5,
             title: "Hadith Studies",
             lectureNo: "07",
