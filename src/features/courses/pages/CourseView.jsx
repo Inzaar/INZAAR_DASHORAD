@@ -43,7 +43,7 @@ const CourseView = () => {
             title: "Tajweed Basics",
             lectureNo: "04",
             date: "12-Jan-2025",
-            videoId: "lTRiuFIWV54",
+            videoId: "7iy8iB8tu5c",
             isLocked: false,
         },
         {

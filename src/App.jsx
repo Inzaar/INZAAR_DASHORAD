@@ -15,6 +15,7 @@ import NotificationPage from "./features/StudentDashboard/pages/NotificationPage
 import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./components/auth/ProtectedRoute"
 import PublicRoute from "./components/auth/PublicRoute"
+import ProfilePage from "./features/StudentDashboard/pages/ProfilePage"
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/help-center" element={<HelpCenter />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />

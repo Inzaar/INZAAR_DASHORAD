@@ -11,7 +11,9 @@ export const register = (data) => {
 }
 
 export const logout = () => {
-    const res = axiosInstance.post("/auth/logout");
+    const res = axiosInstance.post("/auth/logout", {
+        withCredentials: true,
+    });
     return res;
 }
 

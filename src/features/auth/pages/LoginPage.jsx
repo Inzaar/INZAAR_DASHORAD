@@ -13,54 +13,65 @@ import { useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
+import { useQuery } from '@tanstack/react-query';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState('hassanakram1@gmail.com');
+  const [password, setPassword] = useState('Password123!');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (email === '' || password === '') {
-      setError('Please fill all fields');
-      return;
-    }
+  const { loading, error, data: loginData } = useQuery({
+    queryKey: ['login'],
+    queryFn: () => login({
+      email,
+      password,
+    }),
+  });
 
-    setLoading(true);
-    setError('');
+  const handleSubmit = () => {
+    
+  }
 
-    try {
-      const res = await login({
-        email: email,
-        password: password,
-      });
-      if (res.data) {
-        authLogin(res.data.user || { loggedIn: true }); // Update context state
-        navigate('/dashboard', { replace: true });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      if (error.code === "ERR_NETWORK") {
-        setError("Network error. Please check your internet connection or try again later.");
-      } else if (error.response) {
-        if (error.response.status === 401) {
-          setError("Invalid email or password. Please try again.");
-        } else {
-          console.log(error.response.data.message);
-          setError(error.response.data.message);
-        }
-      } else if (error.request) {
-        setError("No response from server. Please try again later.");
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (email === '' || password === '') {
+  //     setError('Please fill all fields');
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setError('');
+
+  //   try {
+  //     const res = await login({
+  //       email: email,
+  //       password: password,
+  //     });
+  //     if (res.data) {
+  //       authLogin(res.data.user || { loggedIn: true }); // Update context state
+  //       navigate('/dashboard', { replace: true });
+  //     }
+  //   } catch (error) {
+  //     console.error("Login error:", error);
+  //     if (error.code === "ERR_NETWORK") {
+  //       setError("Network error. Please check your internet connection or try again later.");
+  //     } else if (error.response) {
+  //       if (error.response.status === 401) {
+  //         setError("Invalid email or password. Please try again.");
+  //       } else {
+  //         console.log(error.response.data.message);
+  //         setError(error.response.data.message);
+  //       }
+  //     } else if (error.request) {
+  //       setError("No response from server. Please try again later.");
+  //     } else {
+  //       setError("An unexpected error occurred. Please try again.");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <AuthPage>
@@ -89,7 +100,7 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <ErrorAlert message={error} />
+          <ErrorAlert message={error?.message} />
 
           <div className="w-full max-w-[500px]">
             <GradiantButton onClick={handleSubmit} className="w-full h-[52px] rounded" type="submit">

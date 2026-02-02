@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import { Calendar18 } from '@/components/shared/Calender';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
@@ -16,6 +16,13 @@ const DashboardPage = () => {
     const [isLectureDropdownOpen, setIsLectureDropdownOpen] = React.useState(false);
     const [selectedLectureFilter, setSelectedLectureFilter] = React.useState("Quran Recitation...");
     const progressPercentage = 40;
+
+
+    useEffect(() => {
+        const fetchCourses = async () => {
+
+        }
+    }, [])
 
     const lectureOptions = [
         "Quran Recitation...",
