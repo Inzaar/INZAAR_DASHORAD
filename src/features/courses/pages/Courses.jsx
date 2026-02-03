@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/Navbar';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 import { useNavigate } from 'react-router-dom';
+import { getAllCourses } from '@/api/course';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import CardCourse from '../components/CardCourse';
 import course from "../../../assets/images/course2.png"
@@ -20,8 +21,26 @@ const Courses = () => {
     const [activeTab, setActiveTab] = React.useState('all');
     const [currentPage, setCurrentPage] = React.useState(1);
     const [itemsPerPage, setItemsPerPage] = React.useState(20);
+    const [courses, setCourses] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
 
-    React.useEffect(() => {
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await getAllCourses();
+                if (res.data?.success) {
+                    setCourses(res.data.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch courses:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCourses();
+    }, []);
+
+    useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             if (width >= 1280) { // xl: 4 cols
@@ -42,105 +61,23 @@ const Courses = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const baseCourses = [
-        {
-            id: 1,
-            title: "Akhrat Kay Dalail Aur Ahwal E Akhrat Course",
-            time: "10 Lectures (3 Hours, 23 Minutes, 24 Seconds)",
-            description: "Course Explains Day Of Judgment Using Quranic Verses And Authentic Ahadith.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            isNew: true,
-            link: "/course-view"
-        },
-        {
-            id: 2,
-            title: "Dora Quran Course (Only In Ramzan)",
-            time: "54 Lectures (24 Hours, 24 Minutes, 5 Seconds)",
-            description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            isNew: true,
-            link: "/course-view"
-        },
-        {
-            id: 3,
-            title: "Imaniyaat Course – Nijat Ka Rasta (Path To Eternal Success) Series",
-            time: "7 Lectures + Q&A (6 Hours, 53 Minutes, 41 Seconds)",
-            description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        },
-        {
-            id: 4,
-            title: "Stress Management Course",
-            time: "9 Lectures (3 Hours, 26 Minutes, 24 Seconds)",
-            description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        },
-        {
-            id: 5,
-            title: "Dora Quran Course (Only In Ramzan)",
-            time: "54 Lectures (24 Hours, 24 Minutes, 5 Seconds)",
-            description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        },
-        {
-            id: 6,
-            title: "Akhrat Kay Dalail Aur Ahwal E Akhrat Course",
-            time: "10 Lectures (3 Hours, 23 Minutes, 24 Seconds)",
-            description: "Course Explains Day Of Judgment Using Quranic Verses And Authentic Ahadith.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        },
-        {
-            id: 7,
-            title: "Stress Management Course",
-            time: "9 Lectures (3 Hours, 26 Minutes, 24 Seconds)",
-            description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        },
-        {
-            id: 8,
-            title: "Imaniyaat Course – Nijat Ka Rasta (Path To Eternal Success) Series",
-            time: "7 Lectures + Q&A (6 Hours, 53 Minutes, 41 Seconds)",
-            description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
-            thumbnail: course,
-            icon: icon,
-            date: "5 Feb 2024",
-            link: "/course-view"
-        }
-    ];
-
-    const allCoursesData = Array.from({ length: 120 }, (_, i) => {
-        const base = baseCourses[i % baseCourses.length];
-        const isNew = base.isNew || (i % 3 === 0);
-        return {
-            ...base,
-            id: i + 1,
-            title: `${base.title} ${Math.floor(i / 8) + 1}`,
-            isNew: isNew
-        };
+    // Helper to format course data for Card
+    const formatCourseForCard = (courseData) => ({
+        id: courseData._id,
+        title: courseData.title,
+        time: `${courseData.totalLectures || 0} Lectures (${courseData.duration || 'N/A'})`,
+        description: courseData.description || "Course description unavailable",
+        thumbnail: courseData.thumbnail || course, // Fallback image if needed
+        icon: icon, // Using static icon for now as per design
+        date: new Date(courseData.createdAt).toLocaleDateString(),
+        isNew: courseData.isNewCourse,
+        link: `/course-details/${courseData._id}`
     });
 
-    const filteredCourses = activeTab === 'new'
-        ? allCoursesData.filter(c => c.isNew)
-        : allCoursesData;
+    const filteredCourses = (activeTab === 'new'
+        ? courses.filter(c => c.isNewCourse)
+        : courses
+    ).map(formatCourseForCard);
 
     const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -154,8 +91,8 @@ const Courses = () => {
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
-            // Optionally scroll to top of grid
-            // window.scrollTo(0, 0); 
+            // Optionally scroll to top of grid  
+            // window.scrollTo(0, 0);  
         }
     };
 

@@ -3,16 +3,21 @@ import { cn } from "@/lib/utils";
 import { TrendingUp } from "lucide-react";
 
 const PerformanceCard = ({
-    percentage = 60,
-    trend = 2.7,
+    userCourses,
     className
 }) => {
+
+    const percentageInfo = {
+        percentage: userCourses.stats?.overallProgress || 0,
+        trend: userCourses.stats?.improvement || 0,
+    }
+
     const size = 139;
     const strokeWidth = 16;
     const center = size / 2;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
+    const offset = circumference - (percentageInfo.percentage / 100) * circumference;
 
     return (
         <div className={cn(
@@ -51,14 +56,14 @@ const PerformanceCard = ({
                 </svg>
 
                 <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-black">{percentage}%</span>
+                    <span className="text-3xl font-bold text-black">{percentageInfo.percentage}%</span>
                     <span className="text-xs text-gray-500">Performance</span>
                 </div>
             </div>
 
             <div className="flex items-center gap-1 text-sm font-medium">
                 <span>Trending up by</span>
-                <span className="text-[#3758EE]">{trend}%</span>
+                <span className="text-[#3758EE]">{percentageInfo.trend}%</span>
                 <span>this Week</span>
                 <TrendingUp className="w-4 h-4 text-black ml-1" />
             </div>

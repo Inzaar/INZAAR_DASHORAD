@@ -1,5 +1,15 @@
+import axiosInstance from "./axiosInstance";
 
-export const getEnrolledCourses = () => {
-    const res = axiosInstance.get("/");
+export const getEnrolledCoursesByUserId = () => {
+    const res = axiosInstance.get("/enroll/dashboard", {
+        withCredentials: true,
+    });
+    return res;
+}
+
+export const getAllCourses = () => {
+    const res = axiosInstance.get("/courses/list", {
+        withCredentials: true,
+    });
     return res;
 }

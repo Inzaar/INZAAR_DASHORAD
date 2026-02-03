@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
 
 const HoursSpentCard = ({
-    data = [
-        { day: 'Sun', spent: 3, expected: 15 },
-        { day: 'Mon', spent: 15, expected: 24 },
-        { day: 'Tue', spent: 8, expected: 12 },
-        { day: 'Wed', spent: 15, expected: 20 },
-        { day: 'Thu', spent: 8, expected: 15 },
-        { day: 'Fri', spent: 4, expected: 7 },
-        { day: 'Sat', spent: 7, expected: 15 },
-    ],
+    userCourses,
     className
 }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
+    // Default mock data structure to preserve order and expected values
+    const defaultData = [
+        { day: 'Sun', key: 'sun', expected: 15 },
+        { day: 'Mon', key: 'mon', expected: 24 },
+        { day: 'Tue', key: 'tue', expected: 12 },
+        { day: 'Wed', key: 'wed', expected: 20 },
+        { day: 'Thu', key: 'thu', expected: 15 },
+        { day: 'Fri', key: 'fri', expected: 22 },
+        { day: 'Sat', key: 'sat', expected: 15 },
+    ];
+
+    const weeklyProgress = userCourses?.stats?.weeklyProgress || {};
+
+    const data = defaultData.map(item => {
+        const minutes = weeklyProgress[item.key] || 0;
+        // Convert minutes to hours, rounded to 1 decimal
+        const hours = Number((minutes / 60).toFixed(1));
+        return {
+            ...item,
+            spent: hours
+        };
+    });
     // Calculate max value for scaling
     const allValues = data.flatMap(d => [d.spent, d.expected]);
     const maxValue = Math.max(...allValues, 24); // Default to at least 24 if values are low
@@ -97,7 +111,7 @@ const HoursSpentCard = ({
                                 )}
 
                                 {/* Bar Container */}
-                                <div className="relative w-8 sm:w-10 h-full flex items-end justify-center rounded-lg overflow-hidden">
+                                <div className="relative w-7 [400px]:w-8 sm:w-9 xl:w-10 h-full flex items-end justify-center rounded-lg overflow-hidden">
                                     {/* Expected Bar (Background) */}
                                     <div
                                         className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-lg transition-all duration-500"

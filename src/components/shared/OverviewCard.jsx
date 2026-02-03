@@ -2,11 +2,25 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 
 const OverviewCard = ({
-    completed = 8,
-    inProgress = 2,
-    timeSpent = "12h 30m",
-    className
+    className,
+    userCourses
 }) => {
+
+    const formatTimeSpent = (minutes) => {
+        if (!minutes) return "0h 0m";
+        const numMinutes = parseInt(minutes, 10);
+        if (isNaN(numMinutes)) return "0h 0m";
+        const hours = Math.floor(numMinutes / 60);
+        const mins = numMinutes % 60;
+        return `${hours}h ${mins}m`;
+    };
+
+    const overviewInfo = {
+        completed: userCourses?.stats?.completed || 0,
+        inProgress: userCourses?.stats?.inProgress || 0,
+        timeSpent: formatTimeSpent(userCourses?.stats?.timeSpent),
+    }
+
     return (
         <div className={cn(
             "w-full max-w-[705px] bg-white rounded-[8px] border border-[#EAEDF2] px-6 py-[14px] flex flex-col gap-[10px]",
@@ -23,7 +37,7 @@ const OverviewCard = ({
                         {/* Vertical Bar */}
                         <div className="w-[2px] h-[48px] bg-[#22C55E] rounded-full"></div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{completed}</span>
+                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{overviewInfo.completed}</span>
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-[#22C55E]"></div>
                                 <span className="text-[#22C55E] text-[11px] [1270px]:text-sm font-medium">Completed</span>
@@ -36,7 +50,7 @@ const OverviewCard = ({
                         {/* Vertical Bar */}
                         <div className="w-[2px] h-[48px] bg-[#3758EE] rounded-full"></div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{inProgress}</span>
+                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{overviewInfo.inProgress}</span>
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-[#3758EE]"></div>
                                 <span className="text-[#3758EE] text-[12px] [1270px]:text-sm font-medium">In Progress</span>
@@ -49,7 +63,7 @@ const OverviewCard = ({
                     {/* Vertical Bar */}
                     <div className="w-[2px] h-[48px] bg-[#B666E7] rounded-full"></div>
                     <div className="flex flex-col gap-1">
-                        <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{timeSpent}</span>
+                        <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{overviewInfo.timeSpent}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#B666E7]"></div>
                             <span className="text-[#B666E7] text-[12px] [1270px]:text-sm font-medium">Time Spent Last week</span>

@@ -10,6 +10,7 @@ import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { getEnrolledCoursesByUserId } from '@/api/course';
 
 const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -17,18 +18,32 @@ const DashboardPage = () => {
     const [selectedLectureFilter, setSelectedLectureFilter] = React.useState("Quran Recitation...");
     const progressPercentage = 40;
 
+    const [userCourses, setUserCourses] = React.useState([]);
+
 
     useEffect(() => {
-        const fetchCourses = async () => {
-
+        const fetchUserCourses = async () => {
+            const res = await getEnrolledCoursesByUserId();
+            console.log(res.data);
+            setUserCourses(res.data);
         }
+        fetchUserCourses();
     }, [])
 
-    const lectureOptions = [
-        "Quran Recitation...",
-        "Tajweed Basics",
-        "Islamic History"
-    ];
+    // Extract valid course titles for dropdown
+    const lectureOptions = userCourses?.data?.map(c => c.title) || [];
+
+    // Set default selection when courses load
+    useEffect(() => {
+        if (lectureOptions.length > 0) {
+            setSelectedLectureFilter(lectureOptions[0]);
+        }
+    }, [userCourses]); // Run when userCourses updates
+
+    // Filter displayed courses based on selection
+    const filteredCourses = userCourses?.data?.filter(course =>
+        course.title === selectedLectureFilter
+    ) || [];
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -82,12 +97,12 @@ const DashboardPage = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics />
+                                    <Analytics userCourses={userCourses} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse />
+                                            <EnrolledCourse userCourses={userCourses.data} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
@@ -101,8 +116,8 @@ const DashboardPage = () => {
                                     </div>
 
                                     <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm" />
-                                        <div className="w-full min-[900px]:w-[50%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
+                                        <HoursSpentCard className="w-full shadow-sm" userCourses={userCourses} />
+                                        <div className="w-full min-[900px]:w-[55%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
                                                 <div className="relative z-20">
@@ -110,7 +125,7 @@ const DashboardPage = () => {
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
                                                         className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-full sm:w-auto justify-between"
                                                     >
-                                                        <span className="truncate max-w-[150px]">{selectedLectureFilter}</span>
+                                                        <span className="truncate max-w-[150px]">{selectedLectureFilter || "Select Course"}</span>
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
                                                             width="16"
@@ -128,31 +143,43 @@ const DashboardPage = () => {
                                                     </button>
 
                                                     {isLectureDropdownOpen && (
-                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100">
-                                                            {lectureOptions.map((option) => (
-                                                                <button
-                                                                    key={option}
-                                                                    onClick={() => {
-                                                                        setSelectedLectureFilter(option);
-                                                                        setIsLectureDropdownOpen(false);
-                                                                    }}
-                                                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
-                                                                >
-                                                                    {option}
-                                                                </button>
-                                                            ))}
+                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50">
+                                                            {lectureOptions.length > 0 ? (
+                                                                lectureOptions.map((option) => (
+                                                                    <button
+                                                                        key={option}
+                                                                        onClick={() => {
+                                                                            setSelectedLectureFilter(option);
+                                                                            setIsLectureDropdownOpen(false);
+                                                                        }}
+                                                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
+                                                                    >
+                                                                        {option}
+                                                                    </button>
+                                                                ))
+                                                            ) : (
+                                                                <div className="px-3 py-2 text-sm text-gray-400">No courses found</div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
-                                                <LectureCard className="shadow-sm" />
+                                                {filteredCourses.length > 0 ? (
+                                                    filteredCourses.map((course) => (
+                                                        <LectureCard
+                                                            key={course.id}
+                                                            title={course.title}
+                                                            image={course.thumbnail}
+                                                            lecture={String((course.completed || 0) + 1).padStart(2, '0')}
+                                                            className="shadow-sm"
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center">
+                                                        No ongoing lectures found
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div

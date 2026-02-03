@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import Navbar from '@/components/layouts/NavBar';
@@ -6,15 +6,27 @@ import StatusTable from '@/components/ui/statusTable/StatusTable';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
+import { getEnrolledCoursesByUserId } from '@/api/course';
 
 const EnrolledCourses = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const progressPercentage = 40;
+    const [userCourses, setUserCourses] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
+
+    useEffect(() => {
+        const fetchUserCourses = async () => {
+            const res = await getEnrolledCoursesByUserId();
+            console.log(res.data);
+            setUserCourses(res.data);
+        }
+        fetchUserCourses();
+    }, [])
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -56,12 +68,12 @@ const EnrolledCourses = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics />
+                                    <Analytics userCourses={userCourses} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse />
+                                            <EnrolledCourse userCourses={userCourses?.data} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"

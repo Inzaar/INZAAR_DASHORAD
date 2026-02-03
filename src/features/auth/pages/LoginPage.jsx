@@ -20,58 +20,64 @@ const LoginPage = () => {
   const { login: authLogin } = useAuth();
   const [email, setEmail] = useState('hassanakram1@gmail.com');
   const [password, setPassword] = useState('Password123!');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  console.log(error, "error");
 
-  const { loading, error, data: loginData } = useQuery({
-    queryKey: ['login'],
-    queryFn: () => login({
-      email,
-      password,
-    }),
-  });
+  // const { loading, error, data: loginData } = useQuery({
+  //   queryKey: ['login'],
+  //   queryFn: () => login({
+  //     email,
+  //     password,
+  //   }),
+  // });
 
-  const handleSubmit = () => {
-    
-  }
+  // const handleSubmit = (e) => {
+  //   console.log(e.target.value, "handle submit value. ");
+  //   console.log("email", email);
+  //   console.log("password", password);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (email === '' || password === '') {
-  //     setError('Please fill all fields');
-  //     return;
-  //   }
+  // }
 
-  //   setLoading(true);
-  //   setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (email === '' || password === '') {
+      setError('Please fill all fields');
+      return;
+    }
 
-  //   try {
-  //     const res = await login({
-  //       email: email,
-  //       password: password,
-  //     });
-  //     if (res.data) {
-  //       authLogin(res.data.user || { loggedIn: true }); // Update context state
-  //       navigate('/dashboard', { replace: true });
-  //     }
-  //   } catch (error) {
-  //     console.error("Login error:", error);
-  //     if (error.code === "ERR_NETWORK") {
-  //       setError("Network error. Please check your internet connection or try again later.");
-  //     } else if (error.response) {
-  //       if (error.response.status === 401) {
-  //         setError("Invalid email or password. Please try again.");
-  //       } else {
-  //         console.log(error.response.data.message);
-  //         setError(error.response.data.message);
-  //       }
-  //     } else if (error.request) {
-  //       setError("No response from server. Please try again later.");
-  //     } else {
-  //       setError("An unexpected error occurred. Please try again.");
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await login({
+        email: email,
+        password: password,
+      });
+      if (res.data) {
+        authLogin(res.data.user || { loggedIn: true }); // Update context state
+        navigate('/dashboard', { replace: true });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.code === "ERR_NETWORK") {
+        setError("Network error. Please check your internet connection or try again later.");
+      } else if (error.response) {
+        if (error.response.status === 401) {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          console.log(error.response.data.message);
+          setError(error.response.data.message);
+        }
+      } else if (error.request) {
+        setError("No response from server. Please try again later.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthPage>
@@ -84,7 +90,7 @@ const LoginPage = () => {
           <p className='text-[#71717A] text-[12px]'>Create your account or sign in.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+        <form className="w-full flex flex-col items-center gap-4">
           <Input1
             label="Email"
             name="email"
@@ -100,7 +106,7 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <ErrorAlert message={error?.message} />
+          <ErrorAlert message={error} />
 
           <div className="w-full max-w-[500px]">
             <GradiantButton onClick={handleSubmit} className="w-full h-[52px] rounded" type="submit">

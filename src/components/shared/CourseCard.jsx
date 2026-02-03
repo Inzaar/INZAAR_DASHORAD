@@ -5,21 +5,21 @@ import img from "../../assets/images/course2.png"
 const CourseCard = ({
     title = "Course Title",
     image = img,
-    completed = 6,
-    total = 11,
+    completed = 0,
+    total = 0,
     className
 }) => {
     const progressPercentage = total > 0 ? (completed / total) * 100 : 0;
 
     return (
         <div className={cn(
-            "w-[301px] h-fit bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px]",
+            "w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px]",
             className
         )}>
             {/* Image Section */}
-            <div className="w-full h-[140px] rounded-[6px] overflow-hidden">
+            <div className="w-full min-h-[140px] rounded-[6px] overflow-hidden">
                 <img
-                    src={image}
+                    src={img}
                     alt={title}
                     className="w-full h-full object-cover"
                 />
@@ -27,7 +27,7 @@ const CourseCard = ({
 
             {/* Content Section */}
             <div className="flex flex-col gap-2">
-                <h3 className="font-bold text-lg text-black leading-tight">
+                <h3 className="font-bold text-md text-black leading-tight">
                     {title}
                 </h3>
 
