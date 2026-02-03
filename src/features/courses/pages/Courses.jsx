@@ -32,7 +32,7 @@ const Courses = () => {
                     setCourses(res.data.data);
                 }
             } catch (error) {
-                console.error("Failed to fetch courses:", error);//git fixed
+                console.error("Failed to fetch courses:", error);
             } finally {
                 setLoading(false);
             }
