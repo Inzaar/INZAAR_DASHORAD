@@ -1,25 +1,26 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
-import img from "../../assets/images/course2.png"
+import { Link } from 'react-router-dom';
 
 const CourseCard = ({
     title = "Course Title",
     image = img,
     completed = 0,
     total = 0,
-    className
+    className,
+    id
 }) => {
     const progressPercentage = total > 0 ? (completed / total) * 100 : 0;
 
     return (
-        <div className={cn(
+        <Link to={`/course-view?id=${id}`} className={cn(
             "w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px]",
             className
         )}>
             {/* Image Section */}
             <div className="w-full min-h-[140px] rounded-[6px] overflow-hidden">
                 <img
-                    src={img}
+                    src={image}
                     alt={title}
                     className="w-full h-full object-cover"
                 />
@@ -47,7 +48,7 @@ const CourseCard = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

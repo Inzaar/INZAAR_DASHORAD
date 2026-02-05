@@ -13,3 +13,10 @@ export const getAllCourses = () => {
     });
     return res;
 }
+
+export const getCourseById = (id) => {
+    const res = axiosInstance.get(`/enroll/dashboard/${id}`, {
+        withCredentials: true,
+    });
+    return res;
+}

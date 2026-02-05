@@ -8,8 +8,8 @@ const PerformanceCard = ({
 }) => {
 
     const percentageInfo = {
-        percentage: userCourses.stats?.overallProgress || 0,
-        trend: userCourses.stats?.improvement || 0,
+        percentage: userCourses?.stats?.overallProgress || 0,
+        trend: userCourses?.stats?.improvement || 0,
     }
 
     const size = 139;

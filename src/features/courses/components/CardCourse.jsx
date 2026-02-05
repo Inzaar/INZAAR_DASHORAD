@@ -23,7 +23,7 @@ const CardCourse = ({ course }) => {
         <p className='font-medium text-[10px]'>{course.time}</p>
         <p className='text-[12px] font-normal line-clamp-2 text-ellipsis overflow-hidden'>{course.description}</p>
       </div>
-      <GradiantButton className="w-[81px] h-[26px] text-[14px] font-[400] rounded-[3px]"><Link to={course.link}>Enroll Now</Link></GradiantButton>
+      <GradiantButton className="w-[81px] h-[26px] text-[14px] font-[400] rounded-[3px]"><Link to={"/course-view"}>Enroll Now</Link></GradiantButton>
     </Card>
   );
 };

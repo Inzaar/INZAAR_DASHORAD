@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "@/components/layouts/NavBar";
 import StatusTable from "@/components/ui/statusTable/StatusTable";
 import Analytics from "@/features/StudentDashboard/components/Analytics";
@@ -6,19 +6,53 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaExpand, FaCompress } from "react-icons/fa";
+import { getCourseById, getEnrolledCoursesByUserId } from "@/api/course";
 
 const CourseView = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const progressPercentage = 40;
+    const [userCourses, setUserCourses] = useState([]);
+    const [course, setCourse] = useState([]);
+    const userId = localStorage.getItem("userId");
+    const firstName = localStorage.getItem("firstName");
+    const courseId = new URLSearchParams(location.search).get("id");
+
+
+
+
+    useEffect(() => {
+        const fetchUserCourses = async () => {
+            const res = await getEnrolledCoursesByUserId();
+            // console.log(res.data);
+            setUserCourses(res.data);
+        }
+        fetchUserCourses();
+
+        // console.log(courseId);
+
+    }, [])
+
+
+    useEffect(() => {
+        const fetchCourse = async (courseId) => {
+            try {
+                const res = await getCourseById(courseId);
+                console.log(res.data);
+                setCourse(res.data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchCourse(courseId);
+        console.log(courseId);
+
+    }, [courseId])
+
+
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
     const navigate = useNavigate();
-
-
-
 
     // Helper to format time
     const formatTime = (seconds) => {
@@ -55,7 +89,7 @@ const CourseView = () => {
             isLocked: true,
         },
         {
-            id: 2,
+            id: 4,
             title: "Tajweed Basics",
             lectureNo: "04",
             date: "12-Jan-2025",
@@ -96,11 +130,14 @@ const CourseView = () => {
 
     // Player State
     const [isPlaying, setIsPlaying] = React.useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [isHovering, setIsHovering] = React.useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [duration, setDuration] = React.useState(0);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [volume, setVolume] = React.useState(100);
     const [isMuted, setIsMuted] = React.useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [isFullscreen, setIsFullscreen] = React.useState(false);
 
     const onPlayerReady = (event) => {
@@ -109,10 +146,12 @@ const CourseView = () => {
         setVolume(event.target.getVolume());
     };
 
+    // eslint-disable-next-line no-unused-vars
     const onPlayerStateChange = (event) => {
         setIsPlaying(event.data === YouTube.PlayerState.PLAYING);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const togglePlay = () => {
         if (playerRef.current) {
             if (isPlaying) {
@@ -123,12 +162,14 @@ const CourseView = () => {
         }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const handleSeek = (e) => {
         const time = parseFloat(e.target.value);
         setCurrentTime(time);
         playerRef.current.seekTo(time);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const toggleMute = () => {
         if (playerRef.current) {
             if (isMuted) {
@@ -141,6 +182,7 @@ const CourseView = () => {
         }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const handleVolumeChange = (e) => {
         const newVolume = parseInt(e.target.value);
         setVolume(newVolume);
@@ -148,6 +190,7 @@ const CourseView = () => {
         setIsMuted(newVolume === 0);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
             containerRef.current.requestFullscreen();
@@ -242,7 +285,7 @@ const CourseView = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum Zain 👋🏻</h2>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
@@ -252,7 +295,7 @@ const CourseView = () => {
                                     +
                                 </GradiantButton>
                             </div>
-                            <Analytics />
+                            <Analytics userCourses={userCourses} />
                             <div className="relative flex flex-col lg:block gap-6 mt-5">
                                 {/* Ongoing Lecture Section - Left Side */}
                                 <div className="w-full lg:w-[70%] flex flex-col gap-4">
@@ -433,7 +476,7 @@ const CourseView = () => {
                                 </div>
                             </div>
 
-                            <StatusTable />
+                            <StatusTable userCourses={userCourses} />
                         </div>
 
                     </main>

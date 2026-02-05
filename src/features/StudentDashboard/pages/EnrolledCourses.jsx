@@ -85,7 +85,7 @@ const EnrolledCourses = () => {
                                 </div>
                             </div>
 
-                            <StatusTable />
+                            <StatusTable userCourses={userCourses} />
                         </div>
 
                     </main>

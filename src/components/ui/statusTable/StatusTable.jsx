@@ -2,30 +2,35 @@ import { useState } from "react";
 import StatusRow from "./StatusRow";
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../pagination";
 
-function StatusTable() {
+function StatusTable({ userCourses }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Generate mock data
-    const mockData = Array.from({ length: 120 }, (_, i) => ({
-        id: i + 1,
-        course: "Tafseer",
-        lecture: `#${String(i + 1).padStart(2, '0')}`,
-        title: `Introduction to Surah ${i + 1}`,
-        date: "05-Feb-2025",
-        progress: `${Math.floor(Math.random() * 100)}%`,
-        status: i % 2 === 0 ? "Locked" : "Unlocked",
-        comments: "N/A"
-    }));
+    // Flatten all lectures from all enrolled courses
+    const allLectures = userCourses?.data?.flatMap(course =>
+        course.lectures?.map(lecture => ({
+            id: lecture._id,
+            course: course.title,
+            lecture: `#${String(lecture.lectureNo).padStart(2, '0')}`,
+            title: lecture.name, // Using 'name' from API lecture object
+            date: new Date(course.createdAt).toLocaleDateString(), // Using course enrollment date as proxy or need lecture status/date? 
+            progress: lecture.lectureProgress,
+            status: lecture?.isLocked ? "Locked" : "Unlocked", // Default lock status for now
+            comments: "N/A"
+        })) || []
+    ) || [];
 
-    const totalPages = Math.ceil(mockData.length / itemsPerPage);
+    const totalPages = Math.ceil(allLectures.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentData = mockData.slice(startIndex, startIndex + itemsPerPage);
+    const currentData = allLectures.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
+
+
+        console.log("current data", currentData);
     };
 
     // Helper to generate pagination items (Smart Pagination)
@@ -56,6 +61,31 @@ function StatusTable() {
         }
         return pages;
     };
+
+    if (allLectures.length === 0) {
+        return (
+            <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10 overflow-x-auto no-scrollbar">
+                <h3 className="font-bold text-gray-900 mb-6">Current status</h3>
+                <div className="min-w-[1080px]">
+                    <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
+                        <div className="w-[134px]  flex items-center justify-center">Courses</div>
+                        <div className="w-[134px] flex items-center justify-center">Lecture</div>
+                        <div className="w-[134px] flex items-center justify-center">Title</div>
+                        <div className="w-[134px] flex items-center justify-center">Date</div>
+                        <div className="w-[134px] flex items-center justify-center">Progress</div>
+                        <div className="w-[134px] flex items-center justify-center">Next Lecture</div>
+                        <div className="w-[134px] flex items-center justify-center">Comments</div>
+                        <div className="w-[134px] flex items-center justify-center">Action</div>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-center h-[100px]">
+                            <p className="text-gray-500">You have no enrolled courses yet !</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10 overflow-x-auto no-scrollbar">

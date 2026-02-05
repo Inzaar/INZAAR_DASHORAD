@@ -6,14 +6,12 @@ import Input1 from '@/components/ui/inputs/Input1';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import GrayButton from '@/components/ui/buttons/GrayButton';
 import AuthText from '../components/AuthText';
-import { Link } from 'react-router-dom';
 import { login } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
-import { useQuery } from '@tanstack/react-query';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,22 +20,13 @@ const LoginPage = () => {
   const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  console.log(error, "error");
 
-  // const { loading, error, data: loginData } = useQuery({
-  //   queryKey: ['login'],
-  //   queryFn: () => login({
-  //     email,
-  //     password,
-  //   }),
-  // });
 
-  // const handleSubmit = (e) => {
-  //   console.log(e.target.value, "handle submit value. ");
-  //   console.log("email", email);
-  //   console.log("password", password);
 
-  // }
+  useEffect(() => {
+    localStorage.removeItem('firstName');
+    localStorage.removeItem('userId');
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +44,18 @@ const LoginPage = () => {
         password: password,
       });
       if (res.data) {
-        authLogin(res.data.user || { loggedIn: true }); // Update context state
+        authLogin(res.data.user || { loggedIn: true });
+
+        //testing
+        console.log(res.data, "user");
+
+        localStorage.setItem('firstName', JSON.stringify(res.data.user.firstname));
+        localStorage.setItem('userId', JSON.stringify(res.data.user._id));
+
+        // testing
+        console.log(localStorage.getItem('firstName'), "firstName");
+        console.log(localStorage.getItem('userId'), "userId");
+
         navigate('/dashboard', { replace: true });
       }
     } catch (error) {
