@@ -42,10 +42,12 @@ const DashboardPage = () => {
         }
     }, [userCourses]); // Run when userCourses updates
 
-    // Filter displayed courses based on selection
-    const filteredCourses = userCourses?.data?.filter(course =>
+    // Find the selected course data
+    const selectedCourseData = userCourses?.data?.find(course =>
         course.title === selectedLectureFilter
-    ) || [];
+    );
+
+    const filteredLectures = selectedCourseData?.lectures || [];
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -86,8 +88,8 @@ const DashboardPage = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
+                                    <p className="text-gray-500 text-[10px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     Enrolled New Course
@@ -99,7 +101,7 @@ const DashboardPage = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics userCourses={userCourses} />
+                                    <Analytics userCourses={userCourses} name="Performance Overview" />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
@@ -118,8 +120,8 @@ const DashboardPage = () => {
                                     </div>
 
                                     <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} />
-                                        <div className="w-full min-[900px]:w-[55%] min-[1400px]:w-[100%] flex flex-col gap-6 bg-white rounded-lg p-4">
+                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={"Hours Spent"} />
+                                        <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
                                                 <div className="relative z-20">
@@ -167,13 +169,13 @@ const DashboardPage = () => {
                                                 </div>
                                             </div>
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
-                                                {filteredCourses.length > 0 ? (
-                                                    filteredCourses.map((course) => (
+                                                {filteredLectures.length > 0 ? (
+                                                    filteredLectures.map((lecture) => (
                                                         <LectureCard
-                                                            key={course.id}
-                                                            title={course.title}
-                                                            image={course.thumbnail}
-                                                            lecture={String((course.completed || 0) + 1).padStart(2, '0')}
+                                                            key={lecture._id}
+                                                            title={lecture.name}
+                                                            image={selectedCourseData?.thumbnail}
+                                                            lecture={String(lecture.lectureNo).padStart(2, '0')}
                                                             className="shadow-sm"
                                                         />
                                                     ))
@@ -198,7 +200,7 @@ const DashboardPage = () => {
                         </div>
 
                     </main>
-                </div>
+                </div >
 
                 <style jsx global>{`
                 .no-scrollbar::-webkit-scrollbar {
@@ -209,8 +211,8 @@ const DashboardPage = () => {
                     scrollbar-width: none;
                 }
             `}</style>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

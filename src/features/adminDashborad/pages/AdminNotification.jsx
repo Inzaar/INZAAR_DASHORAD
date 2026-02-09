@@ -5,7 +5,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
 
-const NotificationPage = () => {
+const AdminNotification = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const navigate = useNavigate(); // Ensure this is inside a <BrowserRouter>
 
@@ -97,4 +97,4 @@ const NotificationPage = () => {
     );
 };
 
-export default NotificationPage;
+export default AdminNotification;

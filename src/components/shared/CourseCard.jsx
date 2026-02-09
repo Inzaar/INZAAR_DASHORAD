@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Link } from 'react-router-dom';
+import img from '@/assets/images/course.png';
 
 const CourseCard = ({
     title = "Course Title",

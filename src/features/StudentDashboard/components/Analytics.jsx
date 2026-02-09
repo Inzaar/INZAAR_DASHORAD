@@ -3,7 +3,7 @@ import OverviewCard from '@/components/shared/OverviewCard'
 import PerformanceCard from '@/components/shared/PerformanceCard'
 import React from 'react'
 
-function Analytics({ userCourses }) {
+function Analytics({ userCourses, name }) {
     return (
         <div className="flex max-[973px]:flex-col gap-6">
             <div className='w-full min-[973px]:w-[60%] min-[1250px]:w-[65%] flex flex-col gap-6 justify-between'>
@@ -14,7 +14,7 @@ function Analytics({ userCourses }) {
                     <OverviewCard className="w-full max-w-full shadow-sm" userCourses={userCourses} />
                 </div>
             </div>
-            <PerformanceCard className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]" userCourses={userCourses} />
+            <PerformanceCard className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]" userCourses={userCourses} name={name} />
         </div>
     )
 }

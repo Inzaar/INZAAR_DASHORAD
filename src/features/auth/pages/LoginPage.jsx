@@ -16,7 +16,7 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [email, setEmail] = useState('hassanakram1@gmail.com');
+  const [email, setEmail] = useState('inzaaruserpannel1@gmail.com');
   const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -56,7 +56,11 @@ const LoginPage = () => {
         console.log(localStorage.getItem('firstName'), "firstName");
         console.log(localStorage.getItem('userId'), "userId");
 
-        navigate('/dashboard', { replace: true });
+        if (res.data.user.role === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       }
     } catch (error) {
       console.error("Login error:", error);

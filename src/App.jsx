@@ -13,9 +13,14 @@ import HelpCenter from "./features/StudentDashboard/pages/HelpCenter"
 import NotificationPage from "./features/StudentDashboard/pages/NotificationPage"
 
 import { AuthProvider } from "./context/AuthContext"
-import ProtectedRoute from "./components/auth/ProtectedRoute"
+// import ProtectedRoute from "./components/auth/ProtectedRoute"
+import AdminRoute from "./components/auth/AdminRoute"
+import StudentRoute from "./components/auth/StudentRoute"
 import PublicRoute from "./components/auth/PublicRoute"
 import ProfilePage from "./features/StudentDashboard/pages/ProfilePage"
+import AdminDashboard from "./features/adminDashborad/pages/AdminDashboard"
+import AdminCalendar from "./features/adminDashborad/pages/AdminCalendar"
+import AdminNotification from "./features/adminDashborad/pages/AdminNotification"
 
 function App() {
   return (
@@ -30,7 +35,13 @@ function App() {
           <Route path="/reset-password" element={<ResetPage />} />
         </Route>
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<AdminRoute />}>
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin-calendar" element={<AdminCalendar />} />
+          <Route path="/admin-notifications" element={<AdminNotification />} />
+        </Route>
+
+        <Route element={<StudentRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/enrolled-courses" element={<EnrolledCourses />} />
           <Route path="/course-view" element={<CourseView />} />

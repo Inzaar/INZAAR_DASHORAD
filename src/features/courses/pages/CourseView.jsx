@@ -17,7 +17,7 @@ const CourseView = () => {
     const courseId = new URLSearchParams(location.search).get("id");
 
 
-
+    console.log("on view page courseId", courseId);
 
     useEffect(() => {
         const fetchUserCourses = async () => {

@@ -4,7 +4,8 @@ import { TrendingUp } from "lucide-react";
 
 const PerformanceCard = ({
     userCourses,
-    className
+    className,
+    name
 }) => {
 
     const percentageInfo = {
@@ -21,10 +22,10 @@ const PerformanceCard = ({
 
     return (
         <div className={cn(
-            "w-[384px] h-fit bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
+            "w-full lg:w-[384px] min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
             className
         )}>
-            <h3 className="text-base font-semibold text-black">Performance Overview</h3>
+            <h3 className="text-[18px] font-bold text-black">{name}</h3>
 
             <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
                 <svg width={size} height={size} className="transform -rotate-90">

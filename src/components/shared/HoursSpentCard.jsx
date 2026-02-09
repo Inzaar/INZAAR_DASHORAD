@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 
 const HoursSpentCard = ({
     userCourses,
-    className
+    className,
+    name
 }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
@@ -51,17 +52,19 @@ const HoursSpentCard = ({
         )}>
             {/* Header & Legend */}
             <div className="flex flex-col gap-4">
-                <h3 className="text-lg font-bold text-black">Hours Spent</h3>
-                <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-[2px] bg-gradient-to-r from-[#3758EE] to-[#B666E7]"></div>
-                        <span className="text-gray-500">Spend time</span>
+                <h3 className="text-lg font-bold text-black">{name}</h3>
+                {name === "Hours Spent" && (
+                    <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-[2px] bg-gradient-to-r from-[#3758EE] to-[#B666E7]"></div>
+                            <span className="text-gray-500">Spend time</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
+                            <span className="text-gray-500">Expected Time</span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
-                        <span className="text-gray-500">Expected Time</span>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Chart Area */}

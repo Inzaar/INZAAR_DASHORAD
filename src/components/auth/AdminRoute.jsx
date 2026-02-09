@@ -1,0 +1,26 @@
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import Loader from '@/components/ui/Loader';
+
+const AdminRoute = () => {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return <Loader />;
+    }
+
+    // Check if user is logged in and has admin role
+    if (!user || user.role !== 'admin') {
+        // If logged in but not admin, redirect to student dashboard
+        if (user) {
+            return <Navigate to="/dashboard" replace />;
+        }
+        // If not logged in, redirect to login
+        return <Navigate to="/login" replace />;
+    }
+
+    return <Outlet />;
+};
+
+export default AdminRoute;

@@ -10,9 +10,9 @@ function Input1({ name, label, type = 'text', placeholder, value, onChange, ...p
   };
 
   return (
-    <div className={`h-[76px] max-w-[500px] w-full flex flex-col items-start justify-between `}>
+    <div className={`h-[76px] w-full flex flex-col items-start justify-between `}>
       <label className='text-[#18181B] text-[16px]'>{label || name}</label>
-      <div className="relative w-full max-w-[500px]">
+      <div className="relative w-full ">
         <input
           type={isPassword ? (showPassword ? 'text' : 'password') : type}
           placeholder={`enter ${placeholder || name}`}

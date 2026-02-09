@@ -20,3 +20,16 @@ export const getCourseById = (id) => {
     });
     return res;
 }
+
+export const enrollCourse = async (id) => {
+    try {
+        const res = await axiosInstance.post(`/enroll/enroll`, {
+            courseId: id,
+            userId: localStorage.getItem("userId"),
+        });
+        return res;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}

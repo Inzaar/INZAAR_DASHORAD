@@ -1,5 +1,6 @@
 import React from "react";
 import GradiantButton from "../../ui/buttons/GradiantButton";
+import { Link } from "react-router-dom";
 
 function StatusRow({ data }) {
     return (
@@ -13,9 +14,9 @@ function StatusRow({ data }) {
                 {data.status === 'Locked' && '🔒'} {data.status}
             </div>
             <div className="w-[134px] flex items-center justify-center">{data.comments}</div>
-            <div className="w-[134px] flex items-center justify-center">
+            <Link to={`/course-view`} className="w-[134px] flex items-center justify-center">
                 <GradiantButton className="p-[8px] rounded-[4px]">Watch Again</GradiantButton>
-            </div>
+            </Link>
         </div>
     );
 }
