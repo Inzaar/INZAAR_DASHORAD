@@ -38,9 +38,9 @@ const AdminNotification = () => {
 
     return (
         // Changed h-screen to min-h-screen for better mobile compatibility
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#F8F9FA]">
+        <div className="min-h-screen max-h-[1680px] w-full flex items-center justify-center bg-[#F8F9FA]">
             {/* Added relative and overflow-hidden to prevent layout shifts */}
-            <div className="relative w-full max-w-[1920px] flex flex-col h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col h-screen overflow-hidden gap-4">
 
                 <Navbar onMenuClick={toggleSidebar} />
 
@@ -89,10 +89,11 @@ const AdminNotification = () => {
             </div>
 
             {/* Inlining the style is fine, but ensure it's not conflicting with Tailwind */}
-            <style jsx global>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+            `}} />
         </div>
     );
 };

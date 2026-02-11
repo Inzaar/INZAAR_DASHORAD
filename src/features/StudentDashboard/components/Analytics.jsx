@@ -3,10 +3,10 @@ import OverviewCard from '@/components/shared/OverviewCard'
 import PerformanceCard from '@/components/shared/PerformanceCard'
 import React from 'react'
 
-function Analytics({ userCourses, name }) {
+function Analytics({ userCourses, name, className }) {
     return (
-        <div className="flex max-[973px]:flex-col gap-6">
-            <div className='w-full min-[973px]:w-[60%] min-[1250px]:w-[65%] flex flex-col gap-6 justify-between'>
+        <div className={`flex max-[973px]:flex-col gap-6 ${className} pb-4`}>
+            <div className='w-full flex flex-col gap-6 justify-between'>
                 <div className='w-full'>
                     <MetricCard className="w-full" userCourses={userCourses} />
                 </div>

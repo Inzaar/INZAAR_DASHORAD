@@ -89,10 +89,11 @@ const NotificationPage = () => {
             </div>
 
             {/* Inlining the style is fine, but ensure it's not conflicting with Tailwind */}
-            <style jsx global>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-            `}</style>
+            `}} />
         </div>
     );
 };

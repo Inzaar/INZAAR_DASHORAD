@@ -34,7 +34,7 @@ function Sidebar({ className, onClose }) {
     '/admin-dashboard': 'Dashboard',
     '/admin-calendar': 'Calendar',
     '/admin-notifications': 'Notification',
-    '/moderators': 'Moderators',
+    '/admin-moderators': 'Moderators',
     '/student-profiles': 'Student Profiles',
     '/admin-courses': 'Courses',
     '/reports': 'Reports & Logs',

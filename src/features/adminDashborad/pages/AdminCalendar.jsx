@@ -276,102 +276,112 @@ const AdminCalendar = () => {
         return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
     };
 
-    return (
-        <div className="w-screen flex flex-col bg-[#F8F9FA] overflow-hidden">
-            <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
-            <div className='flex flex-1 overflow-hidden px-4 gap-4'>
-                {isSidebarOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
-                        onClick={() => setIsSidebarOpen(false)}
-                    />
-                )}
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
-                <Sidebar
-                    onClose={() => setIsSidebarOpen(false)}
-                    className={`
+    return (
+        <div className="h-screen w-screen flex items-center justify-center">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+                <Navbar onMenuClick={toggleSidebar} />
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
+
+                    {isSidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                    )}
+
+                    <Sidebar
+                        onClose={() => setIsSidebarOpen(false)}
+                        className={`
                         transition-transform duration-300 ease-in-out z-40
                         lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:h-[800px] shadow-2xl lg:mt-4
+                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                <main className="flex-1 overflow-y-auto py-4 flex flex-col gap-6 no-scrollbar">
-                    {/* Toggle Switch */}
-                    <div className="flex items-center gap-2 mb-2">
-                        <div className="bg-[#F3F4F6] p-1 rounded-md flex">
-                            <button
-                                onClick={() => setView('calendar')}
-                                className={`px-6 py-2 text-sm font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                            >
-                                Add New Event
-                            </button>
-                            <button
-                                onClick={() => setView('list')}
-                                className={`px-6 py-2 text-sm font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shah' : 'text-gray-500 hover:text-gray-900'}`}
-                            >
-                                List
-                            </button>
+                    <main className="flex-1 flex flex-col gap-4 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none'
+                    }}>
+                        {/* Toggle Switch */}
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="bg-[#F3F4F6] p-1 rounded-md flex">
+                                <button
+                                    onClick={() => setView('calendar')}
+                                    className={`px-6 py-2 text-sm font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                                >
+                                    Add New Event
+                                </button>
+                                <button
+                                    onClick={() => setView('list')}
+                                    className={`px-6 py-2 text-sm font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shah' : 'text-gray-500 hover:text-gray-900'}`}
+                                >
+                                    List
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {view === 'calendar' ? (
-                        <>
-                            {/* Add Event Form (Simplified) */}
-                            <div className="bg-white rounded-xl border p-6 shadow-sm">
-                                <h3 className="text-[#3758EE] text-[16px] font-bold mb-4">+ Add New Event</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                                    <Input1 label="Event title" name={"event title"} value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
-                                    <input type="date" className="h-[52px] border rounded px-3" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                    <input type="date" className="h-[52px] border rounded px-3" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                                    <GradiantButton onClick={handleAddEvent} className="h-[52px] md:rounded-lg ">Add Event</GradiantButton>
-                                </div>
-                            </div>
-
-                            {/* React Calendar Section */}
-                            <div className="bg-white rounded-xl border p-6 shadow-sm flex-1 custom-calendar-container mb-6 flex flex-col overflow-hidden">
-
-                                {/* Custom Header */}
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-[28px] text-[#18181B] font-normal">
-                                        {activeStartDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                                    </h2>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={handleToday}
-                                            className="px-6 py-2 bg-[#A892FF] text-white rounded-md text-sm font-medium hover:bg-[#937aff] transition-colors"
-                                        >
-                                            today
-                                        </button>
-                                        <button onClick={handlePrev} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">‹</button>
-                                        <button onClick={handleNext} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">›</button>
+                        {view === 'calendar' ? (
+                            <>
+                                {/* Add Event Form (Simplified) */}
+                                <div className="bg-white rounded-xl border p-6 shadow-sm">
+                                    <h3 className="text-[#3758EE] text-[16px] font-bold mb-4">+ Add New Event</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                        <Input1 label="Event title" name={"event title"} value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
+                                        <input type="date" className="h-[52px] border rounded px-3" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                        <input type="date" className="h-[52px] border rounded px-3" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                        <GradiantButton onClick={handleAddEvent} className="h-[52px] md:rounded-lg ">Add Event</GradiantButton>
                                     </div>
                                 </div>
 
-                                <div className="overflow-x-auto flex-1 w-full">
-                                    <div className="min-w-[700px]">
-                                        <Calendar
-                                            onChange={() => { }}
-                                            value={null}
-                                            activeStartDate={activeStartDate}
-                                            onActiveStartDateChange={({ activeStartDate }) => setActiveStartDate(activeStartDate)}
-                                            tileContent={renderTileContent}
-                                            className="w-full border-none font-sans"
-                                            showNavigation={false} // Hide default navigation
-                                            formatShortWeekday={formatShortWeekday}
-                                        />
+                                {/* React Calendar Section */}
+                                <div className="bg-white rounded-xl border p-6 shadow-sm flex-1 custom-calendar-container mb-6 flex flex-col overflow-hidden">
+
+                                    {/* Custom Header */}
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-[28px] text-[#18181B] font-normal">
+                                            {activeStartDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                        </h2>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={handleToday}
+                                                className="px-6 py-2 bg-[#A892FF] text-white rounded-md text-sm font-medium hover:bg-[#937aff] transition-colors"
+                                            >
+                                                today
+                                            </button>
+                                            <button onClick={handlePrev} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">‹</button>
+                                            <button onClick={handleNext} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">›</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="overflow-x-auto flex-1 w-full">
+                                        <div className="min-w-[700px]">
+                                            <Calendar
+                                                onChange={() => { }}
+                                                value={null}
+                                                activeStartDate={activeStartDate}
+                                                onActiveStartDateChange={({ activeStartDate }) => setActiveStartDate(activeStartDate)}
+                                                tileContent={renderTileContent}
+                                                className="w-full border-none font-sans"
+                                                showNavigation={false} // Hide default navigation
+                                                formatShortWeekday={formatShortWeekday}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </>
-                    ) : (
-                        <StatusTable userCourses={dummyUserCourses} />
-                    )}
-                </main>
-            </div>
+                            </>
+                        ) : (
+                            <StatusTable userCourses={dummyUserCourses} />
+                        )}
+                    </main>
+                </div>
 
-            {/* Global CSS to override react-calendar defaults */}
-            <style jsx global>{`
+                {/* Global CSS to override react-calendar defaults */}
+                <style dangerouslySetInnerHTML={{
+                    __html: `
                 .react-calendar { width: 100% !important; border: none !important; font-family: inherit !important; }
                 .react-calendar__tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; padding: 10px !important; border: 1px solid #f3f4f6 !important; position: relative; }
                 .react-calendar__month-view__days__day--neighboringMonth { background-color: #f9fafb; color: #d1d5db; }
@@ -384,10 +394,221 @@ const AdminCalendar = () => {
                     .react-calendar__navigation button { font-size: 1.1rem; }
                     .react-calendar__month-view__weekdays { font-size: 0.7rem; }
                 }
-            `}</style>
+            `}} />
+            </div>
 
         </div>
     );
 };
 
 export default AdminCalendar;
+
+
+// import React, { useState } from 'react';
+// import Calendar from 'react-calendar';
+// import 'react-calendar/dist/Calendar.css';
+// import Sidebar from '@/components/layouts/SideBar';
+// import Navbar from '@/components/layouts/NavBar';
+// import Input1 from '@/components/ui/inputs/Input1';
+// import GradiantButton from '@/components/ui/buttons/GradiantButton';
+// import { isSameDay, isWithinInterval, startOfDay } from 'date-fns';
+// import StatusTable from '@/components/ui/statusTable/StatusTable';
+// import dummyUserCourses from '@/constants/dummyData';
+
+// const AdminCalendar = () => {
+//     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+//     const [view, setView] = useState('calendar');
+//     const [events, setEvents] = useState([
+//         { id: 1, title: 'German class', startDate: new Date(2025, 8, 7), endDate: new Date(2025, 8, 10), color: 'bg-indigo-500' },
+//         { id: 2, title: 'French class', startDate: new Date(2025, 8, 18), endDate: new Date(2025, 8, 18), color: 'bg-purple-500' },
+//     ]);
+
+//     // Form State
+//     const [eventTitle, setEventTitle] = useState('');
+//     const [startDate, setStartDate] = useState('');
+//     const [endDate, setEndDate] = useState('');
+//     const [selectedColor, setSelectedColor] = useState('bg-indigo-500');
+//     const handleAddEvent = () => {
+//         if (!eventTitle || !startDate) return;
+//         setEvents([...events, {
+//             id: Date.now(),
+//             title: eventTitle,
+//             startDate: new Date(startDate),
+//             endDate: endDate ? new Date(endDate) : new Date(startDate),
+//             color: selectedColor
+//         }]);
+//         setEventTitle(''); setStartDate(''); setEndDate('');
+//     };
+
+//     // Logic to render content inside each calendar tile
+//     const renderTileContent = ({ date, view }) => {
+//         if (view !== 'month') return null;
+
+//         const dayEvents = events.filter(event =>
+//             isWithinInterval(startOfDay(date), {
+//                 start: startOfDay(event.startDate),
+//                 end: startOfDay(event.endDate)
+//             })
+//         );
+
+//         return (
+//             <div className="flex flex-col gap-1 mt-1 w-full overflow-visible">
+//                 {dayEvents.map(event => {
+//                     const isStart = isSameDay(date, event.startDate);
+//                     const isEnd = isSameDay(date, event.endDate);
+//                     const isMiddle = !isStart && !isEnd;
+
+//                     return (
+//                         <div
+//                             key={event.id}
+//                             className={`h-5 text-[9px] flex items-center px-1 text-white truncate z-10 
+//                                  ${event.color}
+//                                  ${isStart ? 'rounded-l-md ml-0.5' : ''} 
+//                                  ${isEnd ? 'rounded-r-md mr-0.5' : ''}
+//                                  ${isMiddle ? 'mx-[-4px]' : ''}
+//                              `}
+//                         >
+//                             {(isStart || date.getDay() === 0) ? event.title : ''}
+//                         </div>
+//                     );
+//                 })}
+//             </div>
+//         );
+//     }
+
+//     const [activeStartDate, setActiveStartDate] = useState(new Date());
+
+//     const handleToday = () => setActiveStartDate(new Date());
+//     const handlePrev = () => setActiveStartDate(prev => {
+//         const date = new Date(prev);
+//         date.setMonth(date.getMonth() - 1);
+//         return date;
+//     });
+//     const handleNext = () => setActiveStartDate(prev => {
+//         const date = new Date(prev);
+//         date.setMonth(date.getMonth() + 1);
+//         return date;
+//     });
+
+//     const formatShortWeekday = (locale, date) => {
+//         return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+//     };
+
+//     const toggleSidebar = () => {
+//         setIsSidebarOpen(!isSidebarOpen);
+//     };
+
+//     return (
+//         <div className="h-screen w-screen flex items-center justify-center">
+//             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+//                 <Navbar onMenuClick={toggleSidebar} />
+//                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
+
+//                     {isSidebarOpen && (
+//                         <div
+//                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+//                             onClick={() => setIsSidebarOpen(false)}
+//                         />
+//                     )}
+
+//                     <Sidebar
+//                         onClose={() => setIsSidebarOpen(false)}
+//                         className={`
+//                         transition-transform duration-300 ease-in-out z-40
+//                         lg:translate-x-0 lg:static lg:block
+//                         fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
+//                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+//                     `} />
+
+//                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+//                         msOverflowStyle: 'none',
+//                         scrollbarWidth: 'none'
+//                     }}>
+//                         <div className="flex items-center gap-2 mb-2">
+//                             <div className="bg-[#F3F4F6] p-1 rounded-md flex">
+//                                 <button
+//                                     onClick={() => setView('calendar')}
+//                                     className={`px-6 py-2 text-sm font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+//                                 >
+//                                     Add New Event
+//                                 </button>
+//                                 <button
+//                                     onClick={() => setView('list')}
+//                                     className={`px-6 py-2 text-sm font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shah' : 'text-gray-500 hover:text-gray-900'}`}
+//                                 >
+//                                     List
+//                                 </button>
+//                             </div>
+//                         </div>
+
+//                         {view === 'calendar' ? (
+//                             <>
+//                                 {/* Add Event Form (Simplified) */}
+//                                 <div className="bg-white rounded-xl border p-6 shadow-sm">
+//                                     <h3 className="text-[#3758EE] text-[16px] font-bold mb-4">+ Add New Event</h3>
+//                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+//                                         <Input1 label="Event title" name={"event title"} value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
+//                                         <input type="date" className="h-[52px] border rounded px-3" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+//                                         <input type="date" className="h-[52px] border rounded px-3" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+//                                         <GradiantButton onClick={handleAddEvent} className="h-[52px] md:rounded-lg ">Add Event</GradiantButton>
+//                                     </div>
+//                                 </div>
+
+//                                 {/* React Calendar Section */}
+//                                 <div className="bg-white rounded-xl border p-6 shadow-sm flex-1 custom-calendar-container mb-6 flex flex-col overflow-hidden">
+
+//                                     {/* Custom Header */}
+//                                     <div className="flex justify-between items-center mb-6">
+//                                         <h2 className="text-[28px] text-[#18181B] font-normal">
+//                                             {activeStartDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+//                                         </h2>
+//                                         <div className="flex items-center gap-2">
+//                                             <button
+//                                                 onClick={handleToday}
+//                                                 className="px-6 py-2 bg-[#A892FF] text-white rounded-md text-sm font-medium hover:bg-[#937aff] transition-colors"
+//                                             >
+//                                                 today
+//                                             </button>
+//                                             <button onClick={handlePrev} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">‹</button>
+//                                             <button onClick={handleNext} className="w-8 h-8 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1">›</button>
+//                                         </div>
+//                                     </div>
+
+//                                     <div className="overflow-x-auto flex-1 w-full">
+//                                         <div className="min-w-[700px]">
+//                                             <Calendar
+//                                                 onChange={() => { }}
+//                                                 value={null}
+//                                                 activeStartDate={activeStartDate}
+//                                                 onActiveStartDateChange={({ activeStartDate }) => setActiveStartDate(activeStartDate)}
+//                                                 tileContent={renderTileContent}
+//                                                 className="w-full border-none font-sans"
+//                                                 showNavigation={false} // Hide default navigation
+//                                                 formatShortWeekday={formatShortWeekday}
+//                                             />
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </>
+//                         ) : (
+//                             <StatusTable userCourses={dummyUserCourses} />
+//                         )}
+//                     </main>
+//                 </div>
+
+//                 <style dangerouslySetInnerHTML={{
+//                     __html: `
+//                     .no-scrollbar::-webkit-scrollbar {
+//                         display: none;
+//                     }
+//                     .no-scrollbar {
+//                         -ms-overflow-style: none;
+//                         scrollbar-width: none;
+//                     }
+//                 `}} />
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default AdminCalendar;

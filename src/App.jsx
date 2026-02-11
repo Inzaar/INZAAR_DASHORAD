@@ -21,6 +21,11 @@ import ProfilePage from "./features/StudentDashboard/pages/ProfilePage"
 import AdminDashboard from "./features/adminDashborad/pages/AdminDashboard"
 import AdminCalendar from "./features/adminDashborad/pages/AdminCalendar"
 import AdminNotification from "./features/adminDashborad/pages/AdminNotification"
+import AddCoursePage from "./features/adminDashborad/pages/AddCoursePage"
+import ModeratorsPage from "./features/adminDashborad/pages/ModeratorsPage"
+import StudentProfilesPage from "./features/adminDashborad/pages/StudentProfilesPage"
+import AdminCoursesPage from "./features/adminDashborad/pages/AdminCoursesPage"
+import ReportsPage from "./features/adminDashborad/pages/ReportsPage"
 
 function App() {
   return (
@@ -39,6 +44,11 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin-calendar" element={<AdminCalendar />} />
           <Route path="/admin-notifications" element={<AdminNotification />} />
+          <Route path="/admin-add-course" element={<AddCoursePage />} />
+          <Route path="/admin-moderators" element={<ModeratorsPage />} />
+          <Route path="/student-profiles" element={<StudentProfilesPage />} />
+          <Route path="/admin-courses" element={<AdminCoursesPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
 
         <Route element={<StudentRoute />}>

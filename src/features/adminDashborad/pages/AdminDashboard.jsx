@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -6,8 +7,12 @@ import Navbar from '@/components/layouts/NavBar';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import dummyUserCourses from '@/constants/dummyData';
+import UserCard from '../components/UserCard';
+import StatsCard from '../components/StatsCard';
+import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const firstName = localStorage.getItem('firstName');
 
@@ -47,10 +52,16 @@ const AdminDashboard = () => {
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
-                                <GradiantButton className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2">
+                                <GradiantButton
+                                    onClick={() => navigate('/admin-add-course')}
+                                    className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2"
+                                >
                                     <span className='bg-white text-blue-500 rounded-full px-2 pb-0.5 flex items-center justify-center'>+</span> Add New Course
                                 </GradiantButton>
-                                <GradiantButton className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                <GradiantButton
+                                    onClick={() => navigate('/admin-add-course')}
+                                    className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                                >
                                     +
                                 </GradiantButton>
                             </div>
@@ -58,11 +69,76 @@ const AdminDashboard = () => {
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
 
+                                    {/* Stats Cards Section */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        <StatsCard title="Total Registered Students" value="150" trend="2.4%" trendDirection="up" />
+                                        <StatsCard
+                                            title="Inactive Students"
+                                            value="2,420"
+                                            trend="1.8%"
+                                            trendDirection="up"
+                                            trendText="vs last week"
+                                        />
+                                        <StatsCard
+                                            title="Total Courses"
+                                            value="45"
+                                            trend="5%"
+                                            trendDirection="down"
+                                            trendText="vs last month"
+                                        />
+                                        <StatsCard
+                                            title="Total Moderator"
+                                            value="$12.5k"
+                                            trend="8.2%"
+                                            trendDirection="up"
+                                            trendText="vs last month"
+                                        />
+                                    </div>
+
                                     <div className="flex gap-6 flex-col lg:flex-row">
                                         <HoursSpentCard className="w-full lg:w-[60%] xl:w-full shadow-sm " name="Moderator Performance" />
-                                        <PerformanceCard name="Course completion rate" />
+                                        <PerformanceCard name="Course completion rate" className="w-[60%]" />
                                     </div>
+
+                                    {/* Courses Enrollment Overview */}
+                                    <CoursesEnrollmentOverview />
                                 </div>
+
+                                {/* User Cards Demo Section */}
+                                {/* <div className="mb-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-xl font-bold text-gray-900">Recent Users</h3>
+                                        <button className="text-sm text-blue-600 font-medium hover:underline">View All</button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 justify-items-center">
+                                        <UserCard />
+                                        <UserCard
+                                            name="Sarah Johnson"
+                                            id="748291"
+                                            image="https://randomuser.me/api/portraits/women/44.jpg"
+                                            performance="92%"
+                                            email="sarah.j@gmail.com"
+                                            status="offline"
+                                        />
+                                        <UserCard
+                                            name="Ali Ahmed"
+                                            id="839102"
+                                            image="https://randomuser.me/api/portraits/men/85.jpg"
+                                            performance="75%"
+                                            joiningDate="5/11/2025"
+                                            phone="(555) 123-4567"
+                                        />
+                                        <UserCard
+                                            name="Ayesha Khan"
+                                            id="992811"
+                                            image="https://randomuser.me/api/portraits/women/65.jpg"
+                                            performance="98%"
+                                            joiningDate="12/09/2025"
+                                            email="ayesha.k@hotmail.com"
+                                        />
+                                    </div>
+                                </div> */}
+
                             </div>
 
                             <StatusTable userCourses={dummyUserCourses} />
@@ -71,15 +147,16 @@ const AdminDashboard = () => {
                     </main>
                 </div>
 
-                <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
-                }
-            `}</style>
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    .no-scrollbar::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .no-scrollbar {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+                `}} />
             </div>
         </div>
     );

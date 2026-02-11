@@ -68,7 +68,7 @@ const HoursSpentCard = ({
             </div>
 
             {/* Chart Area */}
-            <div className="flex gap-4 h-[150px]">
+            <div className="flex gap-4 min-h-[150px] h-full">
                 {/* Y-Axis */}
                 <div className="flex flex-col justify-between text-xs text-gray-400 py-1">
                     {yAxisLabels.map((label, i) => (

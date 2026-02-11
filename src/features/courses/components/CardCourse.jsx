@@ -3,15 +3,23 @@ import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import Card from "@/components/ui/Card";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import img from "@/assets/images/course.png"
 
-const CardCourse = ({ course }) => {
+const CardCourse = ({ course, isAdmin = false }) => {
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isEnrolling, setIsEnrolling] = useState(false);
-
+  const image = course.thumbnail ? course.thumbnail : img;
   const navigate = useNavigate();
 
   const handleEnroll = async () => {
+    if (isAdmin) {
+      // Navigate to admin course details page (placeholder for now)
+      console.log("Navigating to admin course details for:", course.id);
+      navigate(`/admin-course-view/${course.id}`);
+      return;
+    }
+
     console.log("courseid", course.id);
     setIsEnrolling(true);
     try {
@@ -39,7 +47,7 @@ const CardCourse = ({ course }) => {
       <Card className={`w-full max-w-[380px] h-auto min-h-[305px] flex flex-col items-start rounded-[10px] justify-between gap-2 p-2 bg-white`}>
         <div className="w-full h-[161px] rounded-[10px] relative">
           <img
-            src={course.thumbnail}
+            src={image}
             alt={course.title}
             className="w-full h-[161px] rounded-[10px] object-cover"
           />
@@ -55,7 +63,13 @@ const CardCourse = ({ course }) => {
           <p className='font-medium text-[10px]'>{course.time}</p>
           <p className='text-[12px] font-normal line-clamp-2 text-ellipsis overflow-hidden'>{course.description}</p>
         </div>
-        <GradiantButton className="w-[81px] h-[26px] text-[14px] font-[400] rounded-[3px]" onClick={handleEnroll} disabled={isEnrolling}>Enroll Now</GradiantButton>
+        <GradiantButton
+          className="w-[auto] px-4 h-[26px] text-[14px] font-[400] rounded-[3px]"
+          onClick={handleEnroll}
+          disabled={isEnrolling}
+        >
+          {isAdmin ? "View Details" : "Enroll Now"}
+        </GradiantButton>
       </Card>
 
       {isEnrolling && (

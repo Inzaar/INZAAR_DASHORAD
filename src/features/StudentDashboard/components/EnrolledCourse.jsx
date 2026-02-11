@@ -9,7 +9,7 @@ function EnrolledCourse({ userCourses = [] }) {
                 <p className="text-gray-500 h-[160px] w-full flex items-center justify-center">No any course enrolled yet</p>
             )}
             {userCourses?.map((course) => (
-                <CourseCard key={course.id} id={course._id} title={course.title} completed={course.completedLecturesCount} total={course.totalLectures} className="min-w-[300px] shadow-sm" image={course.thumbnail} />
+                <CourseCard key={course._id} id={course._id} title={course.title} completed={course.completedLecturesCount} total={course.totalLectures} className="min-w-[300px] shadow-sm" image={course.thumbnail} />
             ))}
         </div>
     )
