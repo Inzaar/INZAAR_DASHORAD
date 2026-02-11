@@ -26,6 +26,7 @@ import ModeratorsPage from "./features/adminDashborad/pages/ModeratorsPage"
 import StudentProfilesPage from "./features/adminDashborad/pages/StudentProfilesPage"
 import AdminCoursesPage from "./features/adminDashborad/pages/AdminCoursesPage"
 import ReportsPage from "./features/adminDashborad/pages/ReportsPage"
+import AdminCourseDetailPage from "./features/adminDashborad/pages/AdminCourseDetailPage"
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/student-profiles" element={<StudentProfilesPage />} />
           <Route path="/admin-courses" element={<AdminCoursesPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/admin-course-view/:id" element={<AdminCourseDetailPage />} />
         </Route>
 
         <Route element={<StudentRoute />}>
