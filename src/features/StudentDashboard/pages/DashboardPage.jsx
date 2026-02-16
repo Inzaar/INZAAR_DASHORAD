@@ -88,7 +88,7 @@ const DashboardPage = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
+                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam o Alaikum {firstName} 👋🏻</h2>
                                     <p className="text-gray-500 text-[10px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">

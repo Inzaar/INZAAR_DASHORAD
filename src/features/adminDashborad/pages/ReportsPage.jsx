@@ -19,8 +19,6 @@ const ReportsPage = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    // --- Mock Data ---
-
     // Session Activity Data (Line Chart)
     const sessionData = [
         { day: 'Mon', value: -15 },
