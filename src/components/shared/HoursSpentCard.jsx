@@ -8,6 +8,10 @@ const HoursSpentCard = ({
 }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
+    // Check if the component is being used for Moderator Performance
+    // Matching "Moderator" case-insensitively to be robust
+    const isModerator = name?.toLowerCase().includes("moderator");
+
     // Default mock data structure to preserve order and expected values
     const defaultData = [
         { day: 'Sun', key: 'sun', expected: 15 },
@@ -19,24 +23,82 @@ const HoursSpentCard = ({
         { day: 'Sat', key: 'sat', expected: 15 },
     ];
 
+    // Moderator Mock Data (15 items)
+    // We'll generate this dynamically to have "m-1" to "m-12"
+    // Mocking values since we don't have a real data source mapping for "m-X" yet
+    const moderatorData = [
+        { day: 'm-1', key: 'm-1', percentage: 45 },
+        { day: 'm-2', key: 'm-2', percentage: 60 },
+        { day: 'm-3', key: 'm-3', percentage: 35 },
+        { day: 'm-4', key: 'm-4', percentage: 70 },
+        { day: 'm-5', key: 'm-5', percentage: 85 },
+        { day: 'm-6', key: 'm-6', percentage: 40 },
+        { day: 'm-7', key: 'm-7', percentage: 55 },
+        { day: 'm-8', key: 'm-8', percentage: 50 },
+        { day: 'm-9', key: 'm-9', percentage: 75 },
+        { day: 'm-10', key: 'm-10', percentage: 90 },
+        { day: 'm-11', key: 'm-11', percentage: 30 },
+        { day: 'm-12', key: 'm-12', percentage: 65 },
+        { day: 'm-13', key: 'm-13', percentage: 50 },
+        { day: 'm-14', key: 'm-14', percentage: 80 },
+        { day: 'm-15', key: 'm-15', percentage: 45 },
+    ];
+
     const weeklyProgress = userCourses?.stats?.weeklyProgress || {};
 
-    const data = defaultData.map(item => {
-        const minutes = weeklyProgress[item.key] || 0;
-        // Convert minutes to hours, rounded to 1 decimal
-        const hours = Number((minutes / 60).toFixed(1));
-        return {
-            ...item,
-            spent: hours
-        };
-    });
-    // Calculate max value for scaling
-    const allValues = data.flatMap(d => [d.spent, d.expected]);
-    const maxValue = Math.max(...allValues, 24); // Default to at least 24 if values are low
+    const sourceData = isModerator ? moderatorData : defaultData;
 
-    // Y-Axis labels (0, 25%, 50%, 75%, 100% of max)
-    // To match the image style (0, 05, 10, 15, 24), we'll try to keep it simple or dynamic
-    // Let's use dynamic 5 steps
+    const data = sourceData.map((item, index) => {
+
+        if (isModerator) {
+            // For Moderator: Convert days to m-1, m-2, etc.
+            // Use percentage directly from data
+
+            // If weeklyProgress has data for m-key, use it (assuming it comes as percentage or we treat it as such), otherwise use mock
+            // For now, let's assume weeklyProgress is not used for this view or if it is, it's raw percentage
+            const rawVal = weeklyProgress[item.key] !== undefined ? weeklyProgress[item.key] : item.percentage;
+
+            // Ensure it's within 0-100
+            const spentPct = Math.min(100, Math.max(0, rawVal));
+
+            // No expected value for moderator
+            const expectedPct = 0;
+
+            // Responsive visibility logic
+            // 0-5 (6 items): Always visible
+            // 6-8 (3 items): Visible on SM+ (total 9)
+            // 9-11 (3 items): Visible on MD+ (total 12)
+            // 12-14 (3 items): Visible on XL+ (total 15) - Changed from LG to XL
+            let visibilityClass = "flex";
+            if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
+            if (index >= 9 && index < 12) visibilityClass = "hidden md:flex";
+            if (index >= 12) visibilityClass = "hidden xl:flex";
+
+            return {
+                ...item,
+                day: item.day, // Already set to m-X
+                spent: spentPct,
+                expected: expectedPct,
+                visibilityClass
+            };
+        } else {
+            const minutes = weeklyProgress[item.key] || 0;
+            // Default behavior
+            const hours = Number((minutes / 60).toFixed(1));
+            return {
+                ...item,
+                spent: hours,
+                visibilityClass: "flex"
+            };
+        }
+    });
+
+    // Calculate max value for scaling
+    // For Moderator, max is always 100%. For others, dynamic based on data (min 24).
+    const allValues = data.flatMap(d => [d.spent, d.expected]);
+    const maxValue = isModerator ? 100 : Math.max(...allValues, 24);
+
+    // Y-Axis labels
     const yAxisLabels = [
         Math.round(maxValue),
         Math.round(maxValue * 0.75),
@@ -44,6 +106,13 @@ const HoursSpentCard = ({
         Math.round(maxValue * 0.25),
         0
     ];
+
+    const unit = isModerator ? "%" : " Hr";
+
+    // Bar width logic: thinner bars for Moderator due to higher count
+    const barWidthClass = isModerator
+        ? "w-6 sm:w-7 md:w-8"
+        : "w-7 [400px]:w-8 sm:w-9 xl:w-10";
 
     return (
         <div className={cn(
@@ -53,16 +122,18 @@ const HoursSpentCard = ({
             {/* Header & Legend */}
             <div className="flex flex-col gap-4">
                 <h3 className="text-lg font-bold text-black">{name}</h3>
-                {name === "Hours Spent" && (
+                {(name === "Hours Spent" || isModerator) && (
                     <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-[2px] bg-gradient-to-r from-[#3758EE] to-[#B666E7]"></div>
-                            <span className="text-gray-500">Spend time</span>
+                            <span className="text-gray-500">{isModerator ? "Performance" : "Spend time"}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
-                            <span className="text-gray-500">Expected Time</span>
-                        </div>
+                        {!isModerator && (
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
+                                <span className="text-gray-500">Expected Time</span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -72,7 +143,7 @@ const HoursSpentCard = ({
                 {/* Y-Axis */}
                 <div className="flex flex-col justify-between text-xs text-gray-400 py-1">
                     {yAxisLabels.map((label, i) => (
-                        <span key={i}>{label} Hr</span>
+                        <span key={i}>{label}{unit}</span>
                     ))}
                 </div>
 
@@ -93,7 +164,10 @@ const HoursSpentCard = ({
                         return (
                             <div
                                 key={index}
-                                className="relative flex flex-col items-center justify-end h-full w-full group"
+                                className={cn(
+                                    "relative flex flex-col items-center justify-end h-full w-full group",
+                                    item.visibilityClass
+                                )}
                                 onMouseEnter={() => setHoveredIndex(index)}
                                 onMouseLeave={() => setHoveredIndex(null)}
                             >
@@ -102,24 +176,31 @@ const HoursSpentCard = ({
                                     <div className="absolute bottom-full mb-2 z-10 bg-[#3758EE] text-white text-xs rounded-lg p-2 shadow-lg min-w-[80px]">
                                         <div className="flex items-center gap-2 mb-1">
                                             <div className="w-2 h-2 rounded-full bg-[#B666E7]"></div>
-                                            <span>{item.spent} Hr</span>
+                                            <span>{item.spent}{unit}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-[#E0E7FF]"></div>
-                                            <span>{item.expected} Hr</span>
-                                        </div>
+                                        {!isModerator && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-[#E0E7FF]"></div>
+                                                <span>{item.expected}{unit}</span>
+                                            </div>
+                                        )}
                                         {/* Arrow */}
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#3758EE]"></div>
                                     </div>
                                 )}
 
                                 {/* Bar Container */}
-                                <div className="relative w-7 [400px]:w-8 sm:w-9 xl:w-10 h-full flex items-end justify-center rounded-lg overflow-hidden">
+                                <div className={cn(
+                                    "relative h-full flex items-end justify-center rounded-lg overflow-hidden",
+                                    barWidthClass
+                                )}>
                                     {/* Expected Bar (Background) */}
-                                    <div
-                                        className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-lg transition-all duration-500"
-                                        style={{ height: `${expectedHeight}%` }}
-                                    ></div>
+                                    {!isModerator && (
+                                        <div
+                                            className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-lg transition-all duration-500"
+                                            style={{ height: `${expectedHeight}%` }}
+                                        ></div>
+                                    )}
 
                                     {/* Spent Bar (Foreground) */}
                                     <div
