@@ -15,8 +15,12 @@ function Sidebar({ className, onClose }) {
   const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
-  // Determine which items to show
-  const menuItems = user?.role === 'admin' ? adminItems : studentItems;
+  // Determine which items to show based on the active path/context, not strictly user role
+  const isAdminRoute = location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/reports') ||
+    location.pathname.startsWith('/student-profiles');
+
+  const menuItems = isAdminRoute ? adminItems : studentItems;
 
   // Map your URL paths to the Display Names
   const pathToName = {
@@ -76,7 +80,7 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    // Special case for admin dashboard vs student dashboard as they share the name "Dashboard"
+    // Special case for dashboard
     if (itemName === 'Dashboard') {
       if (user?.role === 'admin') {
         navigate('/admin-dashboard');

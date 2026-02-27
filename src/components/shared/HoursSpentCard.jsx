@@ -44,18 +44,13 @@ const HoursSpentCard = ({
         { day: 'm-15', key: 'm-15', percentage: 45 },
     ];
 
-    const weeklyProgress = userCourses?.stats?.weeklyProgress || {};
+    const weeklyProgress = userCourses?.hoursSpent || userCourses?.stats?.weeklyProgress || {};
 
     const sourceData = isModerator ? moderatorData : defaultData;
 
     const data = sourceData.map((item, index) => {
 
         if (isModerator) {
-            // For Moderator: Convert days to m-1, m-2, etc.
-            // Use percentage directly from data
-
-            // If weeklyProgress has data for m-key, use it (assuming it comes as percentage or we treat it as such), otherwise use mock
-            // For now, let's assume weeklyProgress is not used for this view or if it is, it's raw percentage
             const rawVal = weeklyProgress[item.key] !== undefined ? weeklyProgress[item.key] : item.percentage;
 
             // Ensure it's within 0-100
@@ -71,8 +66,8 @@ const HoursSpentCard = ({
             // 12-14 (3 items): Visible on XL+ (total 15) - Changed from LG to XL
             let visibilityClass = "flex";
             if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
-            if (index >= 9 && index < 12) visibilityClass = "hidden md:flex";
-            if (index >= 12) visibilityClass = "hidden xl:flex";
+            if (index >= 9 && index < 12) visibilityClass = "hidden xl:flex";
+            if (index >= 12) visibilityClass = "hidden 2xl:flex";
 
             return {
                 ...item,
@@ -82,12 +77,12 @@ const HoursSpentCard = ({
                 visibilityClass
             };
         } else {
-            const minutes = weeklyProgress[item.key] || 0;
-            // Default behavior
-            const hours = Number((minutes / 60).toFixed(1));
+            const val = weeklyProgress[item.key] || 0;
+            // The backend now provides hours directly, no need to divide by 60
+            const hours = Number(val).toFixed(1);
             return {
                 ...item,
-                spent: hours,
+                spent: Number(hours), // ensure it's a number for height calculations
                 visibilityClass: "flex"
             };
         }
@@ -204,7 +199,7 @@ const HoursSpentCard = ({
 
                                     {/* Spent Bar (Foreground) */}
                                     <div
-                                        className="absolute bottom-0 w-full bg-gradient-to-b from-[#B666E7] to-[#3758EE] transition-all duration-500"
+                                        className="absolute bottom-0 w-full bg-gradient-to-b rounded-[10px] from-[#B666E7] to-[#3758EE] transition-all duration-500"
                                         style={{ height: `${spentHeight}%` }}
                                     ></div>
                                 </div>

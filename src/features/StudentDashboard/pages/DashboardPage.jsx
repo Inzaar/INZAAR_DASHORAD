@@ -10,53 +10,86 @@ import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { getEnrolledCoursesByUserId } from '@/api/course';
+import { getStudentDashboard } from '@/api/dashboards';
+import { Loader } from 'lucide-react';
 
 const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
-    const [selectedLectureFilter, setSelectedLectureFilter] = useState("Select Course");
-    const userId = localStorage.getItem('userId');
-    const firstName = localStorage.getItem('firstName');
+    const [selectedLectureFilter, setSelectedLectureFilter] = useState("");
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    // const userId = localStorage.getItem('userId');
+    // const firstName = localStorage.getItem('firstName');
     const progressPercentage = 40;
 
     const [userCourses, setUserCourses] = useState([]);
 
+    // useEffect(() => {
+    //     const fetchUserProfile = async () => {
+    //         setLoading(true);
+    //         try {
+    //             const res = await login({ "email": "johndoe@example.com", "password": "Password123!" });
+    //             console.log(res.data.data.user);
+    //             setUserData(res.data.data.user);
+    //         } catch (error) {
+    //             console.log(error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     }
+    //     fetchUserProfile();
+    // }, [])
+
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchUserCourses = async () => {
-            const res = await getEnrolledCoursesByUserId();
-            console.log(res.data);
-            setUserCourses(res.data);
+        if (!user) {
+            navigate('/login');
+            return;
         }
-        fetchUserCourses();
-    }, [])
 
-    // Extract valid course titles for dropdown
-    const lectureOptions = userCourses?.data?.map(c => c.title) || [];
+        const fetchStudentDashboard = async () => {
+            try {
+                const res = await getStudentDashboard();
+                setUserCourses(res.data.data);
+            } catch (error) {
+                console.log(error);
+                if (error.response && error.response.status === 401) {
+                    navigate('/login');
+                }
+            }
+        }
+        fetchStudentDashboard();
+    }, [user, navigate])
 
+    // Extract valid course objects for dropdown to prevent identical name conflicts
+    const lectureOptions = userCourses?.enrolledCourses?.map(c => ({ _id: c._id, title: c.title })) || [];
     // Set default selection when courses load
     useEffect(() => {
-        if (lectureOptions.length > 0) {
-            setSelectedLectureFilter(lectureOptions[0]);
+        if (lectureOptions.length > 0 && !selectedLectureFilter) {
+            setSelectedLectureFilter(lectureOptions[0]._id);
         }
     }, [userCourses]); // Run when userCourses updates
 
-    // Find the selected course data
-    const selectedCourseData = userCourses?.data?.find(course =>
-        course.title === selectedLectureFilter
+    // Find the selected course data by its unique _id
+    const selectedCourseData = userCourses?.enrolledCourses?.find(course =>
+        course._id === selectedLectureFilter
     );
 
     const filteredLectures = selectedCourseData?.lectures || [];
-
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
-    const navigate = useNavigate();
-    const { user } = useAuth();
 
-    if (!user) {
-        navigate('/login');
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+                <Loader className="w-10 h-10 text-[#3758EE] animate-spin mb-4" />
+                <p className="text-[#6A6F78] font-medium animate-pulse">Loading dashboard...</p>
+            </div>
+        );
     }
 
     return (
@@ -88,7 +121,7 @@ const DashboardPage = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam o Alaikum {firstName} 👋🏻</h2>
+                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam o Alaikum {userData?.firstname} 👋🏻</h2>
                                     <p className="text-gray-500 text-[10px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
@@ -106,7 +139,7 @@ const DashboardPage = () => {
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse userCourses={userCourses.data} />
+                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
@@ -129,7 +162,9 @@ const DashboardPage = () => {
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
                                                         className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[120px] justify-between"
                                                     >
-                                                        <span className="truncate max-w-[150px]">{selectedLectureFilter || "Select Course"}</span>
+                                                        <span className="truncate max-w-[150px]">
+                                                            {selectedCourseData?.title || "Select Course"}
+                                                        </span>
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
                                                             width="16"
@@ -151,14 +186,14 @@ const DashboardPage = () => {
                                                             {lectureOptions.length > 0 ? (
                                                                 lectureOptions.map((option) => (
                                                                     <button
-                                                                        key={option}
+                                                                        key={option._id}
                                                                         onClick={() => {
-                                                                            setSelectedLectureFilter(option);
+                                                                            setSelectedLectureFilter(option._id);
                                                                             setIsLectureDropdownOpen(false);
                                                                         }}
-                                                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
+                                                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option._id ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
                                                                     >
-                                                                        {option}
+                                                                        {option.title}
                                                                     </button>
                                                                 ))
                                                             ) : (

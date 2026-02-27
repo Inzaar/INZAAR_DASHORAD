@@ -6,13 +6,12 @@ import StatusTable from '@/components/ui/statusTable/StatusTable';
 import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
-import { getEnrolledCoursesByUserId } from '@/api/course';
+import { getUserProfile } from '@/api/dashboards';
 
 const EnrolledCourses = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const progressPercentage = 40;
-    const [userCourses, setUserCourses] = React.useState([]);
+    const [userCourses, setUserCourses] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
 
     const toggleSidebar = () => {
@@ -21,12 +20,19 @@ const EnrolledCourses = () => {
 
     useEffect(() => {
         const fetchUserCourses = async () => {
-            const res = await getEnrolledCoursesByUserId();
-            console.log(res.data);
-            setUserCourses(res.data);
+            try {
+                const res = await getUserProfile();
+                setUserCourses(res.data.data);
+            } catch (error) {
+                console.error("Failed to load profile", error);
+            } finally {
+                setLoading(false);
+            }
         }
         fetchUserCourses();
     }, [])
+
+    const progressPercentage = userCourses?.stats?.overallProgress || 0;
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -55,7 +61,7 @@ const EnrolledCourses = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum Zain 👋</h2>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {userCourses?.user?.firstname || "Student"} 👋</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
@@ -68,12 +74,12 @@ const EnrolledCourses = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics userCourses={userCourses} />
+                                    <Analytics userCourses={{ stats: userCourses?.stats }} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse userCourses={userCourses?.data} />
+                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses || []} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"

@@ -13,13 +13,23 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
         try {
-            const res = await axiosInstance.get('/auth/protected');
-            if (res.data && res.data.success) {
-                setUser(res.data.user || { loggedIn: true });
+            // Using /users/profile to verify the user identity
+            const res = await axiosInstance.get('/users/profile');
+            if (res.data && res.data.success && res.data.data) {
+                // Backend sends { success: true, data: { _id, firstname, role, ... } }
+                setUser({
+                    id: res.data.data._id,
+                    name: `${res.data.data.firstname} ${res.data.data.lastname}`,
+                    firstname: res.data.data.firstname,
+                    email: res.data.data.email,
+                    role: res.data.data.role || 'student', // Default to student if not specified
+                    loggedIn: true
+                });
             } else {
                 setUser(null);
             }
         } catch (error) {
+            console.error("Auth check failed:", error);
             setUser(null);
         } finally {
             setLoading(false);
@@ -34,9 +44,20 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
     };
 
-    const logout = () => {
+    const logout = async () => {
+        // Clear frontend state
         setUser(null);
-        // Ideally also call backend logout API here or let the caller do it
+
+        // Completely wipe localStorage and sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Expire all cookies to guarantee a clean slate
+        document.cookie.split(";").forEach((c) => {
+            document.cookie = c
+                .replace(/^ +/, "")
+                .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
     };
 
     const value = {

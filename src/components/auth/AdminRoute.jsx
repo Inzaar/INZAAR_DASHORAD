@@ -10,14 +10,14 @@ const AdminRoute = () => {
         return <Loader />;
     }
 
-    // Check if user is logged in and has admin role
-    if (!user || user.role !== 'admin') {
-        // If logged in but not admin, redirect to student dashboard
-        if (user) {
-            return <Navigate to="/dashboard" replace />;
-        }
-        // If not logged in, redirect to login
+    // Check if user is logged in
+    if (!user) {
         return <Navigate to="/login" replace />;
+    }
+
+    // If logged in but not admin, redirect to student dashboard
+    if (user.role !== 'admin') {
+        return <Navigate to="/dashboard" replace />;
     }
 
     return <Outlet />;

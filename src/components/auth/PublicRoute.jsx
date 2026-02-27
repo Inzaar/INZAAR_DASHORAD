@@ -11,8 +11,12 @@ const PublicRoute = () => {
     }
 
     if (user) {
-        // If user is already logged in, redirect them to dashboard
-        return <Navigate to="/dashboard" replace />;
+        // If user is already logged in, redirect them to their respective dashboard
+        if (user.role === 'admin') {
+            return <Navigate to="/admin-dashboard" replace />;
+        } else {
+            return <Navigate to="/dashboard" replace />;
+        }
     }
 
     return <Outlet />;

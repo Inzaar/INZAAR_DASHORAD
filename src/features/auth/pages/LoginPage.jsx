@@ -16,8 +16,8 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [email, setEmail] = useState('muzamilhussainuser@gmail.com');
-  const [password, setPassword] = useState('Muzamil@369#');
+  const [email, setEmail] = useState('johndoe@example.com');
+  const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,20 +43,23 @@ const LoginPage = () => {
         email: email,
         password: password,
       });
-      if (res.data) {
-        authLogin(res.data.user || { loggedIn: true });
+      if (res.data && res.data.success && res.data.data) {
+        const userData = res.data.data.user;
 
-        //testing
-        console.log(res.data, "user");
+        authLogin({
+          id: userData._id,
+          name: `${userData.firstname} ${userData.lastname}`,
+          firstname: userData.firstname,
+          email: userData.email,
+          role: userData.role || 'student',
+          loggedIn: true
+        });
 
-        localStorage.setItem('firstName', JSON.stringify(res.data.user.firstname));
-        localStorage.setItem('userId', JSON.stringify(res.data.user._id));
+        // Store legacy localStorage keys
+        localStorage.setItem('firstName', JSON.stringify(userData.firstname));
+        localStorage.setItem('userId', JSON.stringify(userData._id));
 
-        // testing
-        console.log(localStorage.getItem('firstName'), "firstName");
-        console.log(localStorage.getItem('userId'), "userId");
-
-        if (res.data.user.role === 'admin') {
+        if (userData.role === 'admin') {
           navigate('/admin-dashboard', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });

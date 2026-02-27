@@ -6,19 +6,17 @@ function StatusTable({ userCourses }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Flatten all lectures from all enrolled courses
-    const allLectures = userCourses?.data?.flatMap(course =>
-        course.lectures?.map(lecture => ({
-            id: lecture._id,
-            course: course.title,
-            lecture: `#${String(lecture.lectureNo).padStart(2, '0')}`,
-            title: lecture.name, // Using 'name' from API lecture object
-            date: new Date(course.createdAt).toLocaleDateString(), // Using course enrollment date as proxy or need lecture status/date? 
-            progress: lecture.lectureProgress,
-            status: lecture?.isLocked ? "Locked" : "Unlocked", // Default lock status for now
-            comments: "N/A"
-        })) || []
-    ) || [];
+    // Use the specially crafted recent activity array from backend
+    const allLectures = userCourses?.recentCourseActivity?.map((activity, index) => ({
+        id: index,
+        course: activity.course,
+        lecture: activity.lecture,
+        title: activity.title,
+        date: activity.date,
+        progress: activity.progress,
+        status: activity.nextLectureStatus,
+        comments: activity.comments
+    })) || [];
 
     const totalPages = Math.ceil(allLectures.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
