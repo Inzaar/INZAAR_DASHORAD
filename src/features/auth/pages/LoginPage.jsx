@@ -16,8 +16,8 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [email, setEmail] = useState('johndoe@example.com');
-  const [password, setPassword] = useState('Password123!');
+  const [email, setEmail] = useState('muzamilhussainuser@gmail.com');
+  const [password, setPassword] = useState('Muzamil@369#');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

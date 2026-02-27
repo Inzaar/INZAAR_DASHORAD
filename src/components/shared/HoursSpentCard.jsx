@@ -43,7 +43,6 @@ const HoursSpentCard = ({
         { day: 'm-14', key: 'm-14', percentage: 80 },
         { day: 'm-15', key: 'm-15', percentage: 45 },
     ];
-
     const weeklyProgress = userCourses?.hoursSpent || userCourses?.stats?.weeklyProgress || {};
 
     const sourceData = isModerator ? moderatorData : defaultData;
@@ -51,6 +50,11 @@ const HoursSpentCard = ({
     const data = sourceData.map((item, index) => {
 
         if (isModerator) {
+            // For Moderator: Convert days to m-1, m-2, etc.
+            // Use percentage directly from data
+
+            // If weeklyProgress has data for m-key, use it (assuming it comes as percentage or we treat it as such), otherwise use mock
+            // For now, let's assume weeklyProgress is not used for this view or if it is, it's raw percentage
             const rawVal = weeklyProgress[item.key] !== undefined ? weeklyProgress[item.key] : item.percentage;
 
             // Ensure it's within 0-100
@@ -66,8 +70,8 @@ const HoursSpentCard = ({
             // 12-14 (3 items): Visible on XL+ (total 15) - Changed from LG to XL
             let visibilityClass = "flex";
             if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
-            if (index >= 9 && index < 12) visibilityClass = "hidden xl:flex";
-            if (index >= 12) visibilityClass = "hidden 2xl:flex";
+            if (index >= 9 && index < 12) visibilityClass = "hidden md:flex";
+            if (index >= 12) visibilityClass = "hidden xl:flex";
 
             return {
                 ...item,
@@ -87,7 +91,6 @@ const HoursSpentCard = ({
             };
         }
     });
-
     // Calculate max value for scaling
     // For Moderator, max is always 100%. For others, dynamic based on data (min 24).
     const allValues = data.flatMap(d => [d.spent, d.expected]);
