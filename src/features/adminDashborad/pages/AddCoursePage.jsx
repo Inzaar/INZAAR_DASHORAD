@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { createCourseWithLectures } from '@/api/course';
+import { createCourseWithLectures, uploadImage } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 
 /* ─────────────────────────────────────── helpers ── */
@@ -73,6 +73,9 @@ const AddCoursePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [thumbnailUploading, setThumbnailUploading] = useState(false);
+    const [thumbnailPreview, setThumbnailPreview] = useState('');
+    const thumbnailInputRef = useRef(null);
 
     /* ── Course Setup State ── */
     const [courseForm, setCourseForm] = useState({
@@ -108,6 +111,23 @@ const AddCoursePage = () => {
 
     const handleCourseFormChange = (field, value) => {
         setCourseForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleThumbnailFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        // Show local preview immediately
+        setThumbnailPreview(URL.createObjectURL(file));
+        setThumbnailUploading(true);
+        try {
+            const { url } = await uploadImage(file);
+            handleCourseFormChange('thumbnail', url);
+        } catch (err) {
+            console.error('Thumbnail upload failed:', err);
+            setSubmitError('Thumbnail upload failed. Please try again.');
+        } finally {
+            setThumbnailUploading(false);
+        }
     };
 
     const handleSaveItem = () => {
@@ -340,29 +360,53 @@ const AddCoursePage = () => {
                                         </div>
                                     </div>
 
-                                    {/* Thumbnail URL */}
+                                    {/* Thumbnail Upload */}
                                     <div className="mt-12">
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Course Thumbnail URL</label>
+                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Course Thumbnail</label>
+                                        {/* Hidden file input */}
                                         <input
-                                            type="text"
-                                            placeholder="https://example.com/thumbnail.jpg"
-                                            value={courseForm.thumbnail}
-                                            onChange={e => handleCourseFormChange('thumbnail', e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            ref={thumbnailInputRef}
+                                            type="file"
+                                            accept="image/jpg,image/jpeg,image/png,image/webp"
+                                            className="hidden"
+                                            onChange={handleThumbnailFileChange}
                                         />
-                                        {courseForm.thumbnail && (
-                                            <div className="mt-4 w-full border-2 border-dashed border-gray-200 rounded-[20px] py-6 flex items-center justify-center">
-                                                <img src={courseForm.thumbnail} alt="Thumbnail preview" className="max-h-40 rounded-xl object-cover shadow" />
-                                            </div>
-                                        )}
-                                        {!courseForm.thumbnail && (
-                                            <div className="mt-4 w-full border-2 border-dashed border-gray-300 rounded-[24px] py-14 flex flex-col items-center justify-center bg-transparent">
-                                                <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-4">
-                                                    <Upload size={32} strokeWidth={2.5} />
+                                        <div
+                                            onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
+                                            className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
+                                                ${thumbnailUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
+                                        >
+                                            {/* Preview image */}
+                                            {thumbnailPreview && !thumbnailUploading && (
+                                                <div className="w-full flex flex-col items-center gap-4">
+                                                    <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
+                                                    {courseForm.thumbnail && (
+                                                        <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
+                                                            <CheckCircle size={14} /> Uploaded to Cloudinary
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[12px] text-[#3b82f6] font-medium">Click to change image</span>
                                                 </div>
-                                                <p className="text-[12px] text-gray-400 font-medium">Paste a thumbnail URL above to preview</p>
-                                            </div>
-                                        )}
+                                            )}
+                                            {/* Uploading spinner */}
+                                            {thumbnailUploading && (
+                                                <div className="flex flex-col items-center gap-3">
+                                                    {thumbnailPreview && <img src={thumbnailPreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
+                                                    <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
+                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                                </div>
+                                            )}
+                                            {/* Default empty state */}
+                                            {!thumbnailPreview && !thumbnailUploading && (
+                                                <>
+                                                    <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
+                                                        <ImageIcon size={30} strokeWidth={2} />
+                                                    </div>
+                                                    <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse file</button>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">JPG / PNG / WEBP</p>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

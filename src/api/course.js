@@ -43,3 +43,16 @@ export const createCourseWithLectures = async (data) => {
     });
     return res;
 }
+
+// Upload an image to Cloudinary via the backend
+// file: File object from <input type="file">
+// Returns { url, public_id }
+export const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await axiosInstance.post("/upload/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+    });
+    return res.data.data; // { url, public_id }
+}
