@@ -5,14 +5,19 @@ import { ArrowUpRight } from "lucide-react";
 
 const MetricCard = ({
     className,
-    userCourses
+    userCourses,
+    // Optional overrides for course-detail view
+    title: titleProp,
+    value: valueProp,
+    trendValue: trendValueProp,
+    trendLabel: trendLabelProp,
 }) => {
     const metricInfo = {
-        title: "Total Enrolled Courses",
-        value: userCourses?.stats?.totalEnrolled || "0",
+        title: titleProp ?? "Progress",
+        value: valueProp ?? (userCourses?.stats?.totalEnrolled || "0"),
         trend: {
-            value: userCourses?.stats?.improvement || "0",
-            label: "Improvement From last Week",
+            value: trendValueProp ?? (userCourses?.stats?.improvement || "0"),
+            label: trendLabelProp ?? "Improvement From last Week",
             direction: "up"
         },
         data: [70, 150, 120],

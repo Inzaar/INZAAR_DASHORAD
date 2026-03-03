@@ -12,24 +12,32 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const checkAuth = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
         try {
             // Using /users/profile to verify the user identity
             const res = await axiosInstance.get('/users/profile');
             if (res.data && res.data.success && res.data.data) {
-                // Backend sends { success: true, data: { _id, firstname, role, ... } }
+                const profile = res.data.data.user || res.data.data;
                 setUser({
-                    id: res.data.data._id,
-                    name: `${res.data.data.firstname} ${res.data.data.lastname}`,
-                    firstname: res.data.data.firstname,
-                    email: res.data.data.email,
-                    role: res.data.data.role || 'student', // Default to student if not specified
+                    id: profile._id,
+                    name: `${profile.firstname} ${profile.lastname || ''}`.trim(),
+                    firstname: profile.firstname,
+                    email: profile.email,
+                    role: profile.role || 'student',
                     loggedIn: true
                 });
             } else {
+                localStorage.removeItem('token');
                 setUser(null);
             }
         } catch (error) {
             console.error("Auth check failed:", error);
+            localStorage.removeItem('token');
             setUser(null);
         } finally {
             setLoading(false);
@@ -40,7 +48,10 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
-    const login = (userData) => {
+    const login = (userData, token) => {
+        if (token) {
+            localStorage.setItem('token', token);
+        }
         setUser(userData);
     };
 
@@ -48,8 +59,8 @@ export const AuthProvider = ({ children }) => {
         // Clear frontend state
         setUser(null);
 
-        // Completely wipe localStorage and sessionStorage
-        localStorage.clear();
+        // Remove JWT token
+        localStorage.removeItem('token');
         sessionStorage.clear();
 
         // Expire all cookies to guarantee a clean slate
@@ -58,6 +69,9 @@ export const AuthProvider = ({ children }) => {
                 .replace(/^ +/, "")
                 .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
         });
+
+        // Notify backend to clear httpOnly cookie
+        try { await axiosInstance.post('/users/logout'); } catch (_) { }
     };
 
     const value = {

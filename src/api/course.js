@@ -1,21 +1,22 @@
 import axiosInstance from "./axiosInstance";
 
 export const getEnrolledCoursesByUserId = () => {
-    const res = axiosInstance.get("/enroll/dashboard", {
+    const res = axiosInstance.get("/enrollments/my-courses", {
         withCredentials: true,
     });
     return res;
 }
 
 export const getAllCourses = () => {
-    const res = axiosInstance.get("/courses/list", {
+    const res = axiosInstance.get("/courses", {
         withCredentials: true,
     });
     return res;
 }
 
-export const getCourseById = (id) => {
-    const res = axiosInstance.get(`/enroll/dashboard/${id}`, {
+// Fetch complete course detail for the logged-in user
+export const getCourseById = (courseId) => {
+    const res = axiosInstance.get(`/enrollments/my-courses/${courseId}`, {
         withCredentials: true,
     });
     return res;
@@ -23,9 +24,10 @@ export const getCourseById = (id) => {
 
 export const enrollCourse = async (id) => {
     try {
-        const res = await axiosInstance.post(`/enroll/enroll`, {
+        const res = await axiosInstance.post(`/enrollments/enroll`, {
             courseId: id,
-            userId: localStorage.getItem("userId"),
+        }, {
+            withCredentials: true
         });
         return res;
     } catch (error) {

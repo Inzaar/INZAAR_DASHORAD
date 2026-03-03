@@ -5,12 +5,14 @@ import { TrendingUp } from "lucide-react";
 const PerformanceCard = ({
     userCourses,
     className,
-    name
+    name,
+    percentageOverride,
+    trendOverride,
 }) => {
 
     const percentageInfo = {
-        percentage: userCourses?.stats?.overallProgress || 0,
-        trend: userCourses?.stats?.improvement || 0,
+        percentage: percentageOverride ?? userCourses?.stats?.overallProgress ?? 0,
+        trend: trendOverride ?? userCourses?.stats?.improvement ?? 0,
     }
 
     const size = 139;

@@ -16,8 +16,8 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
-  const [email, setEmail] = useState('muzamilhussainuser@gmail.com');
-  const [password, setPassword] = useState('Muzamil@369#');
+  const [email, setEmail] = useState('johndoe@example.com');
+  const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -45,6 +45,7 @@ const LoginPage = () => {
       });
       if (res.data && res.data.success && res.data.data) {
         const userData = res.data.data.user;
+        console.log("userData", userData);
 
         authLogin({
           id: userData._id,
@@ -53,7 +54,7 @@ const LoginPage = () => {
           email: userData.email,
           role: userData.role || 'student',
           loggedIn: true
-        });
+        }, res.data.data.token);
 
         // Store legacy localStorage keys
         localStorage.setItem('firstName', JSON.stringify(userData.firstname));

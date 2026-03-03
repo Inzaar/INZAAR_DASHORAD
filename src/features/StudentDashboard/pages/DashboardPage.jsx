@@ -10,7 +10,7 @@ import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { getStudentDashboard } from '@/api/dashboards';
+import { getStudentDashboard, getUserProfile } from '@/api/dashboards';
 import { Loader } from 'lucide-react';
 
 const DashboardPage = () => {
@@ -52,8 +52,10 @@ const DashboardPage = () => {
 
         const fetchStudentDashboard = async () => {
             try {
-                const res = await getStudentDashboard();
+                const res = await getUserProfile();
                 setUserCourses(res.data.data);
+                setUserData(res.data.data.user);
+                // console.log("userCourses", userCourses)
             } catch (error) {
                 console.log(error);
                 if (error.response && error.response.status === 401) {

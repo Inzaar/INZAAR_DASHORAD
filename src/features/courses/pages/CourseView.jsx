@@ -7,52 +7,69 @@ import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
 import { getCourseById, getEnrolledCoursesByUserId } from "@/api/course";
+import { useAuth } from "@/context/AuthContext";
+import { Loader } from "lucide-react";
 
 const CourseView = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [userCourses, setUserCourses] = useState([]);
-    const [course, setCourse] = useState([]);
-    const userId = localStorage.getItem("userId");
+    const [courseData, setCourseData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
     const firstName = localStorage.getItem("firstName");
-    const courseId = new URLSearchParams(location.search).get("id");
+    const courseId = new URLSearchParams(window.location.search).get("id");
 
-
-    console.log("on view page courseId", courseId);
-
+    // Fetch enrolled courses list (for Analytics / StatusTable)
     useEffect(() => {
         const fetchUserCourses = async () => {
-            const res = await getEnrolledCoursesByUserId();
-            // console.log(res.data);
-            setUserCourses(res.data);
-        }
-        fetchUserCourses();
-
-        // console.log(courseId);
-
-    }, [])
-
-
-    useEffect(() => {
-        const fetchCourse = async (courseId) => {
             try {
-                const res = await getCourseById(courseId);
-                console.log(res.data);
-                setCourse(res.data);
+                const res = await getEnrolledCoursesByUserId();
+                setUserCourses(res.data?.data || []);
             } catch (error) {
                 console.log(error);
             }
-        }
+        };
+        fetchUserCourses();
+    }, []);
+
+    // Fetch specific course detail
+    useEffect(() => {
+        if (!courseId) return;
+        const fetchCourse = async () => {
+            setLoading(true);
+            try {
+                const res = await getCourseById(courseId);
+                const data = res.data.data;
+                setCourseData(data);
+
+                // Set the ongoing/first lecture as the playing lecture
+                const startLecture = data.ongoingLecture || data.lecturePlaylist?.[0] || null;
+                if (startLecture) setCurrentLecture(startLecture);
+
+                // Seed notes from DB
+                if (data.lectureNotes?.length > 0) {
+                    setNotes(data.lectureNotes.map(n => ({
+                        id: n._id,
+                        timestamp: n.timestamp,
+                        text: n.text,
+                    })));
+                }
+            } catch (error) {
+                console.log(error);
+                if (error.response?.status === 401) navigate("/login");
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchCourse(courseId);
-        console.log(courseId);
-
-    }, [courseId])
-
-
+    }, [courseId]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
-    const navigate = useNavigate();
 
     // Helper to format time
     const formatTime = (seconds) => {
@@ -62,68 +79,36 @@ const CourseView = () => {
         return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    // Initial Static Data
-    const initialLectures = [
-        {
-            id: 1,
-            title: "Quran Recitation",
-            lectureNo: "03",
-            date: "10-Jan-2025",
-            videoId: "jNQXAC9IVRw",
-            isLocked: false,
-        },
-        {
-            id: 2,
-            title: "Tajweed Basics",
-            lectureNo: "04",
-            date: "12-Jan-2025",
-            videoId: "7iy8iB8tu5c",
-            isLocked: false,
-        },
-        {
-            id: 3,
-            title: "Understanding Salah",
-            lectureNo: "05",
-            date: "14-Jan-2025",
-            videoId: "_oTgwjM6mBU",
-            isLocked: true,
-        },
-        {
-            id: 4,
-            title: "Tajweed Basics",
-            lectureNo: "04",
-            date: "12-Jan-2025",
-            videoId: "7iy8iB8tu5c",
-            isLocked: false,
-        },
-        {
-            id: 5,
-            title: "Hadith Studies",
-            lectureNo: "07",
-            date: "18-Jan-2025",
-            videoId: "dummy5",
-            isLocked: true,
-        },
-        {
-            id: 6,
-            title: "Fiqh of Worship",
-            lectureNo: "08",
-            date: "20-Jan-2025",
-            videoId: "dummy6",
-            isLocked: true,
-        },
-        {
-            id: 7,
-            title: "Islamic History",
-            lectureNo: "09",
-            date: "22-Jan-2025",
-            videoId: "dummy7",
-            isLocked: true,
-        },
-    ];
+    // Helper to extract YouTube video ID from URL (fallback if API doesn't return videoId)
+    const extractYouTubeId = (url) => {
+        if (!url) return null;
+        const trimmed = url.trim();
+        // Handle bare video ID (11 chars)
+        if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+        // Handle full YouTube URLs
+        const match = trimmed.match(
+            /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+        );
+        return match ? match[1] : null;
+    };
 
-    const [lectures, setLectures] = React.useState(initialLectures);
-    const [currentLecture, setCurrentLecture] = React.useState(initialLectures[0]);
+    // Build lectures list from API data
+    // videoId comes directly from the backend (pre-extracted), fallback to client-side extraction
+    const lectures = courseData?.lecturePlaylist?.map(l => ({
+        id: l._id,
+        title: l.title,
+        lectureNo: l.lectureNo,
+        date: l.date,
+        videoId: l.videoId || extractYouTubeId(l.videoUrl),  // prefer backend-extracted ID
+        isLocked: l.isLocked,
+        isCompleted: l.isCompleted,
+        videoUrl: l.videoUrl,
+        audioUrl: l.audioUrl,
+        pdfUrl: l.pdfUrl,
+        status: l.status,
+    })) || [];
+
+    const [currentLecture, setCurrentLecture] = React.useState(null);
     const [progress, setProgress] = React.useState(0);
     const playerRef = React.useRef(null);
     const containerRef = React.useRef(null);
@@ -215,11 +200,6 @@ const CourseView = () => {
                 if (duration > 0) {
                     const percent = (currentTime / duration) * 100;
                     setProgress(percent);
-
-                    // Unlock next video if progress > 75%
-                    if (percent > 75) {
-                        unlockNextLecture();
-                    }
                 }
             }
         }, 1000);
@@ -227,25 +207,8 @@ const CourseView = () => {
         return () => clearInterval(interval);
     }, [currentLecture]); // Re-bind when lecture changes
 
-    const unlockNextLecture = () => {
-        const currentIndex = lectures.findIndex(l => l.id === currentLecture.id);
-        if (currentIndex !== -1 && currentIndex < lectures.length - 1) {
-            const nextLecture = lectures[currentIndex + 1];
-            if (nextLecture.isLocked) {
-                setLectures(prevLectures => {
-                    const newLectures = [...prevLectures];
-                    newLectures[currentIndex + 1] = { ...nextLecture, isLocked: false };
-                    return newLectures;
-                });
-            }
-        }
-    };
-
-    // Dummy Data for Notes
-    const [notes, setNotes] = React.useState([
-        { id: 1, timestamp: "00:00:45", text: 'Clear explanation of "Makharij".' },
-        { id: 2, timestamp: "00:02:10", text: 'First 2 minutes are very important, must remember next time.' },
-    ]);
+    // Seeded from API, user can add locally
+    const [notes, setNotes] = React.useState([]);
     const [newNote, setNewNote] = React.useState("");
 
     const handleAddNote = (e) => {
@@ -255,6 +218,15 @@ const CourseView = () => {
             setNewNote("");
         }
     };
+
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+                <Loader className="w-10 h-10 text-[#3758EE] animate-spin mb-4" />
+                <p className="text-[#6A6F78] font-medium animate-pulse">Loading course...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -295,7 +267,7 @@ const CourseView = () => {
                                     +
                                 </GradiantButton>
                             </div>
-                            <Analytics userCourses={userCourses} />
+                            <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
                             <div className="relative flex flex-col lg:block gap-6 mt-5">
                                 {/* Ongoing Lecture Section - Left Side */}
                                 <div className="w-full lg:w-[70%] flex flex-col gap-4">
@@ -303,21 +275,27 @@ const CourseView = () => {
                                     <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 h-fit">
                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black group">
                                             {/* YouTube Iframe with controls visible */}
-                                            <YouTube
-                                                key={currentLecture.videoId}
-                                                videoId={currentLecture.videoId}
-                                                onReady={onPlayerReady}
-                                                opts={{
-                                                    height: '100%',
-                                                    width: '100%',
-                                                    playerVars: {
-                                                        autoplay: 0,
-                                                        rel: 0,
-                                                    },
-                                                }}
-                                                className="w-full h-full"
-                                                iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
-                                            />
+                                            {currentLecture?.videoId ? (
+                                                <YouTube
+                                                    key={currentLecture.id}
+                                                    videoId={currentLecture.videoId}
+                                                    onReady={onPlayerReady}
+                                                    opts={{
+                                                        height: '100%',
+                                                        width: '100%',
+                                                        playerVars: {
+                                                            autoplay: 0,
+                                                            rel: 0,
+                                                        },
+                                                    }}
+                                                    className="w-full h-full"
+                                                    iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                                                    <p className="text-white/50 text-sm">No video available</p>
+                                                </div>
+                                            )}
 
                                             {/* Gradient Overlay for Text Visibility */}
                                             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -331,13 +309,12 @@ const CourseView = () => {
                                             </div>
 
                                             {/* Lecture Info Overlay (Top Left) */}
-                                            {/* Lecture Info Overlay (Top Left) */}
                                             <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300">
-                                                <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md">{currentLecture.title}</h2>
+                                                <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md">{currentLecture?.title}</h2>
                                                 <div className="text-xs sm:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                    <span>Lecture:{currentLecture.lectureNo}</span>
+                                                    <span>Lecture:{currentLecture?.lectureNo}</span>
                                                     <br />
-                                                    <span>Date:{currentLecture.date}</span>
+                                                    <span>Date:{currentLecture?.date}</span>
                                                     <br />
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[10px] sm:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
@@ -383,7 +360,7 @@ const CourseView = () => {
                                                     className={`
                                                     relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0
                                                     w-[60vw] sm:w-[320px] lg:w-full
-                                                    ${currentLecture.id === lecture.id
+                                                    ${currentLecture?.id === lecture.id
                                                             ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                                                             : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
                                                         }
@@ -392,7 +369,7 @@ const CourseView = () => {
                                                 >
                                                     <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-2">
                                                         <img
-                                                            src={lecture.videoId.startsWith("dummy") ? `https://placehold.co/600x400/000000/FFF?text=${lecture.title}` : `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg`}
+                                                            src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : `https://placehold.co/600x400/000000/FFF?text=${lecture.title}`}
                                                             alt={lecture.title}
                                                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                         />
@@ -407,7 +384,7 @@ const CourseView = () => {
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className={`absolute inset-0 flex items-center justify-center ${currentLecture.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                            <div className={`absolute inset-0 flex items-center justify-center ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
                                                                 <div className="bg-white/90 p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                                                                 </div>
@@ -424,7 +401,7 @@ const CourseView = () => {
                                                     </div>
 
                                                     <div className="px-1">
-                                                        <h4 className={`font-bold text-sm mb-1 ${currentLecture.id === lecture.id ? 'text-blue-600' : 'text-gray-800'}`}>
+                                                        <h4 className={`font-bold text-sm mb-1 ${currentLecture?.id === lecture.id ? 'text-blue-600' : 'text-gray-800'}`}>
                                                             {lecture.title}
                                                         </h4>
                                                         <div className="flex justify-between items-center text-xs text-gray-500">
@@ -434,12 +411,12 @@ const CourseView = () => {
                                                     </div>
 
                                                     {/* Active Indicator Strip */}
-                                                    {currentLecture.id === lecture.id && (
+                                                    {currentLecture?.id === lecture.id && (
                                                         <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
                                                     )}
 
-                                                    {/* Completion Checkmark (Visual Feedback) */}
-                                                    {!lecture.isLocked && lecture.id !== currentLecture.id && lectures.findIndex(l => l.id === lecture.id) < lectures.findIndex(l => l.id === currentLecture.id) && (
+                                                    {/* Completion Checkmark */}
+                                                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
                                                         <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
                                                         </div>
@@ -492,8 +469,8 @@ const CourseView = () => {
                         scrollbar-width: none;
                     }
                 `}} />
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

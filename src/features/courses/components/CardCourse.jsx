@@ -23,7 +23,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
     console.log("courseid", course.id);
     setIsEnrolling(true);
     try {
-      const res = await enrollCourse(course.id);
+      const res = await enrollCourse(course.id, );
       console.log(res);
       if (res.data.success === true) {
         navigate("/course-view?id=" + course.id);
