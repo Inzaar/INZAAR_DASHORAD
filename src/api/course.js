@@ -35,3 +35,11 @@ export const enrollCourse = async (id) => {
         throw error;
     }
 }
+
+// Create a course along with all its lectures in one request
+export const createCourseWithLectures = async (data) => {
+    const res = await axiosInstance.post("/courses/with-lectures", data, {
+        withCredentials: true,
+    });
+    return res;
+}
