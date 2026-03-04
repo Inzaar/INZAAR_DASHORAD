@@ -6,7 +6,7 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { getCourseById, getEnrolledCoursesByUserId } from "@/api/course";
+import { getCourseById, getEnrolledCoursesByUserId, updateLectureProgress } from "@/api/course";
 import { useAuth } from "@/context/AuthContext";
 import { Loader } from "lucide-react";
 
@@ -46,8 +46,16 @@ const CourseView = () => {
                 setCourseData(data);
 
                 // Set the ongoing/first lecture as the playing lecture
-                const startLecture = data.ongoingLecture || data.lecturePlaylist?.[0] || null;
-                if (startLecture) setCurrentLecture(startLecture);
+                // IMPORTANT: normalise to always use "id" (not "_id") so the progress
+                // tracker can find it reliably via currentLecture?.id
+                const rawStart = data.ongoingLecture || data.lecturePlaylist?.[0] || null;
+                if (rawStart) {
+                    setCurrentLecture({
+                        ...rawStart,
+                        id: rawStart.id || rawStart._id,           // ensure .id always exists
+                        lastWatchedTime: rawStart.lastWatchedTime || 0,
+                    });
+                }
 
                 // Seed notes from DB
                 if (data.lectureNotes?.length > 0) {
@@ -113,6 +121,11 @@ const CourseView = () => {
     const playerRef = React.useRef(null);
     const containerRef = React.useRef(null);
 
+    // Throttle: timestamp of the last progress API call (ms)
+    const lastReportedRef = React.useRef(0);
+    // Track which lectures have already been marked completed (avoids redundant API calls)
+    const completedIdsRef = React.useRef(new Set());
+
     // Player State
     const [isPlaying, setIsPlaying] = React.useState(false);
     // eslint-disable-next-line no-unused-vars
@@ -129,6 +142,11 @@ const CourseView = () => {
         playerRef.current = event.target;
         setDuration(event.target.getDuration());
         setVolume(event.target.getVolume());
+
+        // Resume from where the student left off
+        if (currentLecture?.lastWatchedTime > 0) {
+            event.target.seekTo(currentLecture.lastWatchedTime, true);
+        }
     };
 
     // eslint-disable-next-line no-unused-vars
@@ -186,9 +204,11 @@ const CourseView = () => {
         }
     };
 
-    // Check progress every second
+    // Check progress every second + report to backend every 10 seconds
     React.useEffect(() => {
         setProgress(0); // Reset progress when switching videos
+        lastReportedRef.current = 0; // Reset throttle on lecture switch
+
         const interval = setInterval(() => {
             if (playerRef.current && playerRef.current.getCurrentTime) {
                 const currentTime = playerRef.current.getCurrentTime();
@@ -200,6 +220,45 @@ const CourseView = () => {
                 if (duration > 0) {
                     const percent = (currentTime / duration) * 100;
                     setProgress(percent);
+
+                    // ── Report progress every 10 seconds (throttled, fire-and-forget) ──
+                    const now = Date.now();
+                    // Handle both .id (mapped lectures) and ._id (raw API objects)
+                    const lectureId = currentLecture?.id || currentLecture?._id;
+                    const shouldReport =
+                        lectureId &&
+                        courseId &&
+                        percent > 0 &&
+                        now - lastReportedRef.current >= 10_000;
+
+                    if (shouldReport) {
+                        lastReportedRef.current = now;
+                        const rounded = Math.min(Math.round(percent), 100);
+
+                        updateLectureProgress(courseId, {
+                            lectureId,
+                            watchedPercentage: rounded,
+                            lastWatchedTime: Math.floor(currentTime),
+                        }).then(() => {
+                            // Optimistic UI: mark as completed locally when student reaches 95%
+                            if (rounded >= 95 && !completedIdsRef.current.has(lectureId)) {
+                                completedIdsRef.current.add(lectureId);
+                                setCourseData(prev => {
+                                    if (!prev) return prev;
+                                    return {
+                                        ...prev,
+                                        lecturePlaylist: prev.lecturePlaylist.map(l =>
+                                            (l._id === lectureId || l.id === lectureId)
+                                                ? { ...l, isCompleted: true }
+                                                : l
+                                        ),
+                                    };
+                                });
+                            }
+                        }).catch(err => {
+                            console.warn('Progress update failed (will retry):', err?.response?.data?.message || err.message);
+                        });
+                    }
                 }
             }
         }, 1000);
@@ -257,7 +316,7 @@ const CourseView = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-end mb-8">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">

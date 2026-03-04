@@ -44,6 +44,20 @@ export const createCourseWithLectures = async (data) => {
     return res;
 }
 
+// Update lecture watched progress for the logged-in student
+// courseId   — the course the lecture belongs to
+// lectureId  — the specific lecture being watched
+// watchedPercentage — 0–100
+// lastWatchedTime   — current video playback position in seconds (for resume)
+export const updateLectureProgress = async (courseId, { lectureId, watchedPercentage, lastWatchedTime }) => {
+    const res = await axiosInstance.patch(
+        `/enrollments/my-courses/${courseId}/progress`,
+        { lectureId, watchedPercentage, lastWatchedTime },
+        { withCredentials: true }
+    );
+    return res.data.data;
+};
+
 // Upload an image to Cloudinary via the backend
 // file: File object from <input type="file">
 // Returns { url, public_id }

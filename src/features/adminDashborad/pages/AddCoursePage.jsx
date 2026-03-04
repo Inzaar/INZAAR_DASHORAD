@@ -5,6 +5,7 @@ import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { createCourseWithLectures, uploadImage } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
+import ThumbnailCropper from '../components/ThumbnailCropper';
 
 /* ─────────────────────────────────────── helpers ── */
 const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
@@ -75,6 +76,8 @@ const AddCoursePage = () => {
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
+    const [showCropper, setShowCropper] = useState(false);
+    const [cropSrc, setCropSrc] = useState('');
     const thumbnailInputRef = useRef(null);
 
     /* ── Course Setup State ── */
@@ -113,21 +116,42 @@ const AddCoursePage = () => {
         setCourseForm(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleThumbnailFileChange = async (e) => {
+    // Step 1: file selected → open cropper
+    const handleThumbnailFileChange = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        // Show local preview immediately
-        setThumbnailPreview(URL.createObjectURL(file));
+        // Reset the input so the same file can be re-selected
+        e.target.value = '';
+        const localUrl = URL.createObjectURL(file);
+        setCropSrc(localUrl);
+        setShowCropper(true);
+    };
+
+    // Step 2: admin confirmed crop → upload blob to Cloudinary
+    const handleCropApply = async (blob) => {
+        setShowCropper(false);
+        // Show local preview from the cropped blob
+        const previewUrl = URL.createObjectURL(blob);
+        setThumbnailPreview(previewUrl);
         setThumbnailUploading(true);
+        setSubmitError('');
         try {
-            const { url } = await uploadImage(file);
+            const croppedFile = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' });
+            const { url } = await uploadImage(croppedFile);
             handleCourseFormChange('thumbnail', url);
         } catch (err) {
             console.error('Thumbnail upload failed:', err);
             setSubmitError('Thumbnail upload failed. Please try again.');
+            setThumbnailPreview('');
         } finally {
             setThumbnailUploading(false);
         }
+    };
+
+    // Step 2 (cancel): close cropper without changes
+    const handleCropCancel = () => {
+        setShowCropper(false);
+        setCropSrc('');
     };
 
     const handleSaveItem = () => {
@@ -657,6 +681,15 @@ const AddCoursePage = () => {
                             </div>
                         </div>
                     </div>
+                )}
+
+                {/* Thumbnail Crop Modal */}
+                {showCropper && cropSrc && (
+                    <ThumbnailCropper
+                        imageSrc={cropSrc}
+                        onApply={handleCropApply}
+                        onCancel={handleCropCancel}
+                    />
                 )}
 
                 <style dangerouslySetInnerHTML={{
