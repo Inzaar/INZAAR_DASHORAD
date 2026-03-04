@@ -205,7 +205,7 @@ const CourseView = () => {
     };
 
     // Check progress every second + report to backend every 10 seconds
-    React.useEffect(() => {
+    useEffect(() => {
         setProgress(0); // Reset progress when switching videos
         lastReportedRef.current = 0; // Reset throttle on lecture switch
 
@@ -229,7 +229,7 @@ const CourseView = () => {
                         lectureId &&
                         courseId &&
                         percent > 0 &&
-                        now - lastReportedRef.current >= 10_000;
+                        now - lastReportedRef.current >= 1_000;
 
                     if (shouldReport) {
                         lastReportedRef.current = now;
