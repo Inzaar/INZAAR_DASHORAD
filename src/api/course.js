@@ -70,3 +70,13 @@ export const uploadImage = async (file) => {
     });
     return res.data.data; // { url, public_id }
 }
+
+// Save a generated certificate URL back to the enrollment
+export const saveCertificate = async (courseId, certificateUrl) => {
+    const res = await axiosInstance.patch(
+        `/enrollments/my-courses/${courseId}/certificate`,
+        { certificateUrl },
+        { withCredentials: true }
+    );
+    return res.data.data;
+};

@@ -6,9 +6,10 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { getCourseById, getEnrolledCoursesByUserId, updateLectureProgress } from "@/api/course";
+import { getCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
 import { useAuth } from "@/context/AuthContext";
 import { Loader } from "lucide-react";
+import CertificateCard from "../components/CertificateCard";
 
 const CourseView = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -21,6 +22,12 @@ const CourseView = () => {
 
     const firstName = localStorage.getItem("firstName");
     const courseId = new URLSearchParams(window.location.search).get("id");
+
+    // Certificate / congrats state
+    const [showCongrats, setShowCongrats] = React.useState(false);
+    const [certData, setCertData] = React.useState(null);       // { studentName, courseName, completedAt, certUrl }
+    const [generatingCert, setGeneratingCert] = React.useState(false);
+    const certCardRef = React.useRef(null);
 
     // Fetch enrolled courses list (for Analytics / StatusTable)
     useEffect(() => {
@@ -239,7 +246,7 @@ const CourseView = () => {
                             lectureId,
                             watchedPercentage: rounded,
                             lastWatchedTime: Math.floor(currentTime),
-                        }).then(() => {
+                        }).then(async (data) => {
                             // Optimistic UI: mark as completed locally when student reaches 95%
                             if (rounded >= 95 && !completedIdsRef.current.has(lectureId)) {
                                 completedIdsRef.current.add(lectureId);
@@ -254,6 +261,55 @@ const CourseView = () => {
                                         ),
                                     };
                                 });
+                            }
+
+                            // Generate and save certificate when course first completes
+                            if (data?.certificateGenerated && !generatingCert) {
+                                setGeneratingCert(true);
+                                try {
+                                    const { studentName, courseName, completedAt, templateUrl } = {
+                                        studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
+                                        courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
+                                        completedAt: data.certificate?.completedAt,
+                                        templateUrl: courseData?.certificateTemplate || null
+                                    };
+
+                                    // Store cert info so CertificateCard can render
+                                    setCertData({ studentName, courseName, completedAt, templateUrl });
+
+                                    // Wait one tick for the off-screen card to mount
+                                    await new Promise(r => setTimeout(r, 300));
+
+                                    // Capture as PNG using html-to-image
+                                    const { toBlob } = await import('html-to-image');
+                                    const blob = await toBlob(certCardRef.current, {
+                                        pixelRatio: 2,
+                                        cacheBust: true,
+                                        style: { transform: 'scale(1)', transformOrigin: 'top left' }
+                                    });
+
+                                    if (blob) {
+                                        try {
+                                            const { uploadImage } = await import('@/api/course');
+                                            const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
+                                            await saveCertificate(courseId, uploaded.url);
+                                            setCertData(prev => ({ ...prev, certUrl: uploaded.url }));
+                                        } catch (e) {
+                                            console.warn('Certificate upload failed:', e);
+                                        } finally {
+                                            setGeneratingCert(false);
+                                            setShowCongrats(true);
+                                        }
+                                    } else {
+                                        console.warn('Certificate blob generation failed');
+                                        setGeneratingCert(false);
+                                        setShowCongrats(true);
+                                    }
+                                } catch (e) {
+                                    console.warn('Certificate generation failed:', e);
+                                    setGeneratingCert(false);
+                                    setShowCongrats(true);
+                                }
                             }
                         }).catch(err => {
                             console.warn('Progress update failed (will retry):', err?.response?.data?.message || err.message);
@@ -289,6 +345,53 @@ const CourseView = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
+            {/* Off-screen certificate card — captured by html2canvas */}
+            {certData && (
+                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, background: '#ffffff', color: '#000000' }}>
+                    <CertificateCard
+                        ref={certCardRef}
+                        studentName={certData.studentName}
+                        courseName={certData.courseName}
+                        completedAt={certData.completedAt}
+                        templateUrl={certData.templateUrl}
+                    />
+                </div>
+            )}
+
+            {/* Congratulations Modal */}
+            {showCongrats && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-in fade-in zoom-in-95 duration-300">
+                        <div className="text-6xl mb-4">🎉</div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Congratulations!</h2>
+                        <p className="text-gray-500 mb-1">You have successfully completed</p>
+                        <p className="font-semibold text-gray-800 mb-6 text-lg">{certData?.courseName}</p>
+                        {generatingCert ? (
+                            <div className="flex items-center justify-center gap-2 text-[#3758EE] mb-4">
+                                <Loader className="w-4 h-4 animate-spin" />
+                                <span className="text-sm">Generating your certificate...</span>
+                            </div>
+                        ) : certData?.certUrl ? (
+                            <a
+                                href={certData.certUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3"
+                            >
+                                🎓 View &amp; Download Certificate
+                            </a>
+                        ) : (
+                            <p className="text-sm text-gray-400 mb-4">Certificate will be available on the Certificates page shortly.</p>
+                        )}
+                        <button
+                            onClick={() => setShowCongrats(false)}
+                            className="w-full py-2.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                        >
+                            Continue Watching
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>

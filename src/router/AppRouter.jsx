@@ -24,6 +24,7 @@ import StudentProfilesPage from "@/features/adminDashborad/pages/StudentProfiles
 import AdminCoursesPage from "@/features/adminDashborad/pages/AdminCoursesPage";
 import ReportsPage from "@/features/adminDashborad/pages/ReportsPage";
 import AdminCourseDetailPage from "@/features/adminDashborad/pages/AdminCourseDetailPage";
+import CertificateCard from '@/features/courses/components/CertificateCard';
 
 const AppRouter = () => {
     return (

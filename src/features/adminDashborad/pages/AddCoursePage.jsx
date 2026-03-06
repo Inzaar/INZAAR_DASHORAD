@@ -80,6 +80,10 @@ const AddCoursePage = () => {
     const [cropSrc, setCropSrc] = useState('');
     const thumbnailInputRef = useRef(null);
 
+    const [certificateUploading, setCertificateUploading] = useState(false);
+    const [certificatePreview, setCertificatePreview] = useState('');
+    const certificateInputRef = useRef(null);
+
     /* ── Course Setup State ── */
     const [courseForm, setCourseForm] = useState({
         title: '',
@@ -153,6 +157,30 @@ const AddCoursePage = () => {
         setShowCropper(false);
         setCropSrc('');
     };
+
+    // Certificate File Upload
+    const handleCertificateFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+
+        const previewUrl = URL.createObjectURL(file);
+        setCertificatePreview(previewUrl);
+        setCertificateUploading(true);
+        setSubmitError('');
+
+        try {
+            const { url } = await uploadImage(file);
+            handleCourseFormChange('certificateFile', url);
+        } catch (err) {
+            console.error('Certificate upload failed:', err);
+            setSubmitError('Certificate upload failed. Please try again.');
+            setCertificatePreview('');
+        } finally {
+            setCertificateUploading(false);
+        }
+    };
+
 
     const handleSaveItem = () => {
         if (!newItem.title.trim()) return;
@@ -357,13 +385,16 @@ const AddCoursePage = () => {
                                                 <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
                                             </div>
                                             <div>
-                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Certificate File URL</label>
+                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">
+                                                    Certificate File URL
+                                                    <span className="text-[10px] text-gray-400 font-normal ml-2">(Uploaded automatically)</span>
+                                                </label>
                                                 <input
                                                     type="text"
-                                                    placeholder="https://example.com/certificate.pdf"
+                                                    placeholder="https://example.com/certificate.png"
                                                     value={courseForm.certificateFile}
-                                                    onChange={e => handleCourseFormChange('certificateFile', e.target.value)}
-                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                    readOnly
+                                                    className="w-full px-4 py-3 border border-gray-100 rounded-lg outline-none text-[14px] text-gray-500 bg-gray-50 shadow-sm cursor-not-allowed"
                                                 />
                                             </div>
                                             <div>
@@ -386,50 +417,96 @@ const AddCoursePage = () => {
 
                                     {/* Thumbnail Upload */}
                                     <div className="mt-12">
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Course Thumbnail</label>
-                                        {/* Hidden file input */}
-                                        <input
-                                            ref={thumbnailInputRef}
-                                            type="file"
-                                            accept="image/jpg,image/jpeg,image/png,image/webp"
-                                            className="hidden"
-                                            onChange={handleThumbnailFileChange}
-                                        />
-                                        <div
-                                            onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
-                                            className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
-                                                ${thumbnailUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
-                                        >
-                                            {/* Preview image */}
-                                            {thumbnailPreview && !thumbnailUploading && (
-                                                <div className="w-full flex flex-col items-center gap-4">
-                                                    <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
-                                                    {courseForm.thumbnail && (
-                                                        <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
-                                                            <CheckCircle size={14} /> Uploaded to Cloudinary
-                                                        </span>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            {/* Course Thumbnail */}
+                                            <div>
+                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Course Thumbnail</label>
+                                                <input
+                                                    ref={thumbnailInputRef}
+                                                    type="file"
+                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                    onChange={handleThumbnailFileChange}
+                                                />
+                                                <div
+                                                    onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
+                                                    className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
+                                                        ${thumbnailUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
+                                                >
+                                                    {thumbnailPreview && !thumbnailUploading && (
+                                                        <div className="w-full flex flex-col items-center gap-4">
+                                                            <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
+                                                            {courseForm.thumbnail && (
+                                                                <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
+                                                                    <CheckCircle size={14} /> Uploaded to Cloudinary
+                                                                </span>
+                                                            )}
+                                                            <span className="text-[12px] text-[#3b82f6] font-medium">Click to change image</span>
+                                                        </div>
                                                     )}
-                                                    <span className="text-[12px] text-[#3b82f6] font-medium">Click to change image</span>
+                                                    {thumbnailUploading && (
+                                                        <div className="flex flex-col items-center gap-3">
+                                                            {thumbnailPreview && <img src={thumbnailPreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
+                                                            <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
+                                                            <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                                        </div>
+                                                    )}
+                                                    {!thumbnailPreview && !thumbnailUploading && (
+                                                        <>
+                                                            <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
+                                                                <ImageIcon size={30} strokeWidth={2} />
+                                                            </div>
+                                                            <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse file</button>
+                                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">JPG / PNG / WEBP</p>
+                                                        </>
+                                                    )}
                                                 </div>
-                                            )}
-                                            {/* Uploading spinner */}
-                                            {thumbnailUploading && (
-                                                <div className="flex flex-col items-center gap-3">
-                                                    {thumbnailPreview && <img src={thumbnailPreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
-                                                    <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
-                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                            </div>
+
+                                            {/* Certificate Template */}
+                                            <div>
+                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Certificate Template <span className="text-gray-400 font-normal ml-2">(Optional)</span></label>
+                                                <input
+                                                    ref={certificateInputRef}
+                                                    type="file"
+                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                    onChange={handleCertificateFileChange}
+                                                />
+                                                <div
+                                                    onClick={() => !certificateUploading && certificateInputRef.current?.click()}
+                                                    className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
+                                                        ${certificateUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
+                                                >
+                                                    {certificatePreview && !certificateUploading && (
+                                                        <div className="w-full flex flex-col items-center gap-4">
+                                                            <img src={certificatePreview} alt="Certificate preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
+                                                            {courseForm.certificateFile && (
+                                                                <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
+                                                                    <CheckCircle size={14} /> Uploaded to Cloudinary
+                                                                </span>
+                                                            )}
+                                                            <span className="text-[12px] text-[#3b82f6] font-medium">Click to change template</span>
+                                                        </div>
+                                                    )}
+                                                    {certificateUploading && (
+                                                        <div className="flex flex-col items-center gap-3">
+                                                            {certificatePreview && <img src={certificatePreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
+                                                            <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
+                                                            <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                                        </div>
+                                                    )}
+                                                    {!certificatePreview && !certificateUploading && (
+                                                        <>
+                                                            <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
+                                                                <ImageIcon size={30} strokeWidth={2} />
+                                                            </div>
+                                                            <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse template</button>
+                                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">900x636 PNG Recommended</p>
+                                                        </>
+                                                    )}
                                                 </div>
-                                            )}
-                                            {/* Default empty state */}
-                                            {!thumbnailPreview && !thumbnailUploading && (
-                                                <>
-                                                    <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
-                                                        <ImageIcon size={30} strokeWidth={2} />
-                                                    </div>
-                                                    <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse file</button>
-                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">JPG / PNG / WEBP</p>
-                                                </>
-                                            )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
