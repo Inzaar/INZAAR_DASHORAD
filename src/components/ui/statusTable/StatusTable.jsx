@@ -1,6 +1,6 @@
 import { useState } from "react";
 import StatusRow from "./StatusRow";
-import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../pagination";
+import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../Pagination";
 
 function StatusTable({ userCourses }) {
     const [currentPage, setCurrentPage] = useState(1);

@@ -4,7 +4,7 @@ import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import { Search, Download, Lock } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 import axiosInstance from '@/api/axiosInstance';
 import { Loader } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';

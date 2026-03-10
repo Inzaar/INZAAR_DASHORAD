@@ -1,6 +1,6 @@
 // import ProfileDesign from "@/components/ui/profileDesign/ProfileDesign";
 import { MdOutlineLogout } from "react-icons/md";
-import Account from "./Account";
+import Account from "./account";
 import GrayButton from "@/components/ui/buttons/GrayButton";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { useState } from "react";

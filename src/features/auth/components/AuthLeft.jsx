@@ -1,7 +1,7 @@
-import Rectangle1 from '../../../assets/icons/rectangle1.png';
-import Reactangle2 from '../../../assets/icons/rectangle2.png';
-import Rectangle3 from '../../../assets/icons/rectangle3.png';
-import Rectangle4 from '../../../assets/icons/rectangle4.png';
+import Rectangle1 from '../../../assets/icons/Rectangle1.png';
+import Reactangle2 from '../../../assets/icons/Rectangle2.png';
+import Rectangle3 from '../../../assets/icons/Rectangle3.png';
+import Rectangle4 from '../../../assets/icons/Rectangle4.png';
 import Logo from './Logo';
 
 function AuthLeft() {

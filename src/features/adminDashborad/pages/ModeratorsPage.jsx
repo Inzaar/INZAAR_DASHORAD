@@ -157,6 +157,7 @@ const ModeratorsPage = () => {
                                             name="Mudassar"
                                             id="635261"
                                             status="online"
+                                             onViewClick={ () =>  navigate("/moderator-detail") }
                                         />
                                     ))}
                                 </div>

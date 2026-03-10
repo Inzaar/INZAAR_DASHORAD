@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
-import Navbar from '@/components/layouts/Navbar';
-import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import Navbar from '@/components/layouts/NavBar';
+import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 
 import { useNavigate } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
