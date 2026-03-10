@@ -25,6 +25,7 @@ import AdminCoursesPage from "@/features/adminDashborad/pages/AdminCoursesPage";
 import ReportsPage from "@/features/adminDashborad/pages/ReportsPage";
 import AdminCourseDetailPage from "@/features/adminDashborad/pages/AdminCourseDetailPage";
 import CertificateCard from '@/features/courses/components/CertificateCard';
+import ModeratorDetails from '@/features/adminDashborad/pages/ModeratorDetails';
 
 const AppRouter = () => {
     return (
@@ -49,6 +50,7 @@ const AppRouter = () => {
                 <Route path="/admin-courses" element={<AdminCoursesPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/admin-course-view/:id" element={<AdminCourseDetailPage />} />
+                <Route path="/moderator-details" element={<ModeratorDetails />} />
             </Route>
 
             <Route element={<StudentRoute />}>
