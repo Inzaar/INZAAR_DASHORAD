@@ -12,6 +12,9 @@ import ProfileImage from "../components/moderator/ModeratorRoll";
 import SessionActivity from "@/components/shared/SessionActivity";
 import ModeratorProfile from "../components/moderator/ModeratorProfile";
 import ModeratorRoll from "../components/moderator/ModeratorRoll";
+import Profile from "../components/moderator/ModeratorProfileComponent";
+import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
+import ModeratorBatches from "./ModeratorBatches";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -136,16 +139,11 @@ const ModeratorDetails = () => {
                     </button>
                   </div>
                 </div>
-                {/* check */}
-                <div className="mt-[20px] w-full">
-                  <div className="flex w-[1120px] h-[301px] gap-[10px]">
-                    <ModeratorRoll/>
-                    <SessionActivity />
-                  </div>
-                </div>
-                <div className="mt-[12px] w-full">
-                  <ModeratorProfile/>
-                </div>
+
+
+                {/* <ModeratorProfileComponent/> */}
+                <ModeratorBatches/>
+
               </div>
             </div>
           </main>
