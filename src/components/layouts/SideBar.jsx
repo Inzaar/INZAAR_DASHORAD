@@ -18,7 +18,8 @@ function Sidebar({ className, onClose }) {
   // Determine which items to show based on the active path/context, not strictly user role
   const isAdminRoute = location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/reports') ||
-    location.pathname.startsWith('/student-profiles');
+    location.pathname.startsWith('/student-profiles') ||
+    location.pathname.startsWith('/moderator-details');
 
   const menuItems = isAdminRoute ? adminItems : studentItems;
 
@@ -39,6 +40,7 @@ function Sidebar({ className, onClose }) {
     '/admin-calendar': 'Calendar',
     '/admin-notifications': 'Notification',
     '/admin-moderators': 'Moderators',
+    '/moderator-details': 'Moderators',
     '/student-profiles': 'Student Profiles',
     '/admin-courses': 'Courses',
     '/reports': 'Reports & Logs',

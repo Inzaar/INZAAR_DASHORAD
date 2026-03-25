@@ -2,7 +2,7 @@
 import { MdUploadFile } from "react-icons/md";
 function Account() {
     return (
-        <div >
+        <div className="">
             <div className="w-full rounded-[12px] p-[24px] gap-[24px] bg-[#FFFFFF] flex flex-col gap-5">
                 <div className="w-full flex flex-col gap-5 opacity-[1px] ">
                     {/* firstname */}

@@ -247,18 +247,26 @@ const CourseView = () => {
                             watchedPercentage: rounded,
                             lastWatchedTime: Math.floor(currentTime),
                         }).then(async (data) => {
-                            // Optimistic UI: mark as completed locally when student reaches 95%
-                            if (rounded >= 95 && !completedIdsRef.current.has(lectureId)) {
+                            // Optimistic UI: mark as completed locally when student reaches unlockCriteria, and unlock the next lecture
+                            const unlockPercent = courseData?.unlockCriteria || 100;
+                            if (rounded >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
                                 completedIdsRef.current.add(lectureId);
                                 setCourseData(prev => {
                                     if (!prev) return prev;
+
+                                    const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+
                                     return {
                                         ...prev,
-                                        lecturePlaylist: prev.lecturePlaylist.map(l =>
-                                            (l._id === lectureId || l.id === lectureId)
-                                                ? { ...l, isCompleted: true }
-                                                : l
-                                        ),
+                                        lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
+                                            if (l._id === lectureId || l.id === lectureId) {
+                                                return { ...l, isCompleted: true };
+                                            }
+                                            if (i === idx + 1 && l.isLocked) {
+                                                return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                                            }
+                                            return l;
+                                        }),
                                     };
                                 });
                             }

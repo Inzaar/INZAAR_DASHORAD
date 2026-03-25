@@ -383,11 +383,11 @@ const AdminCalendar = () => {
                 <style dangerouslySetInnerHTML={{
                     __html: `
                 .react-calendar { width: 100% !important; border: none !important; font-family: inherit !important; }
-                .react-calendar__tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; padding: 10px !important; border: 1px solid #f3f4f6 !important; position: relative; }
+                .react-calendar__tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; !important; border: 1px solid #f3f4f6 !important; position: relative; }
                 .react-calendar__month-view__days__day--neighboringMonth { background-color: #f9fafb; color: #d1d5db; }
                 .react-calendar__tile--now { background: #eef2ff !important; color: #4f46e5 !important; font-weight: bold; }
                 .react-calendar__navigation button { font-size: 1.5rem; font-weight: bold; color: #1f2937; }
-                .react-calendar__month-view__weekdays { text-transform: uppercase; font-weight: 600; font-size: 0.8rem; color: #6b7280; padding-bottom: 10px; }
+                .react-calendar__month-view__weekdays { text-transform: uppercase; font-weight: 600; font-size: 0.8rem; color: #6b7280; padding-bottom: 10px;}
 
                 @media (max-width: 768px) {
                     .react-calendar__tile { min-height: 80px !important; padding: 4px !important; }

@@ -61,7 +61,7 @@ function Profile() {
                                 <h6 onClick={() => handleTabClick("other")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "other" ? "text-[#18181B]" : "text-[#71717A]"}`}>Other</h6>
                             </div>
                         </div>
-                        {activeTab === "account" ? <Account /> : <Other />}
+                        {activeTab === "account" ? <Account className="w-full" /> : <Other />}
                     </div>
 
                 </div>
