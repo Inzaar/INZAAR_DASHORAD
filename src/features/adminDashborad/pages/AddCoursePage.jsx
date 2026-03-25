@@ -398,7 +398,7 @@ const AddCoursePage = () => {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Unlock Next Course (%)</label>
+                                                <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Unlock Next Lecture (%)</label>
                                                 <div className="relative group">
                                                     <select
                                                         value={courseForm.unlockCriteria}
@@ -410,7 +410,7 @@ const AddCoursePage = () => {
                                                     </select>
                                                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                 </div>
-                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">% of this course must be viewed to unlock next.</p>
+                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">% of lecture must be viewed to unlock next.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -577,13 +577,19 @@ const AddCoursePage = () => {
                                                 { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
                                                 { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
                                                 { label: 'Course Duration', value: courseForm.duration || '—' },
-                                                { label: 'Unlock Next Course (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
+                                                { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
                                                 { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
                                                 { label: 'Certificate File', value: courseForm.certificateFile || '—' },
                                             ].map((field, idx) => (
-                                                <div key={idx} className="space-y-2">
+                                                <div key={idx} className="space-y-2 overflow-hidden">
                                                     <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
-                                                    <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
+                                                    {field.label === 'Certificate File' && field.value !== '—' ? (
+                                                        <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
+                                                            {field.value}
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>

@@ -67,6 +67,7 @@ const AppRouter = () => {
             {/* Fallback routes */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="/admin*" element={<Navigate to="/admin-dashboard" replace />} />
         </Routes>
     );
 };
