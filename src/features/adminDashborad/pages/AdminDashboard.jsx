@@ -10,15 +10,52 @@ import dummyUserCourses from '@/constants/dummyData';
 import UserCard from '../components/UserCard';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
+import { getAllUsers } from '@/api/user';
+import { getAllCourses } from '@/api/course';
+import { getAllEnrollments } from '@/api/enrollment';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const firstName = localStorage.getItem('firstName');
+    const [studentCount, setStudentCount] = useState(0);
+    const [moderatorCount, setModeratorCount] = useState(0);
+    const [courseCount, setCourseCount] = useState(0);
+    const [courseStats, setCourseStats] = useState([]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const usersRes = await getAllUsers();
+                const users = usersRes?.data || [];
+                setStudentCount(users.filter(u => u.role === 'user').length);
+                setModeratorCount(users.filter(u => u.role === 'moderator').length);
+            } catch (err) { console.error('Error fetching users:', err); }
+
+            try {
+                const coursesRes = await getAllCourses();
+                const courses = coursesRes?.data?.data || [];
+                setCourseCount(courses.length);
+
+                try {
+                    const enrollmentsRes = await getAllEnrollments();
+                    const enrollments = enrollmentsRes?.data || [];
+                    const stats = courses.map(course => {
+                        const count = Array.isArray(enrollments)
+                            ? enrollments.filter(e => e.courseId && e.courseId._id === course._id).length
+                            : 0;
+                        return { count, trend: '0%', trendDirection: count > 0 ? 'up' : 'down', name: course.title };
+                    });
+                    setCourseStats(stats);
+                } catch (err) { console.error('Error fetching enrollments:', err); }
+            } catch (err) { console.error('Error fetching courses:', err); }
+        };
+        fetchDashboardData();
+    }, []);
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -71,24 +108,24 @@ const AdminDashboard = () => {
 
                                     {/* Stats Cards Section */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <StatsCard title="Total Registered Students" value="150" trend="2.4%" trendDirection="up" />
+                                        <StatsCard title="Total Registered Students" value={studentCount.toString()} trend="2.4%" trendDirection="up" />
                                         <StatsCard
                                             title="Inactive Students"
-                                            value="2,420"
+                                            value="0"
                                             trend="1.8%"
                                             trendDirection="up"
                                             trendText="vs last week"
                                         />
                                         <StatsCard
                                             title="Total Courses"
-                                            value="45"
+                                            value={courseCount.toString()}
                                             trend="5%"
                                             trendDirection="down"
                                             trendText="vs last month"
                                         />
                                         <StatsCard
                                             title="Total Moderator"
-                                            value="$12.5k"
+                                            value={moderatorCount.toString()}
                                             trend="8.2%"
                                             trendDirection="up"
                                             trendText="vs last month"
@@ -101,7 +138,7 @@ const AdminDashboard = () => {
                                     </div>
 
                                     {/* Courses Enrollment Overview */}
-                                    <CoursesEnrollmentOverview />
+                                    {courseStats.length > 0 && <CoursesEnrollmentOverview courseStats={courseStats} />}
                                 </div>
 
                                 {/* User Cards Demo Section */}

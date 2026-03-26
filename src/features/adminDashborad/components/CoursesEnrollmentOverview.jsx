@@ -27,24 +27,7 @@ const CourseStatItem = ({ count, trend, trendDirection, name, isLast }) => {
     );
 };
 
-const CoursesEnrollmentOverview = () => {
-    const row1 = [
-        { count: 105, trend: '15%', trendDirection: 'down', name: 'Akhrat kay Dalail' },
-        { count: 56, trend: '21%', trendDirection: 'up', name: 'Dora Quran Course' },
-        { count: 42, trend: '11%', trendDirection: 'up', name: 'Imaniyaat Course' },
-        { count: 13, trend: '01%', trendDirection: 'down', name: 'Stress Management' },
-        { count: 54, trend: '11%', trendDirection: 'up', name: 'c' },
-        { count: 22, trend: '05%', trendDirection: 'up', name: 'Namaz Courses' },
-    ];
-
-    const row2 = [
-        { count: 29, trend: '1%', trendDirection: 'down', name: 'Nabuwat and Risalat' },
-        { count: 85, trend: '5%', trendDirection: 'up', name: 'Roza & Itikaf Course' },
-        { count: 54, trend: '21%', trendDirection: 'down', name: 'Quran ka Rabbani Insaan' },
-        { count: 57, trend: '21%', trendDirection: 'up', name: 'delivery under review' },
-        { count: 22, trend: '21%', trendDirection: 'down', name: 'Quran ka Matloob Insaan' },
-    ];
-
+const CoursesEnrollmentOverview = ({ courseStats = [] }) => {
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans">
             <div className="flex items-center justify-between mb-8">
@@ -52,35 +35,15 @@ const CoursesEnrollmentOverview = () => {
                 <GradiantButton className="px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm">View All courses</GradiantButton>
             </div>
 
-            <div className="flex flex-col divide-y divide-gray-50/80">
-                {/* Row 1 */}
-                <div className="flex items-start justify-between pb-8 w-full overflow-x-auto no-scrollbar">
-                    {row1.map((item, index) => (
-                        <CourseStatItem
-                            key={index}
-                            {...item}
-                            isLast={index === row1.length - 1}
-                        />
-                    ))}
-                </div>
-
-                {/* Row 2 */}
-                <div className="flex items-start justify-between pt-8 w-full overflow-x-auto no-scrollbar">
-                    {row2.map((item, index) => (
-                        <CourseStatItem
-                            key={index}
-                            {...item}
-                            isLast={index === row2.length - 1}
-                        />
-                    ))}
-                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-8">
+                {courseStats.map((item, index) => (
+                    <CourseStatItem
+                        key={index}
+                        {...item}
+                        isLast={false}
+                    />
+                ))}
             </div>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-            .no-scrollbar::-webkit-scrollbar { display: none; }
-            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        `}} />
         </div>
     );
 };
