@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -7,106 +7,84 @@ import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getAllCourses } from '@/api/course';
+import { getAllEnrollments } from '@/api/enrollment';
 
 const AdminCoursesPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('All');
+    const [courses, setCourses] = useState([]);
+    const [courseStats, setCourseStats] = useState([]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+        const fetchCoursesData = async () => {
+            let coursesData = [];
+            let enrollmentsData = [];
+
+            try {
+                const coursesRes = await getAllCourses();
+                coursesData = coursesRes?.data?.data || [];
+                console.log("coursesData fetched:", coursesData.length);
+            } catch (err) {
+                console.error("Error fetching courses:", err);
+            }
+
+            try {
+                const enrollmentsRes = await getAllEnrollments();
+                enrollmentsData = enrollmentsRes?.data || [];
+                console.log("enrollmentsData fetched:", enrollmentsData?.length);
+            } catch (err) {
+                console.error("Error fetching enrollments:", err);
+            }
+
+            if (coursesData.length > 0) {
+                const mappedCourses = coursesData.map(course => ({
+                    id: course._id,
+                    title: course.title,
+                    date: new Date(course.createdAt || Date.now()).toLocaleDateString(),
+                    lecturesCount: `${course.totalLectures || 0} Lectures`,
+                    duration: course.duration || "N/A",
+                    time: course.duration || "N/A",
+                    description: course.description || "Learn the concepts step-by-step.",
+                    thumbnail: course.thumbnail || null,
+                    status: course.status === "draft" ? "Draft" : "Active"
+                }));
+                setCourses(mappedCourses);
+
+                const statsMatrix = coursesData.map(course => {
+                    const count = Array.isArray(enrollmentsData)
+                        ? enrollmentsData.filter(e => e.courseId && e.courseId._id === course._id).length
+                        : 0;
+                    return {
+                        count,
+                        trend: '0%',
+                        trendDirection: count > 0 ? 'up' : 'down',
+                        name: course.title
+                    };
+                });
+                setCourseStats(statsMatrix);
+            }
+        };
+        fetchCoursesData();
+    }, []);
+
+    const activeCount = courses.filter(c => c.status === 'Active').length;
+    const inactiveCount = courses.filter(c => c.status === 'Inactive').length;
+    const draftCount = courses.filter(c => c.status === 'Draft').length;
+
     const stats = [
-        { title: "Total Registered Courses", value: "25", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Courses", value: "15", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Courses", value: "10", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Draft Courses", value: "05", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Total Registered Courses", value: courses.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Courses", value: activeCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Courses", value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Draft Courses", value: draftCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
 
-    const courses = [
-        {
-            id: 1,
-            title: "Akhrat Kay Dalail Aur Ahwal E Akhrat Course",
-            date: "5 Feb 2024",
-            lecturesCount: "10 Lectures",
-            duration: "3 Hours, 23 Minutes, 24 Seconds",
-            description: "Course Explains Day Of Judgment Using Quranic Verses And Authentic Ahadith.",
-            thumbnail: "", // Replace with real image
-            status: "Active"
-        },
-        {
-            id: 2,
-            title: "Dora Quran Course (Only In Ramzan)",
-            date: "5 Feb 2024",
-            lecturesCount: "54 Lectures",
-            duration: "24 Hours, 24 Minutes, 5 Seconds",
-            description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
-            thumbnail: "",
-            status: "Active"
-        },
-        {
-            id: 3,
-            title: "Imaniyaat Course – Nijat Ka Rasta (Path To Eternal Success) Series",
-            date: "5 Feb 2024",
-            lecturesCount: "7 Lectures + Q&A",
-            duration: "6 Hours, 53 Minutes, 41 Seconds",
-            description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
-            thumbnail: "",
-            status: "Inactive"
-        },
-        {
-            id: 4,
-            title: "Stress Management Course",
-            date: "5 Feb 2024",
-            lecturesCount: "9 Lectures",
-            duration: "3 Hours, 26 Minutes, 24 Seconds",
-            description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
-            thumbnail: "",
-            status: "Inactive"
-        },
-        // Duplicate for grid visual
-        {
-            id: 5,
-            title: "Akhrat Kay Dalail Aur Ahwal E Akhrat Course",
-            date: "5 Feb 2024",
-            lecturesCount: "10 Lectures",
-            duration: "3 Hours, 23 Minutes, 24 Seconds",
-            description: "Course Explains Day Of Judgment Using Quranic Verses And Authentic Ahadith.",
-            thumbnail: "",
-            status: "Draft"
-        },
-        {
-            id: 6,
-            title: "Dora Quran Course (Only In Ramzan)",
-            date: "5 Feb 2024",
-            lecturesCount: "54 Lectures",
-            duration: "24 Hours, 24 Minutes, 5 Seconds",
-            description: "Dora-E-Quran Course Covers Quranic Subjects Taught By Sir Abu Yahya.",
-            thumbnail: "",
-            status: "Active"
-        },
-        {
-            id: 7,
-            title: "Imaniyaat Course – Nijat Ka Rasta (Path To Eternal Success) Series",
-            date: "5 Feb 2024",
-            lecturesCount: "7 Lectures + Q&A",
-            duration: "6 Hours, 53 Minutes, 41 Seconds",
-            description: "Course Guiding To Eternal Success Through Qur'an And Prophet's Authentic Teachings.",
-            thumbnail: "",
-            status: "Inactive"
-        },
-        {
-            id: 8,
-            title: "Stress Management Course",
-            date: "5 Feb 2024",
-            lecturesCount: "9 Lectures",
-            duration: "3 Hours, 26 Minutes, 24 Seconds",
-            description: "Course Teaches Managing Stress, Finding Peace Amidst Life's Hardships And Worries.",
-            thumbnail: "",
-            status: "Active"
-        },
-    ];
+
 
     const filteredCourses = activeTab === 'All'
         ? courses
@@ -170,7 +148,7 @@ const AdminCoursesPage = () => {
                             </div>
 
                             {/* Enrollment Overview */}
-                            <CoursesEnrollmentOverview />
+                            {courseStats.length > 0 && <CoursesEnrollmentOverview courseStats={courseStats} />}
 
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mt-8">
@@ -204,15 +182,21 @@ const AdminCoursesPage = () => {
                                 </div>
 
                                 {/* Courses Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {filteredCourses.map((course) => (
-                                        <CardCourse
-                                            key={course.id}
-                                            course={course}
-                                            isAdmin={true}
-                                        />
-                                    ))}
-                                </div>
+                                {filteredCourses.length === 0 ? (
+                                    <div className="w-full py-16 flex items-center justify-center text-gray-500 font-medium text-lg">
+                                        There is no any course registered for now
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                        {filteredCourses.map((course) => (
+                                            <CardCourse
+                                                key={course.id}
+                                                course={course}
+                                                isAdmin={true}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
                                 {/* Pagination */}
                                 <div className="flex justify-end items-center gap-2 mt-8">
