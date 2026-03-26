@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -6,30 +6,69 @@ import StatsCard from '../components/StatsCard';
 import { Search, Plus } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
+import { getAllUsers } from '@/api/user';
+import { getAllEnrollments } from '@/api/enrollment';
 
 const StudentProfilesPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [students, setStudents] = useState([]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const stats = [
-        { title: "Total Registered Students", value: "1800", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Students", value: "218", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Students", value: "28", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Pending Students", value: "14", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-    ];
+    useEffect(() => {
+        const fetchStudentsData = async () => {
+            try {
+                const [usersRes, enrollmentsRes] = await Promise.all([
+                    getAllUsers(),
+                    getAllEnrollments()
+                ]);
 
-    const students = [
-        { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
-        { id: 2, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 3, name: 'Usama', email: 'usama@gmail.com', phone: '0300 123222', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '01-Sep-2025', status: 'In-active' },
-        { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
-        { id: 6, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
+                if (usersRes?.data && enrollmentsRes?.data) {
+                    const studentUsers = usersRes.data.filter(u => u.role === 'user');
+                    const allEnrollments = enrollmentsRes.data;
+
+                    const formattedStudents = studentUsers.map(user => {
+                        const userEnrollments = allEnrollments.filter(e => e.userId && e.userId._id === user._id);
+
+                        const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
+
+                        let totalProgress = 0;
+                        if (userEnrollments.length > 0) {
+                            const completedCount = userEnrollments.filter(e => e.isCompleted).length;
+                            totalProgress = Math.round((completedCount / userEnrollments.length) * 100);
+                        }
+
+                        return {
+                            id: user._id,
+                            name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username,
+                            email: user.email,
+                            phone: user.phone || "N/A",
+                            enrollments: enrolledCourseNames,
+                            progress: `${totalProgress}%`,
+                            lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(),
+                            status: "Active"
+                        };
+                    });
+
+                    setStudents(formattedStudents);
+                }
+            } catch (error) {
+                console.error("Failed to fetch students data:", error);
+            }
+        };
+
+        fetchStudentsData();
+    }, []);
+
+    const stats = [
+        { title: "Total Registered Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Students", value: "0", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Pending Students", value: "0", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
 
     return (
@@ -68,7 +107,7 @@ const StudentProfilesPage = () => {
                                     className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
                                 >
                                     <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Course
+                                    Add New Student
                                 </GradiantButton>
                             </div>
 
@@ -162,47 +201,59 @@ const StudentProfilesPage = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
-                                            {students.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="py-4 pl-4">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
-                                                    </td>
-                                                    <td className="py-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[13px] text-gray-600">{student.email}</span>
-                                                            <span className="text-[13px] text-gray-500">{student.phone}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <div className="flex flex-col gap-1 items-center">
-                                                            {student.enrollments.map((course, idx) => (
-                                                                <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                    {course}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.lastLogin}</span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
-                                                            ? 'text-[#00C896]'
-                                                            : 'text-red-500'
-                                                            }`}>
-                                                            {student.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium">
-                                                            View Profile
-                                                        </GradiantButton>
+                                            {students.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="7" className="py-8 text-center text-gray-500">
+                                                        No students found.
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            ) : (
+                                                students.map((student) => (
+                                                    <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                                                        <td className="py-4 pl-4">
+                                                            <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
+                                                        </td>
+                                                        <td className="py-4">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[13px] text-gray-600">{student.email}</span>
+                                                                <span className="text-[13px] text-gray-500">{student.phone}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <div className="flex flex-col gap-1 items-center">
+                                                                {student.enrollments.length === 0 ? (
+                                                                    <span className="text-[12px] text-gray-400 italic">No Enrollments</span>
+                                                                ) : (
+                                                                    student.enrollments.map((course, idx) => (
+                                                                        <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
+                                                                            {course}
+                                                                        </span>
+                                                                    ))
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <span className="text-[14px] font-medium text-gray-700">{student.lastLogin}</span>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
+                                                                ? 'text-[#00C896]'
+                                                                : 'text-red-500'
+                                                                }`}>
+                                                                {student.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium">
+                                                                View Profile
+                                                            </GradiantButton>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

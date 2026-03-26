@@ -21,7 +21,7 @@ const StatsCard = ({
                 </div>
             </div>
 
-            <div className="text-[40px] font-medium text-[#18181B] mb-4 leading-none">
+            <div className="text-[30px] font-medium text-[#18181B] mb-4 leading-none">
                 {value}
             </div>
 

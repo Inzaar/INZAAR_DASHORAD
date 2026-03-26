@@ -14,10 +14,10 @@ function SessionActivity() {
     ];
     return (
 
-        <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] lg:w-[50%] sm:w-full">
+        <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] w-[475px]">
             <h3 className="text-gray-900 font-medium mb-6">Session Activity</h3>
             <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1}>
                     <LineChart data={sessionData}>
                         <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
                         <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
