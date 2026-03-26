@@ -14,7 +14,7 @@ function SessionActivity() {
     ];
     return (
 
-        <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] w-[475px]">
+        <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] lg:w-[50%] sm:w-full">
             <h3 className="text-gray-900 font-medium mb-6">Session Activity</h3>
             <div className="h-[220px] w-full">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1}>
