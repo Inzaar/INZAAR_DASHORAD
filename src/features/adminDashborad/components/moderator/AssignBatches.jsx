@@ -12,8 +12,7 @@ function AssignBatches({
     endDate
 }) {
     return (
-        <div className="w-[348px] rounded-2xl shadow-md bg-white p-3">
-
+        <div className=" w-full  rounded-2xl shadow-md bg-white p-3">
             {/* Image */}
             <div className="relative">
                 <img
@@ -23,7 +22,7 @@ function AssignBatches({
                 />
 
                 {/* Top Overlay */}
-                <div className=" text-white w-[304px] h-[27px] flex justify-between absolute top-2 left-3 ">
+                <div className=" text-white w-[95%] h-[27px] flex justify-between absolute top-2 left-3 ">
                     <div className=' w-[45px] h-[27px] flex items-center '>
                         <div className='w-[22px] h-[27px]'>
                             <IoPersonOutline className="text-white" />
@@ -40,16 +39,6 @@ function AssignBatches({
                     </div>
                 </div>
                 {/*  */}
-
-
-
-
-                {/* <div className="absolute top-2 right-3 text-white text-sm text-right">
-            <div className='flex items-center '>
-          <IoPersonOutline className="text-white"/> {moderators}
-          </div>
-          <p className="text-[5px]">Moderator's</p>
-        </div> */}
             </div>
 
             {/* Title */}

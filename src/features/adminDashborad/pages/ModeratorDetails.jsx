@@ -14,46 +14,45 @@ import ModeratorProfile from "../components/moderator/ModeratorProfile";
 import ModeratorRoll from "../components/moderator/ModeratorRoll";
 import Profile from "../components/moderator/ModeratorProfileComponent";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
-import ModeratorBatches from "./ModeratorBatches";
+// import ModeratorBatches from "./ModeratorBatches";
 import { BsThreeDotsVertical } from "react-icons/bs";
-
+import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedLectureFilter, setSelectedLectureFilter] = useState("Select Course");
-  const [open, setOpen] = useState(false);
   const [userCourses, setUserCourses] = useState([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [profileButton, setProfileButton] = useState('Profile');
 
   useEffect(() => {
     const fetchUserCourses = async () => {
       const res = await getEnrolledCoursesByUserId();
-      console.log(res.data);
       setUserCourses(res.data);
     };
     fetchUserCourses();
   }, []);
 
-  // Extract valid course titles for dropdown
   const lectureOptions = userCourses?.data?.map((c) => c.title) || [];
 
-  // Set default selection when courses load
   useEffect(() => {
     if (lectureOptions.length > 0) {
       setSelectedLectureFilter(lectureOptions[0]);
     }
-  }, [userCourses]); // Run when userCourses updates
+  }, [userCourses]);
 
-  // Find the selected course data
   const selectedCourseData = userCourses?.data?.find(
-    (course) => course.title === selectedLectureFilter,
+    (course) => course.title === selectedLectureFilter
   );
+
+  const handleprofilebutton = (e) => {
+    setProfileButton(e.target.value);
+  }
 
   const filteredLectures = selectedCourseData?.lectures || [];
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   if (!user) {
     navigate("/login");
@@ -61,8 +60,9 @@ const ModeratorDetails = () => {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+      <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
         <Navbar onMenuClick={toggleSidebar} />
+
         <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative">
           {isSidebarOpen && (
             <div
@@ -74,11 +74,11 @@ const ModeratorDetails = () => {
           <Sidebar
             onClose={() => setIsSidebarOpen(false)}
             className={`
-                        transition-transform duration-300 ease-in-out z-40
-                        lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
-                        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-                    `}
+              transition-transform duration-300 ease-in-out z-40
+              lg:translate-x-0 lg:static lg:block
+              fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
+              ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            `}
           />
           {/* responsive */}
           <main
@@ -98,21 +98,13 @@ const ModeratorDetails = () => {
 
                 <div className="flex  sm:flex-row justify-between items-start sm:items-center">
                   <div className="flex items-center justify-between flex-wrap bg-gray-100 rounded-[4px] overflow-hidden mb-4 sm:mb-0">
-                    <button className="px-4 py-2 text-gray-700 text-sm font-medium border-r">
-                      Profile
-                    </button>
-                    <button className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200">
-                      Batches
-                    </button>
-                    <button className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200">
-                      Records
-                    </button>
+                    <button className="px-4 py-2 text-gray-700 text-sm font-medium border-r" onClick={handleprofilebutton} value={"Profile"}>Profile</button>
+                    <button className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200" onClick={handleprofilebutton} value={"batchs"}>Batches</button>
+                    <button className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200" onClick={handleprofilebutton} value={"records"}>Records</button>
                   </div>
                   {/* responsive */}
                   <div className="hidden max-[900px]:hidden max-[1060px]:hidden md:flex flex-wrap items-center gap-3">
-                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">
-                      Joining: 10/04/2025
-                    </span>
+                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">Joining: 10/04/2025</span>
                     <button className="max-[900px]:hidden max-[1060px]:hidden  bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
                       Edit
                     </button>
@@ -152,7 +144,13 @@ const ModeratorDetails = () => {
                 </div>
                 {/* responsive 3 dot icon */}
 
-                <ModeratorProfileComponent />
+                {profileButton === "Profile" ? (
+                  <ModeratorProfileComponent />
+                ) : profileButton === "batchs" ? (
+                  <ModeratorBatchesComponent />
+                ) : profileButton === "records" ? (
+                  <div>records</div>
+                ) : null}
               </div>
             </div>
           </main>
@@ -160,14 +158,9 @@ const ModeratorDetails = () => {
         <style
           dangerouslySetInnerHTML={{
             __html: `
-                    .no-scrollbar::-webkit-scrollbar {
-                        display: none;
-                    }
-                    .no-scrollbar {
-                        -ms-overflow-style: none;
-                        scrollbar-width: none;
-                    }
-                `,
+              .no-scrollbar::-webkit-scrollbar { display: none; }
+              .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `,
           }}
         />
       </div>
