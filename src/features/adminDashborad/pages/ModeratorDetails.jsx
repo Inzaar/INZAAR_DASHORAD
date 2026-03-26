@@ -15,12 +15,12 @@ import ModeratorRoll from "../components/moderator/ModeratorRoll";
 import Profile from "../components/moderator/ModeratorProfileComponent";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
 import ModeratorBatches from "./ModeratorBatches";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedLectureFilter, setSelectedLectureFilter] =
-    useState("Select Course");
-
+  const [selectedLectureFilter, setSelectedLectureFilter] = useState("Select Course");
+  const [open, setOpen] = useState(false);
   const [userCourses, setUserCourses] = useState([]);
 
   useEffect(() => {
@@ -80,75 +80,83 @@ const ModeratorDetails = () => {
                         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
                     `}
           />
-
+          {/* responsive */}
           <main
             className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide"
-            style={{
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-            }}
+            style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
           >
             <div className="py-4 pr-2">
               <div className="bg-white shadow rounded-lg p-4">
-                {/* Top Section */}
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-xl font-semibold text-gray-700">
+                <div className=" flex sm:flex-row justify-between items-start sm:items-center mb-4">
+                  <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-
-                  <GradiantButton className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm transition">
+                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm mt-2 sm:mt-0">
                     Back to list
                   </GradiantButton>
                 </div>
 
-                {/* Bottom Section */}
-                <div className="flex justify-between items-center">
-                  {/* Tabs */}
-                  <div className="flex bg-gray-100 rounded-[4px] overflow-hidden">
+                <div className="flex  sm:flex-row justify-between items-start sm:items-center">
+                  <div className="flex items-center justify-between flex-wrap bg-gray-100 rounded-[4px] overflow-hidden mb-4 sm:mb-0">
                     <button className="px-4 py-2 text-gray-700 text-sm font-medium border-r">
                       Profile
                     </button>
-
-                    <button className="px-4 py-2  bg-white text-gray-600 text-sm hover:bg-gray-200">
+                    <button className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200">
                       Batches
                     </button>
-
                     <button className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200">
                       Records
                     </button>
                   </div>
-
-                  {/* Right Side */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600">
+                  {/* responsive */}
+                  <div className="hidden max-[900px]:hidden max-[1060px]:hidden md:flex flex-wrap items-center gap-3">
+                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">
                       Joining: 10/04/2025
                     </span>
-
-                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
+                    <button className="max-[900px]:hidden max-[1060px]:hidden  bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
                       Edit
                     </button>
-
-                    <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
-                      <img src={deactivate}></img>
+                    <button className="max-[900px]:hidden max-[1060px]:hidden  bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
+                      <img src={deactivate} alt="Deactivate" />
                       Deactivate
                     </button>
-
-                    <button className="bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
-                      <RiDeleteBin6Fill />
-                      Delete
+                    <button className="max-[900px]:hidden max-[1060px]:hidden bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
+                      <RiDeleteBin6Fill /> Delete
                     </button>
                   </div>
+
+                  <div className="relative max-[900px]:block max-[1060px]:block hidden ml-2">
+                    <button
+                      onClick={() => setOpen(!open)}
+                      className="p-2 rounded-md hover:bg-gray-200"
+                    >
+                      <BsThreeDotsVertical size={20} />
+                    </button>
+
+                    {open && (
+                      <div className="absolute right-0 w-40 bg-white border rounded shadow-lg z-50">
+                        <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                          Edit
+                        </button>
+
+                        <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                          Deactivate
+                        </button>
+
+                        <button className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 flex items-center gap-2">
+                          <RiDeleteBin6Fill /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {/* responsive 3 dot icon */}
 
-
-                {/* <ModeratorProfileComponent/> */}
-                <ModeratorBatches/>
-
+                <ModeratorProfileComponent />
               </div>
             </div>
           </main>
         </div>
-
         <style
           dangerouslySetInnerHTML={{
             __html: `
