@@ -12,7 +12,7 @@ function AssignBatches({
     endDate
 }) {
     return (
-        <div className=" w-full  rounded-2xl shadow-md bg-white p-3">
+        <div className=" w-full flex flex-col rounded-2xl shadow-md bg-white p-3">
             {/* Image */}
             <div className="relative">
                 <img
@@ -66,7 +66,7 @@ function AssignBatches({
             </div>
 
             {/* Button */}
-            <GradiantButton className="w-[87px] h-[29px] text-[12px] text-white rounded-[4px] text-center ml-[110px] mt-[5px] ">
+            <GradiantButton className="w-[87px] h-[29px] text-[12px] text-white rounded-[4px] self-center text-center mt-[5px] ">
                 View Details
             </GradiantButton>
 
