@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -7,23 +7,39 @@ import UserCard from '../components/UserCard';
 import { Search, Plus } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
+import { getAllUsers } from '@/api/user';
 
 
 const ModeratorsPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // const firstName = localStorage.getItem('firstName');
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [moderators, setModerators] = useState([]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    useEffect(() => {
+        const fetchModerators = async () => {
+            try {
+                const response = await getAllUsers();
+                if (response?.data) {
+                    const mods = response.data.filter(user => user.role === 'moderator');
+                    setModerators(mods);
+                }
+            } catch (error) {
+                console.error("Failed to fetch moderators:", error);
+            }
+        };
+        fetchModerators();
+    }, []);
+
     const stats = [
-        { title: "Total Moderators", value: "150", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Moderators", value: "122", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Moderators", value: "28", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Moderators in Pool", value: "14", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Total Moderators", value: moderators.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Moderators", value: moderators.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Moderators", value: "0", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Moderators in Pool", value: "0", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
 
     return (
@@ -62,7 +78,7 @@ const ModeratorsPage = () => {
                                     className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
                                 >
                                     <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Course
+                                    Add New Moderator
                                 </GradiantButton>
                             </div>
 
@@ -151,15 +167,25 @@ const ModeratorsPage = () => {
 
                                 {/* Moderators Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {Array.from({ length: 6 }).map((_, idx) => (
-                                        <UserCard
-                                            key={idx}
-                                            name="Mudassar"
-                                            id="635261"
-                                            status="online"
-                                            onViewClick={() => navigate("/moderator-details")}
-                                        />
-                                    ))}
+                                    {moderators.length === 0 ? (
+                                        <div className="col-span-full py-10 text-center text-gray-500">
+                                            No moderators found.
+                                        </div>
+                                    ) : (
+                                        moderators.map((mod) => (
+                                            <UserCard
+                                                key={mod._id}
+                                                name={`${mod.firstname} ${mod.lastname}`}
+                                                id={mod._id.toString().slice(-6).toUpperCase()}
+                                                status="online"
+                                                email={mod.email}
+                                                phone={mod.phone}
+                                                joiningDate={new Date(mod.createdAt).toLocaleDateString()}
+                                                performance="N/A"
+                                                onViewClick={() => navigate("/moderator-details")}
+                                            />
+                                        ))
+                                    )}
                                 </div>
 
                                 {/* Pagination */}

@@ -184,7 +184,7 @@
 // export default AdminCalendar;
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/layouts/SideBar';
@@ -194,31 +194,71 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { isSameDay, isWithinInterval, startOfDay } from 'date-fns';
 import StatusTable from '@/components/ui/statusTable/StatusTable';
 import dummyUserCourses from '@/constants/dummyData';
+import { getAllEvents, createEvent } from '@/api/event';
 
 const AdminCalendar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [view, setView] = useState('calendar'); // 'calendar' or 'list'
-    const [events, setEvents] = useState([
-        { id: 1, title: 'German class', startDate: new Date(2025, 8, 7), endDate: new Date(2025, 8, 10), color: 'bg-indigo-500' },
-        { id: 2, title: 'French class', startDate: new Date(2025, 8, 18), endDate: new Date(2025, 8, 18), color: 'bg-purple-500' },
-    ]);
+    const [events, setEvents] = useState([]);
+
+    const fetchEvents = async () => {
+        try {
+            const data = await getAllEvents();
+            if (data?.data) {
+                const mappedEvents = data.data.map(ev => ({
+                    id: ev._id,
+                    title: ev.title,
+                    type: ev.type || "Event",
+                    status: ev.status || "upcoming",
+                    startDate: new Date(ev.fromDate),
+                    endDate: new Date(ev.toDate),
+                    color: 'bg-indigo-500'
+                }));
+                setEvents(mappedEvents);
+            }
+        } catch (error) {
+            console.error("Failed to fetch events:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const getFormattedDate = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const today = new Date();
+    const tenDaysLater = new Date(today);
+    tenDaysLater.setDate(today.getDate() + 10);
 
     // Form State
     const [eventTitle, setEventTitle] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(getFormattedDate(today));
+    const [endDate, setEndDate] = useState(getFormattedDate(tenDaysLater));
     const [selectedColor, setSelectedColor] = useState('bg-indigo-500');
 
-    const handleAddEvent = () => {
+    const handleAddEvent = async () => {
         if (!eventTitle || !startDate) return;
-        setEvents([...events, {
-            id: Date.now(),
-            title: eventTitle,
-            startDate: new Date(startDate),
-            endDate: endDate ? new Date(endDate) : new Date(startDate),
-            color: selectedColor
-        }]);
-        setEventTitle(''); setStartDate(''); setEndDate('');
+
+        try {
+            await createEvent({
+                title: eventTitle,
+                type: "Event",
+                fromDate: new Date(startDate).toISOString(),
+                toDate: (endDate ? new Date(endDate) : new Date(startDate)).toISOString(),
+            });
+            await fetchEvents();
+            setEventTitle('');
+            setStartDate(getFormattedDate(today));
+            setEndDate(getFormattedDate(tenDaysLater));
+        } catch (error) {
+            console.error("Failed to create event:", error);
+        }
     };
 
     // Logic to render content inside each calendar tile
@@ -374,7 +414,41 @@ const AdminCalendar = () => {
                                 </div>
                             </>
                         ) : (
-                            <StatusTable userCourses={dummyUserCourses} />
+                            <div className="bg-white rounded-xl border p-6 shadow-sm overflow-x-auto flex-1">
+                                <h2 className="text-xl font-bold mb-4">All Events</h2>
+                                <table className="w-full text-left text-sm text-gray-700">
+                                    <thead className="border-b">
+                                        <tr>
+                                            <th className="py-3 px-4 font-semibold">Event Title</th>
+                                            <th className="py-3 px-4 font-semibold">Type</th>
+                                            <th className="py-3 px-4 font-semibold">From</th>
+                                            <th className="py-3 px-4 font-semibold">To</th>
+                                            <th className="py-3 px-4 font-semibold">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {events.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" className="py-8 text-center text-gray-500">No events found.</td>
+                                            </tr>
+                                        ) : (
+                                            events.map(ev => (
+                                                <tr key={ev.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                                                    <td className="py-4 px-4 font-medium">{ev.title}</td>
+                                                    <td className="py-4 px-4">{ev.type}</td>
+                                                    <td className="py-4 px-4">{ev.startDate.toLocaleDateString()}</td>
+                                                    <td className="py-4 px-4">{ev.endDate.toLocaleDateString()}</td>
+                                                    <td className="py-4 px-4">
+                                                        <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold capitalize">
+                                                            {ev.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </main>
                 </div>
