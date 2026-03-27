@@ -1,13 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import Profile from '@/components/layouts/profile/profile';
+import { getUserById } from '@/api/auth';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [userPayload, setUserPayload] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const progressPercentage = 40;
+
+    console.log("working before the useEffect")
+    useEffect(() => {
+        const getUserdata = async () => {
+            try {
+                const res = await getUserById();
+                console.log("useEffect", res.data.data.user);
+                setUserInfo(res.data.data.user);
+                setUserPayload(res.data.data.user);
+            } catch (error) {
+                console.log("useEffect error", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        getUserdata();
+    }, []);
+
+    // useEffect(() => {
+    //     console.log("userInfo", userInfo);
+    // }, [userInfo]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -38,7 +63,17 @@ const ProfilePage = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="py-4 pr-2">
-                            <Profile />
+                            {isLoading ? (
+                                <div className="w-full flex justify-center items-center py-20">
+                                    <p className="text-gray-500 text-lg font-medium">Loading profile details...</p>
+                                </div>
+                            ) : userInfo ? (
+                                <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} />
+                            ) : (
+                                <div className="w-full flex justify-center items-center py-20">
+                                    <p className="text-red-500 text-lg font-medium">Failed to load profile details. Are you logged in?</p>
+                                </div>
+                            )}
                         </div>
 
                     </main>

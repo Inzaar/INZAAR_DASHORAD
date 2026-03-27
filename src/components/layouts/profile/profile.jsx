@@ -1,19 +1,36 @@
 // import ProfileDesign from "@/components/ui/profileDesign/ProfileDesign";
 import { MdOutlineLogout } from "react-icons/md";
+import toast from 'react-hot-toast';
 import Account from "./account";
 import GrayButton from "@/components/ui/buttons/GrayButton";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { useState } from "react";
 import Other from "./other";
 import ProfileDesign from "./ProfileDesign";
+import { updateProfile } from "@/api/auth";
 // import profile from "@/assets/images/profile.png"
 
-function Profile() {
+function Profile({ userInfo, setUserPayload, userPayload }) {
     const [activeTab, setActiveTab] = useState("account");
+
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
         console.log(tab)
+    };
+
+    const handleSave = async () => {
+        try {
+            // The backend sends the hashed password in 'user', which we must strip out before updating
+            const payloadToSend = { ...userPayload };
+            delete payloadToSend.password;
+
+            const res = await updateProfile(payloadToSend);
+            toast.success("Profile updated successfully!");
+        } catch (error) {
+            console.error("Error updating profile", error);
+            toast.error(error?.response?.data?.message || "Failed to update profile");
+        }
     };
 
     return (
@@ -26,18 +43,22 @@ function Profile() {
             <div className="gap-[22px] flex flex-col min-[800px]:flex-row min-[600px]:px-10">
                 {/* div left */}
                 <div className="w-[300px]">
-                    <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-400 absolute top-[40px] left-[30px]">
-                        {/* <img
-                            src={profile}
-                            alt="profile"
-                            className="w-full h-full object-cover scale-x-[-1]"
-                        /> */}
+                    <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md absolute top-[40px] left-[30px] flex items-center justify-center">
+                        {userPayload?.profileImageUrl || userInfo?.profileImageUrl ? (
+                            <img
+                                src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
+                                alt="profile"
+                                className="w-full h-full object-cover bg-white"
+                            />
+                        ) : (
+                            <span className="text-gray-400 text-sm font-medium">No Image</span>
+                        )}
                     </div>
 
                     <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] left-[35px]">
                         {/* <h5>Zain</h5> */}
-                        <h4 className="font-bold w-full h-[38px] text-[30px]">Zain</h4>
-                        <a href="#" className="w-full h-[24px] text-[16px] underline">zain@gmail.com</a>
+                        <h4 className="font-bold w-full h-[38px] text-[30px]">{userInfo?.firstname || "[YOUR_NAME]"}</h4>
+                        <a href="#" className="w-full h-[24px] text-[16px] underline">{userInfo?.email || "[EMAIL_ADDRESS]"}</a>
                         <h6 className="font-bold text-[16px] leading-[22px] tracking-[-0.7%] text-[#1E293B]">Personal Info</h6>
                         <p className="font-bold text-[14px] leading-[160%] tracking-[0%] text-[#475569]">You can change  your personal information settings here.</p>
                     </div>
@@ -61,7 +82,7 @@ function Profile() {
                                 <h6 onClick={() => handleTabClick("other")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "other" ? "text-[#18181B]" : "text-[#71717A]"}`}>Other</h6>
                             </div>
                         </div>
-                        {activeTab === "account" ? <Account className="w-full" /> : <Other />}
+                        {activeTab === "account" ? <Account className="w-full" setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} /> : <Other setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} />}
                     </div>
 
                 </div>
@@ -72,8 +93,12 @@ function Profile() {
 
             <div className="w-full flex items-center justify-end gap-[15px] pr-10">
                 <button className={"w-[100px] h-[40px] rounded bg-[#B1B1B1] text-white"}>Cancel</button>
-                <GradiantButton className={"w-[100px] h-[40px] rounded"}>Save</GradiantButton>
+                <div onClick={handleSave}>
+                    <GradiantButton className={"w-[100px] h-[40px] rounded"}>Save</GradiantButton>
+                </div>
             </div>
+
+
         </div>
     )
 }
