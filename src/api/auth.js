@@ -31,3 +31,18 @@ export const updateProfile = (data) => {
     const res = axiosInstance.patch("/users/profile", data);
     return res;
 }
+
+export const getUserById = () => {
+    const res = axiosInstance.get(`/users/profile`);
+    return res;
+}
+
+export const uploadProfilePic = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await axiosInstance.post("/upload/profile-pic", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+    });
+    return res.data.data;
+}

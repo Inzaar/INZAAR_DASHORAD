@@ -1,6 +1,6 @@
 import React from "react";
 
-function Other() {
+function Other({ setUserPayload, userPayload, userInfo }) {
     return (
         <div className="w-full p-[24px] gap-[24px] rounded-[12px] b-[1px] bg-[#FFFFFF]  border border-[#E2E8F0]">
             <div className="w-full rotate-0 opacity-100 flex flex-col gap-[5px] ">
@@ -14,6 +14,8 @@ function Other() {
                                 className=" w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] "
                                 name="Gender"
                                 id="Gender"
+                                value={userPayload?.gender || "Choose"}
+                                onChange={(e) => setUserPayload({ ...userPayload, gender: e.target.value })}
                             >
                                 <option value="Choose">Choose</option>
                                 <option value="Male">Male</option>
@@ -27,8 +29,10 @@ function Other() {
                             <label>Date Of Birth* </label>
 
                             <input
-                                type="text"
-                                placeholder="Enter Your Age"
+                                type="date"
+                                placeholder="Enter Your DOB"
+                                value={userPayload?.dob ? new Date(userPayload.dob).toISOString().split('T')[0] : ''}
+                                onChange={(e) => setUserPayload({ ...userPayload, dob: e.target.value })}
                                 className="h-[52px] rounded-md px-3 border border-[#E4E4E7]"
                             />
                         </div>
@@ -43,6 +47,8 @@ function Other() {
                         <input
                             type="text"
                             placeholder="Enter Your Educational Qualification"
+                            value={userPayload?.educationQualification || ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, educationQualification: e.target.value })}
                             className="w-full h-[52px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 "
                         />
                     </div>
@@ -53,6 +59,8 @@ function Other() {
                         <input
                             type="text"
                             placeholder="Enter Your Nationality"
+                            value={userPayload?.nationality || ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, nationality: e.target.value })}
                             className="w-full h-[52px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 "
                         />
                     </div>
@@ -66,6 +74,8 @@ function Other() {
                         <input
                             type="text"
                             placeholder="Enter Your Permanent Address"
+                            value={userPayload?.permanentAddress || ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, permanentAddress: e.target.value })}
                             className="w-full h-[52px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 "
                         />
                     </div>
@@ -81,6 +91,8 @@ function Other() {
                         <textarea
                             type="text"
                             placeholder="Enter Details"
+                            value={userPayload?.attendedReligiousCourseDetails || ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, attendedReligiousCourseDetails: e.target.value })}
                             className="w-full h-[82px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 pt-16px pr-3 pb-46px pl-3 gap-4  "
                         />
                     </div>
@@ -94,6 +106,8 @@ function Other() {
                         <textarea
                             type="text"
                             placeholder="Enter Feedback"
+                            value={userPayload?.referralSource || ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, referralSource: e.target.value })}
                             className="w-full h-[82px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 pt-16px pr-3 pb-46px pl-3 gap-4  "
                         />
                     </div>
