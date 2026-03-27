@@ -1,7 +1,10 @@
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
+import { useState } from "react";
 import { FaIdCard } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 
 function ModeratorProfile() {
+  
   return (
     <div className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
       <div className="w-full mx-auto">
