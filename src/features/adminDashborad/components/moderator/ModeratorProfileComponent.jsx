@@ -19,18 +19,18 @@ import ModeratorProfile from "./ModeratorProfile";
 //     )
 // }
 // export default ModeratorProfileComponent;
-function ModeratorProfileComponent () {
+function ModeratorProfileComponent ({ profileData }) {
     return (
         <div className="w-full">
             <div className="mt-[20px] w-full">
                 <div className="flex flex-col lg:flex-row w-full gap-[10px]">
-                    <ModeratorRoll/>
-                    <SessionActivity />
+                    <ModeratorRoll profileData={profileData} />
+                    <SessionActivity profileData={profileData} />
                 </div>
             </div>
 
             <div className="mt-[12px] w-full">
-                <ModeratorProfile/>
+                <ModeratorProfile profileData={profileData} />
             </div>
         </div>
     )

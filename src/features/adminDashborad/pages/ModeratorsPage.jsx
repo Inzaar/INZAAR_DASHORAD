@@ -176,13 +176,14 @@ const ModeratorsPage = () => {
                                             <UserCard
                                                 key={mod._id}
                                                 name={`${mod.firstname} ${mod.lastname}`}
-                                                id={mod._id.toString().slice(-6).toUpperCase()}
+                                                // id={mod._id.toString().slice(-6).toUpperCase()}
+                                                id=""
                                                 status="online"
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={new Date(mod.createdAt).toLocaleDateString()}
                                                 performance="N/A"
-                                                onViewClick={() => navigate("/moderator-details")}
+                                                onViewClick={() => navigate(`/moderator-details/${mod._id}`)}
                                             />
                                         ))
                                     )}

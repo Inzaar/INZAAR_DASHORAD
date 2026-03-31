@@ -1,10 +1,13 @@
 import React from 'react'
 
-function GrayButton({ children, className }) {
+function GrayButton({ children, className, onClick }) {
   return (
-    <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
+    <button
+      onClick={onClick}
+      className={`bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors ${className}`}
+    >
       {children}
-    </div>
+    </button>
   )
 }
 

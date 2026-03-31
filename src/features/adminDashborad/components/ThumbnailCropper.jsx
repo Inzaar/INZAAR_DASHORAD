@@ -63,11 +63,11 @@ const ASPECTS = [
      onApply    — cb(blob) called when admin confirms crop
      onCancel   — cb() closes the modal without changes
 ──────────────────────────────────────────────────────── */
-const ThumbnailCropper = ({ imageSrc, onApply, onCancel }) => {
+const ThumbnailCropper = ({ imageSrc, onApply, onCancel, defaultAspect = 16 / 10 }) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
-    const [aspect, setAspect] = useState(16 / 10);
+    const [aspect, setAspect] = useState(defaultAspect);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [applying, setApplying] = useState(false);
 
@@ -90,7 +90,7 @@ const ThumbnailCropper = ({ imageSrc, onApply, onCancel }) => {
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <div className="bg-white w-full max-w-[900px] rounded-[28px] shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: '92vh' }}>
+            <div className="bg-white w-full max-w-[900px] rounded-[24px] shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '96vh', height: '100%' }}>
 
                 {/* Header */}
                 <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
@@ -108,8 +108,8 @@ const ThumbnailCropper = ({ imageSrc, onApply, onCancel }) => {
                     </button>
                 </div>
 
-                {/* Crop Area — fixed height */}
-                <div className="relative bg-[#0f172a] flex-shrink-0" style={{ height: '440px' }}>
+                {/* Crop Area — flexible height */}
+                <div className="relative bg-[#0f172a] flex-1 min-h-[200px]">
                     <Cropper
                         image={imageSrc}
                         crop={crop}
@@ -131,7 +131,7 @@ const ThumbnailCropper = ({ imageSrc, onApply, onCancel }) => {
                 </div>
 
                 {/* Controls */}
-                <div className="px-8 py-6 space-y-5 flex-shrink-0">
+                <div className="px-5 md:px-8 py-4 md:py-6 space-y-4 md:space-y-5 flex-shrink-0 overflow-y-auto max-h-[35vh]">
 
                     {/* Aspect Ratio Tabs */}
                     <div>
@@ -210,7 +210,7 @@ const ThumbnailCropper = ({ imageSrc, onApply, onCancel }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-5 border-t border-gray-100 flex justify-between items-center flex-shrink-0">
+                <div className="px-5 md:px-8 py-4 border-t border-gray-100 flex justify-between items-center flex-shrink-0 bg-white">
                     <button
                         onClick={onCancel}
                         className="px-8 py-2.5 bg-gray-100 text-[#64748b] font-bold rounded-xl hover:bg-gray-200 transition-all text-[14px]"

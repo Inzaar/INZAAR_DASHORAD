@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Router } from "react-router-dom";
 import { LoginPage, RegisterPageP1, RegisterPageP2, ForgetPassword } from "@/features/auth";
 import ResetPage from "@/features/auth/pages/ResetPage";
 import DashboardPage from "@/features/StudentDashboard/pages/DashboardPage";
@@ -50,7 +50,7 @@ const AppRouter = () => {
                 <Route path="/admin-courses" element={<AdminCoursesPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/admin-course-view/:id" element={<AdminCourseDetailPage />} />
-                <Route path="/moderator-details" element={<ModeratorDetails />} />
+                <Route path="/moderator-details/:id" element={<ModeratorDetails />} />
             </Route>
 
             <Route element={<StudentRoute />}>
