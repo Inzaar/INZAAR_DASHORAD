@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Router } from "react-router-dom";
 import { LoginPage, RegisterPageP1, RegisterPageP2, ForgetPassword } from "@/features/auth";
 import ResetPage from "@/features/auth/pages/ResetPage";
 import DashboardPage from "@/features/StudentDashboard/pages/DashboardPage";
