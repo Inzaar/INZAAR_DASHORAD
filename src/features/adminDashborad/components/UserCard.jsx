@@ -4,7 +4,8 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
 const UserCard = ({
     name = "Mudassar",
-    id = "635261",
+    // id = "635261",
+    id= user._id,
     image = "https://randomuser.me/api/portraits/men/32.jpg",
     performance = "88%",
     joiningDate = "7/10/2025",
@@ -28,7 +29,7 @@ const UserCard = ({
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 leading-tight">{name}</h3>
-                        <p className="text-sm text-gray-500">{id}</p>
+                        {/* <p className="text-sm text-gray-500">{id}</p> */}
                     </div>
                 </div>
                 <button className="text-gray-400 hover:text-gray-600 transition-colors">

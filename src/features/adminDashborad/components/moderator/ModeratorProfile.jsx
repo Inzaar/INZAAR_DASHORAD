@@ -3,8 +3,9 @@ import { useState } from "react";
 import { FaIdCard } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 
-function ModeratorProfile() {
-  
+function ModeratorProfile({ profileData }) {
+  const user = profileData?.user || {};
+
   return (
     <div className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
       <div className="w-full mx-auto">
@@ -32,6 +33,7 @@ function ModeratorProfile() {
             <input
               type="text"
               placeholder="Enter first name"
+              defaultValue={user.firstname || user.username || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
@@ -42,6 +44,7 @@ function ModeratorProfile() {
             <input
               type="text"
               placeholder="Enter email"
+              defaultValue={user.email || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
@@ -58,6 +61,7 @@ function ModeratorProfile() {
               <input
                 type="tel"
                 placeholder="Phone number"
+                defaultValue={user.phone || ""}
                 className="outline-none w-full"
               />
             </div>
@@ -66,7 +70,7 @@ function ModeratorProfile() {
           {/* Gender */}
           <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-6 lg:order-4">
             <label className="font-medium text-[14px]">Gender</label>
-            <select className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none">
+            <select className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none" defaultValue={user.gender || "Choose"}>
               <option>Choose</option>
               <option>Male</option>
               <option>Female</option>
@@ -88,6 +92,7 @@ function ModeratorProfile() {
             <label className="font-medium text-[14px]">Address</label>
             <input
               type="text"
+              defaultValue={user.permanentAddress || user.city || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
@@ -98,6 +103,7 @@ function ModeratorProfile() {
             <input
               type="text"
               placeholder="Enter Your Nationality"
+              defaultValue={user.nationality || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
@@ -110,6 +116,7 @@ function ModeratorProfile() {
             <input
               type="text"
               placeholder="Enter Your Education"
+              defaultValue={user.educationQualification || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
