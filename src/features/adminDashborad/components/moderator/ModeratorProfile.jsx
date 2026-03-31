@@ -1,6 +1,6 @@
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { FaIdCard } from "react-icons/fa";
-
+import { FaEdit } from "react-icons/fa";
 function ModeratorProfile() {
   return (
     <div className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
@@ -10,12 +10,19 @@ function ModeratorProfile() {
         <div className="w-full flex justify-between items-center">
           <h3 className="text-[18px] font-medium">Profile Details</h3>
 
-          <div className="flex gap-[12px]">
-            <button className="w-[177px] h-[40px] bg-[#A7A7A7] rounded-[4px] text-white text-sm">
+          <div className="flex gap-[12px] items-center">
+            <button className="w-[140px] h-[40px] bg-[#A7A7A7] rounded-[4px] text-white text-[13px] lg:text-sm lg:w-[177px] hidden min-[640px]:block">
               Change Password
             </button>
-            <GradiantButton className="w-[90px] h-[40px] rounded-[4px] text-sm">
+
+            {/* Edit button for screens larger than 700px */}
+            <GradiantButton className="hidden sm:flex w-[90px] h-[40px] rounded-[4px] text-sm">
               Edit
+            </GradiantButton>
+
+            {/* Gradient icon for smaller screens */}
+            <GradiantButton className="flex sm:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] ">
+              <FaEdit className="text-white w-4" />
             </GradiantButton>
           </div>
         </div>
@@ -144,8 +151,12 @@ function ModeratorProfile() {
               </div>
             </div>
           </div>
-
         </div>
+      </div>
+      <div className="flex justify-end mt-[10px]">
+        <GradiantButton className="w-[90px] h-[40px] rounded-[4px] text-sm">
+          Save
+        </GradiantButton>
       </div>
     </div>
   );
