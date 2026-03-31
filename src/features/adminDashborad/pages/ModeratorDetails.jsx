@@ -109,11 +109,36 @@ const dropdownRef=useRef(null);
                   </GradiantButton>
                 </div>
 
-                <div className="flex  sm:flex-row justify-between items-start sm:items-center">
+                <div className="flex sm:flex-row justify-between items-start sm:items-center">
                   <div className="flex items-center justify-between flex-wrap bg-gray-100 rounded-[4px] overflow-hidden mb-4 sm:mb-0">
-                    <button className="px-4 py-2 text-gray-700 text-sm font-medium border-r" onClick={handleprofilebutton} value={"Profile"}>Profile</button>
-                    <button className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200" onClick={handleprofilebutton} value={"batchs"}>Batches</button>
-                    <button className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200" onClick={handleprofilebutton} value={"records"}>Records</button>
+
+                    <button
+                      className="px-4 py-2 text-gray-700 text-sm font-medium border-r 
+                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
+                      onClick={handleprofilebutton}
+                      value={"Profile"}
+                    >
+                      Profile
+                    </button>
+
+                    <button
+                      className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200 
+                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
+                      onClick={handleprofilebutton}
+                      value={"batchs"}
+                    >
+                      Batches
+                    </button>
+
+                    <button
+                      className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200 
+                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
+                      onClick={handleprofilebutton}
+                      value={"records"}
+                    >
+                      Records
+                    </button>
+
                   </div>
                   {/* responsive */}
                   <div className="hidden max-[900px]:hidden max-[1060px]:hidden md:flex flex-wrap items-center gap-3">
