@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
@@ -21,7 +21,20 @@ const ModeratorDetails = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
+const dropdownRef=useRef(null);
+// ✅ outside click close
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -48,13 +61,15 @@ const ModeratorDetails = () => {
 
   const handleprofilebutton = (e) => {
     setProfileButton(e.target.value);
-  }
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   if (!user) {
     navigate("/login");
   }
+ 
+
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
@@ -117,7 +132,8 @@ const ModeratorDetails = () => {
                     </button>
                   </div>
 
-                  <div className="relative max-[900px]:block max-[1060px]:block hidden ml-2">
+                  <div ref={dropdownRef} className="relative max-[900px]:block max-[1060px]:block hidden ml-2">
+                    
                     <button
                       onClick={() => setOpen(!open)}
                       className="p-2 rounded-md hover:bg-gray-200"

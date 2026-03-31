@@ -4,10 +4,10 @@ import Profileimg from "@/assets/images/course.png";
 function ModeratorRoll({ profileData }) {
   const user = profileData?.user || {};
   return (
-    <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border rounded-[8px] pr-[10px] pl-[20px] flex lg:flex-row  bg-white">
+    <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border rounded-[8px] pr-[10px] pl-[20px] flex lg:flex-row max-[620px]:flex-col bg-white">
       <div className="w-full lg:w-[230px] h-auto lg:h-[301px] pt-[10px] pb-[10px] gap-[8px] flex flex-col items-center">
         <h3 className="text-center text-[12px]">PROFILE IMAGE</h3>
-        <img src={Profileimg} className="w-[230px] h-[236px]  object-cover rounded-[10px]" />
+        <img src={Profileimg} className="w-full h-[236px]  object-cover rounded-[10px]" />
         <label className="text-blue-600 text-sm cursor-pointer text-center block mt-[2px]">
           Choose Profile Image
           <input type="file" className="hidden" />
