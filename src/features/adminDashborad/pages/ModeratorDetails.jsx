@@ -1,56 +1,54 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getEnrolledCoursesByUserId } from "@/api/course";
+import { getUserProfileById } from "@/api/user";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import deactivate from "@/assets/images/deactivate.png";
-import Profiledetail from "../components/moderator/ModeratorProfile";
-import ProfileImage from "../components/moderator/ModeratorRoll";
 import SessionActivity from "@/components/shared/SessionActivity";
-import ModeratorProfile from "../components/moderator/ModeratorProfile";
-import ModeratorRoll from "../components/moderator/ModeratorRoll";
-import Profile from "../components/moderator/ModeratorProfileComponent";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
-// import ModeratorBatches from "./ModeratorBatches";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
+
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedLectureFilter, setSelectedLectureFilter] = useState("Select Course");
-  const [userCourses, setUserCourses] = useState([]);
+  const { id } = useParams();
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
 
   useEffect(() => {
-    const fetchUserCourses = async () => {
-      const res = await getEnrolledCoursesByUserId();
-      setUserCourses(res.data);
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserProfileById(id);
+        if (res?.data) {
+          // setProfileData(res.data);
+          setProfileData({ user: res.data });
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchUserCourses();
-  }, []);
-
-  const lectureOptions = userCourses?.data?.map((c) => c.title) || [];
-
-  useEffect(() => {
-    if (lectureOptions.length > 0) {
-      setSelectedLectureFilter(lectureOptions[0]);
+    if (id) {
+      fetchProfileData();
     }
-  }, [userCourses]);
 
-  const selectedCourseData = userCourses?.data?.find(
-    (course) => course.title === selectedLectureFilter
-  );
+    // if (id) {
+    //   fetchProfileData();
+    // }
+  }, [id]);
 
   const handleprofilebutton = (e) => {
     setProfileButton(e.target.value);
   }
-
-  const filteredLectures = selectedCourseData?.lectures || [];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -104,7 +102,9 @@ const ModeratorDetails = () => {
                   </div>
                   {/* responsive */}
                   <div className="hidden max-[900px]:hidden max-[1060px]:hidden md:flex flex-wrap items-center gap-3">
-                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">Joining: 10/04/2025</span>
+                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">
+                      Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
+                    </span>
                     <button className="max-[900px]:hidden max-[1060px]:hidden  bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
                       Edit
                     </button>
@@ -145,9 +145,9 @@ const ModeratorDetails = () => {
                 {/* responsive 3 dot icon */}
 
                 {profileButton === "Profile" ? (
-                  <ModeratorProfileComponent />
+                  <ModeratorProfileComponent profileData={profileData} />
                 ) : profileButton === "batchs" ? (
-                  <ModeratorBatchesComponent />
+                  <ModeratorBatchesComponent profileData={profileData} />
                 ) : profileButton === "records" ? (
                   <div>records</div>
                 ) : null}

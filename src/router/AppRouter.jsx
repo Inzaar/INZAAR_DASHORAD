@@ -50,7 +50,7 @@ const AppRouter = () => {
                 <Route path="/admin-courses" element={<AdminCoursesPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/admin-course-view/:id" element={<AdminCourseDetailPage />} />
-                <Route path="/moderator-details" element={<ModeratorDetails />} />
+                <Route path="/moderator-details/:id" element={<ModeratorDetails />} />
             </Route>
 
             <Route element={<StudentRoute />}>
