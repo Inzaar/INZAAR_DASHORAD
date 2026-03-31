@@ -1,13 +1,72 @@
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaIdCard } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { uploadImage } from "@/api/course";
+import { updateUser } from "@/api/user";
 
 function ModeratorProfile({ profileData }) {
   const user = profileData?.user || {};
+  const [isSaving, setIsSaving] = useState(false);
+  const [cnicFrontPreview, setCnicFrontPreview] = useState(user.cnicFrontImage || null);
+  const [cnicBackPreview, setCnicBackPreview] = useState(user.cnicBackImage || null);
+
+  useEffect(() => {
+    if (user.cnicFrontImage) setCnicFrontPreview(user.cnicFrontImage);
+    if (user.cnicBackImage) setCnicBackPreview(user.cnicBackImage);
+  }, [user.cnicFrontImage, user.cnicBackImage]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!user._id) return toast.error("User ID not found!");
+    
+    setIsSaving(true);
+    const toastId = toast.loading("Saving profile details...");
+
+    try {
+      const form = new FormData(e.target);
+      const payload = {
+        firstname: form.get("firstname"),
+        email: form.get("email"),
+        phone: form.get("phone"),
+        gender: form.get("gender"),
+        cnic: form.get("cnic"),
+        permanentAddress: form.get("permanentAddress"),
+        nationality: form.get("nationality"),
+        educationQualification: form.get("educationQualification"),
+      };
+
+      // Handle Front CNIC
+      const frontFile = form.get("cnicFrontImageFile");
+      if (frontFile && frontFile.size > 0) {
+        const uploadedFront = await uploadImage(frontFile);
+        payload.cnicFrontImage = uploadedFront.url;
+      }
+
+      // Handle Back CNIC
+      const backFile = form.get("cnicBackImageFile");
+      if (backFile && backFile.size > 0) {
+        const uploadedBack = await uploadImage(backFile);
+        payload.cnicBackImage = uploadedBack.url;
+      }
+
+      // Keep existing if no new uploaded
+      if (!payload.cnicFrontImage && user.cnicFrontImage) payload.cnicFrontImage = user.cnicFrontImage;
+      if (!payload.cnicBackImage && user.cnicBackImage) payload.cnicBackImage = user.cnicBackImage;
+
+      await updateUser(user._id, payload);
+      toast.success("Profile updated successfully!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.message || "Failed to update profile", { id: toastId });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
-    <div className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
+    <form onSubmit={handleSave} className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
       <div className="w-full mx-auto">
 
         {/* Header */}
@@ -39,6 +98,7 @@ function ModeratorProfile({ profileData }) {
             <label className="font-medium text-[14px]">First name</label>
             <input
               type="text"
+              name="firstname"
               placeholder="Enter first name"
               defaultValue={user.firstname || user.username || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
@@ -50,6 +110,7 @@ function ModeratorProfile({ profileData }) {
             <label className="font-medium text-[14px]">Email</label>
             <input
               type="text"
+              name="email"
               placeholder="Enter email"
               defaultValue={user.email || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
@@ -67,6 +128,7 @@ function ModeratorProfile({ profileData }) {
               </select>
               <input
                 type="tel"
+                name="phone"
                 placeholder="Phone number"
                 defaultValue={user.phone || ""}
                 className="outline-none w-full"
@@ -77,7 +139,7 @@ function ModeratorProfile({ profileData }) {
           {/* Gender */}
           <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-6 lg:order-4">
             <label className="font-medium text-[14px]">Gender</label>
-            <select className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none" defaultValue={user.gender || "Choose"}>
+            <select name="gender" className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none" defaultValue={user.gender || "Choose"}>
               <option>Choose</option>
               <option>Male</option>
               <option>Female</option>
@@ -89,7 +151,9 @@ function ModeratorProfile({ profileData }) {
             <label className="font-medium text-[14px]">CNIC</label>
             <input
               type="text"
+              name="cnic"
               placeholder="23456-2389-1"
+              defaultValue={user.cnic || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
           </div>
@@ -99,6 +163,7 @@ function ModeratorProfile({ profileData }) {
             <label className="font-medium text-[14px]">Address</label>
             <input
               type="text"
+              name="permanentAddress"
               defaultValue={user.permanentAddress || user.city || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
@@ -109,6 +174,7 @@ function ModeratorProfile({ profileData }) {
             <label className="font-medium text-[14px]">Nationality</label>
             <input
               type="text"
+              name="nationality"
               placeholder="Enter Your Nationality"
               defaultValue={user.nationality || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
@@ -122,6 +188,7 @@ function ModeratorProfile({ profileData }) {
             </label>
             <input
               type="text"
+              name="educationQualification"
               placeholder="Enter Your Education"
               defaultValue={user.educationQualification || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
@@ -131,44 +198,80 @@ function ModeratorProfile({ profileData }) {
           {/* Front CNIC */}
           <div className="w-full lg:w-[48%] order-9 lg:order-9">
             <p className="mb-2 text-[14px] font-medium">Front CNIC</p>
-            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center">
-              <div className="flex flex-col items-center gap-2">
-                <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
-                <p className="text-[10px] text-[#666666]">
-                  Upload Front CNIC
-                </p>
-                <label className="bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer">
-                  Browse
-                  <input type="file" className="hidden" />
-                </label>
-              </div>
+            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
+              {cnicFrontPreview ? (
+                <>
+                  <img src={cnicFrontPreview} alt="Front CNIC Preview" className="w-full h-full object-cover" />
+                  <a href={cnicFrontPreview} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 hover:bg-black/80 text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 backdrop-blur-sm">
+                    View File
+                  </a>
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
+                  <p className="text-[10px] text-[#666666]">
+                    Upload Front CNIC
+                  </p>
+                </div>
+              )}
+              <label className="absolute bottom-2 bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10">
+                Browse
+                <input 
+                  type="file" 
+                  name="cnicFrontImageFile" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setCnicFrontPreview(URL.createObjectURL(file));
+                  }} 
+                />
+              </label>
             </div>
           </div>
 
           {/* Back CNIC */}
           <div className="w-full lg:w-[48%] order-10 lg:order-10">
             <p className="mb-2 text-[14px] font-medium">Back CNIC</p>
-            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center">
-              <div className="flex flex-col items-center gap-2">
-                <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
-                <p className="text-[10px] text-[#666666]">
-                  Upload Back CNIC
-                </p>
-                <label className="bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer">
-                  Browse
-                  <input type="file" className="hidden" />
-                </label>
-              </div>
+            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
+              {cnicBackPreview ? (
+                <>
+                  <img src={cnicBackPreview} alt="Back CNIC Preview" className="w-full h-full object-cover" />
+                  <a href={cnicBackPreview} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 hover:bg-black/80 text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 backdrop-blur-sm">
+                    View File
+                  </a>
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
+                  <p className="text-[10px] text-[#666666]">
+                    Upload Back CNIC
+                  </p>
+                </div>
+              )}
+              <label className="absolute bottom-2 bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10">
+                Browse
+                <input 
+                  type="file" 
+                  name="cnicBackImageFile" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setCnicBackPreview(URL.createObjectURL(file));
+                  }} 
+                />
+              </label>
             </div>
           </div>
         </div>
       </div>
       <div className="flex justify-end mt-[10px]">
-        <GradiantButton className="w-[90px] h-[40px] rounded-[4px] text-sm">
-          Save
-        </GradiantButton>
+        <button type="submit" disabled={isSaving} className="w-[90px] h-[40px] rounded-[4px] text-sm text-white font-medium bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
+          {isSaving ? "Saving" : "Save"}
+        </button>
       </div>
-    </div>
+    </form>
   );
 }
 

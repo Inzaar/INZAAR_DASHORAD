@@ -21,3 +21,10 @@ export const getUserProfileById = async (id) => {
 //     });
 //     return res.data;
 // };
+
+export const updateUser = async (id, data) => {
+    const res = await axiosInstance.patch(`/users/${id}`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
