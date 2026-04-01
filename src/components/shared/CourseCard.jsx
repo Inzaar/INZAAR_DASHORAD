@@ -15,11 +15,11 @@ const CourseCard = ({
 
     return (
         <Link to={`/course-view?id=${id}`} className={cn(
-            "w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px]",
+            "w-full max-w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px]",
             className
         )}>
             {/* Image Section */}
-            <div className="w-full min-h-[140px] rounded-[6px] overflow-hidden">
+            <div className="w-full min-h-[140px] flex-1 rounded-[6px] overflow-hidden">
                 <img
                     src={image}
                     alt={title}
