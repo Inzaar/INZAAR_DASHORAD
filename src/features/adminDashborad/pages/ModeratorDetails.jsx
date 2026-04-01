@@ -11,6 +11,7 @@ import SessionActivity from "@/components/shared/SessionActivity";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
+import ModeratorRecordComponent from "../components/moderator/ModeratorRecordComponent";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,8 +22,8 @@ const ModeratorDetails = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
-const dropdownRef=useRef(null);
-// ✅ outside click close
+  const dropdownRef = useRef(null);
+  // ✅ outside click close
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -68,7 +69,7 @@ const dropdownRef=useRef(null);
   if (!user) {
     navigate("/login");
   }
- 
+
 
 
   return (
@@ -100,97 +101,95 @@ const dropdownRef=useRef(null);
           >
             <div className="py-4 pr-2">
               <div className="bg-white shadow rounded-lg p-4">
-                <div className=" flex sm:flex-row justify-between items-start sm:items-center mb-4">
+                <div className="hidden md:flex justify-between items-center mb-4">
                   <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm mt-2 sm:mt-0">
+                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0">
                     Back to list
                   </GradiantButton>
                 </div>
 
-                <div className="flex sm:flex-row justify-between items-start sm:items-center">
-                  <div className="flex items-center justify-between flex-wrap bg-gray-100 rounded-[4px] overflow-hidden mb-4 sm:mb-0">
-
+                <div className="flex flex-row justify-between items-center w-full gap-2 mt-4 sm:mt-0">
+                  <div className="flex bg-gray-100 p-1 rounded-md flex-wrap items-center w-fit justify-start">
                     <button
-                      className="px-4 py-2 text-gray-700 text-sm font-medium border-r 
-                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
-                      onClick={handleprofilebutton}
-                      value={"Profile"}
+                      onClick={() => setProfileButton('Profile')}
+                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'Profile'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
                     >
                       Profile
                     </button>
-
                     <button
-                      className="px-4 py-2 bg-white text-gray-600 text-sm hover:bg-gray-200 
-                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
-                      onClick={handleprofilebutton}
-                      value={"batchs"}
+                      onClick={() => setProfileButton('batchs')}
+                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'batchs'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
                     >
                       Batches
                     </button>
-
                     <button
-                      className="px-4 py-2 text-gray-600 text-sm hover:bg-gray-200 
-                 max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs"
-                      onClick={handleprofilebutton}
-                      value={"records"}
+                      onClick={() => setProfileButton('records')}
+                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'records'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
                     >
                       Records
                     </button>
-
                   </div>
-                  {/* responsive */}
-                  <div className="hidden max-[900px]:hidden max-[1060px]:hidden md:flex flex-wrap items-center gap-3">
-                    <span className="text-sm text-gray-600 max-[900px]:hidden max-[1060px]:hidden ">
+
+                  {/* responsive actions */}
+                  <div className="hidden xl:flex flex-wrap items-center gap-3 ml-auto">
+                    <span className="text-sm text-gray-600">
                       Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
-                    <button className="max-[900px]:hidden max-[1060px]:hidden  bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
+                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
                       Edit
                     </button>
-                    <button className="max-[900px]:hidden max-[1060px]:hidden  bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
-                      <img src={deactivate} alt="Deactivate" />
+                    <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
+                      <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
                       Deactivate
                     </button>
-                    <button className="max-[900px]:hidden max-[1060px]:hidden bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
+                    <button className="bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
                       <RiDeleteBin6Fill /> Delete
                     </button>
                   </div>
 
-                  <div ref={dropdownRef} className="relative max-[900px]:block max-[1060px]:block hidden ml-2">
-                    
+                  {/* responsive 3 dot icon */}
+                  <div ref={dropdownRef} className="relative xl:hidden ml-auto">
                     <button
-                      onClick={() => setOpen(!open)}
-                      className="p-2 rounded-md hover:bg-gray-200"
-                    >
-                      <BsThreeDotsVertical size={20} />
-                    </button>
+                        onClick={() => setOpen(!open)}
+                        className="p-2 rounded-md hover:bg-gray-200 transition-colors"
+                      >
+                        <BsThreeDotsVertical size={20} />
+                      </button>
 
-                    {open && (
-                      <div className="absolute right-0 w-40 bg-white border rounded shadow-lg z-50">
-                        <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                          Edit
-                        </button>
-
-                        <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-                          Deactivate
-                        </button>
-
-                        <button className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 flex items-center gap-2">
-                          <RiDeleteBin6Fill /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      {open && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
+                          {/* Action Buttons */}
+                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors">
+                            Edit
+                          </button>
+                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
+                            <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
+                          </button>
+                          <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
+                            <RiDeleteBin6Fill className="w-4 h-4" /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                 </div>
-                {/* responsive 3 dot icon */}
 
                 {profileButton === "Profile" ? (
                   <ModeratorProfileComponent profileData={profileData} />
                 ) : profileButton === "batchs" ? (
                   <ModeratorBatchesComponent profileData={profileData} />
                 ) : profileButton === "records" ? (
-                  <div>records</div>
+                  <ModeratorRecordComponent />
                 ) : null}
               </div>
             </div>
