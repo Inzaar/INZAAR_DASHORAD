@@ -14,6 +14,13 @@ export const getAllCourses = () => {
     return res;
 }
 
+export const getAdminCourseById = (courseId) => {
+    const res = axiosInstance.get(`/courses/${courseId}`, {
+        withCredentials: true,
+    });
+    return res;
+}
+
 // Fetch complete course detail for the logged-in user
 export const getCourseById = (courseId) => {
     const res = axiosInstance.get(`/enrollments/my-courses/${courseId}`, {

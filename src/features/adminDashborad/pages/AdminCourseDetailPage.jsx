@@ -11,11 +11,28 @@ import {
 import { useParams } from 'react-router-dom';
 import img from '@/assets/images/course.png';
 import Analytics from '@/features/StudentDashboard/components/Analytics';
+import { getAdminCourseById } from '@/api/course';
 
 const AdminCourseDetailPage = () => {
     const { id } = useParams();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [searchType, setSearchType] = useState('NAME');
+    const [courseData, setCourseData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const res = await getAdminCourseById(id);
+                setCourseData(res.data.data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching course details:", error);
+                setLoading(false);
+            }
+        };
+        fetchCourse();
+    }, [id]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -32,14 +49,7 @@ const AdminCourseDetailPage = () => {
         { name: '5', value: 30 },
     ];
 
-    const lectures = Array(8).fill({
-        title: "Quran Recitation",
-        date: "10-Jan-2025",
-        lectureCount: "01 Lectures",
-        duration: "3 Hours, 23 Minutes, 24 Seconds",
-        thumbnail: img, // Use imported image or placeholder
-        id: 1 // In reality, unique IDs
-    }).map((l, i) => ({ ...l, id: i + 1, subtitle: `Lecture ${String(i + 1).padStart(2, '0')}` }));
+    const lectures = courseData?.lectures || [];
 
     const students = [
         { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
@@ -48,6 +58,17 @@ const AdminCourseDetailPage = () => {
         { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
         { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
     ];
+
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center font-sans bg-[#F8F9FA]">
+                <div className="flex flex-col items-center gap-4">
+                     <div className="w-12 h-12 border-4 border-blue-200 border-t-[#6366F1] rounded-full animate-spin"></div>
+                     <p className="text-gray-500 font-medium text-sm">Loading course details...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
@@ -77,8 +98,8 @@ const AdminCourseDetailPage = () => {
                             {/* Header */}
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">Quran Recitation (Tajweed)</h2>
-                                    <p className="text-gray-500 text-[14px]">Learn the art of proper Quranic recitation with Tajweed rules, step-by-step.</p>
+                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{courseData?.title || 'Loading...'}</h2>
+                                    <p className="text-gray-500 text-[14px]">{courseData?.description || ''}</p>
                                 </div>
                                 <div className="flex gap-3">
                                     <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
@@ -109,27 +130,27 @@ const AdminCourseDetailPage = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     {lectures.map((lecture, index) => (
-                                        <div key={lecture.id} className="border border-gray-200 rounded-[12px] p-2 bg-white flex flex-col hover:shadow-md transition-shadow">
+                                        <div key={lecture._id || index} className="border border-gray-200 rounded-[12px] p-2 bg-white flex flex-col hover:shadow-md transition-shadow">
                                             <div className="relative w-full h-[150px] rounded-[8px] overflow-hidden mb-3">
-                                                <img src={lecture.thumbnail} alt={lecture.title} className="w-full h-full object-cover" />
+                                                <img src={lecture.thumbnail || img} alt={lecture.title} className="w-full h-full object-cover" />
                                                 <div className="absolute top-2 left-2 text-white bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded text-[10px]">
-                                                    {lecture.subtitle}
+                                                    Lecture {String(lecture.lectureNo || index + 1).padStart(2, '0')}
                                                 </div>
                                                 <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white p-0.5 shadow-sm">
                                                     <img src="https://via.placeholder.com/32" alt="Instructor" className="w-full h-full rounded-full object-cover" />
                                                 </div>
                                                 <div className="absolute bottom-2 left-2 text-white text-[10px] font-medium drop-shadow-md">
-                                                    Date: {lecture.date}
+                                                    Date: {new Date(lecture.date || lecture.createdAt).toLocaleDateString()}
                                                 </div>
                                             </div>
 
                                             <div className="flex justify-between items-start mb-1 px-1">
-                                                <h4 className="font-bold text-gray-900 text-sm">{lecture.title}</h4>
-                                                <span className="text-[10px] text-gray-400">{lecture.date}</span>
+                                                <h4 className="font-bold text-gray-900 text-sm whitespace-nowrap overflow-hidden text-ellipsis">{lecture.title}</h4>
+                                                <span className="text-[10px] text-gray-400 pl-2">{new Date(lecture.date || lecture.createdAt).toLocaleDateString()}</span>
                                             </div>
 
                                             <p className="text-[10px] text-gray-500 px-1 mb-3">
-                                                {lecture.lectureCount} ({lecture.duration})
+                                                Type: {lecture.type || 'Video'}
                                             </p>
 
                                             <GradiantButton className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto">
