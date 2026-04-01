@@ -66,7 +66,7 @@ function ModeratorProfile({ profileData }) {
   };
 
   return (
-    <form onSubmit={handleSave} className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
+    <form key={user._id ? `profile-form-${user._id}` : 'form'} onSubmit={handleSave} className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
       <div className="w-full mx-auto">
 
         {/* Header */}
