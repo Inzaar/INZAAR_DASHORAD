@@ -247,7 +247,10 @@ const StudentProfilesPage = () => {
                                                             </span>
                                                         </td>
                                                         <td className="py-4 text-center">
-                                                            <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium">
+                                                            <GradiantButton
+                                                                onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                                className="text-[12px] px-4 py-2 rounded shadow-none font-medium text-white"
+                                                            >
                                                                 View Profile
                                                             </GradiantButton>
                                                         </td>

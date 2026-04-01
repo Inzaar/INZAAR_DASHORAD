@@ -3,7 +3,8 @@ import { useState } from "react";
 import { FaIdCard } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 
-function ModeratorProfile({ profileData }) {
+function ModeratorProfile({ profileData, type = 'moderator' }) {
+  const isStudent = type === 'student';
   const user = profileData?.user || {};
 
   return (
@@ -34,12 +35,12 @@ function ModeratorProfile({ profileData }) {
         {/* Flex Form */}
         <div className="w-full mt-[20px] flex flex-wrap gap-[20px]">
 
-          {/* First Name */}
+          {/* First Name / Full Name */}
           <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-1 lg:order-1">
-            <label className="font-medium text-[14px]">First name</label>
+            <label className="font-medium text-[14px]">{isStudent ? "Full Name" : "First name"}</label>
             <input
               type="text"
-              placeholder="Enter first name"
+              placeholder={isStudent ? "Your First Name" : "Enter first name"}
               defaultValue={user.firstname || user.username || ""}
               className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
             />
