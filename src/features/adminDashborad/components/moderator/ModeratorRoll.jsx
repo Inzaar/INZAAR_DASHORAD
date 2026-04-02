@@ -16,56 +16,54 @@ function ModeratorRoll({ profileData, type = 'moderator' }) {
         </label>
       </div>
 
-      <div className="w-full lg:w-full h-auto lg:h-[301px] rounded-[8px] pt-[11px] pr-[4px] pb-[11px] pl-[14px] overflow-y-auto">
-        <div className="w-full flex flex-col gap-[6px]">
-          {/* Role */}
-          <h6 className="text-[12px]">Role:</h6>
-          <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] capitalize">
-            {user.role || "Junior Moderator"}
-          </div>
-
-          {/* System Roll / Assigned Features */}
-          <div className="w-full flex flex-col gap-[6px] mt-1">
-            <h6 className="text-[12px]">System Roll:</h6>
-            {user.assignedFeatures && user.assignedFeatures.length > 0 ? (
-              user.assignedFeatures.map((feature, idx) => (
-                <div key={idx} className="w-full min-h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px]">
-                  <span className="text-[#265CEB] truncate">{feature}</span>
-                </div>
-              ))
-            ) : (
-              <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] text-gray-400 italic text-sm">
-                No active features
-              </div>
-            )}
-          </div>
-
-          {/* Managing Courses — from assignedBatches (scrollable) */}
-          <div className="w-full flex flex-col gap-[4px] mt-1">
-            <h6 className="text-[12px]">Managing Courses:</h6>
-            <div className="w-full max-h-[120px] overflow-y-auto flex flex-col gap-[4px] pr-1">
-              {batchCoursePairs.length > 0 ? (
-                batchCoursePairs.map((pair, idx) => (
-                  <div key={idx} className="w-full min-h-[32px] bg-[#EFF2FF] rounded-[6px] text-[#1A1A1A] flex items-center justify-between px-[10px] shrink-0">
-                    <span className="text-[#265CEB] font-medium text-sm truncate">📘 {pair.courseName}</span>
-                    <span className="text-[10px] text-gray-500 bg-white px-2 py-0.5 rounded ml-2 whitespace-nowrap">{pair.batchName}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="w-full h-[32px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] text-gray-400 italic text-sm">
-                  No courses assigned
-                </div>
-              )}
+      <div className="flex-1 h-auto lg:h-[301px] rounded-[8px] pt-4 pr-[4px] pb-[11px] pl-[14px]">
+        <div className="w-full h-full flex flex-col gap-3">
+          <div>
+            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
+              {isStudent ? "Full Name" : "Role"}
+            </h6>
+            <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] text-sm font-medium">
+              {isStudent ? (user.firstname || user.username || "Muhammad Zain") : (user.role || "Junior Moderator")}
             </div>
           </div>
 
-          {/* Employment Type */}
-          <div className="w-full mt-1">
-            <h6 className="text-[12px]">Employment Type</h6>
-            <select className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A]" defaultValue={user.employmentType || "Full-time"}>
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-            </select>
+          <div className="flex-1 flex flex-col gap-2">
+            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
+              {isStudent ? "Enroll Courses" : "System Roll"}
+            </h6>
+            <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar max-h-[150px]">
+              {isStudent ? (
+                <>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all">
+                      Akhrat Kay Dalail ( Batch - 10 )
+                    </a>
+                  </div>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all">
+                      Akhrat Kay Dalail ( Batch - 10 )
+                    </a>
+                  </div>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all">
+                      Akhrat Kay Dalail ( Batch - 10 )
+                    </a>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#265CEB] text-sm underline decoration-[#265CEB]">Manage Batch-10</a>
+                  </div>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#265CEB] text-sm underline decoration-[#265CEB]">Manage Batch-14</a>
+                  </div>
+                  <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0">
+                    <a href="#" className="text-[#265CEB] text-sm underline decoration-[#265CEB]">Manage Batch-12</a>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {!isStudent && (

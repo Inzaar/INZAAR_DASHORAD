@@ -1,8 +1,6 @@
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import course2 from '../../../../assets/images/course2.png'
-import { PiStudentBold } from "react-icons/pi";
-import { RiShieldUserLine } from "react-icons/ri";
-
+import { IoPersonOutline } from "react-icons/io5";
 function AssignBatches({
     image,
     title,
@@ -11,41 +9,40 @@ function AssignBatches({
     performance,
     batch,
     startDate,
-    endDate,
-    status
+    endDate
 }) {
     return (
-        <div className="w-full max-w-[340px] flex flex-col rounded-2xl shadow-md bg-white p-3">
+        <div className=" w-full flex flex-col rounded-2xl shadow-md bg-white p-3">
             {/* Image */}
             <div className="relative">
                 <img
-                    src={image || course2}
-                    alt={title}
+                    src={course2}
+                    alt="course"
                     className="w-full h-[146px] object-cover rounded-xl"
                 />
 
                 {/* Top Overlay */}
-                <div className="w-[95%] flex justify-between absolute top-2 left-3">
-                    <span className="bg-white/90 text-gray-800 font-bold text-[11px] px-2 py-1 rounded flex items-center gap-1">
-                        <PiStudentBold size={14} className="text-blue-600" />
+                <div className=" text-white w-[95%] h-[27px] flex justify-between absolute top-2 left-3 ">
+                    <div className=' w-[45px] h-[27px] flex items-center '>
+                        <div className='w-[22px] h-[27px]'>
+                            <IoPersonOutline className="text-white" />
+                            <p className="text-[5px]">Students</p>
+                        </div>
                         {students}
-                    </span>
-                    <span className="bg-white/90 text-gray-800 font-bold text-[11px] px-2 py-1 rounded flex items-center gap-1">
-                        <RiShieldUserLine size={14} className="text-purple-600" />
-                        {moderators}
-                    </span>
-                </div>
-
-                {/* Status badge */}
-                {status && (
-                    <div className={`absolute bottom-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold text-white ${status === 'active' ? 'bg-green-500' : status === 'draft' ? 'bg-yellow-500' : 'bg-gray-400'}`}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
                     </div>
-                )}
+                    <div className=' w-[52px] h-[27px] flex items-center '>
+                        <div className='w-[29px] h-[27px]'>
+                            <IoPersonOutline className="text-white" />
+                            <p className="text-[5px]">Moderator's</p>
+                        </div>
+                        {moderators}
+                    </div>
+                </div>
+                {/*  */}
             </div>
 
             {/* Title */}
-            <h2 className="font-semibold mt-2 truncate">{title}</h2>
+            <h2 className="font-semibold mt-2">{title}</h2>
 
             {/* Info Box */}
             <div className="bg-[#F2F2FF] rounded-xl p-3 mt-2 flex justify-between text-sm">

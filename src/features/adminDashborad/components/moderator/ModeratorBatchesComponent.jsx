@@ -7,27 +7,26 @@ import { useState } from "react";
 import Modal from "@/components/shared/Modal";
 import BatchList from "./BatchList";
 
-function ModeratorBatchesComponent({ profileData }) {
+function ModeratorBatchesComponent() {
     const [showBatchModal, setShowBatchModal] = useState(false);
-    const user = profileData?.user || {};
-    const assignedBatches = user.assignedBatches || [];
 
     return (
         <div >
             {/* Top Section: Roll + Session */}
             <div className="mt-[20px] w-full">
                 <div className="sm:flex-row lg:flex  gap-[16px]">
-                    <ModeratorRoll profileData={profileData} />
-                    <SessionActivity profileData={profileData} />
+                    <ModeratorRoll />
+                    <SessionActivity />
+
                 </div>
             </div>
 
             {/* Batches Cards Section */}
             <div className="mt-[12px] w-full ">
-                <div className="w-full rounded-[10px]">
-                    <div className="w-full">
+                <div className="w-full h-[488px] rounded-[10px] flex items-center justify-center ">
+                    <div className="w-full h-[440px]  ">
                         {/* heading */}
-                        <div className="w-full h-[40px] flex justify-between items-center pt-[24px] pr-[14px] pb-[24px] pl-[14px]">
+                        <div className="w-full h-[40px] flex justify-between items-center pt-[24px] pr-[14px] pb-[24px] pl-[14px] top-[544px] left-[300px] ">
                             <h3 className="">Assigned Batches</h3>
                             <GradiantButton
                                 onClick={() => setShowBatchModal(true)}
@@ -35,34 +34,63 @@ function ModeratorBatchesComponent({ profileData }) {
                             >
                                 Assign new batch
                             </GradiantButton>
-                        </div>
 
-                        {/* cards - scrollable grid */}
-                        <div className='w-full mt-[20px] max-h-[480px] overflow-y-auto pr-2 pb-4'>
-                            {assignedBatches.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                                    {assignedBatches.map((batch) => (
-                                        <AssignBatches
-                                            key={batch._id}
-                                            image={batch.courseId?.thumbnail || course2}
-                                            title={batch.courseId?.title || "Unknown Course"}
-                                            students={batch.limit || "N/A"}
-                                            moderators="01"
-                                            performance="N/A"
-                                            batch={batch.name || "N/A"}
-                                            startDate={batch.startDate ? new Date(batch.startDate).toLocaleDateString() : "N/A"}
-                                            endDate={batch.endDate ? new Date(batch.endDate).toLocaleDateString() : "N/A"}
-                                            status={batch.status}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="w-full py-10 text-center text-gray-400 italic">
-                                    No batches assigned to this moderator yet.
-                                </div>
-                            )}
+                        </div>
+                        {/* card */}
+                        <div className='w-full mt-[20px] flex gap-5 items-center   overflow-x-auto lg:overflow-visible'>
+                            {/* <div className="flex gap-5 bg-yellow-300"> */}
+
+                            <AssignBatches image={course2}
+                                title="Stress Management Course"
+                                students="55"
+                                moderators="02"
+                                performance="88%"
+                                batch="S-25-01"
+                                startDate="01/01/2025"
+                                endDate="01/03/2025"
+                            />
+
+                            <AssignBatches
+                                image={course2}
+                                title="Stress Management Course"
+                                students="40"
+                                moderators="05"
+                                performance="92%"
+                                batch="S-25-02"
+                                startDate="02/01/2025"
+                                endDate="02/03/2025"
+                            />
+
+                            <AssignBatches
+                                image={course2}
+                                title="Stress Management Course"
+                                students="70"
+                                moderators="03"
+                                performance="80%"
+                                batch="S-25-03"
+                                startDate="03/01/2025"
+                                endDate="03/03/2025"
+                            />
+
+                            {/* </div> */}
+
                         </div>
                     </div>
+                </div>
+
+                <div className="flex justify-end items-center gap-2 mt-8">
+                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                        Previous
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
+                    <button className="w-8 h-8 flex items-center justify-center text-sm font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
+                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
+                    <span className="text-gray-400">...</span>
+                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
+                        Next
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                    </button>
                 </div>
             </div>
 
@@ -71,6 +99,7 @@ function ModeratorBatchesComponent({ profileData }) {
                 <BatchList onClose={() => setShowBatchModal(false)} />
             </Modal>
         </div>
+
     )
 }
 

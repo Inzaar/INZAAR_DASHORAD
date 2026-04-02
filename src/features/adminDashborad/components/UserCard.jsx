@@ -5,6 +5,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 const UserCard = ({
     name = "Mudassar",
     // id = "635261",
+    id= user._id,
     image = "https://randomuser.me/api/portraits/men/32.jpg",
     performance = "88%",
     joiningDate = "7/10/2025",
@@ -67,7 +68,7 @@ const UserCard = ({
                     onClick={onViewClick}
                     className="bg-gradient-to-r from-[#5B4DFF] to-[#8F85FF] text-white font-semibold py-2 px-10 rounded-lg shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all"
                 >
-                    View Details
+                    View
                 </GradiantButton>
             </div>
         </div>
