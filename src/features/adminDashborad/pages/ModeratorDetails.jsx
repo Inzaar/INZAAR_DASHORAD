@@ -166,11 +166,11 @@ const ModeratorDetails = () => {
           >
             <div className="py-4 pr-2">
               <div className="bg-white shadow rounded-lg p-4">
-                <div className=" flex sm:flex-row justify-between items-start sm:items-center mb-4">
+                <div className="hidden md:flex justify-between items-center mb-4">
                   <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm mt-2 sm:mt-0">
+                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0">
                     Back to list
                   </GradiantButton>
                 </div>
@@ -216,9 +216,29 @@ const ModeratorDetails = () => {
                       {isActive ? "Deactivate" : "Activate"}
                     </button>
                     <button
-                      onClick={openDeleteDialog}
-                      className="bg-[#ED3A3A] hover:bg-red-600 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]"
+                      onClick={() => setProfileButton('records')}
+                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'records'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
                     >
+                      Records
+                    </button>
+                  </div>
+
+                  {/* responsive actions */}
+                  <div className="hidden xl:flex flex-wrap items-center gap-3 ml-auto">
+                    <span className="text-sm text-gray-600">
+                      Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
+                    </span>
+                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
+                      Edit
+                    </button>
+                    <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
+                      <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
+                      Deactivate
+                    </button>
+                    <button className="bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
                       <RiDeleteBin6Fill /> Delete
                     </button>
                   </div>
@@ -262,7 +282,7 @@ const ModeratorDetails = () => {
                 ) : profileButton === "batchs" ? (
                   <ModeratorBatchesComponent profileData={profileData} />
                 ) : profileButton === "records" ? (
-                  <div>records</div>
+                  <ModeratorRecordComponent />
                 ) : null}
               </div>
             </div>

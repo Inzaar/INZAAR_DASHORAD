@@ -1,21 +1,16 @@
 import React from "react";
 import Profileimg from "@/assets/images/course.png";
-
-function ModeratorRoll({ profileData }) {
+// import moderatorroll from "../../../../assets/icons/moderatorroll.jpg";
+function ModeratorRoll({ profileData, type = 'moderator' }) {
   const user = profileData?.user || {};
-  const assignedBatches = user.assignedBatches || [];
-
-  // Extract batch-course pairs (with batch name) from assigned batches
-  const batchCoursePairs = assignedBatches
-    .filter(b => b.courseId && b.courseId.title)
-    .map(b => ({ courseName: b.courseId.title, batchName: b.name || 'N/A' }));
+  const isStudent = type === 'student';
 
   return (
     <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border rounded-[8px] pr-[10px] pl-[20px] flex lg:flex-row max-[620px]:flex-col bg-white">
-      <div className="w-full lg:w-[230px] h-auto lg:h-[301px] pt-[10px] pb-[10px] gap-[8px] flex flex-col items-center shrink-0">
-        <h3 className="text-center text-[12px]">PROFILE IMAGE</h3>
-        <img src={user.profileImageUrl || Profileimg} className="w-full h-[236px] object-cover rounded-[10px]" />
-        <label className="text-blue-600 text-sm cursor-pointer text-center block mt-[2px]">
+      <div className="w-full lg:w-[230px] h-auto lg:h-[301px] pt-[10px] pb-[10px] gap-[8px] flex flex-col items-center">
+        <h3 className="text-center text-[12px] font-medium text-gray-500 uppercase tracking-wider">PROFILE IMAGE</h3>
+        <img src={Profileimg} className="w-full h-[236px] object-cover rounded-[10px] border border-gray-100" />
+        <label className="text-blue-600 text-sm font-semibold cursor-pointer text-center block mt-[2px] hover:underline transition-all">
           Choose Profile Image
           <input type="file" className="hidden" />
         </label>
@@ -72,6 +67,16 @@ function ModeratorRoll({ profileData }) {
               <option value="Part-time">Part-time</option>
             </select>
           </div>
+
+          {!isStudent && (
+            <div className="mt-auto">
+              <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">Employment Type</h6>
+              <select className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] text-sm font-medium outline-none border-none">
+                <option>Full-time</option>
+                <option>Part-time</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
     </div>
