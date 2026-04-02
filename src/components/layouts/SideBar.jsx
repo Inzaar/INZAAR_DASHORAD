@@ -49,11 +49,11 @@ function Sidebar({ className, onClose }) {
     '/logout': 'Logout'
   };
 
-  // Sync state with URL whenever the route changes
   useEffect(() => {
-    const currentName = pathToName[location.pathname];
-    if (currentName) {
-      setActiveItem(currentName);
+    // Find a matching path that the current location starts with (so details pages match their parent)
+    const matchingPath = Object.keys(pathToName).find(path => location.pathname.startsWith(path));
+    if (matchingPath) {
+      setActiveItem(pathToName[matchingPath]);
     }
   }, [location.pathname]);
 

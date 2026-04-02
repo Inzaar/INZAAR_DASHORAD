@@ -3,15 +3,15 @@ import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfileById } from "@/api/user";
+import { getUserProfileById, deleteUser, deactivateUser } from "@/api/user";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { RiDeleteBin6Fill } from "react-icons/ri";
-import deactivate from "@/assets/images/deactivate.png";
-import SessionActivity from "@/components/shared/SessionActivity";
+import deactivateImg from "@/assets/images/deactivate.png";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
-import ModeratorRecordComponent from "../components/moderator/ModeratorRecordComponent";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import toast from "react-hot-toast";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,26 +23,32 @@ const ModeratorDetails = () => {
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
   const dropdownRef = useRef(null);
-  // ✅ outside click close
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, type: "", loading: false });
+
+  // Tab config
+  const tabs = [
+    { label: "Profile", value: "Profile" },
+    { label: "Batches", value: "batchs" },
+    { label: "Records", value: "records" },
+  ];
+
+  // Outside click close
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         setLoading(true);
         const res = await getUserProfileById(id);
         if (res?.data) {
-          // setProfileData(res.data);
           setProfileData({ user: res.data });
         }
       } catch (error) {
@@ -51,26 +57,85 @@ const ModeratorDetails = () => {
         setLoading(false);
       }
     };
-    if (id) {
-      fetchProfileData();
-    }
-
-    // if (id) {
-    //   fetchProfileData();
-    // }
+    if (id) fetchProfileData();
   }, [id]);
 
-  const handleprofilebutton = (e) => {
-    setProfileButton(e.target.value);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  // ─── Action Handlers ───────────────────────────────
+  const handleEdit = () => {
+    setProfileButton("Profile");
+    toast.success("You can now edit the profile fields below and click Save.");
   };
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const openDeactivateDialog = () => {
+    const currentStatus = profileData?.user?.isActive;
+    setConfirmDialog({
+      isOpen: true,
+      type: "deactivate",
+      loading: false,
+      title: currentStatus ? "Deactivate Moderator" : "Activate Moderator",
+      message: currentStatus
+        ? `Are you sure you want to deactivate ${profileData?.user?.firstname || "this moderator"}? They will lose access to all assigned batches and features.`
+        : `Are you sure you want to reactivate ${profileData?.user?.firstname || "this moderator"}? They will regain access to their assigned batches.`,
+      dialogType: currentStatus ? "warning" : "info",
+      confirmText: currentStatus ? "Yes, Deactivate" : "Yes, Activate",
+    });
+  };
+
+  const openDeleteDialog = () => {
+    setConfirmDialog({
+      isOpen: true,
+      type: "delete",
+      loading: false,
+      title: "Delete Moderator",
+      message: `This will permanently remove ${profileData?.user?.firstname || "this moderator"} and all associated data. This action cannot be undone.`,
+      dialogType: "danger",
+      confirmText: "Yes, Delete",
+    });
+  };
+
+  const closeDialog = () => setConfirmDialog({ isOpen: false, type: "", loading: false });
+
+  const handleConfirmAction = async () => {
+    setConfirmDialog(prev => ({ ...prev, loading: true }));
+
+    if (confirmDialog.type === "deactivate") {
+      const currentStatus = profileData?.user?.isActive;
+      const toastId = toast.loading(`${currentStatus ? "Deactivating" : "Activating"} moderator...`);
+      try {
+        await deactivateUser(id, !currentStatus);
+        const res = await getUserProfileById(id);
+        if (res?.data) setProfileData({ user: res.data });
+        toast.success(`Moderator ${currentStatus ? "deactivated" : "activated"} successfully!`, { id: toastId });
+      } catch (error) {
+        console.error("Deactivate error:", error);
+        toast.error(error?.response?.data?.message || "Action failed", { id: toastId });
+      }
+    }
+
+    if (confirmDialog.type === "delete") {
+      const toastId = toast.loading("Deleting moderator...");
+      try {
+        await deleteUser(id);
+        toast.success("Moderator deleted successfully!", { id: toastId });
+        closeDialog();
+        navigate("/admin-moderators");
+        return;
+      } catch (error) {
+        console.error("Delete error:", error);
+        toast.error(error?.response?.data?.message || "Failed to delete moderator", { id: toastId });
+      }
+    }
+
+    closeDialog();
+  };
 
   if (!user) {
     navigate("/login");
   }
 
-
+  const isActive = profileData?.user?.isActive;
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
@@ -94,7 +159,7 @@ const ModeratorDetails = () => {
               ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
             `}
           />
-          {/* responsive */}
+
           <main
             className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide"
             style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
@@ -110,25 +175,45 @@ const ModeratorDetails = () => {
                   </GradiantButton>
                 </div>
 
-                <div className="flex flex-row justify-between items-center w-full gap-2 mt-4 sm:mt-0">
-                  <div className="flex bg-gray-100 p-1 rounded-md flex-wrap items-center w-fit justify-start">
+                <div className="flex sm:flex-row justify-between items-start sm:items-center">
+                  {/* Tab buttons with active styling */}
+                  <div className="flex items-center flex-wrap bg-gray-100 rounded-[4px] overflow-hidden mb-4 sm:mb-0">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.value}
+                        className={`px-4 py-2 text-sm font-medium transition-all duration-200
+                          max-[430px]:px-2 max-[430px]:py-1 max-[293px]:px-1 max-[293px]:py-1 max-[430px]:text-xs
+                          ${profileButton === tab.value
+                            ? "bg-white text-gray-800 shadow-sm"
+                            : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                          }`}
+                        onClick={() => setProfileButton(tab.value)}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Desktop action buttons */}
+                  <div className="hidden min-[1060px]:flex flex-wrap items-center gap-3">
+                    <span className="text-sm text-gray-600">
+                      Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
+                    </span>
                     <button
-                      onClick={() => setProfileButton('Profile')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'Profile'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                        }`}
+                      onClick={handleEdit}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition"
                     >
-                      Profile
+                      Edit
                     </button>
                     <button
-                      onClick={() => setProfileButton('batchs')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'batchs'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                      onClick={openDeactivateDialog}
+                      className={`px-4 py-2 rounded-[4px] text-sm transition flex items-center gap-[4px] ${isActive
+                        ? "bg-[#B1B1B1] hover:bg-[#999] text-white"
+                        : "bg-green-500 hover:bg-green-600 text-white"
                         }`}
                     >
-                      Batches
+                      <img src={deactivateImg} alt="" className="w-4 h-4" />
+                      {isActive ? "Deactivate" : "Activate"}
                     </button>
                     <button
                       onClick={() => setProfileButton('records')}
@@ -158,30 +243,38 @@ const ModeratorDetails = () => {
                     </button>
                   </div>
 
-                  {/* responsive 3 dot icon */}
-                  <div ref={dropdownRef} className="relative xl:hidden ml-auto">
+                  {/* Mobile dropdown */}
+                  <div ref={dropdownRef} className="relative min-[1060px]:hidden ml-2">
                     <button
-                        onClick={() => setOpen(!open)}
-                        className="p-2 rounded-md hover:bg-gray-200 transition-colors"
-                      >
-                        <BsThreeDotsVertical size={20} />
-                      </button>
+                      onClick={() => setOpen(!open)}
+                      className="p-2 rounded-md hover:bg-gray-200"
+                    >
+                      <BsThreeDotsVertical size={20} />
+                    </button>
 
-                      {open && (
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
-                          {/* Action Buttons */}
-                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors">
-                            Edit
-                          </button>
-                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
-                            <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
-                          </button>
-                          <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                            <RiDeleteBin6Fill className="w-4 h-4" /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    {open && (
+                      <div className="absolute right-0 w-44 bg-white border rounded shadow-lg z-50">
+                        <button
+                          onClick={() => { handleEdit(); setOpen(false); }}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => { openDeactivateDialog(); setOpen(false); }}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          {isActive ? "Deactivate" : "Activate"}
+                        </button>
+                        <button
+                          onClick={() => { openDeleteDialog(); setOpen(false); }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                          <RiDeleteBin6Fill /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {profileButton === "Profile" ? (
@@ -195,6 +288,19 @@ const ModeratorDetails = () => {
             </div>
           </main>
         </div>
+
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={closeDialog}
+          onConfirm={handleConfirmAction}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          type={confirmDialog.dialogType}
+          confirmText={confirmDialog.confirmText}
+          loading={confirmDialog.loading}
+        />
+
         <style
           dangerouslySetInnerHTML={{
             __html: `
