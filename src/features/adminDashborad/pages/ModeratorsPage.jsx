@@ -179,9 +179,10 @@ const ModeratorsPage = () => {
                                                 // id={mod._id.toString().slice(-6).toUpperCase()}
                                                 id=""
                                                 status="online"
+                                                image={mod.profileImageUrl || undefined}
                                                 email={mod.email}
                                                 phone={mod.phone}
-                                                joiningDate={new Date(mod.createdAt).toLocaleDateString()}
+                                                joiningDate={mod.createdAt ? new Date(mod.createdAt).toLocaleDateString() : 'N/A'}
                                                 performance="N/A"
                                                 onViewClick={() => navigate(`/moderator-details/${mod._id}`)}
                                             />
