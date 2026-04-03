@@ -5,6 +5,7 @@ const OverviewCard = ({
     className,
     userCourses,
     statsOverride,  // optional: { col1, col2, col3 } each { value, label, color }
+    showCircles = false, // Add this prop
 }) => {
 
     const formatTimeSpent = (minutes) => {
@@ -25,6 +26,32 @@ const OverviewCard = ({
 
     const stats = statsOverride || defaultStats;
 
+    const renderColumn = (col, isLast = false) => (
+        <div className={cn("flex flex-1 items-center gap-4", !isLast && "min-[641px]:pl-8 sm:border-none sm:pl-0")}>
+            <div className="relative flex flex-col items-center">
+                {showCircles && (
+                    <div 
+                        className="w-[6px] h-[6px] rounded-full mb-[-1px] z-10" 
+                        style={{ backgroundColor: col.color }} 
+                    />
+                )}
+                <div className="w-[2px] h-[48px] rounded-full" style={{ backgroundColor: col.color }}></div>
+                {showCircles && (
+                    <div 
+                        className="w-[6px] h-[6px] rounded-full mt-[-1px] z-10" 
+                        style={{ backgroundColor: col.color }} 
+                    />
+                )}
+            </div>
+            <div className="flex flex-col gap-1">
+                <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{col.value}</span>
+                <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }}></div>
+                    <span className="text-[12px] [1270px]:text-sm font-medium" style={{ color: col.color }}>{col.label}</span>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className={cn(
@@ -36,43 +63,11 @@ const OverviewCard = ({
 
             {/* Stats Row */}
             <div className="flex max-[641px]:flex-col max-[641px]:gap-6 max-[641px]:items-start gap-2 items-center justify-between w-full">
-                <div className="flex flex-2  max-[641px]:w-full min-[973px]:flex-1 min-[1255px]:flex-2 max-[641px]:items-start items-center justify-between">
-                    {/* Col 1 */}
-                    <div className="flex items-center gap-4 flex-1">
-                        <div className="w-[2px] h-[48px] rounded-full" style={{ backgroundColor: stats.col1.color }}></div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{stats.col1.value}</span>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.col1.color }}></div>
-                                <span className="text-[11px] [1270px]:text-sm font-medium" style={{ color: stats.col1.color }}>{stats.col1.label}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Col 2 */}
-                    <div className="flex items-center gap-4 flex-1 border-l border-gray-100 min-[641px]:pl-8 sm:border-none sm:pl-0">
-                        <div className="w-[2px] h-[48px] rounded-full" style={{ backgroundColor: stats.col2.color }}></div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{stats.col2.value}</span>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.col2.color }}></div>
-                                <span className="text-[12px] [1270px]:text-sm font-medium" style={{ color: stats.col2.color }}>{stats.col2.label}</span>
-                            </div>
-                        </div>
-                    </div>
+                <div className="flex flex-2 max-[641px]:w-full min-[973px]:flex-1 min-[1255px]:flex-2 max-[641px]:items-start items-center justify-between">
+                    {renderColumn(stats.col1)}
+                    {renderColumn(stats.col2)}
                 </div>
-
-                {/* Col 3 */}
-                <div className="flex flex-1 items-center gap-4 border-l border-gray-100 min-[641px]:pl-8 sm:border-none sm:pl-0">
-                    <div className="w-[2px] h-[48px] rounded-full" style={{ backgroundColor: stats.col3.color }}></div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{stats.col3.value}</span>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.col3.color }}></div>
-                            <span className="text-[12px] [1270px]:text-sm font-medium" style={{ color: stats.col3.color }}>{stats.col3.label}</span>
-                        </div>
-                    </div>
-                </div>
+                {renderColumn(stats.col3, true)}
             </div>
         </div>
     );

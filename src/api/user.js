@@ -28,3 +28,10 @@ export const updateUser = async (id, data) => {
     });
     return res.data;
 };
+export const getModeratorStudents = async (id, courseTitle, page = 1, limit = 5) => {
+    const res = await axiosInstance.get(`/users/${id}/students`, {
+        params: { courseTitle, page, limit },
+        withCredentials: true,
+    });
+    return res.data;
+};
