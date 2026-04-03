@@ -3,7 +3,7 @@ import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageI
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { createCourseWithLectures, uploadImage } from '@/api/course';
+import { createCourseWithLectures, createCourse, uploadImage } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
@@ -78,6 +78,7 @@ const AddCoursePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [courseId, setCourseId] = useState(null); // populated when draft auto-saved on Step 2
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [showCropper, setShowCropper] = useState(false);
@@ -215,17 +216,63 @@ const AddCoursePage = () => {
         }
     };
 
-    const handleQuizComplete = (quizData) => {
+    const handleQuizComplete = ({ _id, title }) => {
         setCourseItems(prev => [
             ...prev,
             {
                 id: Date.now(),
-                title: quizData.title,
+                title,
                 type: 'Quiz',
                 lectureNo: prev.length + 1,
+                quizId: _id,
             }
         ]);
         setShowQuizFlow(false);
+    };
+
+    // Auto-save course as draft to get a real courseId before quiz creation
+    const handleAdvanceToStep2 = async () => {
+        if (courseId) {
+            // Already saved — just advance
+            setCurrentStep(2);
+            return;
+        }
+        if (!courseForm.title.trim()) {
+            setSubmitError('Please enter a course title before adding content.');
+            return;
+        }
+        setIsSubmitting(true);
+        setSubmitError('');
+        try {
+            const payload = {
+                title: courseForm.title,
+                instructor: courseForm.instructor || '',
+                addBy: user?.name || user?.firstname || 'Admin',
+                batchStrength: Number(courseForm.batchStrength) || 0,
+                totalLectures: Number(courseForm.totalLectures) || 0,
+                certificateCriteria: Number(courseForm.certificateCriteria) || 0,
+                unlockCriteria: Number(courseForm.unlockCriteria) || 0,
+                duration: courseForm.duration || '',
+                releaseDate: courseForm.releaseDate || new Date().toISOString(),
+                thumbnail: courseForm.thumbnail || '',
+                certificateFile: courseForm.certificateFile || '',
+                status: 'draft',
+            };
+            const res = await createCourse(payload);
+            console.log('[AddCoursePage] Draft save response:', res);
+            // res = { statusCode, data: courseDoc, message } (from ApiResponse)
+            const savedId = res?.data?._id    // ApiResponse.data._id
+                || res?.data?.data?._id       // nested wrapper fallback
+                || res?._id;                  // bare object fallback
+            console.log('[AddCoursePage] Extracted courseId:', savedId);
+            if (savedId) setCourseId(savedId);
+            setCurrentStep(2);
+        } catch (err) {
+            console.error('Draft save error:', err);
+            setSubmitError(err?.response?.data?.message || 'Failed to save draft. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     /* ── Submit to API ── */
@@ -279,6 +326,7 @@ const AddCoursePage = () => {
                     <div className="mx-auto flex flex-col min-h-full overflow-hidden">
                         {showQuizFlow ? (
                             <CreateQuiz
+                                courseId={courseId}
                                 onBackToSelection={() => {
                                     setShowQuizFlow(false);
                                     setModalStep('select-type');
@@ -684,7 +732,11 @@ const AddCoursePage = () => {
                                             Save as draft
                                         </button>
                                         <GradiantButton
-                                            onClick={() => currentStep < 3 ? setCurrentStep(currentStep + 1) : handleSubmit('published')}
+                                            onClick={() => {
+                                                if (currentStep === 1) handleAdvanceToStep2();
+                                                else if (currentStep === 2) setCurrentStep(3);
+                                                else handleSubmit('published');
+                                            }}
                                             disabled={isSubmitting}
                                             className="px-12 py-3.5 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70"
                                         >
