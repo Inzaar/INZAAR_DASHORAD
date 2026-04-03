@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { TfiArrowTopRight } from "react-icons/tfi";
+import { cn } from '@/lib/utils';
 
 
 const StatsCard = ({
@@ -8,12 +9,19 @@ const StatsCard = ({
     value = "150",
     trend = "2.4%",
     trendDirection = "up",
-    trendText = "vs last month"
+    trendText = "vs last month",
+    onClick
 }) => {
     const isUp = trendDirection === 'up';
 
     return (
-        <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 w-[262px] h-[125px] flex flex-col justify-between overflow-hidden font-sans">
+        <div 
+            onClick={onClick}
+            className={cn(
+                "bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 w-full h-[125px] flex flex-col justify-between overflow-hidden font-sans transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95",
+                onClick && "cursor-pointer"
+            )}
+        >
             <div className="flex justify-between items-start">
                 <h3 className="text-[13px] font-bold text-gray-900 line-clamp-1 truncate">{title}</h3>
                 <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 shrink-0">
