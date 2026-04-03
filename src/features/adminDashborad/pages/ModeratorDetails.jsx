@@ -189,7 +189,7 @@ const ModeratorDetails = () => {
                 ) : profileButton === "batchs" ? (
                   <ModeratorBatchesComponent profileData={profileData} />
                 ) : profileButton === "records" ? (
-                  <ModeratorRecordComponent />
+                  <ModeratorRecordComponent profileData={profileData} />
                 ) : null}
               </div>
             </div>
