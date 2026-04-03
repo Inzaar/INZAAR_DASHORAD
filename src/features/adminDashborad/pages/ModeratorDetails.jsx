@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getUserProfileById } from "@/api/user";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
@@ -16,10 +16,11 @@ import ModeratorRecordComponent from "../components/moderator/ModeratorRecordCom
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { id } = useParams();
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { user } = useAuth();
+  const [profileData, setProfileData] = useState(state?.moderator ? { user: state.moderator } : null);
+  const [loading, setLoading] = useState(!state?.moderator);
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
   const dropdownRef = useRef(null);
@@ -42,8 +43,8 @@ const ModeratorDetails = () => {
         setLoading(true);
         const res = await getUserProfileById(id);
         if (res?.data) {
-          // setProfileData(res.data);
-          setProfileData({ user: res.data });
+          // res.data is expected to be { user, assignedBatches, stats, etc. }
+          setProfileData(res.data);
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -54,10 +55,6 @@ const ModeratorDetails = () => {
     if (id) {
       fetchProfileData();
     }
-
-    // if (id) {
-    //   fetchProfileData();
-    // }
   }, [id]);
 
   const handleprofilebutton = (e) => {
@@ -105,7 +102,10 @@ const ModeratorDetails = () => {
                   <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-                  <GradiantButton className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0">
+                  <GradiantButton 
+                    onClick={() => navigate('/admin-moderators')}
+                    className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0"
+                  >
                     Back to list
                   </GradiantButton>
                 </div>

@@ -6,69 +6,62 @@ import StatsCard from '../components/StatsCard';
 import { Search, Plus } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers } from '@/api/user';
-import { getAllEnrollments } from '@/api/enrollment';
+import { getStudentProfiles } from '@/api/user';
 
 const StudentProfilesPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
     const [students, setStudents] = useState([]);
+    const [statsData, setStatsData] = useState({
+        totalRegistered: 0,
+        active: 0,
+        inactive: 0,
+        pending: 0
+    });
+    
+    // Pagination & Loading
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const fetchStudentsData = async () => {
+        try {
+            setIsLoading(true);
+            const res = await getStudentProfiles(currentPage, 5, searchText, statusFilter);
+            if (res?.data) {
+                setStudents(res.data.students || []);
+                setTotalPages(res.data.totalPages || 1);
+                setStatsData(res.data.stats || statsData);
+            }
+        } catch (error) {
+            console.error("Failed to fetch students data:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
-        const fetchStudentsData = async () => {
-            try {
-                const [usersRes, enrollmentsRes] = await Promise.all([
-                    getAllUsers(),
-                    getAllEnrollments()
-                ]);
-
-                if (usersRes?.data && enrollmentsRes?.data) {
-                    const studentUsers = usersRes.data.filter(u => u.role === 'user');
-                    const allEnrollments = enrollmentsRes.data;
-
-                    const formattedStudents = studentUsers.map(user => {
-                        const userEnrollments = allEnrollments.filter(e => e.userId && e.userId._id === user._id);
-
-                        const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
-
-                        let totalProgress = 0;
-                        if (userEnrollments.length > 0) {
-                            const completedCount = userEnrollments.filter(e => e.isCompleted).length;
-                            totalProgress = Math.round((completedCount / userEnrollments.length) * 100);
-                        }
-
-                        return {
-                            id: user._id,
-                            name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username,
-                            email: user.email,
-                            phone: user.phone || "N/A",
-                            enrollments: enrolledCourseNames,
-                            progress: `${totalProgress}%`,
-                            lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(),
-                            status: "Active"
-                        };
-                    });
-
-                    setStudents(formattedStudents);
-                }
-            } catch (error) {
-                console.error("Failed to fetch students data:", error);
-            }
-        };
-
         fetchStudentsData();
-    }, []);
+    }, [currentPage, statusFilter]);
+    
+    // Handle manual search trigger (if search icon or enter pressed)
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            setCurrentPage(1);
+            fetchStudentsData();
+        }
+    };
 
     const stats = [
-        { title: "Total Registered Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Students", value: "0", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Pending Students", value: "0", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Total Registered Students", value: statsData.totalRegistered.toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Students", value: statsData.active.toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Students", value: statsData.inactive.toString(), trend: "- 2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Pending Students", value: statsData.pending.toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", isGray: true },
     ];
 
     return (
@@ -133,12 +126,15 @@ const StudentProfilesPage = () => {
                                 <div className="flex flex-col xl:flex-row gap-4 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
-                                        <div className={`flex relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 ${searchType === 'PHONE' ? 'border-gray-200' : 'border-gray-200'}`}>
+                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
                                                 placeholder={`Search by ${searchType.toLowerCase()}`}
                                                 className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                                onKeyDown={handleSearch}
                                             />
                                             <div className="flex items-center p-1 gap-2">
                                                 <button
@@ -159,63 +155,77 @@ const StudentProfilesPage = () => {
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-12" />
-                                        </div>
+                                        <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-12" />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-20" />
-                                        </div>
+                                        <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-20" />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <select className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer">
-                                            <option>Select</option>
-                                            <option>Active</option>
-                                            <option>Inactive</option>
+                                        <select 
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="Active">Active</option>
+                                            <option value="In-active">Inactive</option>
                                         </select>
                                     </div>
 
-                                    <button className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap">
+                                    <button 
+                                        onClick={() => {
+                                            setSearchText("");
+                                            setStatusFilter("");
+                                            setCurrentPage(1);
+                                        }}
+                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                    >
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear Filter
                                     </button>
                                 </div>
 
                                 {/* Students Table */}
-                                <div className="overflow-x-auto">
+                                <div className="overflow-x-auto relative">
+                                    {isLoading && (
+                                        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                                            <div className="w-8 h-8 border-4 border-[#8B5CF6] border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    )}
                                     <table className="w-full min-w-[1000px]">
                                         <thead>
                                             <tr className="border-b border-gray-100">
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">Action</th>
+                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%] uppercase">Name</th>
+                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%] uppercase">Contact</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%] uppercase">Enrollments</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%] uppercase">Progress</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%] uppercase">Last Login</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%] uppercase">Status</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%] uppercase">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {students.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="7" className="py-8 text-center text-gray-500">
-                                                        No students found.
-                                                    </td>
-                                                </tr>
+                                                !isLoading && (
+                                                    <tr>
+                                                        <td colSpan="7" className="py-12 text-center text-gray-500 font-medium">
+                                                            No students found.
+                                                        </td>
+                                                    </tr>
+                                                )
                                             ) : (
                                                 students.map((student) => (
                                                     <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
                                                         <td className="py-4 pl-4">
-                                                            <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
+                                                            <span className="text-[14px] font-bold text-gray-700">{student.name}</span>
                                                         </td>
-                                                        <td className="py-4">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[13px] text-gray-600">{student.email}</span>
+                                                        <td className="py-4 font-sans">
+                                                            <div className="flex flex-col gap-[2px]">
+                                                                <span className="text-[13px] font-medium text-gray-700">{student.email}</span>
                                                                 <span className="text-[13px] text-gray-500">{student.phone}</span>
                                                             </div>
                                                         </td>
@@ -224,32 +234,34 @@ const StudentProfilesPage = () => {
                                                                 {student.enrollments.length === 0 ? (
                                                                     <span className="text-[12px] text-gray-400 italic">No Enrollments</span>
                                                                 ) : (
-                                                                    student.enrollments.map((course, idx) => (
-                                                                        <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                            {course}
-                                                                        </span>
-                                                                    ))
+                                                                    <>
+                                                                        {student.enrollments.slice(0, 3).map((course, idx) => (
+                                                                            <span key={idx} className="text-[12px] text-[#3758EE] underline decoration-blue-100 hover:decoration-blue-500 cursor-pointer transition-all">
+                                                                                {course}
+                                                                            </span>
+                                                                        ))}
+                                                                        {student.enrollments.length > 3 && (
+                                                                            <span className="text-[12px] text-gray-400 font-bold">...</span>
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         </td>
                                                         <td className="py-4 text-center">
-                                                            <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
+                                                            <span className="text-[14px] font-bold text-gray-700">{student.progress}</span>
                                                         </td>
                                                         <td className="py-4 text-center">
                                                             <span className="text-[14px] font-medium text-gray-700">{student.lastLogin}</span>
                                                         </td>
                                                         <td className="py-4 text-center">
-                                                            <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
-                                                                ? 'text-[#00C896]'
-                                                                : 'text-red-500'
-                                                                }`}>
+                                                            <span className={student.status === 'Active' ? 'text-[#00C896] text-[13px] font-bold' : 'text-red-500 text-[13px] font-bold'}>
                                                                 {student.status}
                                                             </span>
                                                         </td>
                                                         <td className="py-4 text-center">
                                                             <GradiantButton
                                                                 onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                                className="text-[12px] px-4 py-2 rounded shadow-none font-medium text-white"
+                                                                className="text-[12px] px-5 py-2 font-bold text-white bg-[#6366F1] hover:bg-blue-700 rounded shadow-none"
                                                             >
                                                                 View Profile
                                                             </GradiantButton>
@@ -263,15 +275,30 @@ const StudentProfilesPage = () => {
 
                                 {/* Pagination */}
                                 <div className="flex justify-end items-center gap-2 mt-8">
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
+                                    <button 
+                                        disabled={currentPage === 1 || isLoading}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                         Previous
                                     </button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
-                                    <span className="text-gray-400">...</span>
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
+
+                                    {[...Array(totalPages)].map((_, i) => (
+                                        <button 
+                                            key={i}
+                                            onClick={() => setCurrentPage(i + 1)}
+                                            className={`w-8 h-8 flex items-center justify-center text-[13px] rounded-lg transition-colors ${currentPage === i+1 ? 'font-bold text-white bg-[#6366F1] shadow-sm' : 'font-medium text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+
+                                    <button 
+                                        disabled={currentPage === totalPages || isLoading}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
                                         Next
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                     </button>
