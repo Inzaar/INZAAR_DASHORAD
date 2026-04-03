@@ -4,10 +4,11 @@ import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getModeratorStudents } from '@/api/user';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ModeratorRecordComponent({ profileData }) {
     const { id } = useParams();
+    const navigate = useNavigate();
     const user = profileData?.user || {};
     const apiStats = user.stats || {};
 
@@ -27,6 +28,7 @@ export default function ModeratorRecordComponent({ profileData }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loadingStudents, setLoadingStudents] = useState(false);
+    const [filteredStats, setFilteredStats] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -48,6 +50,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                 if (res?.data) {
                     setStudents(res.data.students);
                     setTotalPages(res.data.totalPages);
+                    setFilteredStats(res.data.stats);
                 }
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -64,14 +67,14 @@ export default function ModeratorRecordComponent({ profileData }) {
         setCurrentPage(1);
     }, [selectedCourse]);
 
-    // Combine API data with fallback mocks from Image 2
+    // Combine API data with fallback mocks
     const moderatorStats = {
-        totalEnrolled: apiStats.totalEnrolled ?? 55,
-        activeStudents: apiStats.activeStudents ?? 8,
-        inActiveStudents: apiStats.inActiveStudents ?? 2,
-        averageSpendRate: apiStats.averageSpendRate ?? "44%",
-        completionRate: apiStats.completionRate ?? 88,
-        trend: apiStats.improvement ?? "2.7%"
+        totalEnrolled: filteredStats?.totalEnrolled ?? apiStats.totalEnrolled ?? 0,
+        activeStudents: filteredStats?.activeStudents ?? apiStats.activeStudents ?? 0,
+        inActiveStudents: filteredStats?.inActiveStudents ?? apiStats.inActiveStudents ?? 0,
+        averageSpendRate: filteredStats?.averageSpendRate ?? apiStats.averageSpendRate ?? "0%",
+        completionRate: filteredStats?.completionRate ?? apiStats.completionRate ?? 0,
+        trend: filteredStats?.improvement ?? apiStats.improvement ?? "2.7%"
     };
 
     return (
@@ -189,7 +192,10 @@ export default function ModeratorRecordComponent({ profileData }) {
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6 text-center rounded-r-[8px]">
-                                                <GradiantButton className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]">
+                                                <GradiantButton 
+                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                    className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]"
+                                                >
                                                     View Profile
                                                 </GradiantButton>
                                             </td>

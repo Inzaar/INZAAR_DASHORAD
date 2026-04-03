@@ -12,17 +12,31 @@ import {
   PaginationPrevious
 } from '@/components/ui/Pagination';
 import GrayButton from '@/components/ui/buttons/GrayButton';
-import { useQuery } from '@tanstack/react-query';
-import { getAllBatches } from '../../../../api/batch';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getAllBatches, updateBatch } from '../../../../api/batch';
 import { getAllCourses } from '../../../../api/course';
 import { format } from 'date-fns';
+import toast from 'react-hot-toast';
 
-function BatchList({ onClose }) {
+function BatchList({ onClose, moderatorId }) {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [inputValue, setInputValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const ITEMS_PER_PAGE = 4;
+  const queryClient = useQueryClient();
+
+  const assignMutation = useMutation({
+    mutationFn: (batchId) => updateBatch(batchId, { assignedModerator: moderatorId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] }); // Also refresh moderator batches list if needed
+      toast.success('Batch assigned successfully');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to assign batch');
+    }
+  });
 
   const { data: batches = [], isLoading, isError } = useQuery({
     queryKey: ['batches'],
@@ -37,7 +51,9 @@ function BatchList({ onClose }) {
   const courses = coursesResponse?.data?.data || [];
   
   const filteredBatches = batches.filter(batch => {
-    return batch.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = batch.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCourse = selectedCourseId ? batch.courseId?._id === selectedCourseId : true;
+    return matchesSearch && matchesCourse;
   });
 
   const totalPages = Math.ceil(filteredBatches.length / ITEMS_PER_PAGE);
@@ -160,8 +176,13 @@ function BatchList({ onClose }) {
                       {statusLabel}
                     </div>
                     <div className="text-right">
-                      <GradiantButton className={`px-3 sm:px-4 py-1.5 rounded-[4px] text-white text-[11px] sm:text-xs font-semibold ${isActive ? "opacity-100" : "opacity-50"}`}>
-                        Assigned Batch
+                      <GradiantButton 
+                        onClick={() => assignMutation.mutate(batch._id)}
+                        disabled={assignMutation.isPending || batch.assignedModerator?._id === moderatorId}
+                        className={`px-3 sm:px-4 py-1.5 rounded-[4px] text-white text-[11px] sm:text-xs font-semibold ${isActive ? "opacity-100" : "opacity-30"}`}
+                      >
+                        {assignMutation.isPending && assignMutation.variables === batch._id ? "Assigning..." : 
+                         batch.assignedModerator?._id === moderatorId ? "Assigned" : "Assigned Batch"}
                       </GradiantButton>
                     </div>
                   </div>

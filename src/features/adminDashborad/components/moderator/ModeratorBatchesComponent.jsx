@@ -138,7 +138,7 @@ function ModeratorBatchesComponent({ profileData }) {
 
             {/* Batch Modal */}
             <Modal isOpen={showBatchModal} onClose={() => setShowBatchModal(false)}>
-                <BatchList onClose={() => setShowBatchModal(false)} />
+                <BatchList onClose={() => setShowBatchModal(false)} moderatorId={user._id} />
             </Modal>
         </div>
 
