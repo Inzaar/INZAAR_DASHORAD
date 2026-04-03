@@ -27,6 +27,8 @@ import AdminCourseDetailPage from "@/features/adminDashborad/pages/AdminCourseDe
 import CertificateCard from '@/features/courses/components/CertificateCard';
 import ModeratorDetails from '@/features/adminDashborad/pages/ModeratorDetails';
 import StudentDetailsPage from '@/features/adminDashborad/pages/StudentDetailsPage';
+import RegisteredUsersPage from '@/features/adminDashborad/pages/RegisteredUsersPage';
+import RegisteredCoursesPage from '@/features/adminDashborad/pages/RegisteredCoursesPage';
 
 const AppRouter = () => {
     return (
@@ -54,6 +56,8 @@ const AppRouter = () => {
                 <Route path="/admin-course-play" element={<CourseView />} />
                 <Route path="/moderator-details/:id" element={<ModeratorDetails />} />
                 <Route path="/admin/student-details/:id" element={<StudentDetailsPage />} />
+                <Route path="/registered-users" element={<RegisteredUsersPage />} />
+                <Route path="/registered-courses" element={<RegisteredCoursesPage />} />
             </Route>
 
             <Route element={<StudentRoute />}>
