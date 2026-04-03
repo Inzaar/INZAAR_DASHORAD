@@ -3,21 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, Filter, MoreVertical } from 'lucide-react'; // Renamed import to avoid conflict
+import { Search, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, Cell
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import MetricCard from '@/components/shared/MetricCard';
 import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 
-const ReportsPage = () => {
+const CourseReportsPage = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [searchType, setSearchType] = useState('NAME');
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
     const toggleSidebar = () => {
@@ -34,32 +33,13 @@ const ReportsPage = () => {
         { day: 'Sat', value: 5 },
     ];
 
-    // Moderator Performance Data (Bar Chart)
-    const moderatorData = [
-        { name: 'M-1', value: 40 },
-        { name: 'M-2', value: 90 },
-        { name: 'M-3', value: 40 },
-        { name: 'M-4', value: 70 },
-        { name: 'M-5', value: 70 },
-        { name: 'M-6', value: 50 },
-        { name: 'M-7', value: 85 },
-        { name: 'M-2', value: 60 },
-    ];
-
-    // Total Students Mini Bar Chart Data
-    const miniBarData = [
-        { name: '1', value: 10 },
-        { name: '2', value: 30 },
-        { name: '3', value: 20 },
-    ];
-
-    const students = [
-        { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
-        { id: 2, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 3, name: 'Usama', email: 'usama@gmail.com', phone: '0300 123222', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '01-Sep-2025', status: 'In-active' },
-        { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
-        { id: 6, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
+    const moderators = [
+        { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', batches: ['S-24', 'W-24'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
+        { id: 2, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', batches: ['S-24', 'W-24'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
+        { id: 3, name: 'Usama', email: 'usama@gmail.com', phone: '0300 123222', batches: ['S-24', 'W-24'], progress: '40%', lastLogin: '01-Sep-2025', status: 'In-active' },
+        { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', batches: ['S-24', 'W-24'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
+        { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', batches: ['S-24', 'W-24'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
+        { id: 6, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', batches: ['S-24', 'W-24'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
     ];
 
     return (
@@ -89,8 +69,8 @@ const ReportsPage = () => {
                         <div className="py-4 pr-2">
                             {/* Header */}
                             <div className="mb-6">
-                                <h2 className="text-[24px] font-bold text-gray-900 mb-1">Students Reports</h2>
-                                <p className="text-gray-500 text-[16px]">Manage All Your Students Reports</p>
+                                <h2 className="text-[24px] font-bold text-gray-900 mb-1">Courses Reports</h2>
+                                <p className="text-gray-500 text-[16px]">Manage All Your Courses Reports</p>
                             </div>
 
                             {/* Top Filters */}
@@ -145,7 +125,6 @@ const ReportsPage = () => {
                                 {/* Mobile Dropdown Popup */}
                                 {isFilterDropdownOpen && (
                                     <>
-                                        {/* Click-away overlay */}
                                         <div
                                             className="fixed inset-0 z-40"
                                             onClick={() => setIsFilterDropdownOpen(false)}
@@ -183,7 +162,7 @@ const ReportsPage = () => {
                                 <div className="w-full flex flex-col gap-6 justify-between flex-1 min-w-0">
                                     <div className="w-full">
                                         <MetricCard
-                                            title="Total Students"
+                                            title="Total Courses"
                                             value="47"
                                             trendValue="2.7%"
                                             trendLabel="Improvement From last Week"
@@ -195,7 +174,7 @@ const ReportsPage = () => {
                                             className="w-full max-w-full shadow-sm"
                                             statsOverride={{
                                                 col1: { value: "82%", label: "Success Rate", color: "#22C55E" },
-                                                col2: { value: "12%", label: "In-progress", color: "#3758EE" },
+                                                col2: { value: "12", label: "In-progress", color: "#3758EE" },
                                                 col3: { value: "Active", label: "Status", color: "#A855F7" },
                                             }}
                                         />
@@ -221,7 +200,6 @@ const ReportsPage = () => {
                                                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                                                 <Tooltip />
-                                                {/* <Legend /> */}
                                                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }} />
                                             </LineChart>
                                         </ResponsiveContainer>
@@ -232,72 +210,18 @@ const ReportsPage = () => {
                                 <HoursSpentCard name="Moderator Performance" />
                             </div>
 
-                            {/* Students List Table */}
+                            {/* Moderators List Table */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
                                 <div className="mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Students List</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Moderators List</h3>
                                 </div>
 
-                                {/* Filter Bar Reuse */}
-                                {/* <div className="flex flex-col xl:flex-row gap-4 mb-8">
-                                    <div className='flex-1 flex gap-2 flex-col'>
-                                        <div className={`flex relative bg-white border rounded-lg transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 border-gray-200`}>
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                                            <input
-                                                type="text"
-                                                placeholder={`Search by name`}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
-                                            />
-                                            <div className="flex items-center p-1 gap-2">
-                                                <button
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 bg-[#A78BFA] text-white`}
-                                                >
-                                                    PHONE#
-                                                </button>
-                                                <button
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 bg-[#6366F1] text-white`}
-                                                >
-                                                    NAME
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-12" />
-                                            <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-20" />
-                                            <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <select className="pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer min-w-[100px]">
-                                            <option>Select</option>
-                                            <option>Active</option>
-                                            <option>Inactive</option>
-                                        </select>
-                                    </div>
-
-                                    <button className="flex items-center gap-2 px-6 h-[42px] self-end bg-gray-200 text-gray-500 font-bold text-sm rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap">
-                                        <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
-                                    </button>
-                                </div> */}
+                                {/* Filter Bar */}
                                 <div className="flex flex-col xl:flex-row xl:items-end gap-4 mb-8">
                                     {/* Advanced Search */}
                                     <div className='flex-1 flex gap-2 flex-col min-w-0'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
-                                        <div className={`flex flex-col sm:flex-row relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 ${searchType === 'PHONE' ? 'border-gray-200' : 'border-gray-200'}`}>
+                                        <div className={`flex flex-col sm:flex-row relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 border-gray-200`}>
                                             <div className="relative flex-1 w-full sm:w-auto min-w-0">
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                                 <input
@@ -358,7 +282,7 @@ const ReportsPage = () => {
                                             <tr className="border-b border-gray-100">
                                                 <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
                                                 <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
+                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[15%]">Manage Batch's</th>
                                                 <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
                                                 <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
                                                 <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
@@ -366,44 +290,44 @@ const ReportsPage = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
-                                            {students.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                                            {moderators.map((moderator) => (
+                                                <tr key={moderator.id} className="hover:bg-gray-50/50 transition-colors">
                                                     <td className="py-4 pl-4">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
+                                                        <span className="text-[14px] font-medium text-gray-700">{moderator.name}</span>
                                                     </td>
                                                     <td className="py-4">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[13px] text-gray-600">{student.email}</span>
-                                                            <span className="text-[13px] text-gray-500">{student.phone}</span>
+                                                            <span className="text-[13px] text-gray-600">{moderator.email}</span>
+                                                            <span className="text-[13px] text-gray-500">{moderator.phone}</span>
                                                         </div>
                                                     </td>
                                                     <td className="py-4 text-center">
                                                         <div className="flex flex-col gap-1 items-center">
-                                                            {student.enrollments.map((course, idx) => (
+                                                            {moderator.batches.map((batch, idx) => (
                                                                 <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                    {course}
+                                                                    {batch}
                                                                 </span>
                                                             ))}
                                                         </div>
                                                     </td>
                                                     <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
+                                                        <span className="text-[14px] font-medium text-gray-700">{moderator.progress}</span>
                                                     </td>
                                                     <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.lastLogin}</span>
+                                                        <span className="text-[14px] font-medium text-gray-700">{moderator.lastLogin}</span>
                                                     </td>
                                                     <td className="py-4 text-center">
-                                                        <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
+                                                        <span className={`text-[13px] px-2 py-1 rounded-full ${moderator.status === 'Active'
                                                             ? 'text-[#00C896]'
                                                             : 'text-red-500'
                                                             }`}>
-                                                            {student.status}
+                                                            {moderator.status}
                                                         </span>
                                                     </td>
                                                     <td className="py-4 text-center">
                                                         <GradiantButton
                                                             className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]"
-                                                            onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                            onClick={() => navigate(`/admin-course-view/${moderator.id}`)}
                                                         >
                                                             View Profile
                                                         </GradiantButton>
@@ -444,4 +368,4 @@ const ReportsPage = () => {
     );
 };
 
-export default ReportsPage;
+export default CourseReportsPage;
