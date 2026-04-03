@@ -8,19 +8,11 @@ export const getAllUsers = async () => {
 };
 
 export const getUserProfileById = async (id) => {
-    const res = await axiosInstance.get(`/users/${id}`, {  // ✅ use /:id route
+    const res = await axiosInstance.get(`/users/${id}`, {
         withCredentials: true,
     });
     return res.data;
 };
-
-
-// export const getUserProfileById = async (id) => {
-//     const res = await axiosInstance.get(`/users/profile?id=${id}`, {
-//         withCredentials: true,
-//     });
-//     return res.data;
-// };
 
 export const updateUser = async (id, data) => {
     const res = await axiosInstance.patch(`/users/${id}`, data, {
@@ -31,6 +23,21 @@ export const updateUser = async (id, data) => {
 export const getModeratorStudents = async (id, courseTitle, page = 1, limit = 5) => {
     const res = await axiosInstance.get(`/users/${id}/students`, {
         params: { courseTitle, page, limit },
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const getStudentProfiles = async (page = 1, limit = 5, search = "", status = "") => {
+    const res = await axiosInstance.get("/users/students/profiles", {
+        params: { page, limit, search, status },
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const getStudentCourseStats = async (userId, courseId) => {
+    const res = await axiosInstance.get(`/users/${userId}/courses/${courseId}/stats`, {
         withCredentials: true,
     });
     return res.data;
