@@ -13,26 +13,26 @@ const StatsCard = ({
     const isUp = trendDirection === 'up';
 
     return (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 min-w-[240px] font-sans">
-            <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-                <div className="w-10 h-10 rounded-full border border-gray-100 flex pt-1 pr-1 items-center justify-center text-gray-400">
-                    <TfiArrowTopRight size={20} />
+        <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 w-[262px] h-[125px] flex flex-col justify-between overflow-hidden font-sans">
+            <div className="flex justify-between items-start">
+                <h3 className="text-[13px] font-bold text-gray-900 line-clamp-1 truncate">{title}</h3>
+                <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 shrink-0">
+                    <TfiArrowTopRight size={16} />
                 </div>
             </div>
 
-            <div className="text-[30px] font-medium text-[#18181B] mb-4 leading-none">
+            <div className="text-[20px] font-bold text-[#18181B] leading-none my-1">
                 {value}
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-sm mt-auto">
                 <span className={`
-                    px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1
+                    px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-1 shrink-0
                     ${isUp ? 'bg-[#E6F9F4] text-[#00C896]' : 'bg-red-50 text-red-600'}
                 `}>
                     {isUp ? '↑' : '↓'} {trend}
                 </span>
-                <span className="text-gray-500">{trendText}</span>
+                <span className="text-[10px] text-gray-400 font-medium truncate">{trendText}</span>
             </div>
         </div>
     );

@@ -8,6 +8,8 @@ import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import deactivate from "@/assets/images/deactivate.png";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
 import StudentPerformance from "../components/student/StudentPerformance";
+import StudentCourseDashboard from "../components/student/StudentCourseDashboard";
+import StudentCertificates from "../components/student/StudentCertificates";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
 const StudentDetailsPage = () => {
@@ -96,8 +98,8 @@ const StudentDetailsPage = () => {
                                 </div>
 
                                 {/* Tabs and Actions Bar */}
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4 mb-4">
-                                    <div className="hidden lg:flex items-center bg-gray-100 rounded-[4px] p-1 overflow-x-auto no-scrollbar w-full sm:w-auto">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-4 mb-4">
+                                    <div className="hidden md:flex items-center bg-gray-100 rounded-[4px] p-1 w-auto shrink-0">
                                         {tabs.map((tab) => (
                                             <button
                                                 key={tab}
@@ -112,12 +114,12 @@ const StudentDetailsPage = () => {
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                                    <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
                                         <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
                                             Joining: <span className="text-gray-800">10/04/2025</span>
                                         </span>
 
-                                        <div className="hidden lg:flex items-center gap-4">
+                                        <div className="hidden xl:flex items-center gap-4">
                                             <button className="flex items-center gap-2 px-4 py-2 bg-[#B1B1B1] text-white rounded-[4px] text-sm font-medium hover:bg-gray-400 transition-all shadow-sm">
                                                 <img src={deactivate} alt="Deactivate" className="w-4 h-4 object-contain" />
                                                 Deactivate
@@ -132,15 +134,15 @@ const StudentDetailsPage = () => {
                                             </div>
                                         </div>
 
-                                        {/* Mobile 3-dot actions */}
-                                        <div ref={dropdownRef} className="relative lg:hidden">
+                                        {/* 3-dot actions — hidden on xl+ */}
+                                        <div ref={dropdownRef} className="relative xl:hidden">
                                             <button onClick={() => setOpen(!open)} className="p-2 rounded-md hover:bg-gray-100 text-gray-500 transition-colors">
                                                 <BsThreeDotsVertical size={20} />
                                             </button>
                                             {open && (
                                                 <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-xl z-50 p-2 animate-in fade-in zoom-in duration-200 origin-top-right">
-                                                    {/* Navigation Section */}
-                                                    <div className="mb-2 pb-2 border-b border-gray-100">
+                                                    {/* Navigation Section — hidden on md+ since tabs show outside */}
+                                                    <div className="md:hidden mb-2 pb-2 border-b border-gray-100">
                                                         <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Navigation</p>
                                                         {tabs.map((tab) => (
                                                             <button
@@ -182,6 +184,10 @@ const StudentDetailsPage = () => {
                                     <ModeratorProfileComponent profileData={profileData} type="student" />
                                 ) : activeTab === "Performance" ? (
                                     <StudentPerformance profileData={profileData} />
+                                ) : activeTab === "Courses" ? (
+                                    <StudentCourseDashboard profileData={profileData} />
+                                ) : activeTab === "Certificates" ? (
+                                    <StudentCertificates profileData={profileData} />
                                 ) : (
                                     <div className="min-h-[400px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                                         {activeTab} Content (Coming Soon)

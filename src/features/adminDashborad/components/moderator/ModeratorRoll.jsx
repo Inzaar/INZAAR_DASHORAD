@@ -76,6 +76,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
               {isStudent ? (user.firstname || user.username || "Muhammad Zain") : (user.role || "Junior Moderator")}
             </div>
           </div>
+        </div>
 
           <div className="flex-1 flex flex-col gap-2 min-h-0">
             <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
@@ -124,6 +125,16 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
             </div>
           )}
         </div>
+
+        {!isStudent && (
+          <div className="mt-auto shrink-0">
+            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">Employment Type</h6>
+            <select className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] text-sm font-medium outline-none border-none">
+              <option>Full-time</option>
+              <option>Part-time</option>
+            </select>
+          </div>
+        )}
       </div>
     </div>
   );
