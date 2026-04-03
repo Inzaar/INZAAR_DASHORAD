@@ -599,29 +599,31 @@ const CourseView = () => {
                             </div>
 
                             {/* Lecture Notes Section */}
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20">
-                                <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
+                            {user?.role !== 'admin' && (
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20">
+                                    <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
 
-                                <div className="flex flex-col gap-3 mb-6">
-                                    {notes.map(note => (
-                                        <div key={note.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                            <span className="font-mono text-sm font-semibold text-gray-600 mr-2">{note.timestamp} –</span>
-                                            <span className="text-gray-700">{note.text}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                                    <div className="flex flex-col gap-3 mb-6">
+                                        {notes.map(note => (
+                                            <div key={note.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                                <span className="font-mono text-sm font-semibold text-gray-600 mr-2">{note.timestamp} –</span>
+                                                <span className="text-gray-700">{note.text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
 
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        value={newNote}
-                                        onChange={(e) => setNewNote(e.target.value)}
-                                        onKeyDown={handleAddNote}
-                                        placeholder="Add New Notes (Press Enter to save)"
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-700"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={newNote}
+                                            onChange={(e) => setNewNote(e.target.value)}
+                                            onKeyDown={handleAddNote}
+                                            placeholder="Add New Notes (Press Enter to save)"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-700"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <StatusTable userCourses={userCourses} />
                         </div>

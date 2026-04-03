@@ -8,13 +8,14 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar, Cell
 } from 'recharts';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import img from '@/assets/images/course.png';
 import Analytics from '@/features/StudentDashboard/components/Analytics';
 import { getAdminCourseById } from '@/api/course';
 
 const AdminCourseDetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [searchType, setSearchType] = useState('NAME');
     const [courseData, setCourseData] = useState(null);
@@ -63,8 +64,8 @@ const AdminCourseDetailPage = () => {
         return (
             <div className="h-screen w-screen flex items-center justify-center font-sans bg-[#F8F9FA]">
                 <div className="flex flex-col items-center gap-4">
-                     <div className="w-12 h-12 border-4 border-blue-200 border-t-[#6366F1] rounded-full animate-spin"></div>
-                     <p className="text-gray-500 font-medium text-sm">Loading course details...</p>
+                    <div className="w-12 h-12 border-4 border-blue-200 border-t-[#6366F1] rounded-full animate-spin"></div>
+                    <p className="text-gray-500 font-medium text-sm">Loading course details...</p>
                 </div>
             </div>
         )
@@ -153,7 +154,10 @@ const AdminCourseDetailPage = () => {
                                                 Type: {lecture.type || 'Video'}
                                             </p>
 
-                                            <GradiantButton className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto">
+                                            <GradiantButton
+                                                onClick={() => navigate(`/admin-course-play?id=${id}`)}
+                                                className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
+                                            >
                                                 View Details
                                             </GradiantButton>
                                         </div>
