@@ -1,24 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, Filter, MoreVertical } from 'lucide-react'; // Renamed import to avoid conflict
+import { Search, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, Cell
 } from 'recharts';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import MetricCard from '@/components/shared/MetricCard';
 import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
+import axiosInstance from '@/api/axiosInstance';
 
 const ReportsPage = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [searchType, setSearchType] = useState('NAME');
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    // API Data State
+    const [students, setStudents] = useState([]);
+    const [totalStudents, setTotalStudents] = useState({ count: 0, trend: '+2.7%' });
+    const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
+    const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+
+    // Filter State
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterFrom, setFilterFrom] = useState('');
+    const [filterTo, setFilterTo] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Bottom table filters (separate from top)
+    const [tableSearch, setTableSearch] = useState('');
+    const [tableSearchType, setTableSearchType] = useState('NAME');
+    const [tableFrom, setTableFrom] = useState('');
+    const [tableTo, setTableTo] = useState('');
+    const [tableStatus, setTableStatus] = useState('');
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -34,33 +55,123 @@ const ReportsPage = () => {
         { day: 'Sat', value: 5 },
     ];
 
-    // Moderator Performance Data (Bar Chart)
-    const moderatorData = [
-        { name: 'M-1', value: 40 },
-        { name: 'M-2', value: 90 },
-        { name: 'M-3', value: 40 },
-        { name: 'M-4', value: 70 },
-        { name: 'M-5', value: 70 },
-        { name: 'M-6', value: 50 },
-        { name: 'M-7', value: 85 },
-        { name: 'M-2', value: 60 },
-    ];
+    // Fetch report data from API
+    const fetchReport = useCallback(async (page = 1) => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            params.append('page', page);
+            params.append('limit', 5);
 
-    // Total Students Mini Bar Chart Data
-    const miniBarData = [
-        { name: '1', value: 10 },
-        { name: '2', value: 30 },
-        { name: '3', value: 20 },
-    ];
+            // Apply table filters
+            if (tableStatus) params.append('status', tableStatus);
+            if (tableFrom) params.append('from', tableFrom);
+            if (tableTo) params.append('to', tableTo);
+            if (tableSearch.trim()) {
+                params.append('search', tableSearch.trim());
+                params.append('searchType', tableSearchType);
+            }
 
-    const students = [
-        { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
-        { id: 2, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 3, name: 'Usama', email: 'usama@gmail.com', phone: '0300 123222', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '01-Sep-2025', status: 'In-active' },
-        { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
-        { id: 6, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
-    ];
+            const res = await axiosInstance.get(`/admin/reports/students?${params.toString()}`);
+            const data = res.data.data;
+
+            setStudents(data.studentsList || []);
+            setTotalStudents(data.totalStudents || { count: 0, trend: '+2.7%' });
+            setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
+            setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
+            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+        } catch (err) {
+            console.error('Failed to fetch students report:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [tableStatus, tableFrom, tableTo, tableSearch, tableSearchType]);
+
+    // Initial load
+    useEffect(() => {
+        fetchReport(1);
+    }, []);
+
+    // Handle top filter search
+    const handleTopSearch = () => {
+        // Sync top filters to table filters
+        setTableStatus(filterStatus);
+        setTableFrom(filterFrom);
+        setTableTo(filterTo);
+        setTableSearch(searchQuery);
+        setTableSearchType(searchType);
+        setIsFilterDropdownOpen(false);
+        // Fetch will be triggered by fetchReport call below
+        setTimeout(() => fetchReport(1), 0);
+    };
+
+    // Handle top clear filter
+    const handleTopClear = () => {
+        setFilterStatus('');
+        setFilterFrom('');
+        setFilterTo('');
+        setSearchQuery('');
+        setTableStatus('');
+        setTableFrom('');
+        setTableTo('');
+        setTableSearch('');
+        setTimeout(() => fetchReport(1), 0);
+    };
+
+    // Handle table filter search
+    const handleTableSearch = () => {
+        fetchReport(1);
+    };
+
+    // Handle table clear filter
+    const handleTableClear = () => {
+        setTableStatus('');
+        setTableFrom('');
+        setTableTo('');
+        setTableSearch('');
+        setTimeout(() => {
+            fetchReport(1);
+        }, 0);
+    };
+
+    // Handle table clear (uses the ref-less approach)  
+    useEffect(() => {
+        // This runs when table filters change via clear
+    }, [tableStatus, tableFrom, tableTo, tableSearch]);
+
+    // Pagination handler
+    const goToPage = (page) => {
+        if (page >= 1 && page <= pagination.totalPages) {
+            fetchReport(page);
+        }
+    };
+
+    // Format date for display
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const d = new Date(dateStr);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages = [];
+        const total = pagination.totalPages;
+        const current = pagination.page;
+        if (total <= 5) {
+            for (let i = 1; i <= total; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (current > 3) pages.push('...');
+            for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+                pages.push(i);
+            }
+            if (current < total - 2) pages.push('...');
+            pages.push(total);
+        }
+        return pages;
+    };
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
@@ -100,22 +211,37 @@ const ReportsPage = () => {
                                 <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">STATUS</span>
-                                        <select className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                                            <option>Active Students</option>
-                                            <option>Inactive Students</option>
+                                        <select
+                                            value={filterStatus}
+                                            onChange={(e) => setFilterStatus(e.target.value)}
+                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        >
+                                            <option value="">All Students</option>
+                                            <option value="active">Active Students</option>
+                                            <option value="inactive">Inactive Students</option>
                                         </select>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">FROM</span>
                                         <div className="relative w-full">
-                                            <input type="date" className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" defaultValue="2024-04-12" />
+                                            <input
+                                                type="date"
+                                                value={filterFrom}
+                                                onChange={(e) => setFilterFrom(e.target.value)}
+                                                className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                            />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">TO</span>
                                         <div className="relative w-full">
-                                            <input type="date" className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" defaultValue="2024-04-20" />
+                                            <input
+                                                type="date"
+                                                value={filterTo}
+                                                onChange={(e) => setFilterTo(e.target.value)}
+                                                className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                            />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
@@ -123,11 +249,17 @@ const ReportsPage = () => {
 
                                 {/* Shared Search & Clear Buttons */}
                                 <div className="flex gap-2 flex-wrap">
-                                    <GradiantButton className="h-[42px] px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                                    <GradiantButton
+                                        className="h-[42px] px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                                        onClick={handleTopSearch}
+                                    >
                                         <Search className="w-4 h-4" />
                                         Search
                                     </GradiantButton>
-                                    <button className="h-[42px] px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors">
+                                    <button
+                                        className="h-[42px] px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors"
+                                        onClick={handleTopClear}
+                                    >
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear Filter
                                     </button>
@@ -145,7 +277,6 @@ const ReportsPage = () => {
                                 {/* Mobile Dropdown Popup */}
                                 {isFilterDropdownOpen && (
                                     <>
-                                        {/* Click-away overlay */}
                                         <div
                                             className="fixed inset-0 z-40"
                                             onClick={() => setIsFilterDropdownOpen(false)}
@@ -153,22 +284,37 @@ const ReportsPage = () => {
                                         <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">STATUS</span>
-                                                <select className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                                                    <option>Active Students</option>
-                                                    <option>Inactive Students</option>
+                                                <select
+                                                    value={filterStatus}
+                                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="">All Students</option>
+                                                    <option value="active">Active Students</option>
+                                                    <option value="inactive">Inactive Students</option>
                                                 </select>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">FROM</span>
                                                 <div className="relative">
-                                                    <input type="date" className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" defaultValue="2024-04-12" />
+                                                    <input
+                                                        type="date"
+                                                        value={filterFrom}
+                                                        onChange={(e) => setFilterFrom(e.target.value)}
+                                                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                    />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">TO</span>
                                                 <div className="relative">
-                                                    <input type="date" className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" defaultValue="2024-04-20" />
+                                                    <input
+                                                        type="date"
+                                                        value={filterTo}
+                                                        onChange={(e) => setFilterTo(e.target.value)}
+                                                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                    />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
@@ -184,8 +330,8 @@ const ReportsPage = () => {
                                     <div className="w-full">
                                         <MetricCard
                                             title="Total Students"
-                                            value="47"
-                                            trendValue="2.7%"
+                                            value={String(totalStudents.count)}
+                                            trendValue={totalStudents.trend?.replace('+', '') || "2.7%"}
                                             trendLabel="Improvement From last Week"
                                             className="w-full h-[140px]"
                                         />
@@ -194,9 +340,9 @@ const ReportsPage = () => {
                                         <OverviewCard
                                             className="w-full max-w-full shadow-sm"
                                             statsOverride={{
-                                                col1: { value: "82%", label: "Success Rate", color: "#22C55E" },
-                                                col2: { value: "12%", label: "In-progress", color: "#3758EE" },
-                                                col3: { value: "Active", label: "Status", color: "#A855F7" },
+                                                col1: { value: overview.successRate, label: "Success Rate", color: "#22C55E" },
+                                                col2: { value: overview.inProgress, label: "In-progress", color: "#3758EE" },
+                                                col3: { value: overview.activeStatus, label: "Status", color: "#A855F7" },
                                             }}
                                         />
                                     </div>
@@ -204,8 +350,8 @@ const ReportsPage = () => {
                                 <PerformanceCard
                                     className="shadow-sm w-full xl:w-[40%] 2xl:w-[35%] min-w-0"
                                     name="Overall Performance"
-                                    percentageOverride={82}
-                                    trendOverride={5.2}
+                                    percentageOverride={performance.percentage}
+                                    trendOverride={performance.trendingUp}
                                 />
                             </div>
 
@@ -221,7 +367,6 @@ const ReportsPage = () => {
                                                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
                                                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
                                                 <Tooltip />
-                                                {/* <Legend /> */}
                                                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }} />
                                             </LineChart>
                                         </ResponsiveContainer>
@@ -238,84 +383,33 @@ const ReportsPage = () => {
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">Students List</h3>
                                 </div>
 
-                                {/* Filter Bar Reuse */}
-                                {/* <div className="flex flex-col xl:flex-row gap-4 mb-8">
-                                    <div className='flex-1 flex gap-2 flex-col'>
-                                        <div className={`flex relative bg-white border rounded-lg transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 border-gray-200`}>
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                                            <input
-                                                type="text"
-                                                placeholder={`Search by name`}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
-                                            />
-                                            <div className="flex items-center p-1 gap-2">
-                                                <button
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 bg-[#A78BFA] text-white`}
-                                                >
-                                                    PHONE#
-                                                </button>
-                                                <button
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 bg-[#6366F1] text-white`}
-                                                >
-                                                    NAME
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-12" />
-                                            <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <div className="relative">
-                                            <input type="date" className="pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-20" />
-                                            <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <select className="pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer min-w-[100px]">
-                                            <option>Select</option>
-                                            <option>Active</option>
-                                            <option>Inactive</option>
-                                        </select>
-                                    </div>
-
-                                    <button className="flex items-center gap-2 px-6 h-[42px] self-end bg-gray-200 text-gray-500 font-bold text-sm rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap">
-                                        <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
-                                    </button>
-                                </div> */}
+                                {/* Filter Bar */}
                                 <div className="flex flex-col xl:flex-row xl:items-end gap-4 mb-8">
                                     {/* Advanced Search */}
                                     <div className='flex-1 flex gap-2 flex-col min-w-0'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
-                                        <div className={`flex flex-col sm:flex-row relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 ${searchType === 'PHONE' ? 'border-gray-200' : 'border-gray-200'}`}>
+                                        <div className={`flex flex-col sm:flex-row relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 border-gray-200`}>
                                             <div className="relative flex-1 w-full sm:w-auto min-w-0">
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                                 <input
                                                     type="text"
-                                                    placeholder={`Search by ${searchType.toLowerCase()}`}
+                                                    placeholder={`Search by ${tableSearchType.toLowerCase()}`}
+                                                    value={tableSearch}
+                                                    onChange={(e) => setTableSearch(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
                                                     className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 />
                                             </div>
                                             <div className="flex items-center p-2 sm:p-1 gap-2 border-t sm:border-t-0 border-gray-200 justify-center">
                                                 <button
-                                                    onClick={() => setSearchType('PHONE')}
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}
+                                                    onClick={() => setTableSearchType('PHONE')}
+                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                                 >
                                                     PHONE#
                                                 </button>
                                                 <button
-                                                    onClick={() => setSearchType('NAME')}
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}
+                                                    onClick={() => setTableSearchType('NAME')}
+                                                    className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -326,109 +420,171 @@ const ReportsPage = () => {
                                     {/* From */}
                                     <div className="flex flex-col gap-2 shrink-0">
                                         <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-12" />
+                                        <input
+                                            type="date"
+                                            value={tableFrom}
+                                            onChange={(e) => setTableFrom(e.target.value)}
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                        />
                                     </div>
 
                                     {/* To */}
                                     <div className="flex flex-col gap-2 shrink-0">
                                         <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <input type="date" className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" defaultValue="2024-04-20" />
+                                        <input
+                                            type="date"
+                                            value={tableTo}
+                                            onChange={(e) => setTableTo(e.target.value)}
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                        />
                                     </div>
 
                                     {/* Status */}
                                     <div className="flex flex-col gap-2 shrink-0">
                                         <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <select className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer">
-                                            <option>Select</option>
-                                            <option>Active</option>
-                                            <option>Inactive</option>
+                                        <select
+                                            value={tableStatus}
+                                            onChange={(e) => { setTableStatus(e.target.value); }}
+                                            className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
                                         </select>
                                     </div>
 
                                     {/* Clear Filter */}
-                                    <button className="flex items-center justify-center gap-2 px-4 h-10 shrink-0 bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap">
+                                    <button
+                                        className="flex items-center justify-center gap-2 px-4 h-10 shrink-0 bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                        onClick={handleTableClear}
+                                    >
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear Filter
                                     </button>
                                 </div>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full min-w-[1000px]">
-                                        <thead>
-                                            <tr className="border-b border-gray-100">
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-50">
-                                            {students.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="py-4 pl-4">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
-                                                    </td>
-                                                    <td className="py-4">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[13px] text-gray-600">{student.email}</span>
-                                                            <span className="text-[13px] text-gray-500">{student.phone}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <div className="flex flex-col gap-1 items-center">
-                                                            {student.enrollments.map((course, idx) => (
-                                                                <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                    {course}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[14px] font-medium text-gray-700">{student.lastLogin}</span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
-                                                            ? 'text-[#00C896]'
-                                                            : 'text-red-500'
-                                                            }`}>
-                                                            {student.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 text-center">
-                                                        <GradiantButton
-                                                            className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]"
-                                                            onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                        >
-                                                            View Profile
-                                                        </GradiantButton>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-8">
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                        Previous
-                                    </button>
-                                    <div className="flex items-center gap-1">
-                                        <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
-                                        <button className="w-8 h-8 flex items-center justify-center text-sm font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                                        <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
-                                        <span className="text-gray-400">...</span>
+                                {loading ? (
+                                    <div className="flex items-center justify-center py-16">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
+                                        <span className="ml-3 text-gray-500 text-sm">Loading students...</span>
                                     </div>
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        Next
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
-                                </div>
+                                ) : students.length === 0 ? (
+                                    <div className="flex items-center justify-center py-16">
+                                        <span className="text-gray-400 text-sm">No students found</span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full min-w-[1000px]">
+                                                <thead>
+                                                    <tr className="border-b border-gray-100">
+                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
+                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-50">
+                                                    {students.map((student) => (
+                                                        <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                                                            <td className="py-4 pl-4">
+                                                                <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
+                                                            </td>
+                                                            <td className="py-4">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[13px] text-gray-600">{student.email}</span>
+                                                                    <span className="text-[13px] text-gray-500">{student.phone}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-4 text-center">
+                                                                <div className="flex flex-col gap-1 items-center">
+                                                                    {(student.enrollments || []).length > 0 ? (
+                                                                        <>
+                                                                            {student.enrollments.slice(0, 3).map((course, idx) => (
+                                                                                <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
+                                                                                    {course}
+                                                                                </span>
+                                                                            ))}
+                                                                            {student.enrollments.length > 3 && (
+                                                                                <span className="text-[11px] text-gray-400 font-medium mt-0.5">
+                                                                                    + {student.enrollments.length - 3} more
+                                                                                </span>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        <span className="text-[12px] text-gray-400">No enrollments</span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-4 text-center">
+                                                                <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
+                                                            </td>
+                                                            <td className="py-4 text-center">
+                                                                <span className="text-[14px] font-medium text-gray-700">{formatDate(student.lastLogin)}</span>
+                                                            </td>
+                                                            <td className="py-4 text-center">
+                                                                <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
+                                                                    ? 'text-[#00C896]'
+                                                                    : 'text-red-500'
+                                                                    }`}>
+                                                                    {student.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-4 text-center">
+                                                                <GradiantButton
+                                                                    className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]"
+                                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                                >
+                                                                    View Profile
+                                                                </GradiantButton>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {/* Pagination */}
+                                        <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-8">
+                                            <button
+                                                className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                                                disabled={pagination.page <= 1}
+                                                onClick={() => goToPage(pagination.page - 1)}
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                                Previous
+                                            </button>
+                                            <div className="flex items-center gap-1">
+                                                {getPageNumbers().map((p, idx) => (
+                                                    p === '...' ? (
+                                                        <span key={`dot-${idx}`} className="text-gray-400">...</span>
+                                                    ) : (
+                                                        <button
+                                                            key={p}
+                                                            onClick={() => goToPage(p)}
+                                                            className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg ${p === pagination.page
+                                                                ? 'font-bold text-white bg-[#6366F1] shadow-sm'
+                                                                : 'text-gray-600 hover:bg-gray-100'
+                                                                }`}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    )
+                                                ))}
+                                            </div>
+                                            <button
+                                                className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                                                disabled={pagination.page >= pagination.totalPages}
+                                                onClick={() => goToPage(pagination.page + 1)}
+                                            >
+                                                Next
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </main>
