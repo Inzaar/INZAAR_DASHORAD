@@ -6,10 +6,12 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { getCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
+import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
 import { useAuth } from "@/context/AuthContext";
 import { Loader } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
+import AdminLectureList from "../components/AdminLectureList";
+import fallbackImg from "@/assets/images/coursespage.jpg";
 
 const CourseView = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -22,6 +24,7 @@ const CourseView = () => {
 
     const firstName = localStorage.getItem("firstName");
     const courseId = new URLSearchParams(window.location.search).get("id");
+    const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
 
     // Certificate / congrats state
     const [showCongrats, setShowCongrats] = React.useState(false);
@@ -31,6 +34,7 @@ const CourseView = () => {
 
     // Fetch enrolled courses list (for Analytics / StatusTable)
     useEffect(() => {
+        if (user?.role === 'admin') return;
         const fetchUserCourses = async () => {
             try {
                 const res = await getEnrolledCoursesByUserId();
@@ -40,7 +44,7 @@ const CourseView = () => {
             }
         };
         fetchUserCourses();
-    }, []);
+    }, [user?.role]);
 
     // Fetch specific course detail
     useEffect(() => {
@@ -48,14 +52,18 @@ const CourseView = () => {
         const fetchCourse = async () => {
             setLoading(true);
             try {
-                const res = await getCourseById(courseId);
+                const res = user?.role === 'admin' 
+                    ? await getAdminCourseById(courseId)
+                    : await getCourseById(courseId);
                 const data = res.data.data;
                 setCourseData(data);
 
                 // Set the ongoing/first lecture as the playing lecture
                 // IMPORTANT: normalise to always use "id" (not "_id") so the progress
                 // tracker can find it reliably via currentLecture?.id
-                const rawStart = data.ongoingLecture || data.lecturePlaylist?.[0] || null;
+                const allLecs = data.lecturePlaylist || data.lectures || [];
+                const targetLec = targetLectureId ? allLecs.find(l => l._id === targetLectureId || l.id === targetLectureId) : null;
+                const rawStart = targetLec || data.ongoingLecture || allLecs[0] || null;
                 if (rawStart) {
                     setCurrentLecture({
                         ...rawStart,
@@ -109,13 +117,14 @@ const CourseView = () => {
 
     // Build lectures list from API data
     // videoId comes directly from the backend (pre-extracted), fallback to client-side extraction
-    const lectures = courseData?.lecturePlaylist?.map(l => ({
+    const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
+    const lectures = rawLecturesList.map(l => ({
         id: l._id,
         title: l.title,
         lectureNo: l.lectureNo,
         date: l.date,
         videoId: l.videoId || extractYouTubeId(l.videoUrl),  // prefer backend-extracted ID
-        isLocked: l.isLocked,
+        isLocked: user?.role === 'admin' ? false : l.isLocked,
         isCompleted: l.isCompleted,
         videoUrl: l.videoUrl,
         audioUrl: l.audioUrl,
@@ -233,6 +242,7 @@ const CourseView = () => {
                     // Handle both .id (mapped lectures) and ._id (raw API objects)
                     const lectureId = currentLecture?.id || currentLecture?._id;
                     const shouldReport =
+                        user?.role !== 'admin' &&
                         lectureId &&
                         courseId &&
                         percent > 0 &&
@@ -425,17 +435,32 @@ const CourseView = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="py-4 pr-2">
-                            <div className="flex justify-between items-end mb-8">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    {user?.role !== 'admin' && (
+                                        <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    )}
                                 </div>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    Enrolled New Course
-                                </GradiantButton>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    +
-                                </GradiantButton>
+                                {user?.role === 'admin' ? (
+                                    <div className="flex gap-3">
+                                        <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                            Download Certificate
+                                        </GradiantButton>
+                                        <GradiantButton className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                            Edit
+                                        </GradiantButton>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                            Enrolled New Course
+                                        </GradiantButton>
+                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                            +
+                                        </GradiantButton>
+                                    </>
+                                )}
                             </div>
                             <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
                             <div className="relative flex flex-col lg:block gap-6 mt-5">
@@ -462,8 +487,12 @@ const CourseView = () => {
                                                     iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                                                    <p className="text-white/50 text-sm">No video available</p>
+                                                <div className="w-full h-full flex items-center justify-center relative">
+                                                    <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/50"></div>
+                                                    <div className="relative z-10 w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md cursor-pointer hover:scale-110 transition-transform">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -537,46 +566,51 @@ const CourseView = () => {
                                                     ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
                                                 `}
                                                 >
-                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-2">
+                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
                                                         <img
-                                                            src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : `https://placehold.co/600x400/000000/FFF?text=${lecture.title}`}
+                                                            src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
                                                             alt={lecture.title}
                                                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                         />
 
                                                         {/* Overlays */}
-                                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+
+                                                        {/* Title & Info completely overlaying the graphic */}
+                                                        <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                                            <div className="flex justify-between items-start">
+                                                                <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                                                    {lecture.title}
+                                                                </h4>
+                                                            </div>
+                                                            <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                                                Lecture:{String(lecture.lectureNo).padStart(2, '0')}
+                                                            </div>
+                                                            <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                                                Date: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                            </div>
+                                                        </div>
 
                                                         {lecture.isLocked ? (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-                                                                <div className="bg-white/20 p-2 rounded-full backdrop-blur-md">
+                                                            <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                                <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className={`absolute inset-0 flex items-center justify-center ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                <div className="bg-white/90 p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                            <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                                                                 </div>
                                                             </div>
                                                         )}
 
-                                                        <div className="absolute top-2 right-2">
+                                                        <div className="absolute top-2 right-2 z-20">
                                                             <img
                                                                 src="https://randomuser.me/api/portraits/men/32.jpg"
                                                                 alt="Instructor"
-                                                                className="w-8 h-8 rounded-full border border-white shadow-sm"
+                                                                className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
                                                             />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="px-1">
-                                                        <h4 className={`font-bold text-sm mb-1 ${currentLecture?.id === lecture.id ? 'text-blue-600' : 'text-gray-800'}`}>
-                                                            {lecture.title}
-                                                        </h4>
-                                                        <div className="flex justify-between items-center text-xs text-gray-500">
-                                                            <span>Lecture:{lecture.lectureNo}</span>
-                                                            <span>Date:{lecture.date}</span>
                                                         </div>
                                                     </div>
 
@@ -625,7 +659,8 @@ const CourseView = () => {
                                 </div>
                             )}
 
-                            <StatusTable userCourses={userCourses} />
+                            {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
+                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
                         </div>
 
                     </main>

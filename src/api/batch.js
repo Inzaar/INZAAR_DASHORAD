@@ -8,3 +8,11 @@ export const getAllBatches = async () => {
         throw error.response?.data || error;
     }
 };
+export const updateBatch = async (id, data) => {
+    try {
+        const response = await axiosInstance.patch(`/batches/${id}`, data);
+        return response.data.data;
+    } catch (error) {
+        throw error.response?.data || error;
+    }
+};

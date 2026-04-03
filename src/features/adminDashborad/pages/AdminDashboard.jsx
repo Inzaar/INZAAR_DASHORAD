@@ -108,13 +108,20 @@ const AdminDashboard = () => {
 
                                     {/* Stats Cards Section */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        <StatsCard title="Total Registered Students" value={studentCount.toString()} trend="2.4%" trendDirection="up" />
+                                        <StatsCard
+                                            title="Total Registered Students"
+                                            value={studentCount.toString()}
+                                            trend="2.4%"
+                                            trendDirection="up"
+                                            onClick={() => navigate('/registered-users?type=all_students')}
+                                        />
                                         <StatsCard
                                             title="Inactive Students"
                                             value="0"
                                             trend="1.8%"
                                             trendDirection="up"
                                             trendText="vs last week"
+                                            onClick={() => navigate('/registered-users?type=inactive_students')}
                                         />
                                         <StatsCard
                                             title="Total Courses"
@@ -122,6 +129,7 @@ const AdminDashboard = () => {
                                             trend="5%"
                                             trendDirection="down"
                                             trendText="vs last month"
+                                            onClick={() => navigate('/registered-courses?type=all')}
                                         />
                                         <StatsCard
                                             title="Total Moderator"
@@ -129,6 +137,7 @@ const AdminDashboard = () => {
                                             trend="8.2%"
                                             trendDirection="up"
                                             trendText="vs last month"
+                                            onClick={() => navigate('/registered-users?type=moderators')}
                                         />
                                     </div>
 
@@ -138,7 +147,13 @@ const AdminDashboard = () => {
                                     </div>
 
                                     {/* Courses Enrollment Overview */}
-                                    {courseStats.length > 0 && <CoursesEnrollmentOverview courseStats={courseStats} />}
+                                    {courseStats.length > 0 && (
+                                        <CoursesEnrollmentOverview 
+                                            courseStats={courseStats} 
+                                            limit={12}
+                                            onViewAllClick={() => navigate('/admin-courses')}
+                                        />
+                                    )}
                                 </div>
 
                                 {/* User Cards Demo Section */}

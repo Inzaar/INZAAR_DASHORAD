@@ -84,14 +84,24 @@ const ModeratorsPage = () => {
 
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                {stats.map((stat, index) => (
-                                    <StatsCard
-                                        key={index}
-                                        {...stat}
-                                        trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
-                                        iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
-                                    />
-                                ))}
+                                {stats.map((stat, index) => {
+                                    const typeMap = {
+                                        "Total Moderators": "moderators",
+                                        "Active Moderators": "active_moderators",
+                                        "Inactive Moderators": "inactive_moderators",
+                                        "Moderators in Pool": "moderator_pool"
+                                    };
+                                    
+                                    return (
+                                        <StatsCard
+                                            key={index}
+                                            {...stat}
+                                            trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
+                                            iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
+                                            onClick={() => navigate(`/registered-users?type=${typeMap[stat.title] || 'moderators'}`)}
+                                        />
+                                    );
+                                })}
                             </div>
 
                             {/* Main Content Card */}

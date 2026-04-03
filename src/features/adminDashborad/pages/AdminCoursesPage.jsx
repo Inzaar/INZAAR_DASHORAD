@@ -137,18 +137,35 @@ const AdminCoursesPage = () => {
 
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                {stats.map((stat, index) => (
-                                    <StatsCard
-                                        key={index}
-                                        {...stat}
-                                        trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
-                                        iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
-                                    />
-                                ))}
+                                {stats.map((stat, index) => {
+                                    const typeMap = {
+                                        "Total Registered Courses": "all",
+                                        "Active Courses": "active",
+                                        "Inactive Courses": "inactive",
+                                        "Draft Courses": "draft"
+                                    };
+
+                                    return (
+                                        <StatsCard
+                                            key={index}
+                                            {...stat}
+                                            trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
+                                            iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
+                                            onClick={() => navigate(`/registered-users?type=all_students`)}
+                                        />
+                                    );
+                                })}
                             </div>
 
                             {/* Enrollment Overview */}
-                            {courseStats.length > 0 && <CoursesEnrollmentOverview courseStats={courseStats} />}
+                            {courseStats.length > 0 && (
+                                <CoursesEnrollmentOverview 
+                                    courseStats={courseStats} 
+                                    limit={12} 
+                                    showViewAll={false} 
+                                    showViewMore={true} 
+                                />
+                            )}
 
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mt-8">

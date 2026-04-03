@@ -17,9 +17,9 @@ function Analytics({ userCourses, courseData, name, className }) {
     } : {};
 
     const courseOverviewStats = courseData ? {
-        col1: { value: courseData.quizScore ?? "N/A", label: "Quiz Score", color: "#22C55E" },
-        col2: { value: courseData.lectureCompleted ?? 0, label: "Lecture Completed", color: "#3758EE" },
-        col3: { value: courseData.timeSpentLastWeek ?? "N/A", label: "Time Spent Last week", color: "#B666E7" },
+        col1: courseData.overview ? { value: courseData.overview.completed ?? 0, label: "Completed", color: "#22C55E" } : { value: courseData.quizScore ?? "N/A", label: "Quiz Score", color: "#22C55E" },
+        col2: courseData.overview ? { value: courseData.overview.inProgress ?? 0, label: "In Progress", color: "#3758EE" } : { value: courseData.lectureCompleted ?? 0, label: "Lecture Completed", color: "#3758EE" },
+        col3: courseData.overview ? { value: courseData.overview.timeSpentLastWeek ?? "0h 0m", label: "Time Spent Last week", color: "#B666E7" } : { value: courseData.timeSpentLastWeek ?? "N/A", label: "Time Spent Last week", color: "#B666E7" },
     } : undefined;
 
     const coursePerformanceProps = courseData ? {
