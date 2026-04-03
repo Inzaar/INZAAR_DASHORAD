@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     ChevronLeft, FileText, Sparkles, Upload, PlusCircle, GripVertical,
     HelpCircle, Settings as SettingsIcon, Check, FileEdit,
     Copy, Trash2, ChevronDown, ChevronUp, Image as ImageIcon,
-    MoreHorizontal, Download
+    MoreHorizontal, Download, Loader2, X, Film
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { createQuiz, uploadQuizMedia } from '@/api/quiz';
 
-const CreateQuiz = ({ onBackToSelection, onComplete }) => {
+const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [isSaving, setIsSaving] = useState(false);
+    const [mediaUploading, setMediaUploading] = useState({}); // { [questionId]: boolean }
+    const mediaInputRefs = useRef({});
     const [method, setMethod] = useState(null);
     const [quizData, setQuizData] = useState({
         title: '',
@@ -50,6 +55,21 @@ const CreateQuiz = ({ onBackToSelection, onComplete }) => {
         setQuestions(prev => prev.map(q =>
             q.id === id ? { ...q, [field]: value } : q
         ));
+    };
+
+    const handleMediaUpload = async (questionId, file) => {
+        if (!file) return;
+        setMediaUploading(prev => ({ ...prev, [questionId]: true }));
+        try {
+            const result = await uploadQuizMedia(file);
+            handleQuestionChange(questionId, 'media', { url: result.url, mediaType: result.mediaType });
+            toast.success('Media uploaded!');
+        } catch (err) {
+            console.error('Quiz media upload error:', err);
+            toast.error('Media upload failed. Please try again.');
+        } finally {
+            setMediaUploading(prev => ({ ...prev, [questionId]: false }));
+        }
     };
 
     const handleOptionChange = (qId, optId, value) => {
@@ -120,13 +140,74 @@ const CreateQuiz = ({ onBackToSelection, onComplete }) => {
         setQuizSettings(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (currentStep < 4) {
             setCurrentStep(prev => prev + 1);
-        } else {
-            onComplete({ ...quizData, questions });
+            return;
+        }
+
+        // Step 4: Submit quiz to backend
+        console.log('[CreateQuiz] Submitting quiz. courseId prop received:', courseId);
+
+        if (!courseId) {
+            console.error('[CreateQuiz] courseId is null or undefined!');
+            toast.error('Course not saved yet. Please go back to Step 1 and try again.');
+            return;
+        }
+        if (!quizData.title.trim()) {
+            toast.error('Quiz title is required.');
+            return;
+        }
+
+        setIsSaving(true);
+        const toastId = toast.loading('Creating quiz...');
+        try {
+            // Map local question shape → backend schema
+            const mappedQuestions = questions.map(q => ({
+                questionText: q.text,
+                description: q.description || '',
+                explanation: q.explanation || '',
+                points: q.points || 1,
+                difficulty: q.difficulty || 'Easy',
+                shuffleOptions: q.shuffle || false,
+                mediaUrl: q.media?.url || '',          // Cloudinary URL
+                options: q.options.map(opt => ({
+                    text: opt.text,
+                    isCorrect: opt.isCorrect,
+                })),
+            }));
+
+            const payload = {
+                courseId,
+                title: quizData.title,
+                shortDescription: quizData.description || '',
+                instructions: quizData.instructions || '',
+                creationMethod: method || 'manual',
+                questions: mappedQuestions,
+                passingScorePercentage: quizSettings.passingScore,
+                requirePassingScoreToContinue: quizSettings.requirePassingScore,
+                lockNextLectureUntilCompleted: quizSettings.lockNextLecture,
+                allowRetry: quizSettings.allowRetry,
+                maximumAttempts: quizSettings.maxAttempts,
+                timeLimitInMinutes: quizSettings.timeLimit,
+                shuffleQuestions: quizSettings.shuffleQuestions,
+                shuffleAllAnswerOptions: quizSettings.shuffleAnswerOptions,
+            };
+
+            console.log('[CreateQuiz] Sending payload:', payload);
+            const res = await createQuiz(payload);
+            const savedQuiz = res?.data;
+
+            toast.success('Quiz created successfully!', { id: toastId });
+            onComplete({ _id: savedQuiz?._id, title: savedQuiz?.title || quizData.title });
+        } catch (err) {
+            console.error('Quiz creation error:', err);
+            toast.error(err?.response?.data?.message || 'Failed to create quiz.', { id: toastId });
+        } finally {
+            setIsSaving(false);
         }
     };
+
 
     const handleBack = () => {
         if (currentStep > 1) {
@@ -377,12 +458,90 @@ const CreateQuiz = ({ onBackToSelection, onComplete }) => {
                                         {/* Media Upload */}
                                         <div>
                                             <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Attach Media (Optional)</label>
-                                            <div className="border-2 border-dashed border-gray-100 rounded-[16px] sm:rounded-[20px] p-5 sm:p-8 flex flex-col items-center justify-center bg-gray-50/30 group hover:border-[#3758EE]/30 hover:bg-blue-50/20 transition-all cursor-pointer">
-                                                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-2 sm:mb-3 group-hover:text-[#3758EE] group-hover:scale-110 transition-all">
-                                                    <ImageIcon size={18} />
+
+                                            {/* Hidden file input */}
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
+                                                className="hidden"
+                                                ref={el => mediaInputRefs.current[q.id] = el}
+                                                onChange={e => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) handleMediaUpload(q.id, file);
+                                                    e.target.value = '';
+                                                }}
+                                            />
+
+                                            {/* Upload Zone */}
+                                            {!q.media && !mediaUploading[q.id] && (
+                                                <div
+                                                    onClick={() => mediaInputRefs.current[q.id]?.click()}
+                                                    className="border-2 border-dashed border-gray-100 rounded-[16px] sm:rounded-[20px] p-5 sm:p-8 flex flex-col items-center justify-center bg-gray-50/30 group hover:border-[#3758EE]/30 hover:bg-blue-50/20 transition-all cursor-pointer"
+                                                >
+                                                    <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-2 sm:mb-3 group-hover:text-[#3758EE] group-hover:scale-110 transition-all">
+                                                        <ImageIcon size={18} />
+                                                    </div>
+                                                    <span className="text-[12px] sm:text-[14px] font-bold text-[#64748b] group-hover:text-[#3758EE] transition-all text-center">Click to upload image or video</span>
+                                                    <span className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-1">JPG, PNG, WEBP, MP4, MOV</span>
                                                 </div>
-                                                <span className="text-[12px] sm:text-[14px] font-bold text-[#64748b] group-hover:text-[#3758EE] transition-all text-center">Click to upload image or video</span>
-                                            </div>
+                                            )}
+
+                                            {/* Uploading Spinner */}
+                                            {mediaUploading[q.id] && (
+                                                <div className="border-2 border-dashed border-[#3758EE]/30 rounded-[16px] sm:rounded-[20px] p-5 sm:p-8 flex flex-col items-center justify-center bg-blue-50/20">
+                                                    <Loader2 size={28} className="animate-spin text-[#3758EE] mb-2" />
+                                                    <span className="text-[13px] font-bold text-[#3758EE]">Uploading to Cloudinary…</span>
+                                                </div>
+                                            )}
+
+                                            {/* Preview — Image */}
+                                            {q.media && q.media.mediaType === 'image' && !mediaUploading[q.id] && (
+                                                <div className="relative rounded-[16px] overflow-hidden border border-gray-100 shadow-sm group">
+                                                    <img
+                                                        src={q.media.url}
+                                                        alt="Question media"
+                                                        className="w-full max-h-[220px] object-cover"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+                                                    <button
+                                                        onClick={() => handleQuestionChange(q.id, 'media', null)}
+                                                        className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => mediaInputRefs.current[q.id]?.click()}
+                                                        className="absolute bottom-2 right-2 px-3 py-1 bg-white/90 rounded-lg text-[11px] font-bold text-[#3758EE] shadow hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        Change
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {/* Preview — Video */}
+                                            {q.media && q.media.mediaType === 'video' && !mediaUploading[q.id] && (
+                                                <div className="relative rounded-[16px] overflow-hidden border border-gray-100 shadow-sm group">
+                                                    <video
+                                                        src={q.media.url}
+                                                        controls
+                                                        className="w-full max-h-[220px] object-cover bg-black"
+                                                    />
+                                                    <div className="absolute top-2 right-2 flex gap-2">
+                                                        <button
+                                                            onClick={() => mediaInputRefs.current[q.id]?.click()}
+                                                            className="px-3 py-1 bg-white/90 rounded-lg text-[11px] font-bold text-[#3758EE] shadow hover:bg-white transition-all"
+                                                        >
+                                                            Change
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleQuestionChange(q.id, 'media', null)}
+                                                            className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center text-red-500 hover:bg-red-50 transition-all"
+                                                        >
+                                                            <X size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Answer Options */}
@@ -731,9 +890,12 @@ const CreateQuiz = ({ onBackToSelection, onComplete }) => {
                 </button>
                 <button
                     onClick={handleContinue}
-                    className="w-full sm:w-auto px-8 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium rounded-[8px] active:scale-95 transition-all text-[14px] disabled:opacity-70 disabled:cursor-not-allowed"
+                    disabled={isSaving}
+                    className="w-full sm:w-auto px-8 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium rounded-[8px] active:scale-95 transition-all text-[14px] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                    Continue
+                    {isSaving ? (
+                        <><Loader2 size={15} className="animate-spin" /> Saving...</>
+                    ) : currentStep === 4 ? 'Create Quiz' : 'Continue'}
                 </button>
             </div>
         </div>
