@@ -68,6 +68,8 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
 
       <div className="flex-1 h-auto lg:h-[301px] rounded-[8px] pt-4 pr-[4px] pb-[11px] pl-[14px] overflow-hidden">
         <div className="w-full h-full flex flex-col gap-3">
+
+          {/* Full Name / Role */}
           <div>
             <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
               {isStudent ? "Full Name" : "Role"}
@@ -76,13 +78,12 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
               {isStudent ? (user.firstname || user.username || "Muhammad Zain") : (user.role || "Junior Moderator")}
             </div>
           </div>
-        </div>
 
+          {/* Enroll Courses / System Roll */}
           <div className="flex-1 flex flex-col gap-2 min-h-0">
             <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
               {isStudent ? "Enroll Courses" : "System Roll"}
             </h6>
-            {/* Scrollable list — only ~2 items visible, rest scroll */}
             <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar max-h-[80px] pr-1">
               {isStudent ? (
                 <>
@@ -112,6 +113,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
             </div>
           </div>
 
+          {/* Employment Type (moderator only) */}
           {!isStudent && (
             <div className="mt-auto pb-1">
               <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">Employment Type</h6>
@@ -124,17 +126,8 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
               </select>
             </div>
           )}
-        </div>
 
-        {!isStudent && (
-          <div className="mt-auto shrink-0">
-            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">Employment Type</h6>
-            <select className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] text-sm font-medium outline-none border-none">
-              <option>Full-time</option>
-              <option>Part-time</option>
-            </select>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
