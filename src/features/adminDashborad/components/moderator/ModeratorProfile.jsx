@@ -5,8 +5,9 @@ import { FaEdit } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { uploadImage } from "@/api/course";
 import { updateUser } from "@/api/user";
+import axiosInstance from "@/api/axiosInstance";
 
-function ModeratorProfile({ profileData, type = 'moderator' }) {
+function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage }) {
   const isStudent = type === 'student';
   const user = profileData?.user || {};
   const [isSaving, setIsSaving] = useState(false);
@@ -38,14 +39,28 @@ function ModeratorProfile({ profileData, type = 'moderator' }) {
         educationQualification: form.get("educationQualification"),
       };
 
-      // Handle Front CNIC
+      // 1. Handle Pending Profile Image (from ModeratorRoll component)
+      if (pendingProfileImage) {
+        const profileFormData = new FormData();
+        profileFormData.append("image", pendingProfileImage);
+        
+        const uploadRes = await axiosInstance.post("/upload/profile-pic", profileFormData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        
+        if (uploadRes.data?.data?.url) {
+          payload.profileImageUrl = uploadRes.data.data.url;
+        }
+      }
+
+      // 2. Handle Front CNIC
       const frontFile = form.get("cnicFrontImageFile");
       if (frontFile && frontFile.size > 0) {
         const uploadedFront = await uploadImage(frontFile);
         payload.cnicFrontImage = uploadedFront.url;
       }
 
-      // Handle Back CNIC
+      // 3. Handle Back CNIC
       const backFile = form.get("cnicBackImageFile");
       if (backFile && backFile.size > 0) {
         const uploadedBack = await uploadImage(backFile);
@@ -57,6 +72,10 @@ function ModeratorProfile({ profileData, type = 'moderator' }) {
       if (!payload.cnicBackImage && user.cnicBackImage) payload.cnicBackImage = user.cnicBackImage;
 
       await updateUser(user._id, payload);
+      
+      // Clear pending image state on success
+      if (setPendingProfileImage) setPendingProfileImage(null);
+      
       toast.success("Profile updated successfully!", { id: toastId });
     } catch (error) {
       console.error(error);
