@@ -1,3 +1,5 @@
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import AuthLeft from '../components/AuthLeft'
 import AuthPage from '../../../components/layouts/AuthPage'
 import AuthRight from '../components/AuthRight'
@@ -6,8 +8,45 @@ import Input1 from '../../../components/ui/inputs/Input1'
 import PhoneInput from '../../../components/ui/inputs/PhoneInput'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
 import { Link } from 'react-router-dom';
+import { useRegister } from '../context/RegisterContext';
 
 function RegisterPageP1() {
+  const navigate = useNavigate();
+  const { formData, updateFormData } = useRegister();
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+    
+    // Auto-capitalize first letter for First name, Last name, etc.
+    if (["First Name", "Last Name", "Nationality", "Permanent Address"].includes(name) && value.length > 0) {
+      value = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    const fieldMap = {
+      "First Name": "firstname",
+      "Last Name": "lastname",
+      "Username": "username",
+      "Email": "email",
+      "Password": "password",
+      "Phone number": "phone"
+    };
+
+    const backendField = fieldMap[name] || name;
+    updateFormData({ [backendField]: value });
+  };
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    // Basic validation
+    if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    setError('');
+    navigate('/register/step2');
+  };
+
   return (
     <AuthPage>
       <AuthLeft />
@@ -18,33 +57,65 @@ function RegisterPageP1() {
           </AuthHeading>
         </div>
 
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <div className='max-w-[500px] w-full flex gap-2'>
-          <Input1 name="First Name" placeholder="first name" />
-          <Input1 name="Last Name" placeholder="second name" />
+          <Input1 
+            name="First Name" 
+            placeholder="First Name" 
+            value={formData.firstname}
+            onChange={handleChange}
+          />
+          <Input1 
+            name="Last Name" 
+            placeholder="Second Name" 
+            value={formData.lastname}
+            onChange={handleChange}
+          />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Username" placeholder="username" />
+          <Input1 
+            name="Username" 
+            placeholder="Username" 
+            value={formData.username}
+            onChange={handleChange}
+          />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Email" placeholder="email" />
+          <Input1 
+            name="Email" 
+            placeholder="Email" 
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 name="Password" placeholder="8 digit password" />
+          <Input1 
+            name="Password" 
+            placeholder="8 Digit Password" 
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+          />
         </div>
 
-        <div className='max-w-[500px] w-full mt-[10px]'>
-          <label className='text-[16px] text-[#18181B]'>Phone number</label>
-          <PhoneInput />
+        <div className='max-w-[500px] w-full'>
+          <PhoneInput 
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
         </div>
 
-        <Link to="/register/step2" className="w-full max-w-[500px]">
+        <button onClick={handleNext} className="w-full max-w-[500px]">
           <GradiantButton className="w-full h-[52px] rounded mt-[10px]">
             Next
           </GradiantButton>
-        </Link>
+        </button>
 
         <div className='max-w-[548px] w-full flex flex-col gap-4 '>
           {/* Checkbox 1 */}
@@ -52,10 +123,11 @@ function RegisterPageP1() {
             <input
               type='checkbox'
               id="terms"
+              required
               className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
             <label htmlFor="terms" className='text-[16px] font-[400] text-[#333333CC] cursor-pointer leading-tight select-none'>
-              By creating an account, I agree to our <span className='underline'>Terms of use</span>and <span className='underline'>Privacy Policy</span>
+              By creating an account, I agree to our <span className='underline'>Terms of use</span> and <span className='underline'>Privacy Policy</span>
             </label>
           </div>
 
@@ -71,6 +143,7 @@ function RegisterPageP1() {
             </label>
           </div>
         </div>
+        <AuthText className="mt-[20px]" isRegisterPage={true} />
       </AuthRight>
     </AuthPage>
   )

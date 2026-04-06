@@ -18,22 +18,28 @@
     display: none;
   }
 
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  .glowing-scrollbar::-webkit-scrollbar {
+    width: 12px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-track {
+  .glowing-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+  .glowing-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 20px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+  .glowing-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
+    background: #D889FF; /* Brighter purple */
+    border: 3px solid transparent; /* This creates the "bending" / detached from edge effect */
+    background-clip: padding-box;
+    border-radius: 20px;
+    box-shadow: 
+      0 0 10px #B666E7,
+      0 0 20px #B666E7,
+      0 0 40px #B666E7; /* HYPER GLOW */
   }
 }
 
