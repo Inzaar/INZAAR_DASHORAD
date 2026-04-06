@@ -22,7 +22,17 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/moderator-reports') ||
     location.pathname.startsWith('/course-reports') ||
     location.pathname.startsWith('/student-profiles') ||
-    location.pathname.startsWith('/moderator-details');
+    location.pathname.startsWith('/moderator-details') ||
+    location.pathname.startsWith('/registered-users') ||
+    location.pathname.startsWith('/registered-courses');
+    // location.pathname.startsWith('/reports') ||
+    // location.pathname.startsWith('/moderator-reports') ||
+    // location.pathname.startsWith('/course-reports') ||
+    // location.pathname.startsWith('/student-profiles') ||
+    // location.pathname.startsWith('/moderator-details');
+
+    // location.pathname.startsWith('/registered-users') ||   
+    // location.pathname.startsWith('/registered-courses');
 
   const menuItems = isAdminRoute ? adminItems : studentItems;
 
@@ -50,13 +60,36 @@ function Sidebar({ className, onClose }) {
     '/moderator-reports': 'Moderator Reports',
     '/course-reports': 'Course Reports',
 
+    '/admin/student-details': 'Student Profiles',  // for /admin/student-details/1, /2, etc.
+    '/admin/moderator-details': 'Moderators',
+    '/admin/course-details': 'Courses',  
+    '/admin-course-view': 'Courses',  
+    '/admin-course-play': 'Courses',      
+    '/admin-add-course': 'Courses',              
+    '/registered-users': 'Student Profiles',   
+    '/registered-courses': 'Courses',
+    
+
     // Auth
     '/logout': 'Logout'
   };
 
   // Sync state with URL whenever the route changes
+
   useEffect(() => {
-    const currentName = pathToName[location.pathname];
+    // Try exact match first
+    let currentName = pathToName[location.pathname];
+
+    // If no exact match, try prefix matching for dynamic routes like /admin/student-details/1
+    if (!currentName) {
+      const matchedKey = Object.keys(pathToName).find(key =>
+        location.pathname.startsWith(key) && key !== '/'
+      );
+      if (matchedKey) {
+        currentName = pathToName[matchedKey];
+      }
+    }
+
     if (currentName) {
       setActiveItem(currentName);
       if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
@@ -64,6 +97,17 @@ function Sidebar({ className, onClose }) {
       }
     }
   }, [location.pathname]);
+
+
+  // useEffect(() => {
+  //   const currentName = pathToName[location.pathname];
+  //   if (currentName) {
+  //     setActiveItem(currentName);
+  //     if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
+  //       setIsReportsExpanded(true);
+  //     }
+  //   }
+  // }, [location.pathname]);
 
   const logout = async () => {
     try {
