@@ -10,13 +10,17 @@ const LectureCard = ({
     date = "10-Jan-2025",
     image = img,
     profileImage = pImage,
-    className
+    className,
+    onClick
 }) => {
     return (
-        <div className={cn(
-            "w-[273px] h-[161px] rounded-[23px] relative overflow-hidden group shrink-0",
-            className
-        )}>
+        <div
+            onClick={onClick}
+            className={cn(
+                "w-[273px] h-[161px] rounded-[23px] relative overflow-hidden group shrink-0 cursor-pointer",
+                className
+            )}
+        >
             {/* Background Image */}
             <img
                 src={image}

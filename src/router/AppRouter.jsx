@@ -6,6 +6,7 @@ import DashboardPage from "@/features/StudentDashboard/pages/DashboardPage";
 import EnrolledCourses from "@/features/StudentDashboard/pages/EnrolledCourses";
 import Courses from "@/features/courses/pages/Courses";
 import CourseView from "@/features/courses/pages/CourseView";
+import QuizTakePage from "@/features/courses/pages/QuizTakePage";
 import Certificates from "@/features/StudentDashboard/pages/Certificates";
 import HelpCenter from "@/features/StudentDashboard/pages/HelpCenter";
 import NotificationPage from "@/features/StudentDashboard/pages/NotificationPage";
@@ -13,6 +14,7 @@ import NotificationPage from "@/features/StudentDashboard/pages/NotificationPage
 import AdminRoute from "@/components/auth/AdminRoute";
 import StudentRoute from "@/components/auth/StudentRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 import ProfilePage from "@/features/StudentDashboard/pages/ProfilePage";
 import AdminDashboard from "@/features/adminDashborad/pages/AdminDashboard";
@@ -73,6 +75,9 @@ const AppRouter = () => {
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/help-center" element={<HelpCenter />} />
                 <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+            <Route element={<ProtectedRoute />}>
+                <Route path="/quiz-take/:id" element={<QuizTakePage />} />
             </Route>
 
             {/* Fallback routes */}
