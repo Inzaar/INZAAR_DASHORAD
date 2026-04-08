@@ -87,8 +87,8 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
             <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[120px] custom-scrollbar-thin">
               {isStudent ? (
                 <>
-                  {(user.enrolledBatches || []).length > 0 ? (
-                    user.enrolledBatches.map((pair, idx) => (
+                  {(profileData?.enrolledBatches || []).length > 0 ? (
+                    profileData.enrolledBatches.map((pair, idx) => (
                       <div key={idx} className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-gray-50 shadow-sm">
                         <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all truncate block">
                           {pair.courseName} ( {pair.batchName} )

@@ -218,7 +218,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
           {/* Front CNIC */}
           <div className="w-full lg:w-[48%] order-9 lg:order-9">
             <p className="mb-2 text-[14px] font-medium">Front CNIC</p>
-            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
+            <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
               {cnicFrontPreview ? (
                 <>
                   <img src={cnicFrontPreview} alt="Front CNIC Preview" className="w-full h-full object-cover" />
@@ -234,7 +234,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
                   </p>
                 </div>
               )}
-              <label className="absolute bottom-2 bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10">
+              <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
                 Browse
                 <input 
                   type="file" 
@@ -253,7 +253,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
           {/* Back CNIC */}
           <div className="w-full lg:w-[48%] order-10 lg:order-10">
             <p className="mb-2 text-[14px] font-medium">Back CNIC</p>
-            <div className="w-full h-[125px] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
+            <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
               {cnicBackPreview ? (
                 <>
                   <img src={cnicBackPreview} alt="Back CNIC Preview" className="w-full h-full object-cover" />
@@ -269,7 +269,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
                   </p>
                 </div>
               )}
-              <label className="absolute bottom-2 bg-[#265CEB] rounded-[4px] text-white w-[60px] h-[24px] text-[10px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10">
+              <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
                 Browse
                 <input 
                   type="file" 

@@ -115,6 +115,7 @@ const RegisteredCoursesPage = () => {
                                                     </td>
                                                     <td className="py-6 text-center">
                                                         <GradiantButton 
+                                                            onClick={() => navigate(`/admin-course-view/${course.id}`)}
                                                             className="px-5 py-2 rounded-lg text-[12px] font-bold shadow-lg shadow-blue-200/50"
                                                         >
                                                             View Details
