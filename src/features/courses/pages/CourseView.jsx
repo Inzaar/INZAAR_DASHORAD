@@ -12,6 +12,7 @@ import { Loader, GraduationCap } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
+import QuizStartOverlay from "../components/QuizStartOverlay";
 import fallbackImg from "@/assets/images/coursespage.jpg";
 
 const CourseView = () => {
@@ -425,7 +426,7 @@ const CourseView = () => {
             )}
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className={`flex flex-col lg:flex-row ${isQuizView ? 'px-0 gap-0' : 'px-4 gap-4'} flex-1 overflow-hidden relative`}>
+                <div className={`flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative`}>
 
                     {isSidebarOpen && (
                         <div
@@ -434,24 +435,21 @@ const CourseView = () => {
                         />
                     )}
 
-                    {!isQuizView && (
-                        <Sidebar
-                            onClose={() => setIsSidebarOpen(false)}
-                            className={`
-                                transition-transform duration-300 ease-in-out z-40
-                                lg:translate-x-0 lg:static lg:block
-                                fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
-                                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                            `}
-                        />
-                    )}
+                    <Sidebar
+                        onClose={() => setIsSidebarOpen(false)}
+                        className={`
+                            transition-transform duration-300 ease-in-out z-40
+                            lg:translate-x-0 lg:static lg:block
+                            fixed left-0 top-0 h-full w-[280px] sm:w-[320px] lg:w-auto shadow-2xl bg-white
+                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        `}
+                    />
 
-                    <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide ${isQuizView ? 'flex items-center justify-center' : ''}`} style={{
+                    <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide`} style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className={`${isQuizView ? 'p-0 w-full' : 'py-4 pr-2'}`}>
-                            {!isQuizView && (
+                        <div className={`py-4 pr-2`}>
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                                     <div>
                                         <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
@@ -479,29 +477,42 @@ const CourseView = () => {
                                         </>
                                     )}
                                 </div>
-                            )}
 
-                            {!isQuizView && <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />}
+                            <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
 
-                            <div className={`relative flex flex-col lg:block gap-6 ${isQuizView ? 'mt-0' : 'mt-5'}`}>
-                                <div className={`${isQuizView ? 'w-full min-h-[calc(100vh-80px)] flex items-center justify-center p-4' : 'w-full lg:w-[70%] flex flex-col gap-4'}`}>
-                                    {!isQuizView && <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>}
-                                    <div className={`${isQuizView ? 'w-full max-w-[800px]' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100 h-fit'}`}>
-                                        <div className={`relative w-full overflow-hidden ${isQuizView ? 'bg-transparent' : 'aspect-video rounded-xl bg-black group'}`}>
+                            <div className={`relative flex flex-col lg:flex-row gap-6 mt-5 min-h-0`}>
+                                <div className={`w-full lg:w-[70%] flex flex-col gap-4`}>
+                                    <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
+                                    <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
+                                        <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
                                             {/* YouTube Iframe or Quiz Assessment */}
                                             {currentLecture?.type === 'Quiz' ? (
-                                                <LectureQuizAssessment
-                                                    quizData={{
-                                                        totalQuestions: 7, // Fallback or fetch from currentLecture if available
-                                                        description: "Test your understanding of the lecture before moving to the next lesson.",
-                                                    }}
-                                                    onStart={() => {
-                                                        if (currentLecture.quizId) {
-                                                            navigate(`/quiz-take/${currentLecture.quizId}`);
-                                                        } else {
-                                                            // Fallback if quizId is not present
-                                                            navigate(`/quiz-take/${currentLecture.id}`);
-                                                        }
+                                                <QuizStartOverlay
+                                                    lecture={currentLecture}
+                                                    courseData={courseData}
+onStart={() => {
+    // ✅ Always use current page as returnPath, ignore any passed returnPath
+    // This works for both cases:
+    // - from admin-course-play: window.location = /admin-course-play?id=...
+    // - from admin-course-view: window.location = /admin-course-view/69d3c9... (but this case
+    //   now goes directly to admin-course-play with returnPath set, so onStart runs on admin-course-play)
+    const currentPath = window.location.pathname + window.location.search;
+    
+    // Remove the returnPath param from currentPath to avoid nesting
+    const cleanParams = new URLSearchParams(window.location.search);
+    cleanParams.delete('returnPath');
+    cleanParams.delete('lectureId');
+    const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+    const cleanPath = window.location.pathname + cleanSearch;
+
+    const returnPath = encodeURIComponent(cleanPath);
+
+    const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+    if (currentLecture.quizId) {
+        navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+    } else {
+        navigate(`/quiz-take/${currentLecture.id}${query}`);
+    }
                                                     }}
                                                 />
                                             ) : currentLecture?.videoId ? (
@@ -595,12 +606,10 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Lectures Playlist Section - Right Side - Only if not quiz */}
-                                {!isQuizView && (
-                                    <div className="w-full lg:w-[calc(30%-1.5rem)] flex flex-col gap-4 lg:absolute lg:top-0 lg:right-0 lg:bottom-0">
-                                        <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                        <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto min-h-0 no-scrollbar">
+                                 {/* Lectures Playlist Section - Right Side - Only if not quiz */}
+                                 <div className="w-full lg:w-[30%] flex flex-col gap-4">
+                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
+                                         <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0">
                                             <div className="flex flex-row lg:flex-col gap-3">
                                                 {lectures.map((lecture, index) => (
                                                     <div
@@ -684,13 +693,12 @@ const CourseView = () => {
                                                         )}
                                                     </div>
                                                 ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                </div>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Lecture Notes Section */}
+                    {/* Lecture Notes Section */}
                             {!isQuizView && user?.role !== 'admin' && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20 text-left">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>

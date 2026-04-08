@@ -28,7 +28,7 @@ function Analytics({ userCourses, courseData, name, className }) {
     } : {};
 
     return (
-        <div className={`flex max-[973px]:flex-col gap-6 ${className} pb-4`}>
+        <div className={`flex flex-col lg:flex-row gap-6 ${className} pb-4`}>
             <div className='w-full flex flex-col gap-6 justify-between'>
                 <div className='w-full'>
                     <MetricCard
@@ -46,7 +46,7 @@ function Analytics({ userCourses, courseData, name, className }) {
                 </div>
             </div>
             <PerformanceCard
-                className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
+                className="shadow-sm w-full lg:w-[35%] xl:w-[30%]"
                 userCourses={userCourses}
                 name={name || "Overall Performance"}
                 {...coursePerformanceProps}
