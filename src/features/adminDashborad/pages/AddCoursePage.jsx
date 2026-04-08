@@ -300,6 +300,7 @@ const AddCoursePage = () => {
                     videoUrl: item.videoUrl || '',
                     audioUrl: item.audioUrl || '',
                     pdfUrl: item.pdfUrl || '',
+                    ...(item.quizId && { quizId: item.quizId }),
                 })),
             };
 

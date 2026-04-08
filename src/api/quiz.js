@@ -45,6 +45,14 @@ export const updateQuiz = async (quizId, payload) => {
     return res.data;
 };
 
+// POST /api/v1/quizzes/:id/submit
+export const submitQuiz = async (quizId, payload) => {
+    const res = await axiosInstance.post(`/quizzes/${quizId}/submit`, payload, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 // DELETE /api/v1/quizzes/:id
 export const deleteQuiz = async (quizId) => {
     const res = await axiosInstance.delete(`/quizzes/${quizId}`, {
