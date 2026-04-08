@@ -46,8 +46,8 @@ function RegisterPageP2() {
 
     try {
       // Final validation
-      if (!formData.gender || !formData.dob || !formData.nationality || !formData.permanentAddress) {
-        throw new Error('Please fill in all required fields.');
+      if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress || !formData.referralSource) {
+        throw new Error('Please fill in all required fields (Gender, DOB, Nationality, Address, and Referral Source).');
       }
 
       const res = await registerUser(formData);
@@ -114,6 +114,7 @@ function RegisterPageP2() {
               <Input1 
                 name="DOB" 
                 label="DOB"
+                type="date"
                 placeholder="your age" 
                 value={formData.dob}
                 onChange={handleChange}

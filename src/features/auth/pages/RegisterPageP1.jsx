@@ -9,11 +9,14 @@ import PhoneInput from '../../../components/ui/inputs/PhoneInput'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
 import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
+import AuthText from '../components/AuthText';
 
 function RegisterPageP1() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [shouldShake, setShouldShake] = useState(false);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -38,11 +41,22 @@ function RegisterPageP1() {
 
   const handleNext = (e) => {
     e.preventDefault();
-    // Basic validation
-    if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
-      setError('Please fill in all required fields.');
+    
+    // Basic validation for fields
+    if (!formData.firstname || !formData.lastname || !formData.username || !formData.email || !formData.password || !formData.phone) {
+      setError('Please fill in all required fields (including Second Name).');
       return;
     }
+
+    // Validation for terms
+    if (!agreedToTerms) {
+      setError('Please agree to the Terms of use and Privacy Policy.');
+      setShouldShake(true);
+      // Reset shake after animation completes
+      setTimeout(() => setShouldShake(false), 500);
+      return;
+    }
+
     setError('');
     navigate('/register/step2');
   };
@@ -117,12 +131,14 @@ function RegisterPageP1() {
           </GradiantButton>
         </button>
 
-        <div className='max-w-[548px] w-full flex flex-col gap-4 '>
+        <div className={`max-w-[548px] w-full flex flex-col gap-4 ${shouldShake ? 'animate-shake' : ''}`}>
           {/* Checkbox 1 */}
           <div className='flex items-start w-full gap-3 mt-10'>
             <input
               type='checkbox'
               id="terms"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
               required
               className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
