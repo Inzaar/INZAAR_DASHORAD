@@ -15,15 +15,15 @@ const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-[120px] rounded-full animate-pulse pointer-events-none" />
 
             {/* Content Container */}
-            <div className="relative z-10 w-full h-full flex flex-col p-4 sm:p-6 md:p-10 lg:p-14">
+            <div className="relative z-10 w-full h-full flex flex-col p-4 sm:p-5 md:p-6 lg:p-6">
                 
                 {/* Top Section: Lecture Info and Instructor */}
                 <div className="flex justify-between items-start w-full">
                     <div className="text-white">
-                            <h2 className="text-lg md:text-3xl font-bold mb-1 md:mb-2 shadow-black/20 drop-shadow-lg leading-tight">
+                            <h2 className="text-lg md:text-2xl font-bold mb-0.5 md:mb-1 shadow-black/20 drop-shadow-lg leading-tight">
                                 {lecture?.title || "Recitation"}
                             </h2>
-                            <div className="text-[10px] md:text-lg opacity-80 font-medium">
+                            <div className="text-[10px] md:text-sm opacity-80 font-medium">
                                 <p>Module: {String(lecture?.lectureNo || '01').padStart(2, '0')}</p>
                             </div>
                     </div>
@@ -33,7 +33,7 @@ const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
                         <img 
                             src={instructorImage} 
                             alt="Instructor" 
-                            className="relative w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-white shadow-xl cursor-pointer"
+                            className="relative w-8 h-8 md:w-12 md:h-12 rounded-full border border-white shadow-xl cursor-pointer"
                         />
                     </div>
                 </div>
@@ -41,10 +41,10 @@ const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
                 {/* Center Section: Large Graphic Text */}
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="text-center transform transition-transform duration-700 group-hover:scale-105">
-                        <h1 className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#8C8C8C] to-[#404040] select-none block mb-[-0.2em] opacity-90 leading-none">
+                        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-[#8C8C8C] to-[#404040] select-none block mb-[-0.2em] opacity-90 leading-none">
                             ISLAMIC
                         </h1>
-                        <h1 className="text-4xl sm:text-7xl md:text-9xl lg:text-[160px] font-black italic tracking-tighter text-[#A3E635] select-none block drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
+                        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black italic tracking-tighter text-[#A3E635] select-none block drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] leading-none">
                             QUIZ
                         </h1>
                     </div>
@@ -54,7 +54,7 @@ const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
                 <div className="flex justify-center w-full mt-auto">
                     <GradiantButton 
                         onClick={onStart}
-                        className="w-full max-w-[500px] py-3 md:py-5 bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white font-bold text-sm md:text-xl rounded-xl shadow-[0_10px_40px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_50px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] border-none"
+                        className="w-full max-w-[360px] py-2 md:py-3 bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white font-bold text-sm md:text-base rounded-xl shadow-[0_10px_40px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_50px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] border-none"
                     >
                         Start Quiz
                     </GradiantButton>
