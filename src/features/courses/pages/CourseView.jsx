@@ -424,9 +424,9 @@ const CourseView = () => {
                     </div>
                 </div>
             )}
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className={`flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative`}>
+                <div className={`flex flex-col lg:flex-row px-2 sm:px-4 lg:px-6 xl:px-8 gap-4 flex-1 overflow-hidden relative`}>
 
                     {isSidebarOpen && (
                         <div
@@ -458,23 +458,23 @@ const CourseView = () => {
                                         )}
                                     </div>
                                     {user?.role === 'admin' ? (
-                                        <div className="flex gap-3">
-                                            <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                                            <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                                 Download Certificate
                                             </GradiantButton>
-                                            <GradiantButton className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                            <GradiantButton className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                                 Edit
                                             </GradiantButton>
                                         </div>
                                     ) : (
-                                        <>
-                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                        <div className="flex gap-2">
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                                 Enrolled New Course
                                             </GradiantButton>
-                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                                 +
                                             </GradiantButton>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
 
@@ -565,15 +565,15 @@ onStart={() => {
 
                                             {/* Lecture Info Overlay (Top Left) */}
                                             {!isQuizView && (
-                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300">
-                                                    <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md">{currentLecture?.title}</h2>
-                                                    <div className="text-xs sm:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                        <span>Lecture:{currentLecture?.lectureNo}</span>
-                                                        <br />
-                                                        <span>Date:{currentLecture?.date}</span>
+                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
+                                                    <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
+                                                    <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
+                                                        <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
+                                                        <br className="sm:hidden" />
+                                                        <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
                                                         <br />
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[10px] sm:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
+                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
                                                                 {Math.round(progress)}% Watched
                                                             </span>
                                                         </div>
@@ -609,15 +609,15 @@ onStart={() => {
                                  {/* Lectures Playlist Section - Right Side - Only if not quiz */}
                                  <div className="w-full lg:w-[30%] flex flex-col gap-4">
                                          <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                         <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0">
+                                         <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0 scroll-smooth snap-x">
                                             <div className="flex flex-row lg:flex-col gap-3">
                                                 {lectures.map((lecture, index) => (
                                                     <div
                                                         key={lecture.id}
                                                         onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
                                                         className={`
-                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0
-                                                    w-[60vw] sm:w-[320px] lg:w-full
+                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                                                    w-[75vw] sm:w-[320px] lg:w-full
                                                     ${currentLecture?.id === lecture.id
                                                                 ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                                                                 : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
@@ -725,8 +725,8 @@ onStart={() => {
                                 </div>
                             )}
 
-                            {!isQuizView && user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
-                            {!isQuizView && user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
+                            {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
+                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
                         </div>
                     </main>
                 </div>
