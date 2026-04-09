@@ -10,16 +10,21 @@ export default function ModeratorRecordComponent({ profileData }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = profileData?.user || {};
-    const apiStats = user.stats || {};
+    const apiStats = profileData?.stats || {};
 
     // Extract unique courses from assigned batches
     const courses = useMemo(() => {
-        const assignedBatches = user.assignedBatches || [];
+        const assignedBatches = profileData?.assignedBatches || [];
         const uniqueCoursesArr = Array.from(new Set(assignedBatches.map(b => b.courseId?.title).filter(Boolean)));
         return uniqueCoursesArr.length > 0 ? uniqueCoursesArr : ["Stress Management Course", "Imaniyaat Course", "Namaz Course"];
-    }, [user]);
+    }, [profileData]);
 
     const [selectedCourse, setSelectedCourse] = useState(courses[0]);
+    useEffect(() => {
+        if (courses.length > 0 && (!selectedCourse || !courses.includes(selectedCourse))) {
+            setSelectedCourse(courses[0]);
+        }
+    }, [courses, selectedCourse]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 

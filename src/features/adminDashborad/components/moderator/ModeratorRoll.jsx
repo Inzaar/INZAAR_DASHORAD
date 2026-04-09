@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage }) {
   const user = profileData?.user || {};
   const isStudent = type === 'student';
-  const assignedBatches = user.assignedBatches || [];
+  const assignedBatches = profileData?.assignedBatches || [];
   const fileInputRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(Profileimg);
 
