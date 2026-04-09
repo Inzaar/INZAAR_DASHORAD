@@ -14,7 +14,7 @@ function ModeratorBatchesComponent({ profileData }) {
     const [currentPage, setCurrentPage] = useState(1);
 
     const user = profileData?.user || {};
-    const assignedBatches = user.assignedBatches || [];
+    const assignedBatches = profileData?.assignedBatches || [];
 
     // Pagination logic
     const totalPages = Math.ceil(assignedBatches.length / ITEMS_PER_PAGE);
