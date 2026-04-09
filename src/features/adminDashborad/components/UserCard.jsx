@@ -4,9 +4,8 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
 const UserCard = ({
     name = "Mudassar",
-    // id = "635261",
-    id= user._id,
-    image = "https://randomuser.me/api/portraits/men/32.jpg",
+    id,
+    image,
     performance = "88%",
     joiningDate = "7/10/2025",
     email = "Mudassar123@gmail.com",
@@ -14,6 +13,7 @@ const UserCard = ({
     status = "online",
     onViewClick
 }) => {
+    const displayImage = image || "https://randomuser.me/api/portraits/men/32.jpg";
     return (
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 w-full max-w-[450px] relative font-sans">
             {/* Header: Avatar, Name, Menu */}
@@ -21,7 +21,7 @@ const UserCard = ({
                 <div className="flex flex-col gap-3">
                     <div className="relative w-14 h-14">
                         <img
-                            src={image}
+                            src={displayImage}
                             alt={name}
                             className="w-full h-full rounded-full object-cover border-2 border-white shadow-sm"
                         />
