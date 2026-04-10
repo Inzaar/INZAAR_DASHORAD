@@ -7,8 +7,9 @@ export const getEnrolledCoursesByUserId = () => {
     return res;
 }
 
-export const getAllCourses = () => {
+export const getAllCourses = (params = {}) => {
     const res = axiosInstance.get("/courses", {
+        params,
         withCredentials: true,
     });
     return res;

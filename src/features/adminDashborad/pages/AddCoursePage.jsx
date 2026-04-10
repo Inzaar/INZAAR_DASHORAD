@@ -259,12 +259,12 @@ const AddCoursePage = () => {
                 status: 'draft',
             };
             const res = await createCourse(payload);
-            console.log('[AddCoursePage] Draft save response:', res);
-            // res = { statusCode, data: courseDoc, message } (from ApiResponse)
-            const savedId = res?.data?._id    // ApiResponse.data._id
-                || res?.data?.data?._id       // nested wrapper fallback
-                || res?._id;                  // bare object fallback
-            console.log('[AddCoursePage] Extracted courseId:', savedId);
+            console.log('[AddCoursePage] DRAFT SAVE FULL RESPONSE:', res);
+
+            // Extract _id from the ApiResponse object's data field
+            const savedId = res?.data?._id || res?._id;
+
+            console.log('[AddCoursePage] EXTRACTED courseId:', savedId);
             if (savedId) setCourseId(savedId);
             setCurrentStep(2);
         } catch (err) {
@@ -279,8 +279,10 @@ const AddCoursePage = () => {
     const handleSubmit = async (status = 'published') => {
         setIsSubmitting(true);
         setSubmitError('');
+        console.log('[AddCoursePage] SUBMITTING with courseId:', courseId, 'status:', status);
         try {
             const payload = {
+                id: courseId, // Ensure the draft ID is passed for upsert
                 title: courseForm.title,
                 instructor: courseForm.instructor,
                 addBy: user?.name || user?.firstname || 'Admin',
