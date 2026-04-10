@@ -22,7 +22,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
   const handleSave = async (e) => {
     e.preventDefault();
     if (!user._id) return toast.error("User ID not found!");
-    
+
     setIsSaving(true);
     const toastId = toast.loading("Saving profile details...");
 
@@ -43,11 +43,11 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       if (pendingProfileImage) {
         const profileFormData = new FormData();
         profileFormData.append("image", pendingProfileImage);
-        
+
         const uploadRes = await axiosInstance.post("/upload/profile-pic", profileFormData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        
+
         if (uploadRes.data?.data?.url) {
           payload.profileImageUrl = uploadRes.data.data.url;
         }
@@ -72,10 +72,10 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       if (!payload.cnicBackImage && user.cnicBackImage) payload.cnicBackImage = user.cnicBackImage;
 
       await updateUser(user._id, payload);
-      
+
       // Clear pending image state on success
       if (setPendingProfileImage) setPendingProfileImage(null);
-      
+
       toast.success("Profile updated successfully!", { id: toastId });
     } catch (error) {
       console.error(error);
@@ -90,8 +90,8 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       <div className="w-full mx-auto">
 
         {/* Header */}
-        <div className="w-full flex justify-between items-center">
-          <h3 className="text-[18px] font-medium">Profile Details</h3>
+        <div className="w-full flex justify-between items-center bg-[#3758EE] text-white p-4 rounded-[10px] mb-6 shadow-md">
+          <h3 className="text-[18px] font-bold">Profile Details</h3>
 
           <div className="flex gap-[12px] items-center">
             <button className="w-[140px] h-[40px] bg-[#A7A7A7] rounded-[4px] text-white text-[13px] lg:text-sm lg:w-[177px] hidden min-[640px]:block">
@@ -104,8 +104,8 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
             </GradiantButton>
 
             {/* Gradient icon for smaller screens */}
-            <GradiantButton className="flex sm:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] ">
-              <FaEdit className="text-white w-4" />
+            <GradiantButton className="flex sm:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] bg-white text-blue-600">
+              <FaEdit className="w-4" />
             </GradiantButton>
           </div>
         </div>
@@ -236,15 +236,15 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
               )}
               <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
                 Browse
-                <input 
-                  type="file" 
-                  name="cnicFrontImageFile" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  name="cnicFrontImageFile"
+                  className="hidden"
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) setCnicFrontPreview(URL.createObjectURL(file));
-                  }} 
+                  }}
                 />
               </label>
             </div>
@@ -271,15 +271,15 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
               )}
               <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
                 Browse
-                <input 
-                  type="file" 
-                  name="cnicBackImageFile" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  name="cnicBackImageFile"
+                  className="hidden"
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) setCnicBackPreview(URL.createObjectURL(file));
-                  }} 
+                  }}
                 />
               </label>
             </div>

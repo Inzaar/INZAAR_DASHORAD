@@ -44,22 +44,22 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
   };
 
   return (
-    <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border rounded-[8px] pr-[10px] pl-[20px] flex lg:flex-row max-[620px]:flex-col bg-white shadow-sm">
+    <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border-none rounded-[12px] pr-[10px] pl-[20px] flex lg:flex-row max-[620px]:flex-col bg-[#3758EE] shadow-xl text-white">
       <div className="w-full lg:w-[230px] h-auto lg:h-[301px] pt-[10px] pb-[10px] gap-[8px] flex flex-col items-center shrink-0">
-        <h3 className="text-center text-[12px] font-medium text-gray-500 uppercase tracking-wider">PROFILE IMAGE</h3>
+        <h3 className="text-center text-[12px] font-bold text-blue-100 uppercase tracking-wider">PROFILE IMAGE</h3>
         <div className="relative w-full h-[236px]">
-          <img 
-            src={currentImage} 
-            className="w-full h-full object-cover rounded-[10px] border border-gray-100 transition-all duration-300 shadow-sm" 
+          <img
+            src={currentImage}
+            className="w-full h-full object-cover rounded-[10px] border border-gray-100 transition-all duration-300 shadow-sm"
             alt="ProfilePreview"
           />
         </div>
-        <label className="text-blue-600 text-sm font-semibold cursor-pointer text-center block mt-[2px] hover:underline transition-all active:scale-95">
-          Choose Profile Image
-          <input 
-            type="file" 
-            className="hidden" 
-            ref={fileInputRef} 
+        <label className="text-white text-sm font-bold cursor-pointer text-center block mt-[2px] hover:text-blue-100 transition-all active:scale-95">
+          Change Profile Image
+          <input
+            type="file"
+            className="hidden"
+            ref={fileInputRef}
             onChange={handleFileChange}
             accept="image/*"
           />
@@ -71,17 +71,17 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
 
           {/* Full Name / Role */}
           <div>
-            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
+            <h6 className="text-[12px] font-bold text-blue-100 uppercase mb-1 tracking-wider opacity-90">
               {isStudent ? "Full Name" : "Role"}
             </h6>
-            <div className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] flex items-center px-[10px] text-sm font-medium capitalize border border-gray-50 shadow-inner">
+            <div className="w-full h-[36px] bg-white/10 backdrop-blur-md rounded-[6px] text-white flex items-center px-[10px] text-sm font-medium capitalize border border-white/10">
               {isStudent ? (user.firstname || user.username || "Muhammad Zain") : (user.role || "Junior Moderator")}
             </div>
           </div>
 
           {/* Enroll Courses / System Roll */}
           <div className="flex-1 flex flex-col gap-2 min-h-0">
-            <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">
+            <h6 className="text-[12px] font-bold text-blue-100 uppercase mb-1 tracking-wider opacity-90">
               {isStudent ? "Enroll Courses" : "System Roll"}
             </h6>
             <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[120px] custom-scrollbar-thin">
@@ -96,7 +96,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
                       </div>
                     ))
                   ) : (
-                    <div className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] text-gray-400 italic text-sm border border-gray-50 shadow-inner">
+                    <div className="w-full h-[40px] bg-white/10 rounded-[6px] flex items-center px-[10px] text-blue-100 italic text-sm border border-white/10">
                       No courses enrolled
                     </div>
                   )}
@@ -105,14 +105,12 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
                 <>
                   {batchCoursePairs.length > 0 ? (
                     batchCoursePairs.map((pair, idx) => (
-                      <div key={idx} className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-gray-50 shadow-sm">
-                        <a href="#" className="text-[#265CEB] text-sm underline decoration-[#265CEB] truncate font-medium">
-                          {pair.courseName} ( {pair.batchName} )
-                        </a>
+                      <div key={idx} className="w-full h-[40px] bg-white text-blue-600 rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-white/20 shadow-sm font-bold">
+                        {pair.courseName} ( {pair.batchName} )
                       </div>
                     ))
                   ) : (
-                    <div className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0 text-gray-400 italic text-sm border border-gray-50 shadow-inner">
+                    <div className="w-full h-[40px] bg-white/10 rounded-[6px] flex items-center px-[10px] flex-shrink-0 text-blue-100 italic text-sm border border-white/10">
                       No batches assigned
                     </div>
                   )}
@@ -120,20 +118,21 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
               )}
             </div>
           </div>
-          
-          <style dangerouslySetInnerHTML={{ __html: `
+
+          <style dangerouslySetInnerHTML={{
+            __html: `
             .custom-scrollbar-thin::-webkit-scrollbar { width: 4px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+            .custom-scrollbar-thin::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+            .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+            .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
           `}} />
 
           {/* Employment Type (moderator only) */}
           {!isStudent && (
             <div className="mt-auto pb-1">
-              <h6 className="text-[12px] font-medium text-gray-400 uppercase mb-1 tracking-wider">Employment Type</h6>
+              <h6 className="text-[12px] font-bold text-blue-100 uppercase mb-1 tracking-wider opacity-90">Employment Type</h6>
               <select
-                className="w-full h-[36px] bg-[#F6F6F6] rounded-[6px] text-[#1A1A1A] text-sm font-medium outline-none border border-gray-50 shadow-sm cursor-pointer hover:border-gray-200 transition-all focus:ring-1 focus:ring-blue-100"
+                className="w-full h-[36px] bg-white text-[#1A1A1A] rounded-[6px] text-sm font-bold outline-none border border-white/20 shadow-sm cursor-pointer hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-300"
                 defaultValue={user.employmentType || "Full-time"}
               >
                 <option value="Full-time">Full-time</option>

@@ -13,6 +13,7 @@ import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import { getAllUsers } from '@/api/user';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
+import NewBatchAlert from '@/components/layouts/ManageBatches/NewBatchAlert';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -106,6 +107,8 @@ const AdminDashboard = () => {
                                     +
                                 </GradiantButton>
                             </div>
+
+                            <NewBatchAlert />
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
