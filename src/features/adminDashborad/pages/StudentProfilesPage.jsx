@@ -85,6 +85,10 @@ const StudentProfilesPage = () => {
         }
     };
 
+    const activeCount = students.filter(s => s.status === 'Active').length;
+    const inactiveCount = students.filter(s => s.status === 'Inactive').length;
+    const pendingCount = students.filter(s => s.status === 'Pending').length;
+
     const stats = [
         { title: "Total Registered Students", value: (statsData?.totalRegistered || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
         { title: "Active Students", value: (statsData?.active || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "Active" },

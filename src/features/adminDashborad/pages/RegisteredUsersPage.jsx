@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { cn } from '@/lib/utils';
 import { getAllUsers } from '@/api/user';
@@ -48,9 +48,9 @@ const RegisteredUsersPage = () => {
                     getAllEnrollments()
                 ]);
 
-                if (usersRes?.data && enrollmentsRes?.data) {
-                    let filteredUsers = usersRes.data;
-                    const allEnrollments = enrollmentsRes.data;
+                // Use only API results
+                let filteredUsers = usersRes?.data || [];
+                const allEnrollments = enrollmentsRes?.data || [];
 
                     // Filter by role first
                     if (userType.includes('student')) {
@@ -59,9 +59,9 @@ const RegisteredUsersPage = () => {
                         filteredUsers = filteredUsers.filter(u => u.role === 'moderator');
                     }
 
-                    const formattedData = filteredUsers.map(user => {
-                        const userEnrollments = allEnrollments.filter(e => e.userId && e.userId._id === user._id);
-                        const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
+                const formattedData = filteredUsers.map(user => {
+                    const userEnrollments = allEnrollments.filter(e => e.userId && (e.userId._id === user._id || e.userId === user._id));
+                    const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
 
                         let totalProgress = 0;
                         const hasActivity = userEnrollments.some(e => e.isCompleted || (e.completedLectures && e.completedLectures.length > 0));
@@ -174,7 +174,7 @@ const RegisteredUsersPage = () => {
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                             />
                                             <div className="absolute right-1 flex items-center gap-1">
-                                                <GradiantButton 
+                                                <GradiantButton
                                                     onClick={() => setSearchType('PHONE')}
                                                     className={cn(
                                                         "px-4 py-1.5 text-[11px] font-bold rounded shadow-sm transition-all",
@@ -183,12 +183,12 @@ const RegisteredUsersPage = () => {
                                                 >
                                                     PHONE#
                                                 </GradiantButton>
-                                                <GradiantButton 
+                                                <GradiantButton
                                                     onClick={() => setSearchType('NAME')}
                                                     className={cn(
                                                         "px-4 py-1.5 text-[11px] font-bold rounded shadow-sm transition-all",
-                                                        searchType === 'NAME' 
-                                                            ? "shadow-md shadow-blue-500/20" 
+                                                        searchType === 'NAME'
+                                                            ? "shadow-md shadow-blue-500/20"
                                                             : "opacity-30 grayscale-[0.5]"
                                                     )}
                                                 >

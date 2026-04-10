@@ -31,15 +31,19 @@ const AdminDashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 const usersRes = await getAllUsers();
-                const users = usersRes?.data || [];
-                setStudentCount(users.filter(u => u.role === 'user').length);
-                setModeratorCount(users.filter(u => u.role === 'moderator').length);
+                if (usersRes?.data) {
+                    const users = usersRes.data;
+                    setStudentCount(users.filter(u => u.role === 'user').length);
+                    setModeratorCount(users.filter(u => u.role === 'moderator').length);
+                }
             } catch (err) { console.error('Error fetching users:', err); }
 
             try {
                 const coursesRes = await getAllCourses();
+                if (coursesRes?.data?.data) {
+                    setCourseCount(coursesRes.data.data.length);
+                }
                 const courses = coursesRes?.data?.data || [];
-                setCourseCount(courses.length);
 
                 try {
                     const enrollmentsRes = await getAllEnrollments();
@@ -129,7 +133,7 @@ const AdminDashboard = () => {
                                             trend="5%"
                                             trendDirection="down"
                                             trendText="vs last month"
-                                            onClick={() => navigate('/registered-courses?type=all')}
+                                            onClick={() => navigate('/registered-users')}
                                         />
                                         <StatsCard
                                             title="Total Moderator"
@@ -148,8 +152,8 @@ const AdminDashboard = () => {
 
                                     {/* Courses Enrollment Overview */}
                                     {courseStats.length > 0 && (
-                                        <CoursesEnrollmentOverview 
-                                            courseStats={courseStats} 
+                                        <CoursesEnrollmentOverview
+                                            courseStats={courseStats}
                                             limit={12}
                                             onViewAllClick={() => navigate('/admin-courses')}
                                         />

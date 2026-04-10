@@ -63,6 +63,19 @@ const ModeratorsPage = () => {
     };
 
     useEffect(() => {
+        const fetchModerators = async () => {
+            try {
+                const response = await getAllUsers();
+                if (response?.data) {
+                    const apiMods = response.data.filter(user => user.role === 'moderator');
+                    setModerators(apiMods);
+                }
+            } catch (error) {
+                console.error("Failed to fetch moderators:", error);
+            }
+        };
+        fetchModerators();
+    }, []);
         fetchModeratorsData();
     }, [currentPage, statusFilter, fromDate, toDate]);
 
@@ -85,6 +98,10 @@ const ModeratorsPage = () => {
             setSearchText(val);
         }
     };
+
+    const activeCount = moderators.filter(m => m.status === 'active' || m.status === undefined).length;
+    const inactiveCount = moderators.filter(m => m.status === 'in-active').length;
+    const poolCount = moderators.filter(m => m.status === 'pending').length;
 
     const stats = [
         { title: "Total Moderators", value: (statsData?.totalModerators || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
