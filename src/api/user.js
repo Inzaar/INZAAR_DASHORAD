@@ -50,3 +50,17 @@ export const getStudentCourseStats = async (userId, courseId) => {
     });
     return res.data;
 };
+
+export const getModeratorFeatures = async () => {
+    const res = await axiosInstance.get("/admin/features", {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const assignUserRole = async (id, data) => {
+    const res = await axiosInstance.post(`/admin/users/${id}/assign-role`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};

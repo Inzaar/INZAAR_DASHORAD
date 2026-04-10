@@ -3,7 +3,8 @@ import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfileById } from "@/api/user";
+import { getUserProfileById, assignUserRole } from "@/api/user";
+import toast from "react-hot-toast";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import deactivate from "@/assets/images/deactivate.png";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
@@ -222,10 +223,19 @@ const StudentDetailsPage = () => {
                                 <AssignModeratorModal 
                                     isOpen={isAssignModalOpen}
                                     onClose={() => setIsAssignModalOpen(false)}
-                                    onSave={(data) => {
-                                        console.log("Moderator Data Saved:", data);
-                                        setIsModerator(true);
-                                        setIsAssignModalOpen(false);
+                                    onSave={async (data) => {
+                                        try {
+                                            await assignUserRole(id, {
+                                                role: "moderator",
+                                                assignedFeatures: data.features
+                                            });
+                                            toast.success("Moderator assigned successfully!");
+                                            setIsModerator(true);
+                                            setIsAssignModalOpen(false);
+                                        } catch (err) {
+                                            toast.error("Failed to assign moderator");
+                                            console.error(err);
+                                        }
                                     }}
                                 />
                             </div>

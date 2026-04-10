@@ -53,6 +53,7 @@ const LoginPage = () => {
           firstname: userData.firstname,
           email: userData.email,
           role: userData.role || 'student',
+          assignedFeatures: userData.assignedFeatures || [],
           loggedIn: true
         }, res.data.data.token);
 
