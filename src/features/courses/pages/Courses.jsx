@@ -43,14 +43,12 @@ const Courses = () => {
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
-            if (width >= 1280) { // xl: 4 cols
-                setItemsPerPage(20); // 5 rows * 4 cols
-            } else if (width >= 1024) { // lg: 3 cols
-                setItemsPerPage(15); // 5 rows * 3 cols
+            if (width >= 1024) { // lg and above: 4 cols
+                setItemsPerPage(12); // 3 rows * 4 cols
             } else if (width >= 640) { // sm: 2 cols
                 setItemsPerPage(10); // 5 rows * 2 cols
             } else { // mobile: 1 col
-                setItemsPerPage(5); // 5 rows * 1 col
+                setItemsPerPage(4); // 4 rows * 1 col
             }
         };
 
@@ -206,7 +204,7 @@ const Courses = () => {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 place-items-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 place-items-center">
                                 {currentCourses.map((course) => (
                                     <CardCourse key={course._id} course={course} />
                                 ))}

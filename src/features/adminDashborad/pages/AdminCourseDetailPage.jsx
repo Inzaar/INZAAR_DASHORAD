@@ -100,7 +100,10 @@ const AdminCourseDetailPage = () => {
                                     <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
                                         Download Certificate
                                     </GradiantButton>
-                                    <GradiantButton className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
+                                    <GradiantButton 
+                                        onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
+                                        className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity"
+                                    >
                                         Edit
                                     </GradiantButton>
                                 </div>

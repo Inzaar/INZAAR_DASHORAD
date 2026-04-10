@@ -554,7 +554,7 @@ onStart={() => {
                                             {!isQuizView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
 
                                             {/* Progress Bar */}
-                                            {!isQuizView && (
+                                            {!isQuizView && user?.role !== 'admin' && (
                                                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
                                                     <div
                                                         className="h-full bg-blue-500 transition-all duration-300 ease-linear"
@@ -572,11 +572,13 @@ onStart={() => {
                                                         <br className="sm:hidden" />
                                                         <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
                                                         <br />
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
-                                                                {Math.round(progress)}% Watched
-                                                            </span>
-                                                        </div>
+                                                         {user?.role !== 'admin' && (
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
+                                                                    {Math.round(progress)}% Watched
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
@@ -726,7 +728,7 @@ onStart={() => {
                             )}
 
                             {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
-                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
+                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} onWatch={(lec) => setCurrentLecture(lec)} id={currentLecture?.id} />}
                         </div>
                     </main>
                 </div>

@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { createCourseWithLectures, createCourse, uploadImage } from '@/api/course';
+import { createCourseWithLectures, createCourse, uploadImage, getAdminCourseById, updateCourse } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
@@ -82,7 +82,11 @@ const AddCoursePage = () => {
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [showCropper, setShowCropper] = useState(false);
-    const [cropSrc, setCropSrc] = useState('');
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const isEditMode = queryParams.get('edit') === 'true';
+    const editId = queryParams.get('id');
+
     const thumbnailInputRef = useRef(null);
 
     const [certificateUploading, setCertificateUploading] = useState(false);
@@ -102,6 +106,56 @@ const AddCoursePage = () => {
         thumbnail: '',
         certificateFile: '',
     });
+
+    /* ── Fetch Data for Edit Mode ── */
+    React.useEffect(() => {
+        if (isEditMode && editId) {
+            const fetchCourse = async () => {
+                setIsSubmitting(true);
+                try {
+                    const res = await getAdminCourseById(editId);
+                    const data = res.data.data;
+                    setCourseForm({
+                        title: data.title || '',
+                        instructor: data.instructor || '',
+                        batchStrength: String(data.batchStrength || ''),
+                        totalLectures: String(data.totalLectures || ''),
+                        certificateCriteria: String(data.certificateCriteria || ''),
+                        unlockCriteria: String(data.unlockCriteria || ''),
+                        duration: data.duration || '',
+                        releaseDate: data.releaseDate ? data.releaseDate.split('T')[0] : '',
+                        thumbnail: data.thumbnail || '',
+                        certificateFile: data.certificateFile || '',
+                    });
+                    
+                    if (data.thumbnail) setThumbnailPreview(data.thumbnail);
+                    if (data.certificateFile) setCertificatePreview(data.certificateFile);
+
+                    // Map lectures to courseItems
+                    if (data.lecturePlaylist || data.lectures) {
+                        const lecs = data.lecturePlaylist || data.lectures;
+                        setCourseItems(lecs.map(l => ({
+                            id: l._id || l.id || Date.now() + Math.random(),
+                            title: l.title,
+                            type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+                            lectureNo: l.lectureNo,
+                            videoUrl: l.videoUrl || '',
+                            audioUrl: l.audioUrl || '',
+                            pdfUrl: l.pdfUrl || '',
+                            quizId: l.quizId || null,
+                        })));
+                    }
+                    setCourseId(editId);
+                } catch (err) {
+                    console.error('Failed to fetch course for edit:', err);
+                    setSubmitError('Failed to fetch course data.');
+                } finally {
+                    setIsSubmitting(false);
+                }
+            };
+            fetchCourse();
+        }
+    }, [isEditMode, editId]);
 
     /* ── Lectures State ── */
     const [courseItems, setCourseItems] = useState([]);
@@ -304,13 +358,17 @@ const AddCoursePage = () => {
                 })),
             };
 
-            await createCourseWithLectures(payload);
+            if (isEditMode) {
+                await updateCourse(editId, payload);
+            } else {
+                await createCourseWithLectures(payload);
+            }
             setSubmitSuccess(true);
             setTimeout(() => navigate('/admin-courses'), 1500);
         } catch (err) {
             console.error('Create course error:', err);
             setSubmitError(
-                err?.response?.data?.message || 'Failed to create course. Please try again.'
+                err?.response?.data?.message || (isEditMode ? 'Failed to update course.' : 'Failed to create course.')
             );
         } finally {
             setIsSubmitting(false);
@@ -349,7 +407,7 @@ const AddCoursePage = () => {
                                                 </svg>
                                             </div>
                                         </div>
-                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">Add New Course</h2>
+                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">{isEditMode ? 'Edit Course' : 'Add New Course'}</h2>
                                     </div>
 
                                     {/* Stepper */}
@@ -643,7 +701,7 @@ const AddCoursePage = () => {
                                             {submitSuccess && (
                                                 <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
                                                     <CheckCircle size={20} />
-                                                    <span className="font-bold text-[14px]">Course created successfully! Redirecting…</span>
+                                                    <span className="font-bold text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
                                                 </div>
                                             )}
                                             {submitError && (
@@ -725,13 +783,15 @@ const AddCoursePage = () => {
                                         {currentStep === 1 ? 'Cancel' : 'Back'}
                                     </button>
                                     <div className="flex gap-4">
-                                        <button
-                                            onClick={() => currentStep === 3 ? handleSubmit('draft') : null}
-                                            disabled={isSubmitting}
-                                            className="px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50"
-                                        >
-                                            Save as draft
-                                        </button>
+                                        {!isEditMode && (
+                                            <button
+                                                onClick={() => currentStep === 3 ? handleSubmit('draft') : null}
+                                                disabled={isSubmitting}
+                                                className="px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                                            >
+                                                Save as draft
+                                            </button>
+                                        )}
                                         <GradiantButton
                                             onClick={() => {
                                                 if (currentStep === 1) handleAdvanceToStep2();
@@ -743,7 +803,7 @@ const AddCoursePage = () => {
                                         >
                                             {isSubmitting
                                                 ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving…</span>
-                                                : currentStep === 3 ? 'Save & Publish' : 'Next'
+                                                : currentStep === 3 ? (isEditMode ? 'Edit Course' : 'Save & Publish') : 'Next'
                                             }
                                         </GradiantButton>
                                     </div>

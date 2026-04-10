@@ -16,6 +16,7 @@ const AdminCoursesPage = () => {
     const [activeTab, setActiveTab] = useState('All');
     const [courses, setCourses] = useState([]);
     const [courseStats, setCourseStats] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -187,7 +188,10 @@ const AdminCoursesPage = () => {
                                     {['All', 'Active Courses', 'Inactive Courses', 'Draft Courses'].map((tab) => (
                                         <button
                                             key={tab}
-                                            onClick={() => setActiveTab(tab)}
+                                            onClick={() => {
+                                                setActiveTab(tab);
+                                                setCurrentPage(1);
+                                            }}
                                             className={`px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === tab
                                                 ? 'bg-[#A78BFA] text-white shadow-sm'
                                                 : 'text-gray-500 hover:text-gray-900'
@@ -204,8 +208,8 @@ const AdminCoursesPage = () => {
                                         There is no any course registered for now
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                        {filteredCourses.map((course) => (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                        {filteredCourses.slice((currentPage - 1) * 12, currentPage * 12).map((course) => (
                                             <CardCourse
                                                 key={course.id}
                                                 course={course}
@@ -216,20 +220,41 @@ const AdminCoursesPage = () => {
                                 )}
 
                                 {/* Pagination */}
-                                <div className="flex justify-end items-center gap-2 mt-8">
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                        Previous
-                                    </button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
-                                    <span className="text-gray-400">...</span>
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        Next
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
-                                </div>
+                                {filteredCourses.length > 12 && (
+                                    <div className="flex justify-end items-center gap-2 mt-8">
+                                        <button 
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                            className={`flex items-center gap-1 text-sm font-medium ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                            Previous
+                                        </button>
+                                        
+                                        {[...Array(Math.ceil(filteredCourses.length / 12))].map((_, i) => (
+                                            <button
+                                                key={i + 1}
+                                                onClick={() => setCurrentPage(i + 1)}
+                                                className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${
+                                                    currentPage === i + 1 
+                                                    ? 'bg-[#6366F1] text-white shadow-sm font-bold' 
+                                                    : 'text-gray-600 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                        
+                                        <button 
+                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / 12), prev + 1))}
+                                            disabled={currentPage === Math.ceil(filteredCourses.length / 12)}
+                                            className={`flex items-center gap-1 text-sm font-medium ${currentPage === Math.ceil(filteredCourses.length / 12) ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                                        >
+                                            Next
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </main>
