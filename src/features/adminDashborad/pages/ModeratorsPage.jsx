@@ -29,7 +29,7 @@ const ModeratorsPage = () => {
         inactiveModerators: 0,
         moderatorsInPool: 0
     });
-    
+
     // Pagination & Loading
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -63,20 +63,27 @@ const ModeratorsPage = () => {
     };
 
     useEffect(() => {
-        const fetchModerators = async () => {
-            try {
-                const response = await getAllUsers();
-                if (response?.data) {
-                    const apiMods = response.data.filter(user => user.role === 'moderator');
-                    setModerators(apiMods);
-                }
-            } catch (error) {
-                console.error("Failed to fetch moderators:", error);
-            }
+        const fetchAllData = async () => {
+            await Promise.all([
+                fetchModeratorsData(),
+                (async () => {
+                    try {
+                        const response = await getAllUsers();
+                        if (response?.data) {
+                            const apiMods = response.data.filter(user => user.role === 'moderator');
+                            setModerators(prev => {
+                                // Only update if we don't have moderators or if specifically needed
+                                // (Keeping user's logic intent)
+                                return apiMods;
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch moderators:", error);
+                    }
+                })()
+            ]);
         };
-        fetchModerators();
-    }, []);
-        fetchModeratorsData();
+        fetchAllData();
     }, [currentPage, statusFilter, fromDate, toDate]);
 
     const handleSearchClick = () => {
@@ -180,11 +187,11 @@ const ModeratorsPage = () => {
 
                                 <div className="mb-6 flex justify-between items-center">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">Moderator List</h3>
-                                    <button 
+                                    <button
                                         onClick={fetchModeratorsData}
                                         className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isLoading ? "animate-spin" : ""}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isLoading ? "animate-spin" : ""}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>
                                         Refresh
                                     </button>
                                 </div>
@@ -236,9 +243,9 @@ const ModeratorsPage = () => {
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <input 
-                                            type="date" 
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" 
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
                                             value={fromDate}
                                             onChange={(e) => setFromDate(e.target.value)}
                                         />
@@ -246,9 +253,9 @@ const ModeratorsPage = () => {
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <input 
-                                            type="date" 
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" 
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
                                             value={toDate}
                                             onChange={(e) => setToDate(e.target.value)}
                                         />
@@ -257,7 +264,7 @@ const ModeratorsPage = () => {
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
                                         <div className="relative">
-                                            <select 
+                                            <select
                                                 value={statusFilter}
                                                 onChange={(e) => setStatusFilter(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
@@ -271,7 +278,7 @@ const ModeratorsPage = () => {
                                         </div>
                                     </div>
 
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setSearchText("");
                                             setStatusFilter("");
@@ -294,8 +301,8 @@ const ModeratorsPage = () => {
                                                 <div className="flex flex-col items-center gap-2 text-gray-400">
                                                     <Search size={48} className="opacity-20" />
                                                     <p className="font-medium text-[16px]">No moderators found matching your criteria</p>
-                                                    <button 
-                                                        onClick={() => {setSearchText(""); setStatusFilter(""); fetchModeratorsData();}}
+                                                    <button
+                                                        onClick={() => { setSearchText(""); setStatusFilter(""); fetchModeratorsData(); }}
                                                         className="text-blue-500 text-sm font-bold hover:underline"
                                                     >
                                                         Clear all filters
@@ -327,7 +334,7 @@ const ModeratorsPage = () => {
                                         <Pagination className="mx-0 w-auto">
                                             <PaginationContent className="gap-2">
                                                 <PaginationItem>
-                                                    <PaginationPrevious 
+                                                    <PaginationPrevious
                                                         onClick={() => !isLoading && currentPage > 1 && setCurrentPage(prev => prev - 1)}
                                                         className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-900 font-medium'}`}
                                                     />
@@ -339,7 +346,7 @@ const ModeratorsPage = () => {
                                                         const isActive = currentPage === pageNum;
                                                         return (
                                                             <PaginationItem key={i}>
-                                                                <PaginationLink 
+                                                                <PaginationLink
                                                                     onClick={() => !isLoading && setCurrentPage(pageNum)}
                                                                     isActive={isActive}
                                                                     className={`cursor-pointer w-10 h-10 border-none rounded-lg text-[14px] font-medium transition-all ${isActive ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md hover:text-white hover:opacity-90' : 'text-gray-900 hover:bg-gray-100'}`}
@@ -359,7 +366,7 @@ const ModeratorsPage = () => {
                                                 })}
 
                                                 <PaginationItem>
-                                                    <PaginationNext 
+                                                    <PaginationNext
                                                         onClick={() => !isLoading && currentPage < totalPages && setCurrentPage(prev => prev + 1)}
                                                         className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-900 font-medium'}`}
                                                     />

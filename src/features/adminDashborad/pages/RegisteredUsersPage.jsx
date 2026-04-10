@@ -52,62 +52,61 @@ const RegisteredUsersPage = () => {
                 let filteredUsers = usersRes?.data || [];
                 const allEnrollments = enrollmentsRes?.data || [];
 
-                    // Filter by role first
-                    if (userType.includes('student')) {
-                        filteredUsers = filteredUsers.filter(u => u.role === 'user');
-                    } else if (userType.includes('moderator')) {
-                        filteredUsers = filteredUsers.filter(u => u.role === 'moderator');
-                    }
+                // Filter by role first
+                if (userType.includes('student')) {
+                    filteredUsers = filteredUsers.filter(u => u.role === 'user');
+                } else if (userType.includes('moderator')) {
+                    filteredUsers = filteredUsers.filter(u => u.role === 'moderator');
+                }
 
                 const formattedData = filteredUsers.map(user => {
                     const userEnrollments = allEnrollments.filter(e => e.userId && (e.userId._id === user._id || e.userId === user._id));
                     const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
 
-                        let totalProgress = 0;
-                        const hasActivity = userEnrollments.some(e => e.isCompleted || (e.completedLectures && e.completedLectures.length > 0));
-                        const hasEnrollments = userEnrollments.length > 0;
+                    let totalProgress = 0;
+                    const hasActivity = userEnrollments.some(e => e.isCompleted || (e.completedLectures && e.completedLectures.length > 0));
+                    const hasEnrollments = userEnrollments.length > 0;
 
-                        if (hasEnrollments) {
-                            const sumOfProgress = userEnrollments.map(e => {
-                                if (e.isCompleted) return 100;
-                                if (!e.completedLectures?.length) return 0;
-                                return e.completedLectures.reduce((sum, l) => sum + (l.watchedPercentage || 0), 0) / e.completedLectures.length;
-                            }).reduce((a, b) => a + b, 0);
-                            totalProgress = Math.round(sumOfProgress / userEnrollments.length);
-                        }
+                    if (hasEnrollments) {
+                        const sumOfProgress = userEnrollments.map(e => {
+                            if (e.isCompleted) return 100;
+                            if (!e.completedLectures?.length) return 0;
+                            return e.completedLectures.reduce((sum, l) => sum + (l.watchedPercentage || 0), 0) / e.completedLectures.length;
+                        }).reduce((a, b) => a + b, 0);
+                        totalProgress = Math.round(sumOfProgress / userEnrollments.length);
+                    }
 
-                        // Determine Dynamic Status
-                        let dynamicStatus = "Pending";
-                        if (hasActivity) {
-                            dynamicStatus = "Active";
-                        } else if (hasEnrollments) {
-                            dynamicStatus = "In-active";
-                        }
+                    // Determine Dynamic Status
+                    let dynamicStatus = "Pending";
+                    if (hasActivity) {
+                        dynamicStatus = "Active";
+                    } else if (hasEnrollments) {
+                        dynamicStatus = "In-active";
+                    }
 
-                        return {
-                            id: user._id,
-                            name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username || "Unknown",
-                            email: user.email,
-                            phone: user.phone || "0322 123456",
-                            enrollments: enrolledCourseNames.length > 0 ? enrolledCourseNames : ["N/A"],
-                            progress: `${totalProgress}%`,
-                            lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
-                            status: dynamicStatus,
-                            rawStatus: user.status // preserve original if needed
-                        };
-                    });
+                    return {
+                        id: user._id,
+                        name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username || "Unknown",
+                        email: user.email,
+                        phone: user.phone || "0322 123456",
+                        enrollments: enrolledCourseNames.length > 0 ? enrolledCourseNames : ["N/A"],
+                        progress: `${totalProgress}%`,
+                        lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
+                        status: dynamicStatus,
+                        rawStatus: user.status // preserve original if needed
+                    };
+                });
 
-                    // Re-apply type filtering on formatted data with dynamic status
-                    let finalUsers = formattedData;
-                    if (userType === 'active_students') finalUsers = formattedData.filter(u => u.status === 'Active');
-                    if (userType === 'inactive_students') finalUsers = formattedData.filter(u => u.status === 'In-active');
-                    if (userType === 'pending_students') finalUsers = formattedData.filter(u => u.status === 'Pending');
-                    if (userType === 'active_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'active' || u.rawStatus === undefined);
-                    if (userType === 'inactive_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'in-active');
-                    if (userType === 'moderator_pool') finalUsers = formattedData.filter(u => u.rawStatus === 'pending');
+                // Re-apply type filtering on formatted data with dynamic status
+                let finalUsers = formattedData;
+                if (userType === 'active_students') finalUsers = formattedData.filter(u => u.status === 'Active');
+                if (userType === 'inactive_students') finalUsers = formattedData.filter(u => u.status === 'In-active');
+                if (userType === 'pending_students') finalUsers = formattedData.filter(u => u.status === 'Pending');
+                if (userType === 'active_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'active' || u.rawStatus === undefined);
+                if (userType === 'inactive_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'in-active');
+                if (userType === 'moderator_pool') finalUsers = formattedData.filter(u => u.rawStatus === 'pending');
 
-                    setUsers(finalUsers);
-                }
+                setUsers(finalUsers);
             } catch (error) {
                 console.error("Failed to fetch registered users data:", error);
             } finally {
