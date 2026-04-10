@@ -17,9 +17,9 @@ function Analytics({ userCourses, courseData, name, className }) {
     } : {};
 
     const courseOverviewStats = courseData ? {
-        col1: { value: courseData.quizScore ?? "N/A", label: "Quiz Score", color: "#22C55E" },
-        col2: { value: courseData.lectureCompleted ?? 0, label: "Lecture Completed", color: "#3758EE" },
-        col3: { value: courseData.timeSpentLastWeek ?? "N/A", label: "Time Spent Last week", color: "#B666E7" },
+        col1: courseData.overview ? { value: courseData.overview.completed ?? 0, label: "Completed", color: "#22C55E" } : { value: courseData.quizScore ?? "N/A", label: "Quiz Score", color: "#22C55E" },
+        col2: courseData.overview ? { value: courseData.overview.inProgress ?? 0, label: "In Progress", color: "#3758EE" } : { value: courseData.lectureCompleted ?? 0, label: "Lecture Completed", color: "#3758EE" },
+        col3: courseData.overview ? { value: courseData.overview.timeSpentLastWeek ?? "0h 0m", label: "Time Spent Last week", color: "#B666E7" } : { value: courseData.timeSpentLastWeek ?? "N/A", label: "Time Spent Last week", color: "#B666E7" },
     } : undefined;
 
     const coursePerformanceProps = courseData ? {
@@ -28,8 +28,8 @@ function Analytics({ userCourses, courseData, name, className }) {
     } : {};
 
     return (
-        <div className={`flex max-[973px]:flex-col gap-6 ${className} pb-4`}>
-            <div className='w-full flex flex-col gap-6 justify-between'>
+        <div className={`grid grid-cols-1 xl:grid-cols-3 gap-6 ${className} pb-4`}>
+            <div className='xl:col-span-2 flex flex-col gap-6 justify-between'>
                 <div className='w-full'>
                     <MetricCard
                         className="w-full"
@@ -46,7 +46,7 @@ function Analytics({ userCourses, courseData, name, className }) {
                 </div>
             </div>
             <PerformanceCard
-                className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
+                className="shadow-sm w-full"
                 userCourses={userCourses}
                 name={name || "Overall Performance"}
                 {...coursePerformanceProps}

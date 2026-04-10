@@ -43,7 +43,7 @@ const StudentDetailsPage = () => {
                 setLoading(true);
                 const res = await getUserProfileById(id);
                 if (res?.data) {
-                    setProfileData({ user: res.data });
+                    setProfileData(res.data);
                 }
             } catch (error) {
                 console.error("Error fetching student profile data:", error);

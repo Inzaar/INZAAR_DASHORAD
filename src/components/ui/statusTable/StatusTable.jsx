@@ -90,14 +90,14 @@ function StatusTable({ userCourses }) {
             <h3 className="font-bold text-gray-900 mb-6">Current status</h3>
             <div className="min-w-[1080px]">
                 <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                    <div className="w-[134px]  flex items-center justify-center">Courses</div>
-                    <div className="w-[134px] flex items-center justify-center">Lecture</div>
-                    <div className="w-[134px] flex items-center justify-center">Title</div>
-                    <div className="w-[134px] flex items-center justify-center">Date</div>
-                    <div className="w-[134px] flex items-center justify-center">Progress</div>
-                    <div className="w-[134px] flex items-center justify-center">Next Lecture</div>
-                    <div className="w-[134px] flex items-center justify-center">Comments</div>
-                    <div className="w-[134px] flex items-center justify-center">Action</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Courses</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Lecture</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Title</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Date</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Progress</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Next Lecture</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Comments</div>
+                    <div className="flex-1 min-w-[120px] flex items-center justify-center">Action</div>
                 </div>
                 <div className="flex flex-col gap-4">
                     {currentData.map((item) => (

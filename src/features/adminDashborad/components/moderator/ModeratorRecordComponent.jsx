@@ -3,28 +3,37 @@ import MetricCard from '@/components/shared/MetricCard';
 import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-
-const studentsData = [
-    { id: 1, name: "Zain", email: "zain@gmail.com", phone: "0322 123456", progress: "40%", lastLogin: "05-Feb-2025", status: "In-active" },
-    { id: 2, name: "Majid", email: "majid@gmail.com", phone: "0312 123488", progress: "80%", lastLogin: "14-Sep-2025", status: "Active" },
-    { id: 3, name: "Usama", email: "usama@gmail.com", phone: "0300 123222", progress: "40%", lastLogin: "01-Sep-2025", status: "In-active" },
-    { id: 4, name: "Noman", email: "noman@gmail.com", phone: "0323 123456", progress: "70%", lastLogin: "19-Sep-2025", status: "Active" }
-];
+import { getModeratorStudents } from '@/api/user';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ModeratorRecordComponent({ profileData }) {
+    const { id } = useParams();
+    const navigate = useNavigate();
     const user = profileData?.user || {};
-    const apiStats = user.stats || {};
+    const apiStats = profileData?.stats || {};
 
     // Extract unique courses from assigned batches
     const courses = useMemo(() => {
-        const assignedBatches = user.assignedBatches || [];
+        const assignedBatches = profileData?.assignedBatches || [];
         const uniqueCoursesArr = Array.from(new Set(assignedBatches.map(b => b.courseId?.title).filter(Boolean)));
         return uniqueCoursesArr.length > 0 ? uniqueCoursesArr : ["Stress Management Course", "Imaniyaat Course", "Namaz Course"];
-    }, [user]);
+    }, [profileData]);
 
     const [selectedCourse, setSelectedCourse] = useState(courses[0]);
+    useEffect(() => {
+        if (courses.length > 0 && (!selectedCourse || !courses.includes(selectedCourse))) {
+            setSelectedCourse(courses[0]);
+        }
+    }, [courses, selectedCourse]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    // Pagination and table state
+    const [students, setStudents] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [filteredStats, setFilteredStats] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -36,23 +45,42 @@ export default function ModeratorRecordComponent({ profileData }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Combine API data with fallback mocks from Image 2
-    // Using nullish coalescing (??) to allow 0 as a valid value from API
-    const moderatorStats = {
-        totalEnrolled: apiStats.totalEnrolled ?? 55,
-        activeStudents: apiStats.activeStudents ?? 8,
-        inActiveStudents: apiStats.inActiveStudents ?? 2,
-        averageSpendRate: apiStats.averageSpendRate ?? "44%",
-        completionRate: apiStats.completionRate ?? 88,
-        trend: apiStats.improvement ?? "2.7%"
-    };
-
-    // Logging only during development to verify API connection
+    // Fetch students based on course and pagination
     useEffect(() => {
-        if (profileData) {
-            console.log("Current Moderator Data & Stats:", profileData);
-        }
-    }, [profileData]);
+        const fetchStudents = async () => {
+            if (!id || !selectedCourse) return;
+            try {
+                setLoadingStudents(true);
+                const res = await getModeratorStudents(id, selectedCourse, currentPage, 5);
+                if (res?.data) {
+                    setStudents(res.data.students);
+                    setTotalPages(res.data.totalPages);
+                    setFilteredStats(res.data.stats);
+                }
+            } catch (error) {
+                console.error("Error fetching students:", error);
+            } finally {
+                setLoadingStudents(false);
+            }
+        };
+
+        fetchStudents();
+    }, [id, selectedCourse, currentPage]);
+
+    // Reset pagination when course changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCourse]);
+
+    // Combine API data with fallback mocks
+    const moderatorStats = {
+        totalEnrolled: filteredStats?.totalEnrolled ?? apiStats.totalEnrolled ?? 0,
+        activeStudents: filteredStats?.activeStudents ?? apiStats.activeStudents ?? 0,
+        inActiveStudents: filteredStats?.inActiveStudents ?? apiStats.inActiveStudents ?? 0,
+        averageSpendRate: filteredStats?.averageSpendRate ?? apiStats.averageSpendRate ?? "0%",
+        completionRate: filteredStats?.completionRate ?? apiStats.completionRate ?? 0,
+        trend: filteredStats?.improvement ?? apiStats.improvement ?? "2.7%"
+    };
 
     return (
         <div className="w-full font-sans bg-white pb-8 mt-[20px] rounded-[10px]">
@@ -109,7 +137,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                     <div className="w-full">
                         <OverviewCard
                             className="w-full max-w-full shadow-sm"
-                            showCircles={true} // ONLY ACTIVE ON THIS PAGE
+                            showCircles={true}
                             statsOverride={{
                                 col1: { value: moderatorStats.activeStudents, label: "Active Students", color: "#22C55E" },
                                 col2: { value: moderatorStats.inActiveStudents, label: "In Active Students", color: "#3758EE" },
@@ -124,7 +152,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                     className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
                     name="Course Completion Rate"
                     percentageOverride={moderatorStats.completionRate}
-                    trendOverride={moderatorStats.trend.replace('%', '')}
+                    trendOverride={moderatorStats.trend?.replace('%', '') || 2.7}
                 />
             </div>
 
@@ -132,7 +160,12 @@ export default function ModeratorRecordComponent({ profileData }) {
             <div className="w-full">
                 <h3 className="text-[17px] font-semibold text-gray-800 mb-4 px-2">Student Table</h3>
 
-                <div className="bg-white rounded-[12px] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] w-full overflow-hidden">
+                <div className="bg-white rounded-[12px] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] w-full overflow-hidden relative">
+                    {loadingStudents && (
+                        <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                            <div className="w-8 h-8 border-4 border-[#8B5CF6] border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    )}
                     <div className="overflow-x-auto w-full">
                         <table className="w-full min-w-[800px] text-left border-separate border-spacing-y-3">
                             <thead>
@@ -146,29 +179,42 @@ export default function ModeratorRecordComponent({ profileData }) {
                                 </tr>
                             </thead>
                             <tbody className="before:block before:h-2">
-                                {studentsData.map((student) => (
-                                    <tr key={student.id} className="bg-[#F8F9FA] hover:bg-gray-100 transition-colors shadow-sm">
-                                        <td className="py-4 px-6 text-[13px] font-medium text-gray-700 rounded-l-[8px]">{student.name}</td>
-                                        <td className="py-4 px-6">
-                                            <div className="flex flex-col gap-[2px]">
-                                                <span className="text-[13px] font-medium text-gray-700">{student.email}</span>
-                                                <span className="text-[12px] text-gray-500">{student.phone}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6 text-[13px] text-gray-700 text-center font-medium">{student.progress}</td>
-                                        <td className="py-4 px-6 text-[13px] text-gray-600">{student.lastLogin}</td>
-                                        <td className="py-4 px-6 text-[13px] font-medium">
-                                            <span className={student.status === 'Active' ? 'text-green-500' : 'text-red-500'}>
-                                                {student.status}
-                                            </span>
-                                        </td>
-                                        <td className="py-4 px-6 text-center rounded-r-[8px]">
-                                            <GradiantButton className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]">
-                                                View Profile
-                                            </GradiantButton>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {students.length > 0 ? (
+                                    students.map((student) => (
+                                        <tr key={student.id} className="bg-[#F8F9FA] hover:bg-gray-100 transition-colors shadow-sm">
+                                            <td className="py-4 px-6 text-[13px] font-medium text-gray-700 rounded-l-[8px]">{student.name}</td>
+                                            <td className="py-4 px-6">
+                                                <div className="flex flex-col gap-[2px]">
+                                                    <span className="text-[13px] font-medium text-gray-700">{student.email}</span>
+                                                    <span className="text-[12px] text-gray-500">{student.phone}</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-6 text-[13px] text-gray-700 text-center font-medium">{student.progress}</td>
+                                            <td className="py-4 px-6 text-[13px] text-gray-600">{student.lastLogin}</td>
+                                            <td className="py-4 px-6 text-[13px] font-medium">
+                                                <span className={student.status === 'Active' ? 'text-green-500' : 'text-red-500'}>
+                                                    {student.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-center rounded-r-[8px]">
+                                                <GradiantButton 
+                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                    className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]"
+                                                >
+                                                    View Profile
+                                                </GradiantButton>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    !loadingStudents && (
+                                        <tr>
+                                            <td colSpan="6" className="text-center py-12 text-gray-500 font-medium">
+                                                No students found for this course.
+                                            </td>
+                                        </tr>
+                                    )
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -176,15 +222,30 @@ export default function ModeratorRecordComponent({ profileData }) {
 
                 {/* Pagination */}
                 <div className="flex justify-end items-center gap-2 mt-6 px-2">
-                    <button className="flex items-center gap-1 text-[13px] font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1 || loadingStudents}
+                        className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                    >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                         Previous
                     </button>
-                    <button className="w-8 h-8 flex items-center justify-center text-[13px] font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">1</button>
-                    <button className="w-8 h-8 flex items-center justify-center text-[13px] font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                    <button className="w-8 h-8 flex items-center justify-center text-[13px] font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">3</button>
-                    <span className="text-gray-400 px-1 text-[13px]">...</span>
-                    <button className="flex items-center gap-1 text-[13px] font-medium text-gray-600 hover:text-gray-900 transition-colors">
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                        <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`w-8 h-8 flex items-center justify-center text-[13px] rounded-lg transition-colors ${currentPage === pageNum ? 'font-bold text-white bg-[#6366F1] shadow-sm' : 'font-medium text-gray-600 hover:bg-gray-100'}`}
+                        >
+                            {pageNum}
+                        </button>
+                    ))}
+
+                    <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages || loadingStudents || totalPages === 0}
+                        className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === totalPages || totalPages === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                    >
                         Next
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                     </button>

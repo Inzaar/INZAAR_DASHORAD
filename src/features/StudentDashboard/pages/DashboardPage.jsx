@@ -214,6 +214,7 @@ const DashboardPage = () => {
                                                             image={selectedCourseData?.thumbnail}
                                                             lecture={String(lecture.lectureNo).padStart(2, '0')}
                                                             className="shadow-sm"
+                                                            onClick={() => navigate(`/course-view?id=${selectedCourseData._id}&lectureId=${lecture._id}`)}
                                                         />
                                                     ))
                                                 ) : (

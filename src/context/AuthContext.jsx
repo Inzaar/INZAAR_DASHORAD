@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
                     firstname: profile.firstname,
                     email: profile.email,
                     role: profile.role || 'student',
+                    profileImageUrl: profile.profileImageUrl || null,
                     loggedIn: true
                 });
             } else {

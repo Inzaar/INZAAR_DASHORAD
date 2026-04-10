@@ -52,13 +52,7 @@ const AdminCourseDetailPage = () => {
 
     const lectures = courseData?.lectures || [];
 
-    const students = [
-        { id: 1, name: 'Zain', email: 'zain@gmail.com', phone: '0322 123456', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '05-Feb-2025', status: 'In-active' },
-        { id: 2, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 3, name: 'Usama', email: 'usama@gmail.com', phone: '0300 123222', enrollments: ['Imaniyaat Course', 'Stress Management'], progress: '40%', lastLogin: '01-Sep-2025', status: 'In-active' },
-        { id: 4, name: 'Majid', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Delivery under review'], progress: '90%', lastLogin: '14-Sep-2025', status: 'Active' },
-        { id: 5, name: 'Noman', email: 'majid@gmail.com', phone: '0322 123456', enrollments: ['Namaz Courses'], progress: '70%', lastLogin: '19-Sep-2025', status: 'Active' },
-    ];
+    const students = courseData?.students || [];
 
     if (loading) {
         return (
@@ -113,7 +107,7 @@ const AdminCourseDetailPage = () => {
                             </div>
 
                             {/* Stats Grid */}
-                            <Analytics />
+                            <Analytics courseData={courseData} />
 
                             {/* Lectures Section */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
@@ -154,12 +148,28 @@ const AdminCourseDetailPage = () => {
                                                 Type: {lecture.type || 'Video'}
                                             </p>
 
-                                            <GradiantButton
-                                                onClick={() => navigate(`/admin-course-play?id=${id}`)}
+
+<GradiantButton
+    onClick={() => {
+        // ✅ Redirect both Quiz and Video lectures to the play page
+        // The play page (CourseView) will handle rendering the "Start Quiz" UI for quizzes
+        const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
+        navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
+    }}
+    className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
+>
+    View Details
+</GradiantButton>
+
+                                            {/* <GradiantButton
+                                                onClick={() => {
+                                                    const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
+                                                    navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
+                                                }}
                                                 className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
                                             >
                                                 View Details
-                                            </GradiantButton>
+                                            </GradiantButton> */}
                                         </div>
                                     ))}
                                 </div>

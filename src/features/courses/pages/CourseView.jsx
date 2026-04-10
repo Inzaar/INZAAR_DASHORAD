@@ -6,10 +6,14 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { getCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
+import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
 import { useAuth } from "@/context/AuthContext";
-import { Loader } from "lucide-react";
+import { Loader, GraduationCap } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
+import AdminLectureList from "../components/AdminLectureList";
+import LectureQuizAssessment from "../components/LectureQuizAssessment";
+import QuizStartOverlay from "../components/QuizStartOverlay";
+import fallbackImg from "@/assets/images/coursespage.jpg";
 
 const CourseView = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -22,6 +26,7 @@ const CourseView = () => {
 
     const firstName = localStorage.getItem("firstName");
     const courseId = new URLSearchParams(window.location.search).get("id");
+    const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
 
     // Certificate / congrats state
     const [showCongrats, setShowCongrats] = React.useState(false);
@@ -31,6 +36,7 @@ const CourseView = () => {
 
     // Fetch enrolled courses list (for Analytics / StatusTable)
     useEffect(() => {
+        if (user?.role === 'admin') return;
         const fetchUserCourses = async () => {
             try {
                 const res = await getEnrolledCoursesByUserId();
@@ -40,7 +46,7 @@ const CourseView = () => {
             }
         };
         fetchUserCourses();
-    }, []);
+    }, [user?.role]);
 
     // Fetch specific course detail
     useEffect(() => {
@@ -48,19 +54,31 @@ const CourseView = () => {
         const fetchCourse = async () => {
             setLoading(true);
             try {
-                const res = await getCourseById(courseId);
+                const res = user?.role === 'admin'
+                    ? await getAdminCourseById(courseId)
+                    : await getCourseById(courseId);
                 const data = res.data.data;
                 setCourseData(data);
 
                 // Set the ongoing/first lecture as the playing lecture
                 // IMPORTANT: normalise to always use "id" (not "_id") so the progress
                 // tracker can find it reliably via currentLecture?.id
-                const rawStart = data.ongoingLecture || data.lecturePlaylist?.[0] || null;
+                const rawLectures = data.lecturePlaylist || data.lectures || [];
+                const normalizedLecs = rawLectures.map(l => ({
+                    ...l,
+                    id: l.id || l._id,
+                    type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture')
+                }));
+                const videoLecs = normalizedLecs.filter(l => l.type !== 'Quiz');
+                const targetLec = targetLectureId ? normalizedLecs.find(l => l.id === targetLectureId) : null;
+                const rawStart = targetLec || videoLecs[0] || data.ongoingLecture || normalizedLecs[0] || null;
+
                 if (rawStart) {
                     setCurrentLecture({
                         ...rawStart,
                         id: rawStart.id || rawStart._id,           // ensure .id always exists
                         lastWatchedTime: rawStart.lastWatchedTime || 0,
+                        type: rawStart.type || (rawStart.status === 'Quiz' ? 'Quiz' : 'Lecture')
                     });
                 }
 
@@ -109,23 +127,28 @@ const CourseView = () => {
 
     // Build lectures list from API data
     // videoId comes directly from the backend (pre-extracted), fallback to client-side extraction
-    const lectures = courseData?.lecturePlaylist?.map(l => ({
+    const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
+    const lectures = rawLecturesList.map(l => ({
         id: l._id,
         title: l.title,
         lectureNo: l.lectureNo,
         date: l.date,
         videoId: l.videoId || extractYouTubeId(l.videoUrl),  // prefer backend-extracted ID
-        isLocked: l.isLocked,
+        isLocked: user?.role === 'admin' ? false : l.isLocked,
         isCompleted: l.isCompleted,
         videoUrl: l.videoUrl,
         audioUrl: l.audioUrl,
         pdfUrl: l.pdfUrl,
         status: l.status,
+        type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+        quizId: l.quizId || null,
     })) || [];
 
     const [currentLecture, setCurrentLecture] = React.useState(null);
     const [progress, setProgress] = React.useState(0);
     const playerRef = React.useRef(null);
+
+    const isQuizView = currentLecture?.type === 'Quiz';
     const containerRef = React.useRef(null);
 
     // Throttle: timestamp of the last progress API call (ms)
@@ -233,6 +256,7 @@ const CourseView = () => {
                     // Handle both .id (mapped lectures) and ._id (raw API objects)
                     const lectureId = currentLecture?.id || currentLecture?._id;
                     const shouldReport =
+                        user?.role !== 'admin' &&
                         lectureId &&
                         courseId &&
                         percent > 0 &&
@@ -400,9 +424,9 @@ const CourseView = () => {
                     </div>
                 </div>
             )}
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
+                <div className={`flex flex-col lg:flex-row px-2 sm:px-4 lg:px-6 xl:px-8 gap-4 flex-1 overflow-hidden relative`}>
 
                     {isSidebarOpen && (
                         <div
@@ -414,38 +438,84 @@ const CourseView = () => {
                     <Sidebar
                         onClose={() => setIsSidebarOpen(false)}
                         className={`
-                        transition-transform duration-300 ease-in-out z-40
-                        lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
-                        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    `} />
+                            transition-transform duration-300 ease-in-out z-40
+                            lg:translate-x-0 lg:static lg:block
+                            fixed left-0 top-0 h-full w-[280px] sm:w-[320px] lg:w-auto shadow-2xl bg-white
+                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        `}
+                    />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+                    <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide`} style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="py-4 pr-2">
-                            <div className="flex justify-between items-end mb-8">
-                                <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                        <div className={`py-4 pr-2`}>
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+                                    <div>
+                                        <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
+                                        {user?.role !== 'admin' && (
+                                            <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                        )}
+                                    </div>
+                                    {user?.role === 'admin' ? (
+                                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                                            <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
+                                                Download Certificate
+                                            </GradiantButton>
+                                            <GradiantButton className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
+                                                Edit
+                                            </GradiantButton>
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
+                                                Enrolled New Course
+                                            </GradiantButton>
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                                +
+                                            </GradiantButton>
+                                        </div>
+                                    )}
                                 </div>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    Enrolled New Course
-                                </GradiantButton>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    +
-                                </GradiantButton>
-                            </div>
+
                             <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
-                            <div className="relative flex flex-col lg:block gap-6 mt-5">
-                                {/* Ongoing Lecture Section - Left Side */}
-                                <div className="w-full lg:w-[70%] flex flex-col gap-4">
+
+                            <div className={`relative flex flex-col lg:flex-row gap-6 mt-5 min-h-0`}>
+                                <div className={`w-full lg:w-[70%] flex flex-col gap-4`}>
                                     <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
-                                    <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 h-fit">
-                                        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black group">
-                                            {/* YouTube Iframe with controls visible */}
-                                            {currentLecture?.videoId ? (
+                                    <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
+                                        <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
+                                            {/* YouTube Iframe or Quiz Assessment */}
+                                            {currentLecture?.type === 'Quiz' ? (
+                                                <QuizStartOverlay
+                                                    lecture={currentLecture}
+                                                    courseData={courseData}
+onStart={() => {
+    // ✅ Always use current page as returnPath, ignore any passed returnPath
+    // This works for both cases:
+    // - from admin-course-play: window.location = /admin-course-play?id=...
+    // - from admin-course-view: window.location = /admin-course-view/69d3c9... (but this case
+    //   now goes directly to admin-course-play with returnPath set, so onStart runs on admin-course-play)
+    const currentPath = window.location.pathname + window.location.search;
+    
+    // Remove the returnPath param from currentPath to avoid nesting
+    const cleanParams = new URLSearchParams(window.location.search);
+    cleanParams.delete('returnPath');
+    cleanParams.delete('lectureId');
+    const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+    const cleanPath = window.location.pathname + cleanSearch;
+
+    const returnPath = encodeURIComponent(cleanPath);
+
+    const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+    if (currentLecture.quizId) {
+        navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+    } else {
+        navigate(`/quiz-take/${currentLecture.id}${query}`);
+    }
+                                                    }}
+                                                />
+                                            ) : currentLecture?.videoId ? (
                                                 <YouTube
                                                     key={currentLecture.id}
                                                     videoId={currentLecture.videoId}
@@ -462,145 +532,175 @@ const CourseView = () => {
                                                     iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                                                    <p className="text-white/50 text-sm">No video available</p>
+                                                <div
+                                                    className="w-full h-full flex items-center justify-center relative cursor-pointer"
+                                                    onClick={() => {
+                                                        // If it's a placeholder but should be a quiz (perhaps type is Quiz but no videoId)
+                                                        if (currentLecture?.type === 'Quiz') {
+                                                            // Logic already handles rendering LectureQuizAssessment above, 
+                                                            // but if we want "click anywhere" to show it even if videoId exists (unlikely)
+                                                        }
+                                                    }}
+                                                >
+                                                    <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/50"></div>
+                                                    <div className="relative z-10 w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md cursor-pointer hover:scale-110 transition-transform">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                    </div>
                                                 </div>
                                             )}
 
                                             {/* Gradient Overlay for Text Visibility */}
-                                            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                                            {!isQuizView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
 
                                             {/* Progress Bar */}
-                                            <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
-                                                <div
-                                                    className="h-full bg-blue-500 transition-all duration-300 ease-linear"
-                                                    style={{ width: `${progress}%` }}
-                                                />
-                                            </div>
+                                            {!isQuizView && (
+                                                <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
+                                                    <div
+                                                        className="h-full bg-blue-500 transition-all duration-300 ease-linear"
+                                                        style={{ width: `${progress}%` }}
+                                                    />
+                                                </div>
+                                            )}
 
                                             {/* Lecture Info Overlay (Top Left) */}
-                                            <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300">
-                                                <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md">{currentLecture?.title}</h2>
-                                                <div className="text-xs sm:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                    <span>Lecture:{currentLecture?.lectureNo}</span>
-                                                    <br />
-                                                    <span>Date:{currentLecture?.date}</span>
-                                                    <br />
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[10px] sm:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
-                                                            {Math.round(progress)}% Watched
-                                                        </span>
+                                            {!isQuizView && (
+                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
+                                                    <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
+                                                    <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
+                                                        <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
+                                                        <br className="sm:hidden" />
+                                                        <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
+                                                        <br />
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
+                                                                {Math.round(progress)}% Watched
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            )}
 
                                             {/* Right Side Action Buttons Overlay */}
-                                            <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
-                                                {/* Profile Icon */}
-                                                <img
-                                                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                                                    alt="Instructor"
-                                                    className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
-                                                />
+                                            {!isQuizView && (
+                                                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
+                                                    {/* Profile Icon */}
+                                                    <img
+                                                        src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                        alt="Instructor"
+                                                        className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
+                                                    />
 
-                                                {/* Action Buttons Stack */}
-                                                <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors shadow-lg group/btn">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
-                                                </button>
-                                                <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
-                                                </button>
-                                                <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                                                </button>
-                                            </div>
+                                                    {/* Action Buttons Stack */}
+                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors shadow-lg group/btn">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
+                                                    </button>
+                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
+                                                    </button>
+                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Lectures Playlist Section - Right Side */}
-                                <div className="w-full lg:w-[calc(30%-1.5rem)] flex flex-col gap-4 lg:absolute lg:top-0 lg:right-0 lg:bottom-0">
-                                    <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                    <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto min-h-0 no-scrollbar">
-                                        <div className="flex flex-row lg:flex-col gap-3">
-                                            {lectures.map((lecture, index) => (
-                                                <div
-                                                    key={lecture.id}
-                                                    onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
-                                                    className={`
-                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0
-                                                    w-[60vw] sm:w-[320px] lg:w-full
+                                 {/* Lectures Playlist Section - Right Side - Only if not quiz */}
+                                 <div className="w-full lg:w-[30%] flex flex-col gap-4">
+                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
+                                         <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0 scroll-smooth snap-x">
+                                            <div className="flex flex-row lg:flex-col gap-3">
+                                                {lectures.map((lecture, index) => (
+                                                    <div
+                                                        key={lecture.id}
+                                                        onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
+                                                        className={`
+                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                                                    w-[75vw] sm:w-[320px] lg:w-full
                                                     ${currentLecture?.id === lecture.id
-                                                            ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
-                                                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                                                        }
+                                                                ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
+                                                                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                            }
                                                     ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
+                                                    ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
                                                 `}
-                                                >
-                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-2">
-                                                        <img
-                                                            src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : `https://placehold.co/600x400/000000/FFF?text=${lecture.title}`}
-                                                            alt={lecture.title}
-                                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                        />
+                                                    >
+                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
+                                                            <img
+                                                                src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
+                                                                alt={lecture.title}
+                                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                            />
 
-                                                        {/* Overlays */}
-                                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                                                            {/* Overlays */}
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
 
-                                                        {lecture.isLocked ? (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
-                                                                <div className="bg-white/20 p-2 rounded-full backdrop-blur-md">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                            {/* Title & Info completely overlaying the graphic */}
+                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                                                <div className="flex justify-between items-start">
+                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                                                        {lecture.title}
+                                                                    </h4>
+                                                                </div>
+                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                                                    Lecture:{String(lecture.lectureNo).padStart(2, '0')}
+                                                                </div>
+                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                                                    Date: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
                                                                 </div>
                                                             </div>
-                                                        ) : (
-                                                            <div className={`absolute inset-0 flex items-center justify-center ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                <div className="bg-white/90 p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+
+                                                            {lecture.isLocked ? (
+                                                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                    </div>
                                                                 </div>
+                                                            ) : lecture.type === 'Quiz' ? (
+                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                        <GraduationCap className="text-white w-5 h-5" />
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="absolute top-2 right-2 z-20">
+                                                                <img
+                                                                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                                    alt="Instructor"
+                                                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                                                />
                                                             </div>
+                                                        </div>
+
+                                                        {/* Active Indicator Strip */}
+                                                        {currentLecture?.id === lecture.id && (
+                                                            <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
                                                         )}
 
-                                                        <div className="absolute top-2 right-2">
-                                                            <img
-                                                                src="https://randomuser.me/api/portraits/men/32.jpg"
-                                                                alt="Instructor"
-                                                                className="w-8 h-8 rounded-full border border-white shadow-sm"
-                                                            />
-                                                        </div>
+                                                        {/* Completion Checkmark */}
+                                                        {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                                                            <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
+                                                            </div>
+                                                        )}
                                                     </div>
-
-                                                    <div className="px-1">
-                                                        <h4 className={`font-bold text-sm mb-1 ${currentLecture?.id === lecture.id ? 'text-blue-600' : 'text-gray-800'}`}>
-                                                            {lecture.title}
-                                                        </h4>
-                                                        <div className="flex justify-between items-center text-xs text-gray-500">
-                                                            <span>Lecture:{lecture.lectureNo}</span>
-                                                            <span>Date:{lecture.date}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Active Indicator Strip */}
-                                                    {currentLecture?.id === lecture.id && (
-                                                        <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
-                                                    )}
-
-                                                    {/* Completion Checkmark */}
-                                                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
-                                                        <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                                ))}
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Lecture Notes Section */}
-                            {user?.role !== 'admin' && (
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20">
+                    {/* Lecture Notes Section */}
+                            {!isQuizView && user?.role !== 'admin' && (
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20 text-left">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
 
                                     <div className="flex flex-col gap-3 mb-6">
@@ -625,9 +725,9 @@ const CourseView = () => {
                                 </div>
                             )}
 
-                            <StatusTable userCourses={userCourses} />
+                            {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
+                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
                         </div>
-
                     </main>
                 </div>
 
@@ -641,8 +741,8 @@ const CourseView = () => {
                         scrollbar-width: none;
                     }
                 `}} />
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

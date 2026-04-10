@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'; // Added useEffect
-import { X } from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +9,7 @@ function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
   const location = useLocation(); // Gets the current URL (e.g., /profile)
   const [activeItem, setActiveItem] = useState('Dashboard');
+  const [isReportsExpanded, setIsReportsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
 
   // Define menu items based on role
@@ -18,8 +19,20 @@ function Sidebar({ className, onClose }) {
   // Determine which items to show based on the active path/context, not strictly user role
   const isAdminRoute = location.pathname.startsWith('/admin') ||
     location.pathname.startsWith('/reports') ||
+    location.pathname.startsWith('/moderator-reports') ||
+    location.pathname.startsWith('/course-reports') ||
     location.pathname.startsWith('/student-profiles') ||
-    location.pathname.startsWith('/moderator-details');
+    location.pathname.startsWith('/moderator-details') ||
+    location.pathname.startsWith('/registered-users') ||
+    location.pathname.startsWith('/registered-courses');
+    // location.pathname.startsWith('/reports') ||
+    // location.pathname.startsWith('/moderator-reports') ||
+    // location.pathname.startsWith('/course-reports') ||
+    // location.pathname.startsWith('/student-profiles') ||
+    // location.pathname.startsWith('/moderator-details');
+
+    // location.pathname.startsWith('/registered-users') ||   
+    // location.pathname.startsWith('/registered-courses');
 
   const menuItems = isAdminRoute ? adminItems : studentItems;
 
@@ -43,19 +56,60 @@ function Sidebar({ className, onClose }) {
     '/moderator-details': 'Moderators',
     '/student-profiles': 'Student Profiles',
     '/admin-courses': 'Courses',
-    '/reports': 'Reports & Logs',
+    '/reports': 'Student Reports',
+    '/moderator-reports': 'Moderator Reports',
+    '/course-reports': 'Course Reports',
+
+    '/admin/student-details': 'Student Profiles',  // for /admin/student-details/1, /2, etc.
+    '/admin/moderator-details': 'Moderators',
+    '/admin/profile': 'Dashboard',
+    '/admin/course-details': 'Courses',  
+    '/admin-course-view': 'Courses',  
+    '/admin-course-play': 'Courses',      
+    '/admin-course-add': 'Courses',               
+    '/admin-add-course': 'Courses',              
+    '/registered-users': 'Student Profiles',   
+    '/registered-courses': 'Courses',
+    
 
     // Auth
     '/logout': 'Logout'
   };
 
   // Sync state with URL whenever the route changes
+
   useEffect(() => {
-    const currentName = pathToName[location.pathname];
+    // Try exact match first
+    let currentName = pathToName[location.pathname];
+
+    // If no exact match, try prefix matching for dynamic routes like /admin/student-details/1
+    if (!currentName) {
+      const matchedKey = Object.keys(pathToName).find(key =>
+        location.pathname.startsWith(key) && key !== '/'
+      );
+      if (matchedKey) {
+        currentName = pathToName[matchedKey];
+      }
+    }
+
     if (currentName) {
       setActiveItem(currentName);
+      if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
+        setIsReportsExpanded(true);
+      }
     }
   }, [location.pathname]);
+
+
+  // useEffect(() => {
+  //   const currentName = pathToName[location.pathname];
+  //   if (currentName) {
+  //     setActiveItem(currentName);
+  //     if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
+  //       setIsReportsExpanded(true);
+  //     }
+  //   }
+  // }, [location.pathname]);
 
   const logout = async () => {
     try {
@@ -74,6 +128,11 @@ function Sidebar({ className, onClose }) {
   };
 
   const handleItemClick = (itemName) => {
+    if (itemName === 'Reports & Logs') {
+      setIsReportsExpanded(!isReportsExpanded);
+      return;
+    }
+
     setActiveItem(itemName);
 
     if (itemName === 'Logout') {
@@ -127,15 +186,49 @@ function Sidebar({ className, onClose }) {
       <div className='w-[192px] flex flex-col gap-[10px] mx-auto'>
         <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500]'>
           {/* <div className='mt-2 mb-2 uppercase text-xs font-bold text-gray-400'>Main Menu</div> */}
-          {menuItems.map((item) => (
-            <Sideabrbbutton
-              key={item}
-              isActive={activeItem === item} // This now stays blue based on the user selection
-              onClick={() => handleItemClick(item)}
-            >
-              {item}
-            </Sideabrbbutton>
-          ))}
+          {menuItems.map((item) => {
+            if (item === 'Reports & Logs') {
+              const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports'].includes(activeItem);
+              return (
+                <div key={item} className="w-full flex flex-col gap-1">
+                  <Sideabrbbutton
+                    isActive={isAnyReportActive}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleItemClick(item);
+                    }}
+                  >
+                    <div className="flex items-center justify-between w-full pr-2">
+                      <span>{item}</span>
+                      {isReportsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </Sideabrbbutton>
+                  {isReportsExpanded && (
+                    <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
+                      <Sideabrbbutton isActive={activeItem === 'Student Reports'} onClick={() => handleItemClick('Student Reports')}>
+                        Student Reports
+                      </Sideabrbbutton>
+                      <Sideabrbbutton isActive={activeItem === 'Moderator Reports'} onClick={() => handleItemClick('Moderator Reports')}>
+                        Moderator Reports
+                      </Sideabrbbutton>
+                      <Sideabrbbutton isActive={activeItem === 'Course Reports'} onClick={() => handleItemClick('Course Reports')}>
+                        Course Reports
+                      </Sideabrbbutton>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <Sideabrbbutton
+                key={item}
+                isActive={activeItem === item} // This now stays blue based on the user selection
+                onClick={() => handleItemClick(item)}
+              >
+                {item}
+              </Sideabrbbutton>
+            );
+          })}
         </div>
 
         <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-auto'>

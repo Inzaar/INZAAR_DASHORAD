@@ -62,8 +62,8 @@ const OverviewCard = ({
             <h3 className="text-sm text-gray-500 font-normal">Overview</h3>
 
             {/* Stats Row */}
-            <div className="flex max-[641px]:flex-col max-[641px]:gap-6 max-[641px]:items-start gap-2 items-center justify-between w-full">
-                <div className="flex flex-2 max-[641px]:w-full min-[973px]:flex-1 min-[1255px]:flex-2 max-[641px]:items-start items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-2 items-start sm:items-center justify-between w-full">
+                <div className="flex flex-[2] w-full sm:w-auto items-center justify-between gap-4 sm:gap-0">
                     {renderColumn(stats.col1)}
                     {renderColumn(stats.col2)}
                 </div>

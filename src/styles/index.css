@@ -18,22 +18,28 @@
     display: none;
   }
 
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  .glowing-scrollbar::-webkit-scrollbar {
+    width: 12px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-track {
+  .glowing-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+  .glowing-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 20px;
   }
 
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+  .glowing-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
+    background: #D889FF; /* Brighter purple */
+    border: 3px solid transparent; /* This creates the "bending" / detached from edge effect */
+    background-clip: padding-box;
+    border-radius: 20px;
+    box-shadow: 
+      0 0 10px #B666E7,
+      0 0 20px #B666E7,
+      0 0 40px #B666E7; /* HYPER GLOW */
   }
 }
 
@@ -169,4 +175,40 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Date Input Styling */
+input[type="date"] {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+input[type="date"]::after {
+  content: '📅';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 1.1rem;
+  opacity: 0.5;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="date"]:hover::after,
+input[type="date"]:focus::after {
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(127, 96, 234, 0.5);
 }
