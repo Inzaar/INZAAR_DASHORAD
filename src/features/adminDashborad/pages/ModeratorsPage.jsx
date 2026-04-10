@@ -4,7 +4,7 @@ import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import UserCard from '../components/UserCard';
-import { Search, Plus, ChevronDown } from 'lucide-react';
+import { Search, Plus, ChevronDown, MoreVertical, X } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getModeratorProfiles } from '@/api/user';
@@ -38,6 +38,7 @@ const ModeratorsPage = () => {
     const [statusFilter, setStatusFilter] = useState("");
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -141,16 +142,16 @@ const ModeratorsPage = () => {
                     `} />
 
                     <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
-                        <div className="py-4 pr-2">
+                        <div className="py-2 sm:py-4 px-2 sm:pr-2">
                             {/* Header */}
-                            <div className="flex justify-between items-end mb-8">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-between sm:items-end mb-8">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">Moderators</h2>
-                                    <p className="text-gray-500 text-[16px]">Manage All Your Moderators</p>
+                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">Moderators</h2>
+                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your Moderators</p>
                                 </div>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
+                                    className="w-full sm:w-auto px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center justify-center"
                                 >
                                     <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
                                     Add New Course
@@ -175,7 +176,7 @@ const ModeratorsPage = () => {
                             </div>
 
                             {/* Main Content Card */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 min-h-[600px] relative">
+                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 min-h-[600px] relative">
                                 {isLoading && (
                                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-[24px]">
                                         <div className="flex flex-col items-center gap-2">
@@ -197,7 +198,8 @@ const ModeratorsPage = () => {
                                 </div>
 
                                 {/* Filters */}
-                                <div className="flex flex-col xl:flex-row gap-4 mb-8">
+                                {/* Filters - Desktop */}
+                                <div className="hidden xl:flex flex-row gap-4 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
                                         <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
@@ -243,9 +245,9 @@ const ModeratorsPage = () => {
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <input
-                                            type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                        <input 
+                                            type="date" 
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" 
                                             value={fromDate}
                                             onChange={(e) => setFromDate(e.target.value)}
                                         />
@@ -253,9 +255,9 @@ const ModeratorsPage = () => {
 
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <input
-                                            type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                        <input 
+                                            type="date" 
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" 
                                             value={toDate}
                                             onChange={(e) => setToDate(e.target.value)}
                                         />
@@ -264,7 +266,7 @@ const ModeratorsPage = () => {
                                     <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
                                         <div className="relative">
-                                            <select
+                                            <select 
                                                 value={statusFilter}
                                                 onChange={(e) => setStatusFilter(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
@@ -278,7 +280,7 @@ const ModeratorsPage = () => {
                                         </div>
                                     </div>
 
-                                    <button
+                                    <button 
                                         onClick={() => {
                                             setSearchText("");
                                             setStatusFilter("");
@@ -291,6 +293,122 @@ const ModeratorsPage = () => {
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear
                                     </button>
+                                </div>
+
+                                {/* Filters - Responsive (Mobile Only) */}
+                                <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
+                                    <div className='flex flex-col gap-4'>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button 
+                                                onClick={() => {
+                                                    setSearchText("");
+                                                    setStatusFilter("");
+                                                    setFromDate("");
+                                                    setToDate("");
+                                                    setCurrentPage(1);
+                                                }}
+                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                                            >
+                                                <BiFilterAlt className="w-4 h-4" />
+                                                Clear Filter
+                                            </button>
+                                            <div className="relative">
+                                                <button 
+                                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
+                                                >
+                                                    {isFilterOpen ? <X size={20} /> : <MoreVertical size={20} />}
+                                                </button>
+
+                                                {isFilterOpen && (
+                                                    <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
+                                                        <div className="space-y-5">
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <div className="relative">
+                                                                    <select 
+                                                                        value={statusFilter}
+                                                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                                                        className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                                                                    >
+                                                                        <option value="">All Statuses</option>
+                                                                        <option value="Active">Active</option>
+                                                                        <option value="Inactive">Inactive</option>
+                                                                        <option value="Pool">Pool</option>
+                                                                    </select>
+                                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <input 
+                                                                    type="date" 
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium" 
+                                                                    value={fromDate}
+                                                                    onChange={(e) => setFromDate(e.target.value)}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <input 
+                                                                    type="date" 
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium" 
+                                                                    value={toDate}
+                                                                    onChange={(e) => setToDate(e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Advanced Search Segment UI as per request */}
+                                    <div className='flex flex-col gap-3'>
+                                        <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                                            <div className="flex items-center px-4 py-3 border-b border-gray-100">
+                                                <Search className="text-gray-400 w-5 h-5 mr-3" />
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Search by ${searchType.toLowerCase()}`}
+                                                    className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
+                                                    value={searchText}
+                                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                                    onKeyDown={handleSearchKeyDown}
+                                                />
+                                            </div>
+                                            <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'PHONE') {
+                                                            setSearchType('PHONE');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    PHONE#
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'NAME') {
+                                                            setSearchType('NAME');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    NAME
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Moderators Grid */}

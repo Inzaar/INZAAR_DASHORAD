@@ -5,7 +5,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
@@ -17,6 +17,15 @@ const AdminCoursesPage = () => {
     const [courses, setCourses] = useState([]);
     const [courseStats, setCourseStats] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(window.innerWidth < 640 ? 4 : 12);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setItemsPerPage(window.innerWidth < 640 ? 4 : 12);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -183,8 +192,8 @@ const AdminCoursesPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Tabs */}
-                                <div className="flex gap-2 mb-8 bg-gray-100 p-1.5 rounded-lg w-fit">
+                                {/* Desktop Tabs */}
+                                <div className="hidden sm:flex gap-2 mb-8 bg-gray-100 p-1.5 rounded-lg w-fit">
                                     {['All', 'Active Courses', 'Inactive Courses', 'Draft Courses'].map((tab) => (
                                         <button
                                             key={tab}
@@ -202,6 +211,26 @@ const AdminCoursesPage = () => {
                                     ))}
                                 </div>
 
+                                {/* Mobile Filter Dropdown */}
+                                <div className="sm:hidden mb-8 relative">
+                                    <div className="relative">
+                                        <select 
+                                            value={activeTab}
+                                            onChange={(e) => {
+                                                setActiveTab(e.target.value);
+                                                setCurrentPage(1);
+                                            }}
+                                            className="w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none appearance-none cursor-pointer shadow-sm"
+                                        >
+                                            <option value="All">All Registered Courses</option>
+                                            <option value="Active Courses">Active Courses</option>
+                                            <option value="Inactive Courses">Inactive Courses</option>
+                                            <option value="Draft Courses">Draft Courses</option>
+                                        </select>
+                                        <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
                                 {/* Courses Grid */}
                                 {filteredCourses.length === 0 ? (
                                     <div className="w-full py-16 flex items-center justify-center text-gray-500 font-medium text-lg">
@@ -209,7 +238,7 @@ const AdminCoursesPage = () => {
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                        {filteredCourses.slice((currentPage - 1) * 12, currentPage * 12).map((course) => (
+                                        {filteredCourses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((course) => (
                                             <CardCourse
                                                 key={course.id}
                                                 course={course}
@@ -219,39 +248,41 @@ const AdminCoursesPage = () => {
                                     </div>
                                 )}
 
-                                {/* Pagination */}
-                                {filteredCourses.length > 12 && (
-                                    <div className="flex justify-end items-center gap-2 mt-8">
+                                 {/* Pagination */}
+                                {filteredCourses.length > itemsPerPage && (
+                                    <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2 mt-10 pb-4">
                                         <button 
                                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                             disabled={currentPage === 1}
-                                            className={`flex items-center gap-1 text-sm font-medium ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                                            className={`p-2 sm:px-4 sm:py-2 flex items-center gap-1 text-sm font-medium rounded-lg transition-all ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
                                         >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                            Previous
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                            <span className="hidden sm:inline">Previous</span>
                                         </button>
                                         
-                                        {[...Array(Math.ceil(filteredCourses.length / 12))].map((_, i) => (
-                                            <button
-                                                key={i + 1}
-                                                onClick={() => setCurrentPage(i + 1)}
-                                                className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${
-                                                    currentPage === i + 1 
-                                                    ? 'bg-[#6366F1] text-white shadow-sm font-bold' 
-                                                    : 'text-gray-600 hover:bg-gray-100'
-                                                }`}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        ))}
+                                        <div className="flex items-center gap-1.5">
+                                            {[...Array(Math.ceil(filteredCourses.length / itemsPerPage))].map((_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                    className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-sm font-bold rounded-xl transition-all ${
+                                                        currentPage === i + 1 
+                                                        ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-lg shadow-blue-500/30' 
+                                                        : 'bg-white border border-gray-100 text-gray-600 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </div>
                                         
                                         <button 
-                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / 12), prev + 1))}
-                                            disabled={currentPage === Math.ceil(filteredCourses.length / 12)}
-                                            className={`flex items-center gap-1 text-sm font-medium ${currentPage === Math.ceil(filteredCourses.length / 12) ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / itemsPerPage), prev + 1))}
+                                            disabled={currentPage === Math.ceil(filteredCourses.length / itemsPerPage)}
+                                            className={`p-2 sm:px-4 sm:py-2 flex items-center gap-1 text-sm font-medium rounded-lg transition-all ${currentPage === Math.ceil(filteredCourses.length / itemsPerPage) ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
                                         >
-                                            Next
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                            <span className="hidden sm:inline">Next</span>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                         </button>
                                     </div>
                                 )}
