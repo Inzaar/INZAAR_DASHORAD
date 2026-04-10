@@ -7,14 +7,14 @@ import { useState } from "react";
 import Modal from "@/components/shared/Modal";
 import BatchList from "./BatchList";
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 6;
 
 function ModeratorBatchesComponent({ profileData }) {
     const [showBatchModal, setShowBatchModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
     const user = profileData?.user || {};
-    const assignedBatches = user.assignedBatches || [];
+    const assignedBatches = profileData?.assignedBatches || [];
 
     // Pagination logic
     const totalPages = Math.ceil(assignedBatches.length / ITEMS_PER_PAGE);

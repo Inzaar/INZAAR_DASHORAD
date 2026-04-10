@@ -62,9 +62,11 @@ function Sidebar({ className, onClose }) {
 
     '/admin/student-details': 'Student Profiles',  // for /admin/student-details/1, /2, etc.
     '/admin/moderator-details': 'Moderators',
+    '/admin/profile': 'Dashboard',
     '/admin/course-details': 'Courses',  
     '/admin-course-view': 'Courses',  
     '/admin-course-play': 'Courses',      
+    '/admin-course-add': 'Courses',               
     '/admin-add-course': 'Courses',              
     '/registered-users': 'Student Profiles',   
     '/registered-courses': 'Courses',

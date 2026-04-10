@@ -27,7 +27,7 @@ const Courses = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await getAllCourses();
+                const res = await getAllCourses({ status: 'published' });
                 if (res.data?.success) {
                     setCourses(res.data.data);
                 }

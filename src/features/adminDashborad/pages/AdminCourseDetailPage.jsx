@@ -148,12 +148,28 @@ const AdminCourseDetailPage = () => {
                                                 Type: {lecture.type || 'Video'}
                                             </p>
 
-                                            <GradiantButton
-                                                onClick={() => navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}`)}
+
+<GradiantButton
+    onClick={() => {
+        // ✅ Redirect both Quiz and Video lectures to the play page
+        // The play page (CourseView) will handle rendering the "Start Quiz" UI for quizzes
+        const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
+        navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
+    }}
+    className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
+>
+    View Details
+</GradiantButton>
+
+                                            {/* <GradiantButton
+                                                onClick={() => {
+                                                    const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
+                                                    navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
+                                                }}
                                                 className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
                                             >
                                                 View Details
-                                            </GradiantButton>
+                                            </GradiantButton> */}
                                         </div>
                                     ))}
                                 </div>

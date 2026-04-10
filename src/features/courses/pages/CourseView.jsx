@@ -12,6 +12,7 @@ import { Loader, GraduationCap } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
+import QuizStartOverlay from "../components/QuizStartOverlay";
 import fallbackImg from "@/assets/images/coursespage.jpg";
 
 const CourseView = () => {
@@ -423,9 +424,9 @@ const CourseView = () => {
                     </div>
                 </div>
             )}
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className={`flex flex-col lg:flex-row ${isQuizView ? 'px-0 gap-0' : 'px-4 gap-4'} flex-1 overflow-hidden relative`}>
+                <div className={`flex flex-col lg:flex-row px-2 sm:px-4 lg:px-6 xl:px-8 gap-4 flex-1 overflow-hidden relative`}>
 
                     {isSidebarOpen && (
                         <div
@@ -434,24 +435,21 @@ const CourseView = () => {
                         />
                     )}
 
-                    {!isQuizView && (
-                        <Sidebar
-                            onClose={() => setIsSidebarOpen(false)}
-                            className={`
-                                transition-transform duration-300 ease-in-out z-40
-                                lg:translate-x-0 lg:static lg:block
-                                fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
-                                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                            `}
-                        />
-                    )}
+                    <Sidebar
+                        onClose={() => setIsSidebarOpen(false)}
+                        className={`
+                            transition-transform duration-300 ease-in-out z-40
+                            lg:translate-x-0 lg:static lg:block
+                            fixed left-0 top-0 h-full w-[280px] sm:w-[320px] lg:w-auto shadow-2xl bg-white
+                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        `}
+                    />
 
-                    <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide ${isQuizView ? 'flex items-center justify-center' : ''}`} style={{
+                    <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide`} style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className={`${isQuizView ? 'p-0 w-full' : 'py-4 pr-2'}`}>
-                            {!isQuizView && (
+                        <div className={`py-4 pr-2`}>
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                                     <div>
                                         <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
@@ -460,48 +458,61 @@ const CourseView = () => {
                                         )}
                                     </div>
                                     {user?.role === 'admin' ? (
-                                        <div className="flex gap-3">
-                                            <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                                            <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                                 Download Certificate
                                             </GradiantButton>
-                                            <GradiantButton className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                            <GradiantButton className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                                 Edit
                                             </GradiantButton>
                                         </div>
                                     ) : (
-                                        <>
-                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                        <div className="flex gap-2">
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                                 Enrolled New Course
                                             </GradiantButton>
-                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                            <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                                 +
                                             </GradiantButton>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
-                            )}
 
-                            {!isQuizView && <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />}
+                            <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
 
-                            <div className={`relative flex flex-col lg:block gap-6 ${isQuizView ? 'mt-0' : 'mt-5'}`}>
-                                <div className={`${isQuizView ? 'w-full min-h-[calc(100vh-80px)] flex items-center justify-center p-4' : 'w-full lg:w-[70%] flex flex-col gap-4'}`}>
-                                    {!isQuizView && <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>}
-                                    <div className={`${isQuizView ? 'w-full max-w-[800px]' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100 h-fit'}`}>
-                                        <div className={`relative w-full overflow-hidden ${isQuizView ? 'bg-transparent' : 'aspect-video rounded-xl bg-black group'}`}>
+                            <div className={`relative flex flex-col lg:flex-row gap-6 mt-5 min-h-0`}>
+                                <div className={`w-full lg:w-[70%] flex flex-col gap-4`}>
+                                    <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
+                                    <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
+                                        <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
                                             {/* YouTube Iframe or Quiz Assessment */}
                                             {currentLecture?.type === 'Quiz' ? (
-                                                <LectureQuizAssessment
-                                                    quizData={{
-                                                        totalQuestions: 7, // Fallback or fetch from currentLecture if available
-                                                        description: "Test your understanding of the lecture before moving to the next lesson.",
-                                                    }}
-                                                    onStart={() => {
-                                                        if (currentLecture.quizId) {
-                                                            navigate(`/quiz-take/${currentLecture.quizId}`);
-                                                        } else {
-                                                            // Fallback if quizId is not present
-                                                            navigate(`/quiz-take/${currentLecture.id}`);
-                                                        }
+                                                <QuizStartOverlay
+                                                    lecture={currentLecture}
+                                                    courseData={courseData}
+onStart={() => {
+    // ✅ Always use current page as returnPath, ignore any passed returnPath
+    // This works for both cases:
+    // - from admin-course-play: window.location = /admin-course-play?id=...
+    // - from admin-course-view: window.location = /admin-course-view/69d3c9... (but this case
+    //   now goes directly to admin-course-play with returnPath set, so onStart runs on admin-course-play)
+    const currentPath = window.location.pathname + window.location.search;
+    
+    // Remove the returnPath param from currentPath to avoid nesting
+    const cleanParams = new URLSearchParams(window.location.search);
+    cleanParams.delete('returnPath');
+    cleanParams.delete('lectureId');
+    const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+    const cleanPath = window.location.pathname + cleanSearch;
+
+    const returnPath = encodeURIComponent(cleanPath);
+
+    const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+    if (currentLecture.quizId) {
+        navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+    } else {
+        navigate(`/quiz-take/${currentLecture.id}${query}`);
+    }
                                                     }}
                                                 />
                                             ) : currentLecture?.videoId ? (
@@ -554,15 +565,15 @@ const CourseView = () => {
 
                                             {/* Lecture Info Overlay (Top Left) */}
                                             {!isQuizView && (
-                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300">
-                                                    <h2 className="text-lg sm:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md">{currentLecture?.title}</h2>
-                                                    <div className="text-xs sm:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                        <span>Lecture:{currentLecture?.lectureNo}</span>
-                                                        <br />
-                                                        <span>Date:{currentLecture?.date}</span>
+                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
+                                                    <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
+                                                    <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
+                                                        <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
+                                                        <br className="sm:hidden" />
+                                                        <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
                                                         <br />
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[10px] sm:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
+                                                            <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
                                                                 {Math.round(progress)}% Watched
                                                             </span>
                                                         </div>
@@ -595,20 +606,18 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Lectures Playlist Section - Right Side - Only if not quiz */}
-                                {!isQuizView && (
-                                    <div className="w-full lg:w-[calc(30%-1.5rem)] flex flex-col gap-4 lg:absolute lg:top-0 lg:right-0 lg:bottom-0">
-                                        <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                        <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto min-h-0 no-scrollbar">
+                                 {/* Lectures Playlist Section - Right Side - Only if not quiz */}
+                                 <div className="w-full lg:w-[30%] flex flex-col gap-4">
+                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
+                                         <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0 scroll-smooth snap-x">
                                             <div className="flex flex-row lg:flex-col gap-3">
                                                 {lectures.map((lecture, index) => (
                                                     <div
                                                         key={lecture.id}
                                                         onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
                                                         className={`
-                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0
-                                                    w-[60vw] sm:w-[320px] lg:w-full
+                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                                                    w-[75vw] sm:w-[320px] lg:w-full
                                                     ${currentLecture?.id === lecture.id
                                                                 ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                                                                 : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
@@ -684,13 +693,12 @@ const CourseView = () => {
                                                         )}
                                                     </div>
                                                 ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                </div>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Lecture Notes Section */}
+                    {/* Lecture Notes Section */}
                             {!isQuizView && user?.role !== 'admin' && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20 text-left">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
@@ -717,8 +725,8 @@ const CourseView = () => {
                                 </div>
                             )}
 
-                            {!isQuizView && user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
-                            {!isQuizView && user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
+                            {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
+                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} />}
                         </div>
                     </main>
                 </div>

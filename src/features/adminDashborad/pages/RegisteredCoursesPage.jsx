@@ -33,12 +33,13 @@ const RegisteredCoursesPage = () => {
             setLoading(true);
             try {
                 const res = await getAllCourses();
-                if (res?.data?.data) {
-                    let filtered = res.data.data;
+                let apiCourses = res?.data?.data || [];
 
-                    if (courseType === 'active') filtered = filtered.filter(c => c.status === 'active' || c.status === 'Active');
-                    if (courseType === 'inactive') filtered = filtered.filter(c => c.status === 'inactive' || c.status === 'Inactive');
-                    if (courseType === 'draft') filtered = filtered.filter(c => c.status === 'draft' || c.status === 'Draft');
+                let filtered = apiCourses;
+
+                if (courseType === 'active') filtered = filtered.filter(c => c.status === 'active' || c.status === 'Active');
+                if (courseType === 'inactive') filtered = filtered.filter(c => c.status === 'inactive' || c.status === 'Inactive');
+                if (courseType === 'draft') filtered = filtered.filter(c => c.status === 'draft' || c.status === 'Draft');
 
                     const formatted = filtered.map(c => ({
                         id: c._id,
@@ -49,7 +50,6 @@ const RegisteredCoursesPage = () => {
                         status: c.status === 'draft' ? 'Draft' : 'Active'
                     }));
                     setCourses(formatted);
-                }
             } catch (error) {
                 console.error("Failed to fetch courses:", error);
             } finally {
@@ -115,6 +115,7 @@ const RegisteredCoursesPage = () => {
                                                     </td>
                                                     <td className="py-6 text-center">
                                                         <GradiantButton 
+                                                            onClick={() => navigate(`/admin-course-view/${course.id}`)}
                                                             className="px-5 py-2 rounded-lg text-[12px] font-bold shadow-lg shadow-blue-200/50"
                                                         >
                                                             View Details

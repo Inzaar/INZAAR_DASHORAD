@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { cn } from '@/lib/utils';
 import { getAllUsers } from '@/api/user';
@@ -48,31 +48,40 @@ const RegisteredUsersPage = () => {
                     getAllEnrollments()
                 ]);
 
-                if (usersRes?.data && enrollmentsRes?.data) {
-                    let filteredUsers = usersRes.data;
-                    const allEnrollments = enrollmentsRes.data;
+                // Use only API results
+                let filteredUsers = usersRes?.data || [];
+                const allEnrollments = enrollmentsRes?.data || [];
 
-                    // Filter by role/status based on type
+                    // Filter by role first
                     if (userType.includes('student')) {
                         filteredUsers = filteredUsers.filter(u => u.role === 'user');
-                        if (userType === 'active_students') filteredUsers = filteredUsers.filter(u => u.status === 'active' || u.status === undefined); // fallback
-                        if (userType === 'inactive_students') filteredUsers = filteredUsers.filter(u => u.status === 'in-active');
-                        if (userType === 'pending_students') filteredUsers = filteredUsers.filter(u => u.status === 'pending');
                     } else if (userType.includes('moderator')) {
                         filteredUsers = filteredUsers.filter(u => u.role === 'moderator');
-                        if (userType === 'active_moderators') filteredUsers = filteredUsers.filter(u => u.status === 'active' || u.status === undefined);
-                        if (userType === 'inactive_moderators') filteredUsers = filteredUsers.filter(u => u.status === 'in-active');
-                        if (userType === 'moderator_pool') filteredUsers = filteredUsers.filter(u => u.status === 'pending');
                     }
 
-                    const formattedData = filteredUsers.map(user => {
-                        const userEnrollments = allEnrollments.filter(e => e.userId && e.userId._id === user._id);
-                        const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
+                const formattedData = filteredUsers.map(user => {
+                    const userEnrollments = allEnrollments.filter(e => e.userId && (e.userId._id === user._id || e.userId === user._id));
+                    const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
 
                         let totalProgress = 0;
-                        if (userEnrollments.length > 0) {
-                            const completedCount = userEnrollments.filter(e => e.isCompleted).length;
-                            totalProgress = Math.round((completedCount / userEnrollments.length) * 100);
+                        const hasActivity = userEnrollments.some(e => e.isCompleted || (e.completedLectures && e.completedLectures.length > 0));
+                        const hasEnrollments = userEnrollments.length > 0;
+
+                        if (hasEnrollments) {
+                            const sumOfProgress = userEnrollments.map(e => {
+                                if (e.isCompleted) return 100;
+                                if (!e.completedLectures?.length) return 0;
+                                return e.completedLectures.reduce((sum, l) => sum + (l.watchedPercentage || 0), 0) / e.completedLectures.length;
+                            }).reduce((a, b) => a + b, 0);
+                            totalProgress = Math.round(sumOfProgress / userEnrollments.length);
+                        }
+
+                        // Determine Dynamic Status
+                        let dynamicStatus = "Pending";
+                        if (hasActivity) {
+                            dynamicStatus = "Active";
+                        } else if (hasEnrollments) {
+                            dynamicStatus = "In-active";
                         }
 
                         return {
@@ -83,11 +92,21 @@ const RegisteredUsersPage = () => {
                             enrollments: enrolledCourseNames.length > 0 ? enrolledCourseNames : ["N/A"],
                             progress: `${totalProgress}%`,
                             lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
-                            status: user.status === 'in-active' ? 'In-active' : 'Active'
+                            status: dynamicStatus,
+                            rawStatus: user.status // preserve original if needed
                         };
                     });
 
-                    setUsers(formattedData);
+                    // Re-apply type filtering on formatted data with dynamic status
+                    let finalUsers = formattedData;
+                    if (userType === 'active_students') finalUsers = formattedData.filter(u => u.status === 'Active');
+                    if (userType === 'inactive_students') finalUsers = formattedData.filter(u => u.status === 'In-active');
+                    if (userType === 'pending_students') finalUsers = formattedData.filter(u => u.status === 'Pending');
+                    if (userType === 'active_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'active' || u.rawStatus === undefined);
+                    if (userType === 'inactive_moderators') finalUsers = formattedData.filter(u => u.rawStatus === 'in-active');
+                    if (userType === 'moderator_pool') finalUsers = formattedData.filter(u => u.rawStatus === 'pending');
+
+                    setUsers(finalUsers);
                 }
             } catch (error) {
                 console.error("Failed to fetch registered users data:", error);
@@ -155,7 +174,7 @@ const RegisteredUsersPage = () => {
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                             />
                                             <div className="absolute right-1 flex items-center gap-1">
-                                                <GradiantButton 
+                                                <GradiantButton
                                                     onClick={() => setSearchType('PHONE')}
                                                     className={cn(
                                                         "px-4 py-1.5 text-[11px] font-bold rounded shadow-sm transition-all",
@@ -164,12 +183,12 @@ const RegisteredUsersPage = () => {
                                                 >
                                                     PHONE#
                                                 </GradiantButton>
-                                                <GradiantButton 
+                                                <GradiantButton
                                                     onClick={() => setSearchType('NAME')}
                                                     className={cn(
                                                         "px-4 py-1.5 text-[11px] font-bold rounded shadow-sm transition-all",
-                                                        searchType === 'NAME' 
-                                                            ? "shadow-md shadow-blue-500/20" 
+                                                        searchType === 'NAME'
+                                                            ? "shadow-md shadow-blue-500/20"
                                                             : "opacity-30 grayscale-[0.5]"
                                                     )}
                                                 >
@@ -246,10 +265,13 @@ const RegisteredUsersPage = () => {
                                                             </div>
                                                         </td>
                                                         <td className="py-6 text-center">
-                                                            <div className="flex flex-col gap-0.5">
-                                                                {user.enrollments.map((course, idx) => (
+                                                            <div className="flex flex-col gap-0.5 items-center">
+                                                                {user.enrollments.slice(0, 3).map((course, idx) => (
                                                                     <span key={idx} className="text-[12px] text-blue-500 underline underline-offset-2 hover:text-blue-700 cursor-pointer">{course}</span>
                                                                 ))}
+                                                                {user.enrollments.length > 3 && (
+                                                                    <span className="text-[12px] text-gray-400 font-bold">...</span>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="py-6 text-center text-gray-700 font-medium">{user.progress}</td>
@@ -264,6 +286,7 @@ const RegisteredUsersPage = () => {
                                                         </td>
                                                         <td className="py-6 text-center">
                                                             <GradiantButton
+                                                                onClick={() => navigate(`/admin/student-details/${user.id}`)}
                                                                 className="text-[12px] px-5 py-2 rounded-lg font-bold shadow-lg shadow-blue-200/50"
                                                             >
                                                                 View Profile

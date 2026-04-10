@@ -14,8 +14,9 @@ function Input1({ name, label, type = 'text', placeholder, value, onChange, ...p
       <label className='text-[#18181B] text-[16px]'>{label || name}</label>
       <div className="relative w-full ">
         <input
+          name={name}
           type={isPassword ? (showPassword ? 'text' : 'password') : type}
-          placeholder={`enter ${placeholder || name}`}
+          placeholder={`Enter ${placeholder || name}`}
           value={value}
           onChange={onChange}
           className={`w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2 transition-all duration-200 ${isPassword ? 'pr-10' : ''}`}

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage }) {
   const user = profileData?.user || {};
   const isStudent = type === 'student';
-  const assignedBatches = user.assignedBatches || [];
+  const assignedBatches = profileData?.assignedBatches || [];
   const fileInputRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(Profileimg);
 
@@ -87,10 +87,12 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
             <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[120px] custom-scrollbar-thin">
               {isStudent ? (
                 <>
-                  {(user.enrolledBatches || []).length > 0 ? (
-                    user.enrolledBatches.map((pair, idx) => (
-                      <div key={idx} className="w-full h-[40px] bg-white text-blue-600 rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-white/20 shadow-sm font-bold">
-                        {pair.courseName} ( {pair.batchName} )
+                  {(profileData?.enrolledBatches || []).length > 0 ? (
+                    profileData.enrolledBatches.map((pair, idx) => (
+                      <div key={idx} className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-gray-50 shadow-sm">
+                        <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all truncate block">
+                          {pair.courseName} ( {pair.batchName} )
+                        </a>
                       </div>
                     ))
                   ) : (

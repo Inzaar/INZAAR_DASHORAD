@@ -28,9 +28,17 @@ export const getModeratorStudents = async (id, courseTitle, page = 1, limit = 5)
     return res.data;
 };
 
-export const getStudentProfiles = async (page = 1, limit = 5, search = "", status = "") => {
+export const getStudentProfiles = async (page = 1, limit = 10, search = "", status = "", fromDate = "", toDate = "", searchType = "NAME") => {
     const res = await axiosInstance.get("/users/students/profiles", {
-        params: { page, limit, search, status },
+        params: { page, limit, search, status, fromDate, toDate, searchType },
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const getModeratorProfiles = async (page = 1, limit = 6, search = "", status = "", fromDate = "", toDate = "", searchType = "NAME") => {
+    const res = await axiosInstance.get("/users/moderators/profiles", {
+        params: { page, limit, search, status, fromDate, toDate, searchType },
         withCredentials: true,
     });
     return res.data;

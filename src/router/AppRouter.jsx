@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate, Router } from "react-router-dom";
 import { LoginPage, RegisterPageP1, RegisterPageP2, ForgetPassword } from "@/features/auth";
 import ResetPage from "@/features/auth/pages/ResetPage";
+import { RegisterProvider } from "@/features/auth/context/RegisterContext";
 import DashboardPage from "@/features/StudentDashboard/pages/DashboardPage";
 import EnrolledCourses from "@/features/StudentDashboard/pages/EnrolledCourses";
 import Courses from "@/features/courses/pages/Courses";
@@ -39,9 +40,11 @@ const AppRouter = () => {
         <Routes>
             <Route element={<PublicRoute />}>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<RegisterPageP1 />} />
-                <Route path="/register" element={<RegisterPageP1 />} />
-                <Route path="/register/step2" element={<RegisterPageP2 />} />
+                <Route element={<RegisterProvider />}>
+                    <Route path="/signup" element={<RegisterPageP1 />} />
+                    <Route path="/register" element={<RegisterPageP1 />} />
+                    <Route path="/register/step2" element={<RegisterPageP2 />} />
+                </Route>
                 <Route path="/forgot-password" element={<ForgetPassword />} />
                 <Route path="/reset-password" element={<ResetPage />} />
             </Route>
@@ -62,6 +65,7 @@ const AppRouter = () => {
                 <Route path="/admin-course-play" element={<CourseView />} />
                 <Route path="/moderator-details/:id" element={<ModeratorDetails />} />
                 <Route path="/admin/student-details/:id" element={<StudentDetailsPage />} />
+                <Route path="/admin/profile" element={<ProfilePage />} />
                 <Route path="/registered-users" element={<RegisteredUsersPage />} />
                 <Route path="/registered-courses" element={<RegisteredCoursesPage />} />
             </Route>
