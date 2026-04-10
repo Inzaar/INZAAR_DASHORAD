@@ -96,3 +96,10 @@ export const saveCertificate = async (courseId, certificateUrl) => {
     );
     return res.data.data;
 };
+
+export const updateCourse = async (id, data) => {
+    const res = await axiosInstance.patch(`/courses/${id}`, data, {
+        withCredentials: true,
+    });
+    return res;
+};
