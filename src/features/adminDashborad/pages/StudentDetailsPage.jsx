@@ -10,6 +10,7 @@ import ModeratorProfileComponent from "../components/moderator/ModeratorProfileC
 import StudentPerformance from "../components/student/StudentPerformance";
 import StudentCourseDashboard from "../components/student/StudentCourseDashboard";
 import StudentCertificates from "../components/student/StudentCertificates";
+import AssignModeratorModal from "../components/student/AssignModeratorModal";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
 const StudentDetailsPage = () => {
@@ -21,6 +22,8 @@ const StudentDetailsPage = () => {
     const { user } = useAuth();
     const [open, setOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Profile');
+    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+    const [isModerator, setIsModerator] = useState(false);
     const dropdownRef = useRef(null);
 
     // outside click close for dropdown
@@ -128,7 +131,18 @@ const StudentDetailsPage = () => {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm text-gray-500 font-medium whitespace-nowrap">Switch as Moderator</span>
                                                 <label className="relative inline-flex items-center cursor-pointer scale-90">
-                                                    <input type="checkbox" className="sr-only peer" />
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="sr-only peer" 
+                                                        checked={isModerator}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setIsAssignModalOpen(true);
+                                                            } else {
+                                                                setIsModerator(false);
+                                                            }
+                                                        }}
+                                                    />
                                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
                                                 </label>
                                             </div>
@@ -169,7 +183,18 @@ const StudentDetailsPage = () => {
                                                     <div className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
                                                         <span>Switch as Moderator</span>
                                                         <label className="relative inline-flex items-center cursor-pointer scale-[0.8]">
-                                                            <input type="checkbox" className="sr-only peer" />
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="sr-only peer" 
+                                                                checked={isModerator}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setIsAssignModalOpen(true);
+                                                                    } else {
+                                                                        setIsModerator(false);
+                                                                    }
+                                                                }}
+                                                            />
                                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
                                                         </label>
                                                     </div>
@@ -193,6 +218,16 @@ const StudentDetailsPage = () => {
                                         {activeTab} Content (Coming Soon)
                                     </div>
                                 )}
+
+                                <AssignModeratorModal 
+                                    isOpen={isAssignModalOpen}
+                                    onClose={() => setIsAssignModalOpen(false)}
+                                    onSave={(data) => {
+                                        console.log("Moderator Data Saved:", data);
+                                        setIsModerator(true);
+                                        setIsAssignModalOpen(false);
+                                    }}
+                                />
                             </div>
                         </div>
                     </main>

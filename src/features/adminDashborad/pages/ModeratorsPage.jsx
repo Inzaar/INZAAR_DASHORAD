@@ -25,8 +25,8 @@ const ModeratorsPage = () => {
             try {
                 const response = await getAllUsers();
                 if (response?.data) {
-                    const mods = response.data.filter(user => user.role === 'moderator');
-                    setModerators(mods);
+                    const apiMods = response.data.filter(user => user.role === 'moderator');
+                    setModerators(apiMods);
                 }
             } catch (error) {
                 console.error("Failed to fetch moderators:", error);
@@ -35,11 +35,15 @@ const ModeratorsPage = () => {
         fetchModerators();
     }, []);
 
+    const activeCount = moderators.filter(m => m.status === 'active' || m.status === undefined).length;
+    const inactiveCount = moderators.filter(m => m.status === 'in-active').length;
+    const poolCount = moderators.filter(m => m.status === 'pending').length;
+
     const stats = [
         { title: "Total Moderators", value: moderators.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Moderators", value: moderators.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Moderators", value: "0", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Moderators in Pool", value: "0", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Moderators", value: activeCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Moderators", value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Moderators in Pool", value: poolCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
 
     return (
@@ -91,7 +95,7 @@ const ModeratorsPage = () => {
                                         "Inactive Moderators": "inactive_moderators",
                                         "Moderators in Pool": "moderator_pool"
                                     };
-                                    
+
                                     return (
                                         <StatsCard
                                             key={index}

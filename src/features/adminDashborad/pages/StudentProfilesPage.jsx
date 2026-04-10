@@ -27,35 +27,35 @@ const StudentProfilesPage = () => {
                     getAllEnrollments()
                 ]);
 
-                if (usersRes?.data && enrollmentsRes?.data) {
-                    const studentUsers = usersRes.data.filter(u => u.role === 'user');
-                    const allEnrollments = enrollmentsRes.data;
-
-                    const formattedStudents = studentUsers.map(user => {
-                        const userEnrollments = allEnrollments.filter(e => e.userId && e.userId._id === user._id);
-
-                        const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
-
-                        let totalProgress = 0;
-                        if (userEnrollments.length > 0) {
-                            const completedCount = userEnrollments.filter(e => e.isCompleted).length;
-                            totalProgress = Math.round((completedCount / userEnrollments.length) * 100);
-                        }
-
-                        return {
-                            id: user._id,
-                            name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username,
-                            email: user.email,
-                            phone: user.phone || "N/A",
-                            enrollments: enrolledCourseNames,
-                            progress: `${totalProgress}%`,
-                            lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(),
-                            status: "Active"
-                        };
-                    });
-
-                    setStudents(formattedStudents);
+                let apiUsers = [];
+                if (usersRes?.data) {
+                    apiUsers = usersRes.data.filter(u => u.role === 'user');
                 }
+                const apiEnrollments = enrollmentsRes?.data || [];
+
+                const formattedStudents = apiUsers.map(user => {
+                    const userEnrollments = apiEnrollments.filter(e => e.userId && (e.userId._id === user._id || e.userId === user._id));
+                    const enrolledCourseNames = userEnrollments.map(e => e.courseId?.title || "Unknown Course");
+
+                    let totalProgress = 0;
+                    if (userEnrollments.length > 0) {
+                        const completedCount = userEnrollments.filter(e => e.isCompleted).length;
+                        totalProgress = Math.round((completedCount / userEnrollments.length) * 100);
+                    }
+
+                    return {
+                        id: user._id,
+                        name: `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.username || "Unknown",
+                        email: user.email,
+                        phone: user.phone || "N/A",
+                        enrollments: enrolledCourseNames.length > 0 ? enrolledCourseNames : ["N/A"],
+                        progress: `${totalProgress}%`,
+                        lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(),
+                        status: user.status === 'pending' ? 'Pending' : (user.status === 'in-active' ? 'Inactive' : 'Active')
+                    };
+                });
+
+                setStudents(formattedStudents);
             } catch (error) {
                 console.error("Failed to fetch students data:", error);
             }
@@ -64,11 +64,15 @@ const StudentProfilesPage = () => {
         fetchStudentsData();
     }, []);
 
+    const activeCount = students.filter(s => s.status === 'Active').length;
+    const inactiveCount = students.filter(s => s.status === 'Inactive').length;
+    const pendingCount = students.filter(s => s.status === 'Pending').length;
+
     const stats = [
         { title: "Total Registered Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Students", value: students.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Students", value: "0", trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Pending Students", value: "0", trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Active Students", value: activeCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: "Inactive Students", value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
+        { title: "Pending Students", value: pendingCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
 
     return (
@@ -120,7 +124,7 @@ const StudentProfilesPage = () => {
                                         "Inactive Students": "inactive_students",
                                         "Pending Students": "pending_students"
                                     };
-                                    
+
                                     return (
                                         <StatsCard
                                             key={index}
