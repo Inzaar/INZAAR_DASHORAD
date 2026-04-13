@@ -3,9 +3,10 @@ import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfileById } from "@/api/user";
+import { getUserProfileById, assignUserRole } from "@/api/user";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { RiDeleteBin6Fill } from "react-icons/ri";
+import { toast } from "react-hot-toast";
 import deactivate from "@/assets/images/deactivate.png";
 import SessionActivity from "@/components/shared/SessionActivity";
 import ModeratorProfileComponent from "../components/moderator/ModeratorProfileComponent";
@@ -21,6 +22,7 @@ const ModeratorDetails = () => {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState(state?.moderator ? { user: state.moderator } : null);
   const [loading, setLoading] = useState(!state?.moderator);
+  const [isDeactivating, setIsDeactivating] = useState(false);
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
   const dropdownRef = useRef(null);
@@ -56,6 +58,24 @@ const ModeratorDetails = () => {
       fetchProfileData();
     }
   }, [id]);
+
+  const handleDeactivate = async () => {
+    try {
+      setIsDeactivating(true);
+      await assignUserRole(id, { role: "user" });
+      setProfileData(prev => ({
+        ...prev,
+        user: { ...prev.user, role: "user" }
+      }));
+      toast.success("Moderator deactivated successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to deactivate moderator");
+    } finally {
+      setIsDeactivating(false);
+      setOpen(false);
+    }
+  };
 
   const handleprofilebutton = (e) => {
     setProfileButton(e.target.value);
@@ -149,9 +169,13 @@ const ModeratorDetails = () => {
                     <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
                       Edit
                     </button>
-                    <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
+                    <button 
+                      onClick={handleDeactivate}
+                      disabled={isDeactivating}
+                      className="bg-[#B1B1B1] hover:bg-gray-400 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center gap-[4px] disabled:opacity-50"
+                    >
                       <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
-                      Deactivate
+                      {isDeactivating ? "Deactivating..." : "Deactivate"}
                     </button>
                     <button className="bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
                       <RiDeleteBin6Fill /> Delete
@@ -173,8 +197,12 @@ const ModeratorDetails = () => {
                           <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors">
                             Edit
                           </button>
-                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
-                            <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
+                          <button 
+                            onClick={handleDeactivate}
+                            disabled={isDeactivating}
+                            className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> {isDeactivating ? "Deactivating..." : "Deactivate"}
                           </button>
                           <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
                             <RiDeleteBin6Fill className="w-4 h-4" /> Delete
