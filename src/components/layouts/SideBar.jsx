@@ -34,7 +34,12 @@ function Sidebar({ className, onClose }) {
     // location.pathname.startsWith('/registered-users') ||   
     // location.pathname.startsWith('/registered-courses');
 
-  const menuItems = isAdminRoute ? adminItems : studentItems;
+  let menuItems = isAdminRoute ? adminItems : studentItems;
+
+  if (!isAdminRoute && user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
+      // Use a Set to prevent duplicates if any overlap exists
+      menuItems = [...new Set([...studentItems, ...user.assignedFeatures])];
+  }
 
   // Map your URL paths to the Display Names
   const pathToName = {

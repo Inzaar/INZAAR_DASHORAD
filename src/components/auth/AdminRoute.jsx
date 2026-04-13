@@ -15,8 +15,8 @@ const AdminRoute = () => {
         return <Navigate to="/login" replace />;
     }
 
-    // If logged in but not admin, redirect to student dashboard
-    if (user.role !== 'admin') {
+    // If logged in but not admin or moderator, redirect to student dashboard
+    if (user.role !== 'admin' && user.role !== 'moderator') {
         return <Navigate to="/dashboard" replace />;
     }
 

@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Box, Check } from 'lucide-react';
+import { getModeratorFeatures } from '@/api/user';
 
 const AssignModeratorModal = ({ isOpen, onClose, onSave }) => {
   const [selectedRole, setSelectedRole] = useState('');
-  const [features, setFeatures] = useState([
-    { id: 'calendar', label: 'Calendar', checked: true },
-    { id: 'profiles', label: 'Student Profiles', checked: true },
-    { id: 'reports', label: 'Reports & Logs', checked: false },
-    { id: 'courses', label: 'Courses Management', checked: true },
-    { id: 'assets', label: 'Add Courses Asses', checked: false },
-    { id: 'admin', label: 'Mini Admin', checked: false },
-    { id: 'create_reports', label: 'Create Reports', checked: true },
-  ]);
+  const [features, setFeatures] = useState([]);
+  
+  useEffect(() => {
+    if (isOpen) {
+        const fetchFeatures = async () => {
+            try {
+                const res = await getModeratorFeatures();
+                if (res?.data) {
+                    const dbFeatures = res.data.map(f => ({
+                        id: f.key,
+                        label: f.name,
+                        checked: false
+                    }));
+                    setFeatures(dbFeatures);
+                }
+            } catch (err) {
+                console.error("Failed to fetch moderator features", err);
+            }
+        };
+        fetchFeatures();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -22,7 +36,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave }) => {
   };
 
   const handleSave = () => {
-    onSave({ selectedRole, features: features.filter(f => f.checked) });
+    onSave({ selectedRole, features: features.filter(f => f.checked).map(f => f.label) });
   };
 
   return (
