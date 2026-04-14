@@ -182,7 +182,8 @@ function BatchList({ onClose, moderatorId }) {
                         className={`px-3 sm:px-4 py-1.5 rounded-[4px] text-white text-[11px] sm:text-xs font-semibold ${isActive ? "opacity-100" : "opacity-30"}`}
                       >
                         {assignMutation.isPending && assignMutation.variables === batch._id ? "Assigning..." : 
-                         batch.assignedModerator?._id === moderatorId ? "Assigned" : "Assigned Batch"}
+                         batch.assignedModerator?._id === moderatorId ? "Assigned" : 
+                         batch.assignedModerator ? "Replace Moderator" : "Assign Batch"}
                       </GradiantButton>
                     </div>
                   </div>
