@@ -1,13 +1,77 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, PlusCircle, User, Users } from 'lucide-react';
+import { X, Search, PlusCircle, User, Users, Loader2, Check, Edit2 } from 'lucide-react';
 import BatchInformation from './BatchInformation';
 import AdjustStudentsTab from './AdjustStudentsTab';
+import { fetchAllModerators, assignBatch } from '../../../api/user';
 
 const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign' }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
+    const [moderators, setModerators] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [assigningId, setAssigningId] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [assignedModId, setAssignedModId] = useState(batchData?.assignedModerator?._id || batchData?.assignedModerator);
+    const [isEditMode, setIsEditMode] = useState(!(batchData?.assignedModerator?._id || batchData?.assignedModerator));
+
+    // Sync state with batchData when it opens
+    useEffect(() => {
+        if (isOpen && batchData) {
+            const modId = batchData.assignedModerator?._id || batchData.assignedModerator;
+            setAssignedModId(modId);
+            setIsEditMode(!modId);
+        }
+    }, [isOpen, batchData]);
+
+    // Fetch moderators from backend
+    useEffect(() => {
+        const getModerators = async () => {
+            if (isOpen) {
+                setLoading(true);
+                try {
+                    const response = await fetchAllModerators();
+                    if (response.success) {
+                        setModerators(response.data.moderatorList);
+                    }
+                } catch (error) {
+                    console.error("Error fetching moderators:", error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        getModerators();
+    }, [isOpen]);
+
+    const handleAssign = async (moderatorId) => {
+        const batchId = batchData?._id || batchData?.id;
+        if (!batchId) {
+            alert("No Batch ID found for assignment");
+            return;
+        }
+
+        setAssigningId(moderatorId);
+        try {
+            const response = await assignBatch(moderatorId, batchId);
+            if (response.success) {
+                setAssignedModId(moderatorId);
+                setIsEditMode(false);
+                // Refresh moderator list to show updated batch counts
+                const modResponse = await fetchAllModerators();
+                if (modResponse.success) {
+                    setModerators(modResponse.data.moderatorList);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to assign moderator:", error);
+            alert("Failed to assign moderator");
+        } finally {
+            setAssigningId(null);
+        }
+    };
 
     // Reset tab when modal opens
-    React.useEffect(() => {
+    useEffect(() => {
         if (isOpen) {
             setActiveTab(initialTab);
         }
@@ -15,15 +79,11 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
 
     if (!isOpen) return null;
 
-    const moderators = [
-        { name: "Ali Khar", email: "ali@lms.com", batches: 2, tags: ["Digital Marketing", "SEO", "Content Marketing"] },
-        { name: "Sara Ahmed", email: "sara@lms.com", batches: 1, tags: ["Digital Marketing", "Social Media", "Analytics"] },
-        { name: "Hassan Raza", email: "hassan@lms.com", batches: 3, tags: ["Web Development", "JavaScript", "React"] },
-        { name: "Fatima Noor", email: "fatima@lms.com", batches: 1, tags: ["Data Science", "Python", "Machine Learning"] },
-        { name: "Zainab Khan", email: "zainab@lms.com", batches: 2, tags: ["UI/UX Design", "Figma", "Branding"] },
-        { name: "Umer Sheikh", email: "umer@lms.com", batches: 4, tags: ["Backend", "Node.js", "MongoDB"] },
-        { name: "Ayesha Bibi", email: "ayesha@lms.com", batches: 0, tags: ["Quality Assurance", "Testing"] },
-    ];
+    // Filter moderators based on search
+    const filteredModerators = moderators.filter(mod =>
+        mod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        mod.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -82,8 +142,20 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                     <div className="flex-1 xl:min-h-0 mt-6 relative flex flex-col overflow-visible xl:overflow-hidden">
                         {activeTab === 'assign' && (
                             <div className="flex-1 xl:min-h-0 flex flex-col overflow-visible xl:overflow-hidden">
-                                <h3 className="text-gray-900 text-sm font-bold">Assign Moderator</h3>
-                                <p className="text-gray-400 text-[10px] mt-0.5">Choose a moderator responsible for managing this batch.</p>
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <h3 className="text-gray-900 text-sm font-bold">Assign Moderator</h3>
+                                        <p className="text-gray-400 text-[10px] mt-0.5">Choose a moderator responsible for managing this batch.</p>
+                                    </div>
+                                    {assignedModId && !isEditMode && (
+                                        <button
+                                            onClick={() => setIsEditMode(true)}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#5D5FEF]/5 text-[#5D5FEF] rounded-lg text-[10px] font-bold hover:bg-[#5D5FEF]/10 transition-colors"
+                                        >
+                                            <Edit2 className="w-3 h-3" /> Change Moderator
+                                        </button>
+                                    )}
+                                </div>
 
                                 {/* Search Bar (Fixed at top of tab) */}
                                 <div className="mt-4 flex flex-col sm:flex-row gap-3">
@@ -92,6 +164,8 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                                         <input
                                             type="text"
                                             placeholder="Search moderators..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
                                             className="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D5FEF]/10 focus:bg-white focus:border-[#5D5FEF]/20 transition-all text-[11px]"
                                         />
                                     </div>
@@ -102,38 +176,79 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
 
                                 {/* Moderator List (Independently Scrollable on Desktop) */}
                                 <div className="flex-1 overflow-y-visible xl:overflow-y-auto mt-4 pr-1 space-y-3 custom-scrollbar pb-6">
-                                    {moderators.map((mod, i) => (
-                                        <div
-                                            key={i}
-                                            className="p-3 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-[#5D5FEF]/30 hover:shadow-lg hover:shadow-gray-500/5 transition-all group"
-                                        >
-                                            <div className="flex gap-4 items-center w-full sm:flex-1 min-w-0">
-                                                <div className="bg-[#3758EE] p-2.5 rounded-full text-white shadow-md flex-shrink-0">
-                                                    <User className="w-4 h-4" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-bold text-gray-900 text-sm truncate">{mod.name}</h4>
-                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-0.5">
-                                                        <p className="text-gray-400 text-[10px] flex items-center gap-1.5 min-w-0">
-                                                            <span className="opacity-60 text-[8px]">📧</span> <span className="truncate">{mod.email}</span>
-                                                        </p>
-                                                        <p className="text-gray-400 text-[10px] flex items-center gap-1.5 whitespace-nowrap">
-                                                            <span className="opacity-60 text-[8px]">💼</span> {mod.batches} batches
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1.5 mt-2">
-                                                        {mod.tags.map((tag, j) => (
-                                                            <span key={j} className="px-2 py-0.5 bg-gray-50 text-gray-500 rounded-md text-[9px] font-bold border border-gray-100 group-hover:bg-[#5D5FEF]/5 group-hover:border-[#5D5FEF]/10 group-hover:text-[#5D5FEF] transition-colors">{tag}</span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button className="w-full sm:w-auto px-5 py-2 bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white rounded-lg font-bold text-xs shadow-md hover:scale-[1.02] transition-all active:scale-95 flex-shrink-0">
-                                                Assign
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
+                                     {loading ? (
+                                         <div className="flex flex-col items-center justify-center py-10 gap-3">
+                                             <Loader2 className="w-8 h-8 text-[#5D5FEF] animate-spin" />
+                                             <p className="text-gray-400 text-xs font-medium">Fetching moderators...</p>
+                                         </div>
+                                     ) : filteredModerators.length === 0 ? (
+                                         <div className="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                                             <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                             <p className="text-gray-400 text-xs">No moderators found</p>
+                                         </div>
+                                     ) : (
+                                         filteredModerators.map((mod, i) => (
+                                             <div
+                                                 key={mod.id || i}
+                                                 className="p-3 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-[#5D5FEF]/30 hover:shadow-lg hover:shadow-gray-500/5 transition-all group"
+                                             >
+                                                 <div className="flex gap-4 items-center w-full sm:flex-1 min-w-0">
+                                                     <div className={`rounded-full text-white shadow-md flex-shrink-0 flex items-center justify-center overflow-hidden w-10 h-10 ${!mod.imageUrl ? 'bg-[#3758EE]' : ''}`}>
+                                                         {mod.imageUrl ? (
+                                                             <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover" />
+                                                         ) : (
+                                                             <User className="w-5 h-5" />
+                                                         )}
+                                                     </div>
+                                                     <div className="flex-1 min-w-0">
+                                                         <h4 className="font-bold text-gray-900 text-sm truncate">{mod.name}</h4>
+                                                         <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-0.5">
+                                                             <p className="text-gray-400 text-[10px] flex items-center gap-1.5 min-w-0">
+                                                                 <span className="opacity-60 text-[8px]">📧</span> <span className="truncate">{mod.email}</span>
+                                                             </p>
+                                                             <p className="text-gray-400 text-[10px] flex items-center gap-1.5 whitespace-nowrap">
+                                                                 <span className="opacity-60 text-[8px]">💼</span> {mod.batches || 0} batches
+                                                             </p>
+                                                         </div>
+                                                         <div className="flex flex-wrap gap-1.5 mt-2">
+                                                             {mod.tags && mod.tags.length > 0 ? (
+                                                                 mod.tags.map((tag, j) => (
+                                                                     <span key={j} className="px-2 py-0.5 bg-gray-50 text-gray-500 rounded-md text-[9px] font-bold border border-gray-100 group-hover:bg-[#5D5FEF]/5 group-hover:border-[#5D5FEF]/10 group-hover:text-[#5D5FEF] transition-colors">{tag}</span>
+                                                                 ))
+                                                             ) : (
+                                                                 <span className="px-2 py-0.5 bg-gray-50 text-gray-400 rounded-md text-[9px] font-bold border border-gray-50 italic">No tags assigned</span>
+                                                             )}
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                                 <button
+                                                     onClick={() => handleAssign(mod.id)}
+                                                     disabled={assigningId !== null || (assignedModId === mod.id && !isEditMode) || (!isEditMode && assignedModId)}
+                                                     className={`w-full sm:w-auto px-5 py-2 rounded-lg font-bold text-xs shadow-md transition-all active:scale-95 flex-shrink-0 flex items-center justify-center gap-2 
+                                                        ${mod.id === assignedModId 
+                                                            ? 'bg-green-500 text-white cursor-default' 
+                                                            : 'bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white'
+                                                        } 
+                                                        ${(assigningId !== null || (!isEditMode && assignedModId !== mod.id)) ? 'opacity-50 cursor-not-allowed grayscale-[0.5]' : 'hover:scale-[1.02]'}`}
+                                                 >
+                                                     {assigningId === mod.id ? (
+                                                         <>
+                                                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                             Assigning...
+                                                         </>
+                                                     ) : mod.id === assignedModId ? (
+                                                         <>
+                                                             <Check className="w-3.5 h-3.5" />
+                                                             Assigned
+                                                         </>
+                                                     ) : (
+                                                         'Assign'
+                                                     )}
+                                                 </button>
+                                             </div>
+                                         ))
+                                     )}
+                                 </div>
                             </div>
                         )}
 
