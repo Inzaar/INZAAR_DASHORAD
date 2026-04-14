@@ -49,7 +49,9 @@ const BatchInformation = ({ data }) => {
 
             <div className="border-t border-gray-200 pt-2 sm:pt-3 mt-1">
                 <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Status</p>
-                <p className="text-[11px] sm:text-xs font-bold text-red-500">{data?.status || 'Pending Moderator Assignment'}</p>
+                <p className={`text-[11px] sm:text-xs font-bold ${data?.assignedModerator ? 'text-green-500' : 'text-red-500'}`}>
+                    {data?.assignedModerator ? 'Moderator Assigned' : 'Moderator Not Assigned'}
+                </p>
             </div>
         </div>
     );

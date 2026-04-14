@@ -58,6 +58,20 @@ export const getModeratorFeatures = async () => {
     return res.data;
 };
 
+export const fetchAllModerators = async () => {
+    const res = await axiosInstance.get("/admin/moderators", {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const assignBatch = async (moderatorId, batchId) => {
+    const res = await axiosInstance.post(`/admin/moderators/${moderatorId}/assign-batch`, { batchId }, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 export const assignUserRole = async (id, data) => {
     const res = await axiosInstance.post(`/admin/users/${id}/assign-role`, data, {
         withCredentials: true,
