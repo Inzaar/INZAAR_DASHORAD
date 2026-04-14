@@ -90,7 +90,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       <div className="w-full mx-auto">
 
         {/* Header */}
-        <div className="w-full flex justify-between items-center bg-[#3758EE] text-white p-4 rounded-[10px] mb-6 shadow-md">
+        <div className="w-full flex justify-between items-center bg-white text-gray-900 border border-[#ECECEC] p-4 rounded-[10px] mb-6 shadow-sm">
           <h3 className="text-[18px] font-bold">Profile Details</h3>
 
           <div className="flex gap-[12px] items-center">
