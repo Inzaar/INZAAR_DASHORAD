@@ -7,7 +7,7 @@ import { uploadImage } from "@/api/course";
 import { updateUser } from "@/api/user";
 import axiosInstance from "@/api/axiosInstance";
 
-function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage }) {
+function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage, onEditClick }) {
   const isStudent = type === 'student';
   const user = profileData?.user || {};
   const [isSaving, setIsSaving] = useState(false);
@@ -99,12 +99,20 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
             </button>
 
             {/* Edit button for screens larger than 700px */}
-            <GradiantButton className="hidden sm:flex w-[90px] h-[40px] rounded-[4px] text-sm">
+            <GradiantButton
+              type="button"
+              onClick={onEditClick}
+              className="hidden sm:flex w-[90px] h-[40px] rounded-[4px] text-sm"
+            >
               Edit
             </GradiantButton>
 
             {/* Gradient icon for smaller screens */}
-            <GradiantButton className="flex sm:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] bg-white text-blue-600">
+            <GradiantButton
+              type="button"
+              onClick={onEditClick}
+              className="flex sm:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] bg-white text-blue-600"
+            >
               <FaEdit className="w-4" />
             </GradiantButton>
           </div>

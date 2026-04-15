@@ -2,30 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { X, Box, Check } from 'lucide-react';
 import { getModeratorFeatures } from '@/api/user';
 
-const AssignModeratorModal = ({ isOpen, onClose, onSave }) => {
-  const [selectedRole, setSelectedRole] = useState('');
+const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], initialRole = '' }) => {
+  const [selectedRole, setSelectedRole] = useState(initialRole || '');
   const [features, setFeatures] = useState([]);
-  
+
   useEffect(() => {
     if (isOpen) {
-        const fetchFeatures = async () => {
-            try {
-                const res = await getModeratorFeatures();
-                if (res?.data) {
-                    const dbFeatures = res.data.map(f => ({
-                        id: f.key,
-                        label: f.name,
-                        checked: false
-                    }));
-                    setFeatures(dbFeatures);
-                }
-            } catch (err) {
-                console.error("Failed to fetch moderator features", err);
-            }
-        };
-        fetchFeatures();
+      setSelectedRole(initialRole || '');
     }
-  }, [isOpen]);
+  }, [initialRole, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const fetchFeatures = async () => {
+        try {
+          const res = await getModeratorFeatures();
+          if (res?.data) {
+            const dbFeatures = res.data.map(f => ({
+              id: f.key,
+              label: f.name,
+              checked: (assignedFeatures || []).includes(f.name) || (assignedFeatures || []).includes(f.key)
+            }));
+            setFeatures(dbFeatures);
+          }
+        } catch (err) {
+          console.error("Failed to fetch moderator features", err);
+        }
+      };
+      fetchFeatures();
+    }
+  }, [isOpen, assignedFeatures]);
 
   if (!isOpen) return null;
 
@@ -42,7 +48,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans">
       <div className="bg-white w-full max-w-[750px] max-h-[90vh] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-        
+
         {/* Header */}
         <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
           <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
