@@ -4,15 +4,15 @@ import Sidebar from '@/components/layouts/SideBar';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import Navbar from '@/components/layouts/NavBar';
-import StatusTable from '@/components/ui/statusTable/StatusTable';
+import SharedStudentTable from '@/components/shared/SharedStudentTable';
 import PerformanceCard from '@/components/shared/PerformanceCard';
-import dummyUserCourses from '@/constants/dummyData';
 import UserCard from '../components/UserCard';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import { getAllUsers } from '@/api/user';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
+import axiosInstance from '@/api/axiosInstance';
 import NewBatchAlert from '@/components/layouts/ManageBatches/NewBatchAlert';
 
 const AdminDashboard = () => {
@@ -23,6 +23,11 @@ const AdminDashboard = () => {
     const [moderatorCount, setModeratorCount] = useState(0);
     const [courseCount, setCourseCount] = useState(0);
     const [courseStats, setCourseStats] = useState([]);
+
+    // Students List Data
+    const [students, setStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -60,6 +65,25 @@ const AdminDashboard = () => {
             } catch (err) { console.error('Error fetching courses:', err); }
         };
         fetchDashboardData();
+    }, []);
+
+    const fetchStudentsTable = async (page = 1) => {
+        setLoadingStudents(true);
+        try {
+            const res = await axiosInstance.get(`/admin/reports/students?page=${page}&limit=5`);
+            if (res?.data?.data) {
+                setStudents(res.data.data.studentsList || []);
+                setPagination(res.data.data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            }
+        } catch (err) {
+            console.error('Failed to fetch students for dashboard:', err);
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStudentsTable(1);
     }, []);
 
     return (
@@ -200,7 +224,14 @@ const AdminDashboard = () => {
 
                             </div>
 
-                            <StatusTable userCourses={dummyUserCourses} />
+                            <SharedStudentTable
+                                students={students}
+                                loading={loadingStudents}
+                                pagination={pagination}
+                                onPageChange={fetchStudentsTable}
+                                title="Student Table"
+                                showDropdown={true}
+                            />
                         </div>
 
                     </main>

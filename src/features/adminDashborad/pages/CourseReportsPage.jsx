@@ -411,8 +411,20 @@ const CourseReportsPage = () => {
                                                 {getPageNumbers().map((p, idx) => (
                                                     p === '...' ? (
                                                         <span key={`dot-${idx}`} className="text-gray-400">...</span>
+                                                    ) : p === pagination.page ? (
+                                                        <GradiantButton
+                                                            key={p}
+                                                            onClick={() => goToPage(p)}
+                                                            className="w-8 h-8 !p-0 flex items-center justify-center text-sm font-bold rounded-lg shadow-sm"
+                                                        >
+                                                            {p}
+                                                        </GradiantButton>
                                                     ) : (
-                                                        <button key={p} onClick={() => goToPage(p)} className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg ${p === pagination.page ? 'font-bold text-white bg-[#6366F1] shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                                        <button
+                                                            key={p}
+                                                            onClick={() => goToPage(p)}
+                                                            className="w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-100"
+                                                        >
                                                             {p}
                                                         </button>
                                                     )
