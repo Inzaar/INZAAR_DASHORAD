@@ -55,7 +55,12 @@ const NewBatchAlert = () => {
                 console.error("Failed to fetch unassigned batches", error);
             }
         };
-        fetchUnassignedBatches();
+        
+        // Only fetch on mount or when modal CLOSES (to refresh list after potentially assigning).
+        // Fetching when it opens causes severe UI lag due to redundant heavy API calls.
+        if (!modalData.isOpen) {
+            fetchUnassignedBatches();
+        }
     }, [modalData.isOpen]);
 
     const handleOpenModal = (tab = 'assign', batch) => {
