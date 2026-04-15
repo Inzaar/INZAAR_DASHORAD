@@ -3,7 +3,8 @@ import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfileById, assignUserRole } from "@/api/user";
+import { getUserProfileById, assignUserRole, deleteUser, restoreUser } from "@/api/user";
+import { RiDeleteBin6Fill } from "react-icons/ri";
 import toast from "react-hot-toast";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import deactivate from "@/assets/images/deactivate.png";
@@ -25,6 +26,8 @@ const StudentDetailsPage = () => {
     const [activeTab, setActiveTab] = useState('Profile');
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [isModerator, setIsModerator] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     // outside click close for dropdown
@@ -54,6 +57,32 @@ const StudentDetailsPage = () => {
         };
         if (id) fetchProfileData();
     }, [id]);
+
+    const handleDeactivate = async () => {
+        try {
+            await deleteUser(id);
+            toast.success("Student deactivated successfully!");
+            // Re-fetch to update isDeleted status
+            const res = await getUserProfileById(id);
+            if (res?.data) setProfileData(res.data);
+        } catch (err) {
+            toast.error("Failed to deactivate student");
+            console.error(err);
+        }
+    };
+
+    const handleRestore = async () => {
+        try {
+            await restoreUser(id);
+            toast.success("Student restored successfully!");
+            // Re-fetch to update isDeleted status
+            const res = await getUserProfileById(id);
+            if (res?.data) setProfileData(res.data);
+        } catch (err) {
+            toast.error("Failed to restore student");
+            console.error(err);
+        }
+    };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -124,19 +153,35 @@ const StudentDetailsPage = () => {
                                         </span>
 
                                         <div className="hidden xl:flex items-center gap-4">
-                                            <button className="flex items-center gap-2 px-4 py-2 bg-[#B1B1B1] text-white rounded-[4px] text-sm font-medium hover:bg-gray-400 transition-all shadow-sm">
-                                                <img src={deactivate} alt="Deactivate" className="w-4 h-4 object-contain" />
-                                                Deactivate
-                                            </button>
+                                            {!profileData?.user?.isDeleted ? (
+                                                <button 
+                                                    onClick={() => setIsDeleteModalOpen(true)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-[#B1B1B1] text-white rounded-[4px] text-sm font-medium hover:bg-gray-400 transition-all shadow-sm"
+                                                >
+                                                    <img src={deactivate} alt="Deactivate" className="w-4 h-4 object-contain" />
+                                                    Deactivate
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => setIsRestoreModalOpen(true)}
+                                                    className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-red-500/30"
+                                                >
+                                                    <RiDeleteBin6Fill className="rotate-180" /> Restore
+                                                </button>
+                                            )}
 
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm text-gray-500 font-medium whitespace-nowrap">Switch as Moderator</span>
-                                                <label className="relative inline-flex items-center cursor-pointer scale-90">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="sr-only peer"
+                                                <span className={`text-sm font-medium whitespace-nowrap ${profileData?.user?.isDeleted ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    Switch as Moderator
+                                                </span>
+                                                <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-90`}>
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="sr-only peer" 
                                                         checked={isModerator}
+                                                        disabled={profileData?.user?.isDeleted}
                                                         onChange={(e) => {
+                                                            if (profileData?.user?.isDeleted) return;
                                                             if (e.target.checked) {
                                                                 setIsAssignModalOpen(true);
                                                             } else {
@@ -178,17 +223,31 @@ const StudentDetailsPage = () => {
 
                                                     {/* Actions Section */}
                                                     <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
-                                                    <button className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans">
-                                                        Deactivate Profile
-                                                    </button>
-                                                    <div className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
+                                                    {!profileData?.user?.isDeleted ? (
+                                                        <button 
+                                                            onClick={() => { setIsDeleteModalOpen(true); setOpen(false); }}
+                                                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
+                                                        >
+                                                            Deactivate Profile
+                                                        </button>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={() => { setIsRestoreModalOpen(true); setOpen(false); }}
+                                                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors text-left font-sans"
+                                                        >
+                                                            <RiDeleteBin6Fill className="w-4 h-4 rotate-180" /> Restore Profile
+                                                        </button>
+                                                    )}
+                                                    <div className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md transition-colors ${profileData?.user?.isDeleted ? 'text-gray-400 hover:bg-transparent' : 'text-gray-600 hover:bg-gray-50'}`}>
                                                         <span>Switch as Moderator</span>
-                                                        <label className="relative inline-flex items-center cursor-pointer scale-[0.8]">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="sr-only peer"
+                                                        <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-[0.8]`}>
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="sr-only peer" 
                                                                 checked={isModerator}
+                                                                disabled={profileData?.user?.isDeleted}
                                                                 onChange={(e) => {
+                                                                    if (profileData?.user?.isDeleted) return;
                                                                     if (e.target.checked) {
                                                                         setIsAssignModalOpen(true);
                                                                     } else {
@@ -239,6 +298,58 @@ const StudentDetailsPage = () => {
                                         }
                                     }}
                                 />
+
+                                {/* Deactivate/Delete Confirmation Modal */}
+                                {isDeleteModalOpen && (
+                                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans text-left">
+                                        <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                                            <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                                                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-sm">
+                                                    <RiDeleteBin6Fill className="text-red-600 w-5 h-5" />
+                                                </div>
+                                                <h2 className="text-[22px] font-bold text-gray-800">Confirm Deactivation</h2>
+                                            </div>
+                                            <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                                                Are you sure you want to deactivate <span className="font-bold">{profileData?.user?.firstname} {profileData?.user?.lastname}</span>?
+                                                This will soft-delete their profile and disable their active roles.
+                                            </div>
+                                            <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                                                <button onClick={() => setIsDeleteModalOpen(false)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                                                    No, Cancel
+                                                </button>
+                                                <button onClick={() => { setIsDeleteModalOpen(false); handleDeactivate(); }} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                                                    Yes, Deactivate
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Restore Confirmation Modal */}
+                                {isRestoreModalOpen && (
+                                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans text-left">
+                                        <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                                            <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                                                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-sm">
+                                                    <RiDeleteBin6Fill className="text-[#E52222] w-5 h-5 rotate-180" />
+                                                </div>
+                                                <h2 className="text-[22px] font-bold text-gray-800">Confirm Restoration</h2>
+                                            </div>
+                                            <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                                                Are you sure you want to restore <span className="font-bold">{profileData?.user?.firstname} {profileData?.user?.lastname}</span>?
+                                                This will make the student active and visible in the general lists again.
+                                            </div>
+                                            <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                                                <button onClick={() => setIsRestoreModalOpen(false)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                                                    No, Cancel
+                                                </button>
+                                                <button onClick={() => { setIsRestoreModalOpen(false); handleRestore(); }} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                                                    Yes, Restore
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </main>
