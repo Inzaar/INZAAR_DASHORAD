@@ -120,7 +120,7 @@ const ModeratorsPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
-            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
@@ -275,6 +275,7 @@ const ModeratorsPage = () => {
                                                 <option value="Active">Active</option>
                                                 <option value="Inactive">Inactive</option>
                                                 <option value="Pool">Pool</option>
+                                                <option value="Deleted">Deleted</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
@@ -336,6 +337,7 @@ const ModeratorsPage = () => {
                                                                         <option value="Active">Active</option>
                                                                         <option value="Inactive">Inactive</option>
                                                                         <option value="Pool">Pool</option>
+                                                                        <option value="Deleted">Deleted</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
@@ -435,7 +437,7 @@ const ModeratorsPage = () => {
                                                 name={mod.name}
                                                 id={mod.id}
                                                 image={mod.profileImageUrl}
-                                                status={mod.isActive ? "online" : "offline"}
+                                                status={mod.status === 'Deleted' || mod.isDeleted ? "deleted" : (mod.isActive ? "online" : "offline")}
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={new Date(mod.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}

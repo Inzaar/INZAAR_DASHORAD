@@ -25,7 +25,7 @@ const UserCard = ({
                             alt={name}
                             className="w-full h-full rounded-full object-cover border-2 border-white shadow-sm"
                         />
-                        <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${status === 'online' ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                        <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${status === 'online' ? 'bg-green-500' : status === 'deleted' ? 'bg-red-500' : 'bg-gray-300'}`}></span>
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 leading-tight">{name}</h3>

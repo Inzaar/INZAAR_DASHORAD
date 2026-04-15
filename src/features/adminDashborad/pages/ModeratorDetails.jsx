@@ -151,7 +151,7 @@ const ModeratorDetails = () => {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+      <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
         <Navbar onMenuClick={toggleSidebar} />
 
         <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
@@ -241,7 +241,7 @@ const ModeratorDetails = () => {
                           <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
                           Deactivate
                         </button>
-                        <button 
+                        <button
                           onClick={() => setIsDeleteModalOpen(true)}
                           className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px] shadow-sm shadow-red-500/30"
                         >
@@ -249,7 +249,7 @@ const ModeratorDetails = () => {
                         </button>
                       </>
                     ) : (
-                      <button 
+                      <button
                         onClick={() => setIsRestoreModalOpen(true)}
                         className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px] shadow-sm shadow-red-500/30"
                       >
@@ -290,7 +290,7 @@ const ModeratorDetails = () => {
                             >
                               <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
                             </button>
-                            <button 
+                            <button
                               onClick={() => {
                                 setIsDeleteModalOpen(true);
                                 setOpen(false);
@@ -301,7 +301,7 @@ const ModeratorDetails = () => {
                             </button>
                           </>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => {
                               setIsRestoreModalOpen(true);
                               setOpen(false);
