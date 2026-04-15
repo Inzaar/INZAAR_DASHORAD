@@ -41,14 +41,15 @@ const CourseReportsPage = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     // Session Activity Data (Line Chart)
-    const sessionData = [
-        { day: 'Mon', value: -15 },
-        { day: 'Tue', value: -10 },
-        { day: 'Wed', value: -5 },
-        { day: 'Thu', value: -3 },
+    const [sessionData, setSessionData] = useState([
+        { day: 'Mon', value: 0 },
+        { day: 'Tue', value: 0 },
+        { day: 'Wed', value: 0 },
+        { day: 'Thu', value: 0 },
         { day: 'Fri', value: 0 },
-        { day: 'Sat', value: 5 },
-    ];
+        { day: 'Sat', value: 0 },
+        { day: 'Sun', value: 0 },
+    ]);
 
     // Fetch report data from API
     const fetchReport = useCallback(async (page = 1) => {
@@ -72,6 +73,9 @@ const CourseReportsPage = () => {
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
             setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            if (data.sessionActivity) {
+                setSessionData(data.sessionActivity);
+            }
         } catch (err) {
             console.error('Failed to fetch courses report:', err);
         } finally {
