@@ -3,7 +3,7 @@ import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { getUserProfileById } from "@/api/user";
+import { getUserProfileById, deleteUser, restoreUser } from "@/api/user";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import deactivate from "@/assets/images/deactivate.png";
@@ -29,6 +29,8 @@ const ModeratorDetails = () => {
   const [profileButton, setProfileButton] = useState('Profile');
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   // ✅ outside click close
   useEffect(() => {
@@ -113,6 +115,28 @@ const ModeratorDetails = () => {
       navigate('/admin-moderators');
     } catch (err) {
       toast.error("Failed to deactivate moderator");
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteUser(id);
+      toast.success("Moderator deleted successfully!");
+      fetchProfileData();
+    } catch (err) {
+      toast.error("Failed to delete moderator");
+      console.error(err);
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await restoreUser(id);
+      toast.success("Moderator restored successfully!");
+      fetchProfileData();
+    } catch (err) {
+      toast.error("Failed to restore moderator");
       console.error(err);
     }
   };
@@ -202,22 +226,36 @@ const ModeratorDetails = () => {
                     <span className="text-sm text-gray-600">
                       Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
-                    <button
-                      onClick={() => setIsAssignModalOpen(true)}
-                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setIsDeactivateModalOpen(true)}
-                      className="bg-[#B1B1B1] hover:bg-gray-500 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center gap-[4px]"
-                    >
-                      <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
-                      Deactivate
-                    </button>
-                    <button className="bg-[#ED3A3A] text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px]">
-                      <RiDeleteBin6Fill /> Delete
-                    </button>
+                    {!profileData?.user?.isDeleted ? (
+                      <>
+                        <button
+                          onClick={() => setIsAssignModalOpen(true)}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setIsDeactivateModalOpen(true)}
+                          className="bg-[#B1B1B1] hover:bg-gray-500 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center gap-[4px]"
+                        >
+                          <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
+                          Deactivate
+                        </button>
+                        <button 
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px] shadow-sm shadow-red-500/30"
+                        >
+                          <RiDeleteBin6Fill /> Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button 
+                        onClick={() => setIsRestoreModalOpen(true)}
+                        className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-[4px] shadow-sm shadow-red-500/30"
+                      >
+                        <RiDeleteBin6Fill className="rotate-180" /> Restore
+                      </button>
+                    )}
                   </div>
 
                   {/* responsive 3 dot icon */}
@@ -232,27 +270,47 @@ const ModeratorDetails = () => {
                     {open && (
                       <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
                         {/* Action Buttons */}
-                        <button
-                          onClick={() => {
-                            setIsAssignModalOpen(true);
-                            setOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsDeactivateModalOpen(true);
-                            setOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
-                        >
-                          <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
-                        </button>
-                        <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                          <RiDeleteBin6Fill className="w-4 h-4" /> Delete
-                        </button>
+                        {!profileData?.user?.isDeleted ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setIsAssignModalOpen(true);
+                                setOpen(false);
+                              }}
+                              className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsDeactivateModalOpen(true);
+                                setOpen(false);
+                              }}
+                              className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
+                            >
+                              <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setIsDeleteModalOpen(true);
+                                setOpen(false);
+                              }}
+                              className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                            >
+                              <RiDeleteBin6Fill className="w-4 h-4" /> Delete
+                            </button>
+                          </>
+                        ) : (
+                          <button 
+                            onClick={() => {
+                              setIsRestoreModalOpen(true);
+                              setOpen(false);
+                            }}
+                            className="block w-full text-left px-4 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-2"
+                          >
+                            <RiDeleteBin6Fill className="w-4 h-4 rotate-180" /> Restore
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -318,6 +376,58 @@ const ModeratorDetails = () => {
                           className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#4E6BFF] to-[#8E6BFF] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-indigo-500/20 hover:opacity-90 transition-all active:scale-95"
                         >
                           Yes, Deactivate
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {isDeleteModalOpen && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans">
+                    <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                      <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-sm">
+                          <RiDeleteBin6Fill className="text-red-600 w-5 h-5" />
+                        </div>
+                        <h2 className="text-[22px] font-bold text-gray-800">Confirm Deletion</h2>
+                      </div>
+                      <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                        Are you sure you want to delete <span className="font-bold">{profileData?.user?.firstname} {profileData?.user?.lastname}</span>?
+                        This will soften their profile from general lists.
+                      </div>
+                      <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                        <button onClick={() => setIsDeleteModalOpen(false)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                          No, Cancel
+                        </button>
+                        <button onClick={() => { setIsDeleteModalOpen(false); handleDelete(); }} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                          Yes, Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Restore Confirmation Modal */}
+                {isRestoreModalOpen && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans">
+                    <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                      <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shadow-sm">
+                          <RiDeleteBin6Fill className="text-blue-600 w-5 h-5 rotate-180" />
+                        </div>
+                        <h2 className="text-[22px] font-bold text-gray-800">Confirm Restoration</h2>
+                      </div>
+                      <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                        Are you sure you want to restore <span className="font-bold">{profileData?.user?.firstname} {profileData?.user?.lastname}</span>?
+                        This will make the user active and visible in the main lists again.
+                      </div>
+                      <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                        <button onClick={() => setIsRestoreModalOpen(false)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                          No, Cancel
+                        </button>
+                        <button onClick={() => { setIsRestoreModalOpen(false); handleRestore(); }} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                          Yes, Restore
                         </button>
                       </div>
                     </div>
