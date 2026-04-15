@@ -7,11 +7,17 @@ import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { useState } from "react";
 import Other from "./other";
 import ProfileDesign from "./ProfileDesign";
-import { updateProfile } from "@/api/auth";
+import { updateProfile, logout as apiLogout } from "@/api/auth";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import LogoutModal from "@/components/shared/LogoutModal";
 // import profile from "@/assets/images/profile.png"
 
 function Profile({ userInfo, setUserPayload, userPayload }) {
     const [activeTab, setActiveTab] = useState("account");
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const { logout: contextLogout } = useAuth();
+    const navigate = useNavigate();
 
 
     const handleTabClick = (tab) => {
@@ -30,6 +36,17 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         } catch (error) {
             console.error("Error updating profile", error);
             toast.error(error?.response?.data?.message || "Failed to update profile");
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await apiLogout();
+        } catch (error) {
+            console.error("Logout error", error);
+        } finally {
+            contextLogout();
+            navigate('/login');
         }
     };
 
@@ -67,7 +84,12 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 {/* div right */}
                 <div className="w-full">
                     <div className="w-full h-[200px] min-[800px]:h-[150px] flex items-center justify-end">
-                        <div className="hidden min-[600px]:flex w-[140px] h-[50px] mt-10 rounded-md justify-center items-center bg-[#B1B1B1] text-[#FFFFFF] gap-[10px] font-medium">Log Out <MdOutlineLogout /></div>
+                        <div 
+                            onClick={() => setIsLogoutModalOpen(true)}
+                            className="hidden min-[600px]:flex w-[140px] h-[50px] mt-10 rounded-md justify-center items-center bg-[#B1B1B1] text-[#FFFFFF] gap-[10px] font-medium cursor-pointer hover:bg-gray-400 transition-all"
+                        >
+                            Log Out <MdOutlineLogout />
+                        </div>
                     </div>
 
 
@@ -99,6 +121,13 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             </div>
 
 
+
+
+            <LogoutModal 
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogout}
+            />
         </div>
     )
 }

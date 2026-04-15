@@ -4,6 +4,7 @@ import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
 import { logout as apiLogout } from '@/api/auth';
+import LogoutModal from '@/components/shared/LogoutModal';
 
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ function Sidebar({ className, onClose }) {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [isReportsExpanded, setIsReportsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Define menu items based on role
   const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses', 'Reports & Logs'];
@@ -141,8 +143,7 @@ function Sidebar({ className, onClose }) {
     setActiveItem(itemName);
 
     if (itemName === 'Logout') {
-      logout();
-      if (onClose) onClose();
+      setIsLogoutModalOpen(true);
       return;
     }
 
@@ -246,6 +247,12 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
         </div>
       </div>
+
+      <LogoutModal 
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={logout}
+      />
     </div>
   );
 }
