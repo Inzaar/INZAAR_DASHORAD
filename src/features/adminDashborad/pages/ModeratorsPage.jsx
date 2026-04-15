@@ -123,7 +123,7 @@ const ModeratorsPage = () => {
             <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -137,7 +137,7 @@ const ModeratorsPage = () => {
                         className={`
                         transition-transform duration-300 ease-in-out z-40
                         lg:translate-x-0 lg:static lg:block
-                        fixed left-0 top-0 h-full lg:max-h-[800px] shadow-2xl
+                        fixed left-0 top-0 shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 

@@ -25,20 +25,20 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/moderator-details') ||
     location.pathname.startsWith('/registered-users') ||
     location.pathname.startsWith('/registered-courses');
-    // location.pathname.startsWith('/reports') ||
-    // location.pathname.startsWith('/moderator-reports') ||
-    // location.pathname.startsWith('/course-reports') ||
-    // location.pathname.startsWith('/student-profiles') ||
-    // location.pathname.startsWith('/moderator-details');
+  // location.pathname.startsWith('/reports') ||
+  // location.pathname.startsWith('/moderator-reports') ||
+  // location.pathname.startsWith('/course-reports') ||
+  // location.pathname.startsWith('/student-profiles') ||
+  // location.pathname.startsWith('/moderator-details');
 
-    // location.pathname.startsWith('/registered-users') ||   
-    // location.pathname.startsWith('/registered-courses');
+  // location.pathname.startsWith('/registered-users') ||   
+  // location.pathname.startsWith('/registered-courses');
 
   let menuItems = isAdminRoute ? adminItems : studentItems;
+  let moderatorFeatures = [];
 
   if (!isAdminRoute && user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
-      // Use a Set to prevent duplicates if any overlap exists
-      menuItems = [...new Set([...studentItems, ...user.assignedFeatures])];
+    moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature));
   }
 
   // Map your URL paths to the Display Names
@@ -65,23 +65,20 @@ function Sidebar({ className, onClose }) {
     '/moderator-reports': 'Moderator Reports',
     '/course-reports': 'Course Reports',
 
-    '/admin/student-details': 'Student Profiles',  // for /admin/student-details/1, /2, etc.
+    '/admin/student-details': 'Student Profiles',
     '/admin/moderator-details': 'Moderators',
     '/admin/profile': 'Dashboard',
-    '/admin/course-details': 'Courses',  
-    '/admin-course-view': 'Courses',  
-    '/admin-course-play': 'Courses',      
-    '/admin-course-add': 'Courses',               
-    '/admin-add-course': 'Courses',              
-    '/registered-users': 'Student Profiles',   
+    '/admin/course-details': 'Courses',
+    '/admin-course-view': 'Courses',
+    '/admin-course-play': 'Courses',
+    '/admin-course-add': 'Courses',
+    '/admin-add-course': 'Courses',
+    '/registered-users': 'Student Profiles',
     '/registered-courses': 'Courses',
-    
 
     // Auth
     '/logout': 'Logout'
   };
-
-  // Sync state with URL whenever the route changes
 
   useEffect(() => {
     // Try exact match first
@@ -105,29 +102,14 @@ function Sidebar({ className, onClose }) {
     }
   }, [location.pathname]);
 
-
-  // useEffect(() => {
-  //   const currentName = pathToName[location.pathname];
-  //   if (currentName) {
-  //     setActiveItem(currentName);
-  //     if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
-  //       setIsReportsExpanded(true);
-  //     }
-  //   }
-  // }, [location.pathname]);
-
   const logout = async () => {
     try {
       console.log("Logout function called");
-      // Call backend API to invalidate session/cookie
       await apiLogout();
     } catch (error) {
       console.error("Logout API failed:", error);
-      // Even if API fails, we should logout locally
     } finally {
-      // Clear local auth state
       contextLogout();
-      // Redirect to login page
       navigate('/login');
     }
   };
@@ -146,7 +128,6 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    // Special case for dashboard
     if (itemName === 'Dashboard') {
       if (user?.role === 'admin') {
         navigate('/admin-dashboard');
@@ -157,95 +138,119 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    // Special case for "Courses" collision if you want distinct paths for admin vs student
     if (itemName === 'Courses' && user?.role === 'admin') {
       navigate('/admin-courses');
       if (onClose) onClose();
       return;
     }
 
-    // Find the path associated with the clicked name
     const path = Object.keys(pathToName).find(key => pathToName[key] === itemName);
 
     if (path) {
       navigate(path);
-    } else {
-      // Fallback for unconnected admin routes
-      console.log(`Navigating to placeholder for ${itemName}`);
-      // You might want to navigate to a "Coming Soon" or specific route construction
-      // navigate(`/admin/${itemName.toLowerCase().replace(/ /g, '-')}`); 
     }
 
     if (onClose) onClose();
   };
 
+  const renderMenuItem = (item) => {
+    if (item === 'Reports & Logs') {
+      const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports'].includes(activeItem);
+      return (
+        <div key={item} className="w-full flex flex-col gap-1">
+          <Sideabrbbutton
+            isActive={isAnyReportActive}
+            onClick={(e) => {
+              e.preventDefault();
+              handleItemClick(item);
+            }}
+          >
+            <div className="flex items-center justify-between w-full pr-2">
+              <span>{item}</span>
+              {isReportsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </Sideabrbbutton>
+          {isReportsExpanded && (
+            <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
+              <Sideabrbbutton isActive={activeItem === 'Student Reports'} onClick={() => handleItemClick('Student Reports')}>
+                Student Reports
+              </Sideabrbbutton>
+              <Sideabrbbutton isActive={activeItem === 'Moderator Reports'} onClick={() => handleItemClick('Moderator Reports')}>
+                Moderator Reports
+              </Sideabrbbutton>
+              <Sideabrbbutton isActive={activeItem === 'Course Reports'} onClick={() => handleItemClick('Course Reports')}>
+                Course Reports
+              </Sideabrbbutton>
+            </div>
+          )}
+        </div>
+      );
+    }
+    return (
+      <Sideabrbbutton
+        key={item}
+        isActive={activeItem === item}
+        onClick={() => handleItemClick(item)}
+      >
+        {item}
+      </Sideabrbbutton>
+    );
+  };
+
   return (
-    <div className={`w-[260px] bg-white p-4 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm ${className}`}>
-      <div className='w-full flex items-center justify-between mb-6 lg:mb-0 h-[44px]'>
-        <div className='text-[#6A6F78] text-[14px] ml-3'>Welcome, {user?.firstname || user?.name || "User"}</div>
+    <div className={`w-[260px] bg-white p-4 pt-6 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm h-full ${className}`}>
+      {/* Header */}
+      <div className='w-full flex items-center justify-between mb-6 h-[44px] shrink-0'>
+        <div className='text-[#6A6F78] text-[14px] ml-3 font-medium truncate pr-2'>Welcome, {user?.firstname || user?.name || "User"}</div>
         <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
           <X size={20} />
         </button>
       </div>
 
-      <div className='w-[192px] flex flex-col gap-[10px] mx-auto'>
-        <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500]'>
-          {/* <div className='mt-2 mb-2 uppercase text-xs font-bold text-gray-400'>Main Menu</div> */}
-          {menuItems.map((item) => {
-            if (item === 'Reports & Logs') {
-              const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports'].includes(activeItem);
-              return (
-                <div key={item} className="w-full flex flex-col gap-1">
-                  <Sideabrbbutton
-                    isActive={isAnyReportActive}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleItemClick(item);
-                    }}
-                  >
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <span>{item}</span>
-                      {isReportsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </div>
-                  </Sideabrbbutton>
-                  {isReportsExpanded && (
-                    <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
-                      <Sideabrbbutton isActive={activeItem === 'Student Reports'} onClick={() => handleItemClick('Student Reports')}>
-                        Student Reports
-                      </Sideabrbbutton>
-                      <Sideabrbbutton isActive={activeItem === 'Moderator Reports'} onClick={() => handleItemClick('Moderator Reports')}>
-                        Moderator Reports
-                      </Sideabrbbutton>
-                      <Sideabrbbutton isActive={activeItem === 'Course Reports'} onClick={() => handleItemClick('Course Reports')}>
-                        Course Reports
-                      </Sideabrbbutton>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-            return (
-              <Sideabrbbutton
-                key={item}
-                isActive={activeItem === item} // This now stays blue based on the user selection
-                onClick={() => handleItemClick(item)}
-              >
-                {item}
-              </Sideabrbbutton>
-            );
-          })}
+      {/* Scrollable Container */}
+      <div className='w-full lg:w-[192px] mx-auto flex-1 overflow-y-auto custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500]'>
+
+        <div className='w-full flex flex-col items-start gap-2'>
+          {menuItems.map(renderMenuItem)}
         </div>
 
-        <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-auto'>
-          <div className='mt-2 uppercase text-xs font-bold text-gray-400'>User</div>
-          <Sideabrbbutton
-            isActive={activeItem === 'Logout'}
-            onClick={() => handleItemClick('Logout')}
-          >
-            Logout
-          </Sideabrbbutton>
-        </div>
+        {moderatorFeatures.length > 0 && (
+          <div className='w-full flex flex-col items-start gap-2 mt-4 pt-4 border-t border-gray-100'>
+            <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>Moderator Features</div>
+            {moderatorFeatures.map(renderMenuItem)}
+          </div>
+        )}
+
       </div>
+
+      {/* Footer (Logout) remains fixed at bottom */}
+      <div className='w-full lg:w-[192px] mx-auto flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-2 shrink-0 pb-2'>
+        <div className='uppercase text-[10px] font-bold text-gray-400 pl-3'>{isAdminRoute ? 'Admin' : 'User'}</div>
+        <Sideabrbbutton
+          isActive={activeItem === 'Logout'}
+          onClick={() => handleItemClick('Logout')}
+        >
+          Logout
+        </Sideabrbbutton>
+      </div>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .custom-sidebar-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+           .custom-sidebar-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .custom-sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 10px;
+          }
+          .custom-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+          }
+        `
+      }} />
     </div>
   );
 }

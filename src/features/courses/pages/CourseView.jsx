@@ -440,7 +440,7 @@ const CourseView = () => {
                         className={`
                             transition-transform duration-300 ease-in-out z-40
                             lg:translate-x-0 lg:static lg:block
-                            fixed left-0 top-0 h-full w-[280px] sm:w-[320px] lg:w-auto shadow-2xl bg-white
+                            fixed left-0 top-0 shadow-2xl
                             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                         `}
                     />
