@@ -12,6 +12,10 @@ import ModeratorProfileComponent from "../components/moderator/ModeratorProfileC
 import { BsThreeDotsVertical } from "react-icons/bs";
 import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
 import ModeratorRecordComponent from "../components/moderator/ModeratorRecordComponent";
+import AssignModeratorModal from "../components/student/AssignModeratorModal";
+import { assignUserRole } from "@/api/user";
+import toast from "react-hot-toast";
+import { Check } from "lucide-react";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +27,7 @@ const ModeratorDetails = () => {
   const [loading, setLoading] = useState(!state?.moderator);
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   // ✅ outside click close
   useEffect(() => {
@@ -59,6 +64,35 @@ const ModeratorDetails = () => {
 
   const handleprofilebutton = (e) => {
     setProfileButton(e.target.value);
+  };
+
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const res = await getUserProfileById(id);
+      if (res?.data) {
+        setProfileData(res.data);
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssignModalSave = async (data) => {
+    try {
+      await assignUserRole(id, {
+        role: "moderator",
+        assignedFeatures: data.features
+      });
+      toast.success("Moderator updated successfully!");
+      setIsAssignModalOpen(false);
+      fetchProfileData(); // Refresh data
+    } catch (err) {
+      toast.error("Failed to update moderator");
+      console.error(err);
+    }
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -102,7 +136,7 @@ const ModeratorDetails = () => {
                   <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-                  <GradiantButton 
+                  <GradiantButton
                     onClick={() => navigate('/admin-moderators')}
                     className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0"
                   >
@@ -146,7 +180,10 @@ const ModeratorDetails = () => {
                     <span className="text-sm text-gray-600">
                       Joining: {profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
-                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition">
+                    <button
+                      onClick={() => setIsAssignModalOpen(true)}
+                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm transition"
+                    >
                       Edit
                     </button>
                     <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
@@ -161,36 +198,59 @@ const ModeratorDetails = () => {
                   {/* responsive 3 dot icon */}
                   <div ref={dropdownRef} className="relative xl:hidden ml-auto">
                     <button
-                        onClick={() => setOpen(!open)}
-                        className="p-2 rounded-md hover:bg-gray-200 transition-colors"
-                      >
-                        <BsThreeDotsVertical size={20} />
-                      </button>
+                      onClick={() => setOpen(!open)}
+                      className="p-2 rounded-md hover:bg-gray-200 transition-colors"
+                    >
+                      <BsThreeDotsVertical size={20} />
+                    </button>
 
-                      {open && (
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
-                          {/* Action Buttons */}
-                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors">
-                            Edit
-                          </button>
-                          <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
-                            <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
-                          </button>
-                          <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                            <RiDeleteBin6Fill className="w-4 h-4" /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    {open && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
+                        {/* Action Buttons */}
+                        <button
+                          onClick={() => {
+                            setIsAssignModalOpen(true);
+                            setOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
+                          <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
+                        </button>
+                        <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
+                          <RiDeleteBin6Fill className="w-4 h-4" /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {profileButton === "Profile" ? (
-                  <ModeratorProfileComponent profileData={profileData} />
+                  <ModeratorProfileComponent
+                    profileData={profileData}
+                    onEditClick={() => setIsAssignModalOpen(true)}
+                  />
                 ) : profileButton === "batchs" ? (
-                  <ModeratorBatchesComponent profileData={profileData} />
+                  <ModeratorBatchesComponent
+                    profileData={profileData}
+                    onEditClick={() => setIsAssignModalOpen(true)}
+                  />
                 ) : profileButton === "records" ? (
-                  <ModeratorRecordComponent profileData={profileData} />
+                  <ModeratorRecordComponent
+                    profileData={profileData}
+                    onEditClick={() => setIsAssignModalOpen(true)}
+                  />
                 ) : null}
+
+                <AssignModeratorModal
+                  isOpen={isAssignModalOpen}
+                  onClose={() => setIsAssignModalOpen(false)}
+                  onSave={handleAssignModalSave}
+                  assignedFeatures={profileData?.user?.assignedFeatures || []}
+                  initialRole={profileData?.user?.role || ''}
+                />
               </div>
             </div>
           </main>

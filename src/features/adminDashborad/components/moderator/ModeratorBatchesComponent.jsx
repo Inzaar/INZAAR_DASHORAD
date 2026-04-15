@@ -9,7 +9,7 @@ import BatchList from "./BatchList";
 
 const ITEMS_PER_PAGE = 6;
 
-function ModeratorBatchesComponent({ profileData }) {
+function ModeratorBatchesComponent({ profileData, onEditClick }) {
     const [showBatchModal, setShowBatchModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -59,12 +59,20 @@ function ModeratorBatchesComponent({ profileData }) {
                         {/* heading */}
                         <div className="w-full h-[40px] flex justify-between items-center pt-[24px] pr-[14px] pb-[24px] pl-[14px]">
                             <h3 className="">Assigned Batches</h3>
-                            <GradiantButton
-                                onClick={() => setShowBatchModal(true)}
-                                className="w-[159px] h-[40px] font-bold text-[14px] rounded-[4px]"
-                            >
-                                Assign new batch
-                            </GradiantButton>
+                            <div className="flex gap-[12px]">
+                                <GradiantButton
+                                    onClick={onEditClick}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm !bg-none !text-black !border border-gray-300 w-[90px]"
+                                >
+                                    Edit
+                                </GradiantButton>
+                                <GradiantButton
+                                    onClick={() => setShowBatchModal(true)}
+                                    className="w-[159px] h-[40px] font-bold text-[14px] rounded-[4px]"
+                                >
+                                    Assign new batch
+                                </GradiantButton>
+                            </div>
                         </div>
 
                         {/* cards — 3 per row, from API */}
@@ -113,11 +121,10 @@ function ModeratorBatchesComponent({ profileData }) {
                                 <button
                                     key={page}
                                     onClick={() => goToPage(page)}
-                                    className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition ${
-                                        currentPage === page
-                                            ? "font-bold text-white bg-[#6366F1] shadow-sm"
-                                            : "text-gray-600 hover:bg-gray-100"
-                                    }`}
+                                    className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition ${currentPage === page
+                                        ? "font-bold text-white bg-[#6366F1] shadow-sm"
+                                        : "text-gray-600 hover:bg-gray-100"
+                                        }`}
                                 >
                                     {page}
                                 </button>

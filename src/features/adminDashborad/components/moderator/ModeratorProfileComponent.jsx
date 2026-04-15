@@ -20,16 +20,16 @@ import ModeratorProfile from "./ModeratorProfile";
 //     )
 // }
 // export default ModeratorProfileComponent;
-function ModeratorProfileComponent({ profileData, type = 'moderator' }) {
+function ModeratorProfileComponent({ profileData, type = 'moderator', onEditClick }) {
     const [pendingProfileImage, setPendingProfileImage] = React.useState(null);
 
     return (
         <div className="w-full">
             <div className="mt-[20px] w-full">
                 <div className="flex flex-col lg:flex-row w-full gap-[10px]">
-                    <ModeratorRoll 
-                        profileData={profileData} 
-                        type={type} 
+                    <ModeratorRoll
+                        profileData={profileData}
+                        type={type}
                         pendingProfileImage={pendingProfileImage}
                         setPendingProfileImage={setPendingProfileImage}
                     />
@@ -38,11 +38,12 @@ function ModeratorProfileComponent({ profileData, type = 'moderator' }) {
             </div>
 
             <div className="mt-[12px] w-full">
-                <ModeratorProfile 
-                    profileData={profileData} 
-                    type={type} 
+                <ModeratorProfile
+                    profileData={profileData}
+                    type={type}
                     pendingProfileImage={pendingProfileImage}
                     setPendingProfileImage={setPendingProfileImage}
+                    onEditClick={onEditClick}
                 />
             </div>
         </div>

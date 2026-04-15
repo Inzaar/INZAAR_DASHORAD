@@ -6,7 +6,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getModeratorStudents } from '@/api/user';
 import { useParams, useNavigate } from 'react-router-dom';
 
-export default function ModeratorRecordComponent({ profileData }) {
+export default function ModeratorRecordComponent({ profileData, onEditClick }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const user = profileData?.user || {};
@@ -146,7 +146,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                         />
                     </div>
                 </div>
-                
+
                 {/* Performance Card with Moderator Name */}
                 <PerformanceCard
                     className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
@@ -197,7 +197,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                                                 </span>
                                             </td>
                                             <td className="py-4 px-6 text-center rounded-r-[8px]">
-                                                <GradiantButton 
+                                                <GradiantButton
                                                     onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                     className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]"
                                                 >
@@ -222,7 +222,7 @@ export default function ModeratorRecordComponent({ profileData }) {
 
                 {/* Pagination */}
                 <div className="flex justify-end items-center gap-2 mt-6 px-2">
-                    <button 
+                    <button
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1 || loadingStudents}
                         className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
@@ -241,7 +241,7 @@ export default function ModeratorRecordComponent({ profileData }) {
                         </button>
                     ))}
 
-                    <button 
+                    <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages || loadingStudents || totalPages === 0}
                         className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === totalPages || totalPages === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
