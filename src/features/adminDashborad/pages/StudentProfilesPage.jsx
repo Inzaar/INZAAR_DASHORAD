@@ -244,6 +244,7 @@ const StudentProfilesPage = () => {
                                                 <option value="Active">Active</option>
                                                 <option value="In-active">Inactive</option>
                                                 <option value="Pending">Pending</option>
+                                                <option value="Deleted">Deleted</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
@@ -305,6 +306,7 @@ const StudentProfilesPage = () => {
                                                                         <option value="Active">Active</option>
                                                                         <option value="In-active">Inactive</option>
                                                                         <option value="Pending">Pending</option>
+                                                                        <option value="Deleted">Deleted</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
@@ -484,6 +486,7 @@ const StudentProfilesPage = () => {
                                                                 text-[12px] font-[900] uppercase tracking-widest transition-all duration-300
                                                                 ${student.status === 'Active' ? 'text-[#10B981]' :
                                                                     student.status === 'Pending' ? 'text-[#F97316]' :
+                                                                        student.status === 'Deleted' ? 'text-[#9CA3AF]' :
                                                                         'text-[#EF4444]'}
                                                             `}>
                                                                 {student.status === 'In-active' ? 'IN-ACTIVE' : student.status.toUpperCase()}

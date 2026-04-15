@@ -275,6 +275,7 @@ const ModeratorsPage = () => {
                                                 <option value="Active">Active</option>
                                                 <option value="Inactive">Inactive</option>
                                                 <option value="Pool">Pool</option>
+                                                <option value="Deleted">Deleted</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
@@ -336,6 +337,7 @@ const ModeratorsPage = () => {
                                                                         <option value="Active">Active</option>
                                                                         <option value="Inactive">Inactive</option>
                                                                         <option value="Pool">Pool</option>
+                                                                        <option value="Deleted">Deleted</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
@@ -435,7 +437,7 @@ const ModeratorsPage = () => {
                                                 name={mod.name}
                                                 id={mod.id}
                                                 image={mod.profileImageUrl}
-                                                status={mod.isActive ? "online" : "offline"}
+                                                status={mod.status === 'Deleted' || mod.isDeleted ? "deleted" : (mod.isActive ? "online" : "offline")}
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={new Date(mod.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
