@@ -82,6 +82,7 @@ const AddCoursePage = () => {
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [showCropper, setShowCropper] = useState(false);
+    const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const isEditMode = queryParams.get('edit') === 'true';
@@ -291,10 +292,16 @@ const AddCoursePage = () => {
             setCurrentStep(2);
             return;
         }
-        if (!courseForm.title.trim()) {
-            setSubmitError('Please enter a course title before adding content.');
+
+        // --- Validation ---
+        if (!courseForm.title || courseForm.title.trim() === '') {
+            setValidationModal({
+                isOpen: true,
+                message: 'Please fill in the course name.'
+            });
             return;
         }
+
         setIsSubmitting(true);
         setSubmitError('');
         try {
@@ -938,6 +945,29 @@ const AddCoursePage = () => {
                         onApply={handleCropApply}
                         onCancel={handleCropCancel}
                     />
+                )}
+
+                {/* Validation Modal */}
+                {validationModal.isOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans animate-in fade-in duration-200">
+                        <div className="bg-white w-full max-w-[400px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden transform animate-in slide-in-from-bottom-4 duration-300">
+                            <div className="p-8 flex flex-col items-center text-center">
+                                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                                    <AlertCircle className="text-red-500 w-8 h-8" strokeWidth={2.5} />
+                                </div>
+                                <h3 className="text-[20px] font-bold text-[#0f172a] mb-2">Incomplete Form</h3>
+                                <p className="text-[#64748b] text-[14px] font-medium leading-relaxed">
+                                    {validationModal.message}
+                                </p>
+                                <button
+                                    onClick={() => setValidationModal({ isOpen: false, message: '' })}
+                                    className="mt-8 w-full py-3.5 bg-gradient-to-r from-[#3b82f6] to-[#4f46e5] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all active:scale-[0.98]"
+                                >
+                                    Got it, thanks!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 <style dangerouslySetInnerHTML={{
