@@ -7,12 +7,16 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createQuiz, uploadQuizMedia } from '@/api/quiz';
+import { AlertCircle } from 'lucide-react';
 
 const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [isSaving, setIsSaving] = useState(false);
     const [mediaUploading, setMediaUploading] = useState({}); // { [questionId]: boolean }
     const mediaInputRefs = useRef({});
+    const csvInputRef = useRef(null);
+    const [selectedCSV, setSelectedCSV] = useState(null);
+    const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const [method, setMethod] = useState(null);
     const [quizData, setQuizData] = useState({
         title: '',
@@ -142,6 +146,26 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
 
     const handleContinue = async () => {
         if (currentStep < 4) {
+            // Validation for Step 1
+            if (currentStep === 1) {
+                if (!quizData.title.trim()) {
+                    setValidationModal({
+                        isOpen: true,
+                        message: 'Please fill in the quiz name.'
+                    });
+                    return;
+                }
+            }
+            // Validation for Step 3 - Bulk method
+            if (currentStep === 3 && method === 'bulk') {
+                if (!selectedCSV) {
+                    setValidationModal({
+                        isOpen: true,
+                        message: 'Please upload a CSV file to continue.'
+                    });
+                    return;
+                }
+            }
             setCurrentStep(prev => prev + 1);
             return;
         }
@@ -182,7 +206,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                 title: quizData.title,
                 shortDescription: quizData.description || '',
                 instructions: quizData.instructions || '',
-                creationMethod: method || 'manual',
+                creationMethod: method === 'bulk' ? 'csv' : 'manual',
                 questions: mappedQuestions,
                 passingScorePercentage: quizSettings.passingScore,
                 requirePassingScoreToContinue: quizSettings.requirePassingScore,
@@ -217,8 +241,87 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
         }
     };
 
+    const parseCSV = (text) => {
+        const lines = text.split('\n');
+        if (lines.length === 0) return [];
+        
+        // Basic header cleanup
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const result = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            // Regex to handle commas inside quotes
+            const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+            const row = {};
+            headers.forEach((header, index) => {
+                let val = values[index]?.trim() || '';
+                // Remove surrounding quotes
+                val = val.replace(/^"|"$/g, '');
+                row[header] = val;
+            });
+            result.push(row);
+        }
+        return result;
+    };
+
+    const handleCSVFileUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            toast.error('Please upload a valid CSV file.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target.result;
+            try {
+                const parsedData = parseCSV(text);
+                const mappedQuestions = parsedData.map((row, index) => {
+                    // Normalize correct answer index
+                    const correctKey = (row.correct_answer || '').toLowerCase().trim();
+                    
+                    return {
+                        id: Date.now() + index,
+                        text: row.question_text || '',
+                        description: row.explanation || '',
+                        options: [
+                            { id: 'A', text: row.option_1 || '', isCorrect: correctKey === 'option_1' || correctKey === 'a' },
+                            { id: 'B', text: row.option_2 || '', isCorrect: correctKey === 'option_2' || correctKey === 'b' },
+                            { id: 'C', text: row.option_3 || '', isCorrect: correctKey === 'option_3' || correctKey === 'c' },
+                            { id: 'D', text: row.option_4 || '', isCorrect: correctKey === 'option_4' || correctKey === 'd' }
+                        ],
+                        explanation: row.explanation || '',
+                        points: parseInt(row.points) || 1,
+                        difficulty: row.difficulty || 'Easy',
+                        shuffle: false,
+                        isExpanded: false
+                    };
+                });
+                
+                if (mappedQuestions.length === 0) {
+                     toast.error('The CSV file appears to be empty or invalid.');
+                     return;
+                }
+
+                setQuestions(mappedQuestions);
+                setSelectedCSV(file);
+                setMethod('manual'); // Transition to manual view to show parsed questions
+                toast.success(`Successfully loaded ${mappedQuestions.length} questions! Review them below.`);
+            } catch (err) {
+                console.error('CSV Parse Error:', err);
+                toast.error('Failed to parse CSV file. Please check the format.');
+            }
+        };
+        reader.onerror = () => toast.error('Error reading file.');
+        reader.readAsText(file);
+    };
+
     return (
-        <div className="flex-1 flex flex-col w-full min-h-0 font-sans bg-[#f8fafc]">
+        <div className="flex-1 flex flex-col w-full h-[80vh] max-h-[850px] min-h-[500px] overflow-hidden font-sans bg-[#f8fafc] lg:rounded-[32px] border-t lg:border border-gray-100 shadow-sm relative">
             {/* SVG Gradient Definition */}
             <svg width="0" height="0" className="absolute">
                 <defs>
@@ -278,7 +381,9 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                 ))}
             </div>
 
-            {/* Form Content - Step 1: Setup */}
+            {/* Scrollable Content Wrapper */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-6 mb-4">
+                {/* Form Content - Step 1: Setup */}
             {currentStep === 1 && (
                 <div className="flex-1 max-w-[1000px] mx-auto w-full px-4 md:px-0">
                     <div className="bg-white rounded-[20px] md:rounded-[24px] p-5 sm:p-6 md:p-10 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
@@ -387,9 +492,9 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
 
             {/* Form Content - Step 3: Questions List & Sidebar */}
             {currentStep === 3 && method === 'manual' && (
-                <div className="flex-1 max-w-[1240px] mx-auto w-full flex flex-col lg:flex-row gap-6 md:gap-8 px-4 md:px-0">
+                <div className="max-w-[1240px] mx-auto w-full flex flex-col lg:flex-row gap-6 md:gap-8 flex-1 min-h-0 overflow-hidden">
                     {/* Left Column: Questions List */}
-                    <div className="flex-1 space-y-4 sm:space-y-6 pb-6 sm:pb-10 order-2 lg:order-1 min-w-0 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1 sm:pr-2">
+                    <div className="flex-1 space-y-4 sm:space-y-6 pb-6 sm:pb-10 order-2 lg:order-1 min-w-0 overflow-y-auto custom-scrollbar pr-1 lg:pr-3">
                         {questions.map((q, idx) => (
                             <div key={q.id} className="bg-white rounded-[16px] sm:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300">
                                 {/* Question Header */}
@@ -651,8 +756,8 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                     </div>
 
                     {/* Right Column: Sidebar Preview */}
-                    <div className="w-full lg:w-[350px] space-y-6 order-1 lg:order-2 flex-shrink-0">
-                        <div className="bg-white rounded-[20px] sm:rounded-[24px] p-5 sm:p-6 border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] lg:sticky lg:top-8">
+                    <div className="w-full lg:w-[350px] order-1 lg:order-2 flex-shrink-0 h-full overflow-y-auto custom-scrollbar pr-1 bg-white rounded-[20px] sm:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] self-start sticky top-0">
+                        <div className="p-5 sm:p-6">
                             <h3 className="text-[16px] sm:text-[18px] font-bold text-[#0f172a] mb-4 sm:mb-6">Quiz Preview</h3>
 
                             {/* Stats Summary */}
@@ -691,10 +796,10 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                             {/* Individual Question Preview(s) */}
                             {questions.length > 0 && (
                                 <div className="mt-6 sm:mt-8 space-y-6">
-                                    {questions.slice(0, 2).map((q, qIdx) => (
+                                    {questions.map((q, qIdx) => (
                                         <div key={q.id} className="pt-6 sm:pt-8 border-t border-gray-50">
                                             <h4 className="text-[10px] sm:text-[11px] font-medium text-gray-400 mb-3 uppercase tracking-wider">Question {qIdx + 1} Preview</h4>
-                                            <p className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-3 sm:mb-4">{qIdx === 0 ? '1st' : '2nd'} Question</p>
+                                            <p className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-3 sm:mb-4">Question {qIdx + 1}</p>
                                             <div className="space-y-2">
                                                 {q.options.map((opt) => (
                                                     <div key={opt.id} className={`p-3 sm:p-3.5 rounded-xl border transition-all text-[12px] sm:text-[13px] font-bold
@@ -743,14 +848,34 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                     <div className="bg-white rounded-[12px] md:rounded-[16px] p-5 sm:p-6 md:p-8 border border-gray-200 shadow-sm">
                         <h3 className="text-[16px] md:text-[17px] font-bold text-[#0f172a] mb-5 md:mb-6">Upload CSV File</h3>
 
-                        <div className="border-[1.5px] border-dashed border-gray-300 rounded-[12px] md:rounded-[16px] py-10 md:py-16 px-4 flex flex-col items-center justify-center bg-white group hover:border-[#8b5cf6]/50 transition-all cursor-pointer">
+                        <div 
+                            onClick={() => csvInputRef.current?.click()}
+                            className="border-[1.5px] border-dashed border-gray-300 rounded-[12px] md:rounded-[16px] py-10 md:py-16 px-4 flex flex-col items-center justify-center bg-white group hover:border-[#8b5cf6]/50 transition-all cursor-pointer"
+                        >
+                            <input
+                                ref={csvInputRef}
+                                type="file"
+                                accept=".csv"
+                                className="hidden"
+                                onChange={handleCSVFileUpload}
+                            />
                             <div className="w-12 h-12 md:w-14 md:h-14 bg-[#f3e8ff] rounded-full flex items-center justify-center mb-3 md:mb-5">
                                 <Upload size={20} className="md:w-[24px] md:h-[24px] text-[#8b5cf6]" strokeWidth={2} />
                             </div>
-                            <h4 className="text-[14px] md:text-[15px] font-bold text-[#0f172a] mb-1.5 md:mb-2 text-center">Upload CSV File</h4>
-                            <p className="text-[12px] md:text-[13px] text-[#64748b] font-medium mb-5 md:mb-6 text-center max-w-[200px] sm:max-w-none">Drag and drop your file here, or click to browse</p>
+                            <h4 className="text-[14px] md:text-[15px] font-bold text-[#0f172a] mb-1.5 md:mb-2 text-center">
+                                {selectedCSV ? `Selected: ${selectedCSV.name}` : 'Upload CSV File'}
+                            </h4>
+                            <p className="text-[12px] md:text-[13px] text-[#64748b] font-medium mb-5 md:mb-6 text-center max-w-[200px] sm:max-w-none">
+                                {selectedCSV ? 'Click to change file' : 'Drag and drop your file here, or click to browse'}
+                            </p>
 
-                            <button className="px-6 py-2 md:py-2.5 bg-white border border-gray-200 rounded-[8px] text-[12px] md:text-[13px] text-[#0f172a] font-semibold hover:bg-gray-50 transition-all shadow-sm w-full sm:w-auto max-w-[250px]">
+                            <button 
+                                className="px-6 py-2 md:py-2.5 bg-white border border-gray-200 rounded-[8px] text-[12px] md:text-[13px] text-[#0f172a] font-semibold hover:bg-gray-50 transition-all shadow-sm w-full sm:w-auto max-w-[250px]"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    csvInputRef.current?.click();
+                                }}
+                            >
                                 Browse Files
                             </button>
 
@@ -879,9 +1004,10 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                     </div>
                 </div>
             )}
+            </div>
 
             {/* Footer Buttons */}
-            <div className="mt-auto flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-4 px-4 md:px-0 py-6 sm:py-10">
+            <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-4 px-4 md:px-6 py-5 border-t border-gray-100 bg-[#f8fafc] z-20">
                 <button
                     onClick={handleBack}
                     className="w-full sm:w-auto px-8 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-[8px] hover:bg-gray-50 transition-all active:scale-95 text-[14px]"
@@ -898,6 +1024,50 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId }) => {
                     ) : currentStep === 4 ? 'Create Quiz' : 'Continue'}
                 </button>
             </div>
+
+            {/* Validation Modal */}
+            {validationModal.isOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-[400px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden transform animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="p-8 flex flex-col items-center text-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                                <AlertCircle className="text-red-500 w-8 h-8" strokeWidth={2.5} />
+                            </div>
+                            <h3 className="text-[20px] font-bold text-[#0f172a] mb-2">Incomplete Form</h3>
+                            <p className="text-[#64748b] text-[14px] font-medium leading-relaxed">
+                                {validationModal.message}
+                            </p>
+                            <button
+                                onClick={() => setValidationModal({ isOpen: false, message: '' })}
+                                className="mt-8 w-full py-3.5 bg-gradient-to-r from-[#8b5cf6] to-[#4f46e5] text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all active:scale-[0.98]"
+                            >
+                                Got it, thanks!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #e2e8f0;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #8b5cf6;
+                }
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: #e2e8f0 transparent;
+                }
+            `}} />
         </div>
     );
 };
