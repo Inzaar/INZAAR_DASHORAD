@@ -13,7 +13,7 @@ function Sidebar({ className, onClose }) {
   const { user, logout: contextLogout } = useAuth();
 
   // Define menu items based on role
-  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses', 'Reports & Logs'];
+  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   // Determine which items to show based on the active path/context, not strictly user role
@@ -25,19 +25,13 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/moderator-details') ||
     location.pathname.startsWith('/registered-users') ||
     location.pathname.startsWith('/registered-courses');
-  // location.pathname.startsWith('/reports') ||
-  // location.pathname.startsWith('/moderator-reports') ||
-  // location.pathname.startsWith('/course-reports') ||
-  // location.pathname.startsWith('/student-profiles') ||
-  // location.pathname.startsWith('/moderator-details');
 
-  // location.pathname.startsWith('/registered-users') ||   
-  // location.pathname.startsWith('/registered-courses');
-
-  let menuItems = isAdminRoute ? adminItems : studentItems;
+  // ONLY FULL ADMIN gets the adminItems main list. Moderators keep the student list.
+  let menuItems = (isAdminRoute && user?.role === 'admin') ? adminItems : studentItems;
   let moderatorFeatures = [];
 
-  if (!isAdminRoute && user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
+  // Display moderator features below the student items seamlessly across all views
+  if (user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
     moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature));
   }
 
@@ -60,7 +54,7 @@ function Sidebar({ className, onClose }) {
     '/admin-moderators': 'Moderators',
     '/moderator-details': 'Moderators',
     '/student-profiles': 'Student Profiles',
-    '/admin-courses': 'Courses',
+    '/admin-courses': 'Courses Management',
     '/reports': 'Student Reports',
     '/moderator-reports': 'Moderator Reports',
     '/course-reports': 'Course Reports',
@@ -68,23 +62,20 @@ function Sidebar({ className, onClose }) {
     '/admin/student-details': 'Student Profiles',
     '/admin/moderator-details': 'Moderators',
     '/admin/profile': 'Dashboard',
-    '/admin/course-details': 'Courses',
-    '/admin-course-view': 'Courses',
-    '/admin-course-play': 'Courses',
-    '/admin-course-add': 'Courses',
-    '/admin-add-course': 'Courses',
+    '/admin/course-details': 'Courses Management',
+    '/admin-course-view': 'Courses Management',
+    '/admin-course-play': 'Courses Management',
+    '/admin-course-add': 'Courses Management',
+    '/admin-add-course': 'Courses Management',
     '/registered-users': 'Student Profiles',
-    '/registered-courses': 'Courses',
-
+    '/registered-courses': 'Courses Management',
+    
     // Auth
     '/logout': 'Logout'
   };
 
   useEffect(() => {
-    // Try exact match first
     let currentName = pathToName[location.pathname];
-
-    // If no exact match, try prefix matching for dynamic routes like /admin/student-details/1
     if (!currentName) {
       const matchedKey = Object.keys(pathToName).find(key =>
         location.pathname.startsWith(key) && key !== '/'
@@ -96,7 +87,7 @@ function Sidebar({ className, onClose }) {
 
     if (currentName) {
       setActiveItem(currentName);
-      if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName)) {
+      if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName) || currentName === 'Reports & Logs') {
         setIsReportsExpanded(true);
       }
     }
@@ -138,14 +129,27 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    if (itemName === 'Courses' && user?.role === 'admin') {
-      navigate('/admin-courses');
-      if (onClose) onClose();
-      return;
+    if (itemName === 'Courses Management' || itemName === 'Courses') {
+      if (user?.role === 'admin' || user?.role === 'moderator') {
+          navigate('/admin-courses');
+          if (onClose) onClose();
+          return;
+      }
+    }
+
+    if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(itemName)) {
+       // It handles the sub-items for reports
+       const subRoutes = {
+           'Student Reports': '/reports',
+           'Moderator Reports': '/moderator-reports',
+           'Course Reports': '/course-reports'
+       };
+       navigate(subRoutes[itemName]);
+       if (onClose) onClose();
+       return;
     }
 
     const path = Object.keys(pathToName).find(key => pathToName[key] === itemName);
-
     if (path) {
       navigate(path);
     }
