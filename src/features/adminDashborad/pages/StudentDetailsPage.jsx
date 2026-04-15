@@ -226,12 +226,13 @@ const StudentDetailsPage = () => {
                                     onSave={async (data) => {
                                         try {
                                             await assignUserRole(id, {
-                                                role: "moderator",
+                                                role: data.selectedRole || "moderator",
                                                 assignedFeatures: data.features
                                             });
                                             toast.success("Moderator assigned successfully!");
                                             setIsModerator(true);
                                             setIsAssignModalOpen(false);
+                                            navigate("/admin-moderators");
                                         } catch (err) {
                                             toast.error("Failed to assign moderator");
                                             console.error(err);

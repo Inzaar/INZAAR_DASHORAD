@@ -46,7 +46,16 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
   };
 
   const handleSave = () => {
-    onSave({ selectedRole, features: features.filter(f => f.checked).map(f => f.label) });
+    const selectedFeatures = features.filter(f => f.checked).map(f => f.label);
+    
+    if (selectedFeatures.length === 0) {
+      import('react-hot-toast').then(({ default: toast }) => {
+        toast.error("Choose at least one feature");
+      });
+      return;
+    }
+    
+    onSave({ selectedRole, features: selectedFeatures });
   };
 
   return (
