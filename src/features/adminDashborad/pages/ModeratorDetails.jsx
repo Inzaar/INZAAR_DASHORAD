@@ -28,6 +28,7 @@ const ModeratorDetails = () => {
   const [open, setOpen] = useState(false);
   const [profileButton, setProfileButton] = useState('Profile');
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const dropdownRef = useRef(null);
   // ✅ outside click close
   useEffect(() => {
@@ -82,15 +83,36 @@ const ModeratorDetails = () => {
 
   const handleAssignModalSave = async (data) => {
     try {
+      const isDeactivated = data.features.length === 0;
       await assignUserRole(id, {
-        role: "moderator",
+        role: isDeactivated ? "user" : "moderator",
         assignedFeatures: data.features
       });
-      toast.success("Moderator updated successfully!");
-      setIsAssignModalOpen(false);
-      fetchProfileData(); // Refresh data
+
+      if (isDeactivated) {
+        toast.success("Moderator given 0 features and reverted to student!");
+        navigate('/admin-moderators');
+      } else {
+        toast.success("Moderator updated successfully!");
+        setIsAssignModalOpen(false);
+        fetchProfileData(); // Refresh data
+      }
     } catch (err) {
       toast.error("Failed to update moderator");
+      console.error(err);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    try {
+      await assignUserRole(id, {
+        role: "user",
+        assignedFeatures: []
+      });
+      toast.success("Moderator deactivated successfully!");
+      navigate('/admin-moderators');
+    } catch (err) {
+      toast.error("Failed to deactivate moderator");
       console.error(err);
     }
   };
@@ -186,7 +208,10 @@ const ModeratorDetails = () => {
                     >
                       Edit
                     </button>
-                    <button className="bg-[#B1B1B1] text-white px-4 py-2 rounded-[4px] text-sm cursor-not-allowed flex items-center gap-[4px]">
+                    <button
+                      onClick={() => setIsDeactivateModalOpen(true)}
+                      className="bg-[#B1B1B1] hover:bg-gray-500 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center gap-[4px]"
+                    >
                       <img src={deactivate} alt="Deactivate" className="w-4 h-4" />
                       Deactivate
                     </button>
@@ -216,7 +241,13 @@ const ModeratorDetails = () => {
                         >
                           Edit
                         </button>
-                        <button className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setIsDeactivateModalOpen(true);
+                            setOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
+                        >
                           <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
                         </button>
                         <button className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
@@ -251,6 +282,47 @@ const ModeratorDetails = () => {
                   assignedFeatures={profileData?.user?.assignedFeatures || []}
                   initialRole={profileData?.user?.role || ''}
                 />
+
+                {/* Deactivate Confirmation Modal */}
+                {isDeactivateModalOpen && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans">
+                    <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+
+                      {/* Header */}
+                      <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                        <div className="w-10 h-10 bg-gradient-to-r from-[#4E6BFF] to-[#8E6BFF] rounded-lg flex items-center justify-center shadow-sm">
+                          <img src={deactivate} alt="Deactivate" className="w-5 h-5 brightness-0 invert drop-shadow-sm" />
+                        </div>
+                        <h2 className="text-[22px] font-bold text-gray-800">Confirm Deactivation</h2>
+                      </div>
+
+                      {/* Body */}
+                      <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                        Are you sure you want to deactivate <span className="font-bold">{profileData?.user?.firstname} {profileData?.user?.lastname}</span>?
+                        This action will remove all their assigned features and change their role back to a standard student.
+                      </div>
+
+                      {/* Footer */}
+                      <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                        <button
+                          onClick={() => setIsDeactivateModalOpen(false)}
+                          className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                        >
+                          No, Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsDeactivateModalOpen(false);
+                            handleDeactivate();
+                          }}
+                          className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#4E6BFF] to-[#8E6BFF] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-indigo-500/20 hover:opacity-90 transition-all active:scale-95"
+                        >
+                          Yes, Deactivate
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </main>
