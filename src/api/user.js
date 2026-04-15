@@ -78,3 +78,17 @@ export const assignUserRole = async (id, data) => {
     });
     return res.data;
 };
+
+export const deleteUser = async (id) => {
+    const res = await axiosInstance.delete(`/users/${id}`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const restoreUser = async (id) => {
+    const res = await axiosInstance.patch(`/users/${id}/restore`, {}, {
+        withCredentials: true,
+    });
+    return res.data;
+};
