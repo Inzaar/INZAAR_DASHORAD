@@ -19,7 +19,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
           const res = await getModeratorFeatures();
           if (res?.data) {
             const dbFeatures = res.data.map(f => ({
-              id: f.key,
+              id: f._id || f.key || f.name,
               label: f.name,
               checked: (assignedFeatures || []).includes(f.name) || (assignedFeatures || []).includes(f.key)
             }));
@@ -30,8 +30,12 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
         }
       };
       fetchFeatures();
+    } else {
+      setFeatures([]); // Clear when closed
     }
-  }, [isOpen, assignedFeatures]);
+    // Only re-run when modal opens/closes to prevent overwriting user clicks
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
