@@ -99,7 +99,7 @@ const StudentProfilesPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
-            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
@@ -471,7 +471,7 @@ const StudentProfilesPage = () => {
                                                                 <div className="w-20 bg-gray-100 h-1.5 rounded-full overflow-hidden">
                                                                     <div
                                                                         className={`h-full rounded-full transition-all duration-500 ${parseInt(student.progress) > 80 ? 'bg-green-500' :
-                                                                                parseInt(student.progress) > 40 ? 'bg-blue-500' : 'bg-orange-400'
+                                                                            parseInt(student.progress) > 40 ? 'bg-blue-500' : 'bg-orange-400'
                                                                             }`}
                                                                         style={{ width: student.progress || '0%' }}
                                                                     ></div>
@@ -487,7 +487,7 @@ const StudentProfilesPage = () => {
                                                                 ${student.status === 'Active' ? 'text-[#10B981]' :
                                                                     student.status === 'Pending' ? 'text-[#F97316]' :
                                                                         student.status === 'Deleted' ? 'text-[#9CA3AF]' :
-                                                                        'text-[#EF4444]'}
+                                                                            'text-[#EF4444]'}
                                                             `}>
                                                                 {student.status === 'In-active' ? 'IN-ACTIVE' : student.status.toUpperCase()}
                                                             </span>

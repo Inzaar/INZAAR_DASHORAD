@@ -66,7 +66,7 @@ const StudentDetailsPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
                 <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
@@ -132,9 +132,9 @@ const StudentDetailsPage = () => {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm text-gray-500 font-medium whitespace-nowrap">Switch as Moderator</span>
                                                 <label className="relative inline-flex items-center cursor-pointer scale-90">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        className="sr-only peer" 
+                                                    <input
+                                                        type="checkbox"
+                                                        className="sr-only peer"
                                                         checked={isModerator}
                                                         onChange={(e) => {
                                                             if (e.target.checked) {
@@ -184,9 +184,9 @@ const StudentDetailsPage = () => {
                                                     <div className="flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
                                                         <span>Switch as Moderator</span>
                                                         <label className="relative inline-flex items-center cursor-pointer scale-[0.8]">
-                                                            <input 
-                                                                type="checkbox" 
-                                                                className="sr-only peer" 
+                                                            <input
+                                                                type="checkbox"
+                                                                className="sr-only peer"
                                                                 checked={isModerator}
                                                                 onChange={(e) => {
                                                                     if (e.target.checked) {
@@ -220,7 +220,7 @@ const StudentDetailsPage = () => {
                                     </div>
                                 )}
 
-                                <AssignModeratorModal 
+                                <AssignModeratorModal
                                     isOpen={isAssignModalOpen}
                                     onClose={() => setIsAssignModalOpen(false)}
                                     onSave={async (data) => {
