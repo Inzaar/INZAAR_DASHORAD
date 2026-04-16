@@ -113,7 +113,7 @@ const AdminDashboard = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="py-4 pr-2">
-                            <div className="flex justify-between items-end mb-8">
+                            <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {firstName} 👋🏻</h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>

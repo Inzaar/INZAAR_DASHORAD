@@ -144,7 +144,7 @@ const ModeratorsPage = () => {
                     <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
                         <div className="py-2 sm:py-4 px-2 sm:pr-2">
                             {/* Header */}
-                            <div className="flex flex-col sm:flex-row gap-4 justify-between sm:items-end mb-8">
+                            <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
                                     <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">Moderators</h2>
                                     <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your Moderators</p>
