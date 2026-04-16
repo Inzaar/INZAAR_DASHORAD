@@ -74,7 +74,7 @@ const NewBatchAlert = () => {
     if (unassignedBatches.length === 0) return null;
 
     const renderAlertCard = (batchData) => (
-        <div key={batchData._id} className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+        <div key={batchData._id} className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden flex-shrink-0 w-full h-auto min-h-fit">
             {/* Top Section */}
             <div className="p-4 sm:p-5 md:p-6 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
                 <div className="flex gap-4 sm:gap-6 items-start flex-1 min-w-0">
@@ -105,8 +105,8 @@ const NewBatchAlert = () => {
             </div>
 
             {/* Bottom Section */}
-            <div className="px-3 sm:px-4 pb-4">
-                <div className="bg-[#F8F9FA] px-3 sm:px-6 py-4 sm:py-6 rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4 sm:gap-x-6">
+            <div className="px-3 sm:px-4 pb-4 mt-auto">
+                <div className="bg-[#F8F9FA] px-3 sm:px-6 py-4 sm:py-6 rounded-lg grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-y-4 gap-x-4 sm:gap-x-6">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className="bg-[#5D5FEF]/10 p-2 sm:p-2.5 rounded-lg flex-shrink-0">
                             <BookOpen className="text-[#5D5FEF] w-4 h-4" />
@@ -176,7 +176,7 @@ const NewBatchAlert = () => {
                                 &times;
                             </button>
                         </div>
-                        <div className="p-4 sm:p-6 overflow-y-auto flex flex-col gap-5 flex-1 min-h-0">
+                        <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto flex flex-col gap-6 flex-1 min-h-0 pb-10 no-scrollbar">
                             {unassignedBatches.map(batchData => renderAlertCard(batchData))}
                         </div>
                     </div>
