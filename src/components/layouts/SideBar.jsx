@@ -4,6 +4,7 @@ import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
 import { logout as apiLogout } from '@/api/auth';
+import LogoutModal from '@/components/shared/LogoutModal';
 
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ function Sidebar({ className, onClose }) {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [isReportsExpanded, setIsReportsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Define menu items based on role
   const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
@@ -114,8 +116,7 @@ function Sidebar({ className, onClose }) {
     setActiveItem(itemName);
 
     if (itemName === 'Logout') {
-      logout();
-      if (onClose) onClose();
+      setIsLogoutModalOpen(true);
       return;
     }
 
@@ -202,17 +203,16 @@ function Sidebar({ className, onClose }) {
   };
 
   return (
-    <div className={`w-[260px] bg-white p-4 pt-6 border-[3px] border-[#6984E6] flex flex-col z-40 rounded shadow-sm h-full ${className}`}>
+    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-[100dvh] max-h-screen ${className}`}>
       {/* Header */}
-      <div className='w-full flex items-center justify-between mb-6 h-[44px] shrink-0'>
+      <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
         <div className='text-[#6A6F78] text-[14px] ml-3 font-medium truncate pr-2'>Welcome, {user?.firstname || user?.name || "User"}</div>
         <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
           <X size={20} />
         </button>
       </div>
 
-      {/* Scrollable Container */}
-      <div className='w-full lg:w-[192px] mx-auto flex-1 overflow-y-auto custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500]'>
+      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500]'>
 
         <div className='w-full flex flex-col items-start gap-2'>
           {menuItems.map(renderMenuItem)}
@@ -225,19 +225,24 @@ function Sidebar({ className, onClose }) {
           </div>
         )}
 
+        {/* Footer (Logout) follows list items */}
+        <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-6 shrink-0 pb-4'>
+          <div className='uppercase text-[10px] font-bold text-gray-400 pl-3'>{isAdminRoute ? 'Admin' : 'User'}</div>
+          <Sideabrbbutton
+            isActive={activeItem === 'Logout'}
+            onClick={() => handleItemClick('Logout')}
+          >
+            Logout
+          </Sideabrbbutton>
+        </div>
       </div>
 
-      {/* Footer (Logout) remains fixed at bottom */}
-      <div className='w-full lg:w-[192px] mx-auto flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-2 shrink-0 pb-2'>
-        <div className='uppercase text-[10px] font-bold text-gray-400 pl-3'>{isAdminRoute ? 'Admin' : 'User'}</div>
-        <Sideabrbbutton
-          isActive={activeItem === 'Logout'}
-          onClick={() => handleItemClick('Logout')}
-        >
-          Logout
-        </Sideabrbbutton>
-      </div>
 
+      <LogoutModal 
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={logout}
+      />
       <style dangerouslySetInnerHTML={{
         __html: `
           .custom-sidebar-scrollbar::-webkit-scrollbar {

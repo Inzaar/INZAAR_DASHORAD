@@ -123,7 +123,7 @@ const StudentProfilesPage = () => {
                     <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
                         <div className="py-4 pr-2">
                             {/* Header */}
-                            <div className="flex justify-between items-end mb-8">
+                            <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
                                     <h2 className="text-[24px] font-bold text-gray-900 mb-1">Students</h2>
                                     <p className="text-gray-500 text-[16px]">Manage All Your Students</p>
