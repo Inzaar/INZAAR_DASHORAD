@@ -7,8 +7,9 @@ import { useNavigate } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
 import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
+import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
@@ -66,6 +67,19 @@ const CourseView = () => {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Edit Lecture Logic
+    const [isEditLectureModalOpen, setIsEditLectureModalOpen] = useState(false);
+    const [isSavingLecture, setIsSavingLecture] = useState(false);
+    const [loadingLecture, setLoadingLecture] = useState(false);
+    const [editLectureData, setEditLectureData] = useState({
+        id: "",
+        title: "",
+        type: "Lecture",
+        videoUrl: "",
+        audioUrl: "",
+        pdfUrl: "",
+    });
 
     // Refs
     const certCardRef = useRef(null);
@@ -357,6 +371,62 @@ const CourseView = () => {
         if (playerRef.current) playerRef.current.seekTo(seconds, true);
     };
 
+    const handleEditLectureClick = async () => {
+        const id = currentLecture?.id || currentLecture?._id;
+        if (!id) return;
+        setLoadingLecture(true);
+        try {
+            const res = await getLectureById(id);
+            const data = res.data.data;
+            setEditLectureData({
+                id: data._id,
+                title: data.title || '',
+                type: data.type || 'Lecture',
+                videoUrl: data.videoUrl || '',
+                audioUrl: data.audioUrl || '',
+                pdfUrl: data.pdfUrl || '',
+            });
+            setIsEditLectureModalOpen(true);
+        } catch (err) {
+            console.error("Failed to fetch lecture details:", err);
+        } finally {
+            setLoadingLecture(false);
+        }
+    };
+
+    const handleSaveLecture = async () => {
+        if (!editLectureData.title.trim()) return;
+        setIsSavingLecture(true);
+        try {
+            const res = await updateLecture(editLectureData.id, editLectureData);
+            const updated = res.data.data;
+
+            // Sync with local courseData
+            setCourseData(prev => {
+                if (!prev) return prev;
+                const field = prev.lecturePlaylist ? 'lecturePlaylist' : 'lectures';
+                return {
+                    ...prev,
+                    [field]: prev[field].map(l => (l._id === updated._id || l.id === updated._id) ? { ...l, ...updated } : l)
+                };
+            });
+
+            // Update current lecture view
+            setCurrentLecture(prev => ({
+                ...prev,
+                ...updated,
+                id: updated._id, // Ensure ID is consistent
+                videoId: updated.videoUrl ? extractYouTubeId(updated.videoUrl) : prev.videoId
+            }));
+
+            setIsEditLectureModalOpen(false);
+        } catch (err) {
+            console.error("Failed to update lecture:", err);
+        } finally {
+            setIsSavingLecture(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
@@ -441,7 +511,7 @@ const CourseView = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className={`py-4 pr-2`}>
-                            <div className="flex justify-between items-start mb-8 gap-4 max-w-[800px]">
+                            <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
                                     {user?.role !== 'admin' && (
@@ -453,8 +523,12 @@ const CourseView = () => {
                                         <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                             Download Certificate
                                         </GradiantButton>
-                                        <GradiantButton className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
-                                            Edit
+                                        <GradiantButton 
+                                            onClick={handleEditLectureClick}
+                                            disabled={loadingLecture}
+                                            className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none"
+                                        >
+                                            {loadingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Edit"}
                                         </GradiantButton>
                                     </div>
                                 ) : (
@@ -591,7 +665,10 @@ const CourseView = () => {
                                                     <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
                                                     </button>
-                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn">
+                                                    <button 
+                                                        onClick={handleEditLectureClick}
+                                                        className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                                                     </button>
                                                 </div>
@@ -789,6 +866,117 @@ const CourseView = () => {
                     type="danger"
                     loading={isDeleting}
                 />
+
+                {/* Edit Lecture Modal */}
+                {isEditLectureModalOpen && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans">
+                        <div className="bg-white w-full max-w-[720px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
+                            <div className="px-8 pt-8 pb-6 bg-white">
+                                <div className="flex items-start gap-4 mb-1">
+                                    <div className="w-10 h-10 bg-[#eff6ff] rounded-[14px] flex items-center justify-center flex-shrink-0">
+                                        <div className="w-5.5 h-5.5 bg-[#4f46e5] rounded-[6px] flex items-center justify-center p-1 shadow-sm">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                                <line x1="12" y1="22.08" x2="12" y2="12" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">Edit Lecture</h2>
+                                        <p className="text-[#64748b] text-[13px] font-medium leading-relaxed">Update the details for this lecture.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-8 pb-8">
+                                <div className="space-y-5">
+                                    {/* Type */}
+                                    <div>
+                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Select Type</label>
+                                        <div className="relative group">
+                                            <select
+                                                value={editLectureData.type}
+                                                onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })}
+                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-800 appearance-none shadow-sm cursor-pointer"
+                                            >
+                                                <option>Lecture</option>
+                                                <option>Quiz</option>
+                                                <option>Assignment</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                        </div>
+                                    </div>
+
+                                    {/* Title */}
+                                    <div>
+                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Lecture Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter title"
+                                            value={editLectureData.title}
+                                            onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                        />
+                                    </div>
+
+                                    {/* Video URL */}
+                                    <div>
+                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Video URL <span className="text-gray-400 font-normal text-[11px]">(MP4 / MOV)</span></label>
+                                        <input
+                                            type="text"
+                                            placeholder="https://example.com/lecture.mp4"
+                                            value={editLectureData.videoUrl}
+                                            onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })}
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                        />
+                                    </div>
+
+                                    {/* Audio + PDF */}
+                                    <div className="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Audio URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
+                                            <input
+                                                type="text"
+                                                placeholder="https://example.com/audio.mp3"
+                                                value={editLectureData.audioUrl}
+                                                onChange={e => setEditLectureData({ ...editLectureData, audioUrl: e.target.value })}
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Resource URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
+                                            <input
+                                                type="text"
+                                                placeholder="https://example.com/resource.pdf"
+                                                value={editLectureData.pdfUrl}
+                                                onChange={e => setEditLectureData({ ...editLectureData, pdfUrl: e.target.value })}
+                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Modal Footer */}
+                                <div className="mt-8 flex justify-between items-center bg-white gap-4">
+                                    <button
+                                        onClick={() => setIsEditLectureModalOpen(false)}
+                                        className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-bold rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <GradiantButton
+                                        onClick={handleSaveLecture}
+                                        disabled={isSavingLecture}
+                                        className="px-16 py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[14px]"
+                                    >
+                                        {isSavingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                                    </GradiantButton>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div >
         </div >
     );
