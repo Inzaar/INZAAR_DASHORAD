@@ -64,11 +64,11 @@ const PerformanceCard = ({
                 </div>
             </div>
 
-            <div className="flex items-center gap-1 text-sm font-medium">
+            <div className="flex flex-wrap items-center justify-center gap-1 text-[11px] sm:text-sm font-medium text-center">
                 <span>Trending up by</span>
                 <span className="text-[#3758EE]">{percentageInfo.trend}%</span>
                 <span>this Week</span>
-                <TrendingUp className="w-4 h-4 text-black ml-1" />
+                <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black ml-1" />
             </div>
         </div>
     );

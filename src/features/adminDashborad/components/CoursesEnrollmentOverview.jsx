@@ -39,12 +39,12 @@ const CoursesEnrollmentOverview = ({
 
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans">
-            <div className="flex items-center justify-between mb-8">
-                <h3 className="text-[18px] font-bold text-[#64748b]">Courses Enrollment Overview</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <h3 className="text-[16px] sm:text-[18px] font-bold text-[#64748b] truncate pr-2">Courses Enrollment Overview</h3>
                 {showViewAll && (
                     <GradiantButton 
                         onClick={onViewAllClick}
-                        className="px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm"
+                        className="w-fit px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm"
                     >
                         View All courses
                     </GradiantButton>
