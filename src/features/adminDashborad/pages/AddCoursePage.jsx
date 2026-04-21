@@ -440,7 +440,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 1: Course Setup ── */}
                                 {currentStep === 1 && (
-                                    <div className="px-10 py-10 flex-1">
+                                    <div className="px-6 md:px-10 py-10 flex-1 text-left">
                                         <div className="max-w-[1300px] mx-auto">
                                             <div className="mb-10">
                                                 <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Course Setup</h3>
@@ -673,7 +673,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 2: Add Course Content ── */}
                                 {currentStep === 2 && (
-                                    <div className="px-10 py-10 flex-1">
+                                    <div className="px-6 md:px-10 py-10 flex-1">
                                         <div className="max-w-[1400px] w-full mx-auto">
                                             <div className="mb-10">
                                                 <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
@@ -703,7 +703,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 3: Review & Publish ── */}
                                 {currentStep === 3 && (
-                                    <div className="px-10 py-10 flex-1 space-y-12">
+                                    <div className="px-6 md:px-10 py-10 flex-1 space-y-12">
                                         <div className="max-w-[1400px] mx-auto">
 
                                             {/* Success / Error Alerts */}
@@ -726,7 +726,7 @@ const AddCoursePage = () => {
                                                     <h3 className="text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
                                                     <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-y-10 gap-x-20">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-20">
                                                     {[
                                                         { label: 'Course Title', value: courseForm.title || '—' },
                                                         { label: 'Release Date', value: courseForm.releaseDate || '—' },
@@ -784,19 +784,19 @@ const AddCoursePage = () => {
                                 )}
 
                                 {/* Footer Actions */}
-                                <div className="px-10 py-8 flex justify-between items-center z-20 mt-auto">
+                                <div className="px-6 md:px-10 py-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-20 mt-auto">
                                     <button
                                         onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
-                                        className="px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm"
+                                        className="w-full sm:w-auto px-6 md:px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm"
                                     >
                                         {currentStep === 1 ? 'Cancel' : 'Back'}
                                     </button>
-                                    <div className="flex gap-4">
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                         {!isEditMode && (
                                             <button
                                                 onClick={() => currentStep === 3 ? handleSubmit('draft') : null}
                                                 disabled={isSubmitting}
-                                                className="px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                                                className="w-full sm:w-auto px-6 md:px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50"
                                             >
                                                 Save as draft
                                             </button>
@@ -808,7 +808,7 @@ const AddCoursePage = () => {
                                                 else handleSubmit('published');
                                             }}
                                             disabled={isSubmitting}
-                                            className="px-12 py-3.5 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70"
+                                            className="w-full sm:w-auto px-6 md:px-12 py-3.5 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70"
                                         >
                                             {isSubmitting
                                                 ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving…</span>
