@@ -173,8 +173,8 @@ const AdminDashboard = () => {
                                     </div>
 
                                     <div className="flex gap-6 flex-col lg:flex-row">
-                                        <HoursSpentCard className="w-full lg:w-[60%] xl:w-full shadow-sm " name="Moderator Performance" />
-                                        <PerformanceCard name="Course completion rate" className="w-[60%]" />
+                                        <HoursSpentCard className="w-full lg:flex-1 shadow-sm" name="Moderator Performance" />
+                                        <PerformanceCard name="Course completion rate" className="w-full lg:max-w-[340px]" />
                                     </div>
 
                                     {/* Courses Enrollment Overview */}
@@ -186,42 +186,6 @@ const AdminDashboard = () => {
                                         />
                                     )}
                                 </div>
-
-                                {/* User Cards Demo Section */}
-                                {/* <div className="mb-6">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-xl font-bold text-gray-900">Recent Users</h3>
-                                        <button className="text-sm text-blue-600 font-medium hover:underline">View All</button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 justify-items-center">
-                                        <UserCard />
-                                        <UserCard
-                                            name="Sarah Johnson"
-                                            id="748291"
-                                            image="https://randomuser.me/api/portraits/women/44.jpg"
-                                            performance="92%"
-                                            email="sarah.j@gmail.com"
-                                            status="offline"
-                                        />
-                                        <UserCard
-                                            name="Ali Ahmed"
-                                            id="839102"
-                                            image="https://randomuser.me/api/portraits/men/85.jpg"
-                                            performance="75%"
-                                            joiningDate="5/11/2025"
-                                            phone="(555) 123-4567"
-                                        />
-                                        <UserCard
-                                            name="Ayesha Khan"
-                                            id="992811"
-                                            image="https://randomuser.me/api/portraits/women/65.jpg"
-                                            performance="98%"
-                                            joiningDate="12/09/2025"
-                                            email="ayesha.k@hotmail.com"
-                                        />
-                                    </div>
-                                </div> */}
-
                             </div>
 
                             <SharedStudentTable

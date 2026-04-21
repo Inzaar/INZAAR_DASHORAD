@@ -72,6 +72,14 @@ export const assignBatch = async (moderatorId, batchId) => {
     return res.data;
 };
 
+export const removeModerator = async (batchId) => {
+    const res = await axiosInstance.delete(`/admin/batches/${batchId}/remove-moderator`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+
 export const assignUserRole = async (id, data) => {
     const res = await axiosInstance.post(`/admin/users/${id}/assign-role`, data, {
         withCredentials: true,
