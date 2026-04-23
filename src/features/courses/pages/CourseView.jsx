@@ -174,10 +174,11 @@ const CourseView = () => {
     // Build lectures list from API data
     const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
     const lectures = rawLecturesList.map(l => ({
-        id: l._id,
+        id: l._id || l.id,
         title: l.title,
         lectureNo: l.lectureNo,
         date: l.date,
+        watchedPercentage: l.watchedPercentage || (typeof l.progress === 'string' ? parseInt(l.progress) : (l.progress || 0)),
         videoId: l.videoId || extractYouTubeId(l.videoUrl),
         isLocked: user?.role === 'admin' ? false : l.isLocked,
         isCompleted: l.isCompleted,
