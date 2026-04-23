@@ -62,87 +62,94 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
             </div>
 
             {/* Table wrapper */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-center border-collapse">
-                    <thead>
-                        <tr className="border-b border-gray-100">
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Lecture No</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Title</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Date</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Progress</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Status</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Comments</th>
-                            <th className="pb-4 font-semibold text-gray-700 text-[14px]">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {currentLectures.map((lecture, index) => {
-                            const isCurrent = lecture.id === currentLectureId;
-                            const progress = lecture.watchedPercentage || 0;
-                            const lectureNotes = notes.filter(n => n.lectureId === lecture.id);
-                            const latestNote = lectureNotes.length > 0 ? lectureNotes[lectureNotes.length - 1].text : 'N/A';
+            <div className="overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
+                <div className="min-w-[1000px] px-4 sm:px-0">
+                    <table className="w-full text-center border-collapse">
+                        <thead>
+                            <tr className="border-b border-gray-100">
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Lecture No</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Title</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Date</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Progress</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Status</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Comments</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {currentLectures.map((lecture, index) => {
+                                const isCurrent = lecture.id === currentLectureId;
+                                const progress = lecture.watchedPercentage || 0;
+                                const lectureNotes = notes.filter(n => n.lectureId === lecture.id);
+                                const latestNote = lectureNotes.length > 0 ? lectureNotes[lectureNotes.length - 1].text : 'N/A';
 
-                            return (
-                                <tr key={lecture.id} className={`${isCurrent ? 'bg-blue-50/30' : ''} hover:bg-gray-50/50 transition-colors`}>
-                                    <td className="py-6 text-[13px] font-medium text-gray-600">#{String(lecture.lectureNo).padStart(2, '0')}</td>
-                                    <td className="py-6 text-[13px] text-gray-700">{lecture.title}</td>
-                                    <td className="py-6 text-[13px] text-gray-500">{formatDate(lecture.date)}</td>
-                                    <td className="py-6 text-[13px] text-gray-700 font-medium">{String(progress).padStart(2, '0')}%</td>
-                                    <td className="py-6">
-                                        <div className="flex items-center justify-center gap-1">
-                                            {lecture.isLocked ? (
-                                                <>
-                                                    <Lock className="w-3.5 h-3.5 text-gray-400" />
-                                                    <span className="text-[12px] text-gray-400 font-medium">Locked</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Unlock className="w-3.5 h-3.5 text-yellow-500" />
-                                                    <span className="text-[12px] text-gray-700 font-medium">Unlocked</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="py-6">
-                                        <div className="relative mx-auto w-[160px] h-10 bg-white border border-gray-100 rounded p-1.5 overflow-hidden">
-                                            <p className="text-[11px] text-gray-500 text-left line-clamp-2 leading-tight">
-                                                {latestNote}
-                                            </p>
-                                            {latestNote !== 'N/A' && (
-                                                <div className="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-l-[6px] border-t-blue-500 border-l-transparent"></div>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="py-6">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button
-                                                disabled={!lecture.pdfUrl}
-                                                onClick={() => window.open(lecture.pdfUrl, '_blank')}
-                                                className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.pdfUrl ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-red-100 text-red-300 cursor-not-allowed'}`}
-                                            >
-                                                <FileText size={14} />
-                                            </button>
-                                            <button
-                                                disabled={!lecture.audioUrl}
-                                                onClick={() => window.open(lecture.audioUrl, '_blank')}
-                                                className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.audioUrl ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]' : 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed'}`}
-                                            >
-                                                <Volume2 size={14} />
-                                            </button>
-                                            <button
-                                                onClick={() => onWatch(lecture)}
-                                                className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
-                                            >
-                                                <PlayCircle size={14} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                const displayLectureNo = typeof lecture.lectureNo === 'string' && lecture.lectureNo.startsWith('#')
+                                    ? lecture.lectureNo
+                                    : `#${String(lecture.lectureNo).padStart(2, '0')}`;
+
+                                return (
+                                    <tr key={lecture.id} className={`${isCurrent ? 'bg-blue-50/30' : ''} hover:bg-gray-50/50 transition-colors`}>
+                                        <td className="py-6 text-[13px] font-medium text-gray-600 whitespace-nowrap">{displayLectureNo}</td>
+                                        <td className="py-6 text-[13px] text-gray-700 whitespace-nowrap">{lecture.title}</td>
+                                        <td className="py-6 text-[13px] text-gray-500 whitespace-nowrap">{formatDate(lecture.date)}</td>
+                                        <td className="py-6 text-[13px] text-gray-700 font-medium whitespace-nowrap">{String(progress).padStart(2, '0')}%</td>
+                                        <td className="py-6 whitespace-nowrap">
+                                            <div className="flex items-center justify-center gap-1">
+                                                {lecture.isLocked ? (
+                                                    <>
+                                                        <Lock className="w-3.5 h-3.5 text-gray-400" />
+                                                        <span className="text-[12px] text-gray-400 font-medium">Locked</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Unlock className="w-3.5 h-3.5 text-yellow-500" />
+                                                        <span className="text-[12px] text-gray-700 font-medium">Unlocked</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="py-6">
+                                            <div className="relative mx-auto w-[160px] h-10 bg-white border border-gray-100 rounded p-1.5 overflow-hidden">
+                                                <p className="text-[11px] text-gray-500 text-left line-clamp-2 leading-tight">
+                                                    {latestNote}
+                                                </p>
+                                                {latestNote !== 'N/A' && (
+                                                    <div className="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-l-[6px] border-t-blue-500 border-l-transparent"></div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="py-6">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    disabled={!lecture.pdfUrl}
+                                                    onClick={() => window.open(lecture.pdfUrl, '_blank')}
+                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.pdfUrl ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-red-100 text-red-300 cursor-not-allowed'}`}
+                                                >
+                                                    <FileText size={14} />
+                                                </button>
+                                                <button
+                                                    disabled={!lecture.audioUrl}
+                                                    onClick={() => window.open(lecture.audioUrl, '_blank')}
+                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.audioUrl ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]' : 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed'}`}
+                                                >
+                                                    <Volume2 size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => onWatch(lecture)}
+                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
+                                                >
+                                                    <PlayCircle size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
 
             {/* Pagination */}
             <div className="flex items-center justify-end mt-10 gap-2">
