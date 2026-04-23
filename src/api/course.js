@@ -24,7 +24,7 @@ export const createCourse = async (data) => {
 };
 
 export const getAdminCourseById = (courseId) => {
-    const res = axiosInstance.get(`/admin/courses/${courseId}`, {
+    const res = axiosInstance.get(`/courses/${courseId}`, {
         withCredentials: true,
     });
     return res;

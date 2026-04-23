@@ -146,7 +146,7 @@ export default function ModeratorRecordComponent({ profileData, onEditClick }) {
                         />
                     </div>
                 </div>
-                
+
                 {/* Performance Card with Moderator Name */}
                 <PerformanceCard
                     className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
