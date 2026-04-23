@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
+import LectureListTable from "../components/LectureListTable";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
 import QuizStartOverlay from "../components/QuizStartOverlay";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
@@ -39,7 +40,7 @@ const extractYouTubeId = (url) => {
 const CourseView = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    
+
     // Consolidate All State at the Top
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [userCourses, setUserCourses] = useState([]);
@@ -57,7 +58,7 @@ const CourseView = () => {
     const [volume, setVolume] = useState(100);
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    
+
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState("");
     const [editingNoteId, setEditingNoteId] = useState(null);
@@ -146,25 +147,29 @@ const CourseView = () => {
     }, [courseId]);
 
     useEffect(() => {
-        const fetchNotes = async () => {
-            const lectureId = currentLecture?.id || currentLecture?._id;
-            if (!lectureId) return;
+        const fetchAllNotes = async () => {
+            if (!courseData || user?.role === 'admin') return;
+            const lecs = courseData.lecturePlaylist || courseData.lectures || [];
+            if (lecs.length === 0) return;
 
             try {
-                const res = await getLectureNotes(lectureId);
-                const fetchedNotes = res.data.data.map(n => ({
+                // Fetch notes for all lectures to populate the table's "Comments" column
+                const notesPromises = lecs.map(l => getLectureNotes(l.id || l._id));
+                const results = await Promise.all(notesPromises);
+                const allNotes = results.flatMap((res, idx) => res.data.data.map(n => ({
                     id: n._id,
+                    lectureId: lecs[idx].id || lecs[idx]._id,
                     timestamp: formatTime(n.videoTime),
                     text: n.content,
                     videoTime: n.videoTime
-                }));
-                setNotes(fetchedNotes);
+                })));
+                setNotes(allNotes);
             } catch (error) {
-                console.error("Error fetching notes:", error);
+                console.error("Error fetching all notes:", error);
             }
         };
-        fetchNotes();
-    }, [currentLecture?.id, currentLecture?._id, user?.role]);
+        fetchAllNotes();
+    }, [courseData?.id, user?.role]);
 
     // Build lectures list from API data
     const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
@@ -195,7 +200,7 @@ const CourseView = () => {
     };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-    
+
     const togglePlay = () => {
         if (playerRef.current) {
             if (isPlaying) playerRef.current.pauseVideo();
@@ -318,13 +323,15 @@ const CourseView = () => {
             try {
                 const res = await createLectureNote({ lectureId, content: newNote, videoTime: time });
                 const saved = res.data.data;
-                setNotes([...notes, { 
-                    id: saved._id, 
-                    timestamp: formatTime(saved.videoTime), 
+                setNotes([...notes, {
+                    id: saved._id,
+                    lectureId: saved.lectureId, // Include lectureId for correct filtering
+                    timestamp: formatTime(saved.videoTime),
                     text: saved.content,
                     videoTime: saved.videoTime
                 }].sort((a, b) => a.videoTime - b.videoTime));
                 setNewNote("");
+
             } catch (error) {
                 console.error("Error saving note:", error);
             }
@@ -523,7 +530,7 @@ const CourseView = () => {
                                         <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
                                             Download Certificate
                                         </GradiantButton>
-                                        <GradiantButton 
+                                        <GradiantButton
                                             onClick={handleEditLectureClick}
                                             disabled={loadingLecture}
                                             className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none"
@@ -665,7 +672,7 @@ const CourseView = () => {
                                                     <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={handleEditLectureClick}
                                                         className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
                                                     >
@@ -774,57 +781,58 @@ const CourseView = () => {
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
 
                                     <div className="flex flex-col gap-3 mb-6">
-                                        {notes.length > 0 ? notes.map(note => (
-                                            <div key={note.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center group/note">
-                                                <div className="flex-1">
-                                                    {editingNoteId === note.id ? (
-                                                        <div className="flex gap-2">
-                                                            <input 
-                                                                value={editingText}
-                                                                onChange={(e) => setEditingText(e.target.value)}
-                                                                className="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                                                                autoFocus
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter') handleUpdateNote(note.id);
-                                                                    if (e.key === 'Escape') setEditingNoteId(null);
-                                                                }}
-                                                            />
-                                                            <button onClick={() => handleUpdateNote(note.id)} className="text-green-600 hover:text-green-700">
-                                                                <Check size={18} />
+                                        {notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
+                                            notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).map(note => (
+                                                <div key={note.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center group/note">
+                                                    <div className="flex-1">
+                                                        {editingNoteId === note.id ? (
+                                                            <div className="flex gap-2">
+                                                                <input
+                                                                    value={editingText}
+                                                                    onChange={(e) => setEditingText(e.target.value)}
+                                                                    className="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                                    autoFocus
+                                                                    onKeyDown={(e) => {
+                                                                        if (e.key === 'Enter') handleUpdateNote(note.id);
+                                                                        if (e.key === 'Escape') setEditingNoteId(null);
+                                                                    }}
+                                                                />
+                                                                <button onClick={() => handleUpdateNote(note.id)} className="text-green-600 hover:text-green-700">
+                                                                    <Check size={18} />
+                                                                </button>
+                                                                <button onClick={() => setEditingNoteId(null)} className="text-red-500 hover:text-red-600">
+                                                                    <X size={18} />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="cursor-pointer hover:text-blue-600 transition-colors" onClick={() => handleJumpToTime(note.videoTime)}>
+                                                                <span className="font-mono text-sm font-semibold text-gray-600 mr-2">{note.timestamp} –</span>
+                                                                <span className="text-gray-700">{note.text}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {editingNoteId !== note.id && (
+                                                        <div className="flex gap-1 transition-opacity">
+                                                            <button
+                                                                onClick={() => startEditing(note)}
+                                                                className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                                title="Edit Note"
+                                                            >
+                                                                <Edit2 size={16} />
                                                             </button>
-                                                            <button onClick={() => setEditingNoteId(null)} className="text-red-500 hover:text-red-600">
-                                                                <X size={18} />
+                                                            <button
+                                                                onClick={() => handleDeleteNote(note.id)}
+                                                                className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                                title="Delete Note"
+                                                            >
+                                                                <Trash2 size={16} />
                                                             </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="cursor-pointer hover:text-blue-600 transition-colors" onClick={() => handleJumpToTime(note.videoTime)}>
-                                                            <span className="font-mono text-sm font-semibold text-gray-600 mr-2">{note.timestamp} –</span>
-                                                            <span className="text-gray-700">{note.text}</span>
                                                         </div>
                                                     )}
                                                 </div>
-                                                {editingNoteId !== note.id && (
-                                                    <div className="flex gap-1 transition-opacity">
-                                                        <button 
-                                                            onClick={() => startEditing(note)}
-                                                            className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                            title="Edit Note"
-                                                        >
-                                                            <Edit2 size={16} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteNote(note.id)}
-                                                            className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                            title="Delete Note"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )) : (
-                                            <p className="text-gray-400 text-sm italic">No notes added yet for this lecture.</p>
-                                        )}
+                                            )) : (
+                                                <p className="text-gray-400 text-sm italic">No notes added yet for this lecture.</p>
+                                            )}
                                     </div>
 
                                     <div className="relative">
@@ -840,7 +848,17 @@ const CourseView = () => {
                                 </div>
                             )}
 
-                            {user?.role !== 'admin' && <StatusTable userCourses={userCourses} />}
+                            {user?.role !== 'admin' && (
+                                <LectureListTable
+                                    lectures={lectures}
+                                    notes={notes}
+                                    onWatch={(lec) => setCurrentLecture({
+                                        ...lec,
+                                        id: lec.id || lec._id
+                                    })}
+                                    currentLectureId={currentLecture?.id || currentLecture?._id}
+                                />
+                            )}
                             {user?.role === 'admin' && <AdminLectureList lectures={lectures} onWatch={(lec) => setCurrentLecture(lec)} id={currentLecture?.id} />}
                         </div>
                     </main>
