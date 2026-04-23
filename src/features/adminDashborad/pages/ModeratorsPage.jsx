@@ -150,11 +150,10 @@ const ModeratorsPage = () => {
                                     <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your Moderators</p>
                                 </div>
                                 <GradiantButton
-                                    onClick={() => navigate('/admin-add-course')}
                                     className="w-full sm:w-auto px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center justify-center"
                                 >
                                     <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Course
+                                    Add New Moderators
                                 </GradiantButton>
                             </div>
 

@@ -129,11 +129,10 @@ const StudentProfilesPage = () => {
                                     <p className="text-gray-500 text-[16px]">Manage All Your Students</p>
                                 </div>
                                 <GradiantButton
-                                    onClick={() => navigate('/admin-add-course')}
                                     className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
                                 >
                                     <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Course
+                                    Add New Students
                                 </GradiantButton>
                             </div>
 

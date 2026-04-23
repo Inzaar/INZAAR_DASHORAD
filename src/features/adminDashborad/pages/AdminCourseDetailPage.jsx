@@ -100,7 +100,7 @@ const AdminCourseDetailPage = () => {
                                     <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
                                         Download Certificate
                                     </GradiantButton>
-                                    <GradiantButton 
+                                    <GradiantButton
                                         onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
                                         className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity"
                                     >
@@ -135,7 +135,7 @@ const AdminCourseDetailPage = () => {
                                                     Lecture {String(lecture.lectureNo || index + 1).padStart(2, '0')}
                                                 </div>
                                                 <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white p-0.5 shadow-sm">
-                                                    <img src="https://via.placeholder.com/32" alt="Instructor" className="w-full h-full rounded-full object-cover" />
+                                                    <img src="https://via.placeholder.com/32x32" alt="Instructor" className="w-full h-full rounded-full object-cover" />
                                                 </div>
                                                 <div className="absolute bottom-2 left-2 text-white text-[10px] font-medium drop-shadow-md">
                                                     Date: {new Date(lecture.date || lecture.createdAt).toLocaleDateString()}
@@ -152,17 +152,17 @@ const AdminCourseDetailPage = () => {
                                             </p>
 
 
-<GradiantButton
-    onClick={() => {
-        // ✅ Redirect both Quiz and Video lectures to the play page
-        // The play page (CourseView) will handle rendering the "Start Quiz" UI for quizzes
-        const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
-        navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
-    }}
-    className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
->
-    View Details
-</GradiantButton>
+                                            <GradiantButton
+                                                onClick={() => {
+                                                    // ✅ Redirect both Quiz and Video lectures to the play page
+                                                    // The play page (CourseView) will handle rendering the "Start Quiz" UI for quizzes
+                                                    const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
+                                                    navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
+                                                }}
+                                                className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
+                                            >
+                                                View Details
+                                            </GradiantButton>
 
                                             {/* <GradiantButton
                                                 onClick={() => {
