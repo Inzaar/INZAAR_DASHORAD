@@ -13,3 +13,17 @@ export const createEvent = async (eventData) => {
     });
     return res.data;
 };
+
+export const updateEvent = async (eventId, eventData) => {
+    const res = await axiosInstance.patch(`/events/${eventId}`, eventData, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const deleteEvent = async (eventId) => {
+    const res = await axiosInstance.delete(`/events/${eventId}`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
