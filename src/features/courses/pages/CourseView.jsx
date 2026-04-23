@@ -148,7 +148,7 @@ const CourseView = () => {
     useEffect(() => {
         const fetchNotes = async () => {
             const lectureId = currentLecture?.id || currentLecture?._id;
-            if (!lectureId || user?.role === 'admin') return;
+            if (!lectureId) return;
 
             try {
                 const res = await getLectureNotes(lectureId);
@@ -769,8 +769,8 @@ const CourseView = () => {
                             </div>
 
                             {/* Lecture Notes Section */}
-                            {!isQuizView && user?.role !== 'admin' && (
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-20 text-left w-full max-w-[800px]">
+                            {!isQuizView && (
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
 
                                     <div className="flex flex-col gap-3 mb-6">
