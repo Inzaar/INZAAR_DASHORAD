@@ -138,10 +138,12 @@ const AdminCoursesPage = () => {
                                 </div>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
+                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
                                 >
-                                    <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Course
+                                    <div className="flex items-center justify-center">
+                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                    </div>
+                                    <span className="hidden sm:block">Add New Course</span>
                                 </GradiantButton>
                             </div>
 

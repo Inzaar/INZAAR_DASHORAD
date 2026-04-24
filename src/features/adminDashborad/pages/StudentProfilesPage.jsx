@@ -3,10 +3,10 @@ import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
-import { Search, Plus, ChevronDown, MoreVertical, X } from 'lucide-react';
+import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
-import { getStudentProfiles } from '@/api/user';
+import { getStudentProfiles, adminCreateStudent } from '@/api/user';
 import {
     Pagination,
     PaginationContent,
@@ -38,6 +38,19 @@ const StudentProfilesPage = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Add Student Modal State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newStudent, setNewStudent] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        phone: '',
+        password: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -86,6 +99,28 @@ const StudentProfilesPage = () => {
         }
     };
 
+    const handleAddStudent = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setFormError('');
+        try {
+            await adminCreateStudent(newStudent);
+            setIsAddModalOpen(false);
+            setNewStudent({
+                firstname: '',
+                lastname: '',
+                email: '',
+                phone: '',
+                password: ''
+            });
+            fetchStudentsData();
+        } catch (err) {
+            setFormError(err.response?.data?.message || 'Failed to add student');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const activeCount = students.filter(s => s.status === 'Active').length;
     const inactiveCount = students.filter(s => s.status === 'Inactive').length;
     const pendingCount = students.filter(s => s.status === 'Pending').length;
@@ -129,10 +164,13 @@ const StudentProfilesPage = () => {
                                     <p className="text-gray-500 text-[16px]">Manage All Your Students</p>
                                 </div>
                                 <GradiantButton
-                                    className="px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center"
+                                    onClick={() => setIsAddModalOpen(true)}
+                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
                                 >
-                                    <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Students
+                                    <div className="flex items-center justify-center">
+                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                    </div>
+                                    <span className="hidden sm:block">Add New Students</span>
                                 </GradiantButton>
                             </div>
 
@@ -562,6 +600,131 @@ const StudentProfilesPage = () => {
                     `}} />
                 </div>
             </div>
+
+            {/* Add Student Modal */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">Add New Student</h3>
+                                <p className="text-sm text-gray-500">Create a new student profile</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={handleAddStudent} className="p-6 space-y-4">
+                            {formError && (
+                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
+                                    <X size={16} className="bg-red-500 text-white rounded-full p-0.5" />
+                                    {formError}
+                                </div>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder="Enter First Name"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                        value={newStudent.firstname}
+                                        onChange={(e) => setNewStudent({...newStudent, firstname: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Last Name"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                        value={newStudent.lastname}
+                                        onChange={(e) => setNewStudent({...newStudent, lastname: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
+                                <input
+                                    required
+                                    type="email"
+                                    placeholder="Enter Email Address"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newStudent.email}
+                                    onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
+                                <input
+                                    required
+                                    type="tel"
+                                    placeholder="Enter Phone Number"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newStudent.phone}
+                                    onChange={(e) => {
+                                        const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                        setNewStudent({...newStudent, phone: numericValue});
+                                    }}
+                                />
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                                <div className="relative">
+                                    <input
+                                        required
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter Password"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
+                                        value={newStudent.password}
+                                        onChange={(e) => setNewStudent({...newStudent, password: e.target.value})}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    disabled={isSubmitting}
+                                    type="submit"
+                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                >
+                                    {isSubmitting ? (
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <Plus size={18} className="bg-white text-blue-600 rounded-full p-0.5" />
+                                            Create Student
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -621,10 +621,17 @@ const AdminCalendar = () => {
                                                             <span className="text-[14px] text-gray-600">{ev.type}</span>
                                                         </td>
                                                         <td className="py-5 px-6 text-center">
-                                                            <div className="flex flex-col text-[13px] text-gray-600 leading-tight">
-                                                                <span>{ev.startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                                            <div className="flex flex-col items-center justify-center min-w-[100px]">
+                                                                <div className="text-[13px] font-bold text-gray-700 whitespace-nowrap">
+                                                                    {ev.startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
+                                                                </div>
                                                                 {ev.endDate && ev.startDate.getTime() !== ev.endDate.getTime() && (
-                                                                    <span>{ev.endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                                                    <>
+                                                                        <div className="h-2 w-[1px] bg-gray-200 my-0.5"></div>
+                                                                        <div className="text-[13px] font-bold text-gray-400 whitespace-nowrap">
+                                                                            {ev.endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
+                                                                        </div>
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         </td>
