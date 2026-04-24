@@ -83,7 +83,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
                 <div className="w-full">
                     <div className="w-full h-[120px] sm:h-[150px] md:h-[200px] flex items-center justify-end px-6 sm:px-0">
-                        <div 
+                        <div
                             onClick={() => setIsLogoutModalOpen(true)}
                             className="flex w-[130px] sm:w-[140px] h-[45px] sm:h-[50px] mt-6 sm:mt-10 rounded-xl justify-center items-center bg-[#f1f5f9] border border-gray-100 text-[#64748b] hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all cursor-pointer font-bold text-[14px] shadow-sm gap-2"
                         >
@@ -119,7 +119,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 </div>
             </div>
 
-            <LogoutModal 
+            <LogoutModal
                 isOpen={isLogoutModalOpen}
                 onClose={() => setIsLogoutModalOpen(false)}
                 onConfirm={handleLogout}

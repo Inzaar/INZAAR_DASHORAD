@@ -100,3 +100,17 @@ export const restoreUser = async (id) => {
     });
     return res.data;
 };
+
+export const adminCreateStudent = async (data) => {
+    const res = await axiosInstance.post("/admin/students", data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const adminCreateModerator = async (data) => {
+    const res = await axiosInstance.post("/admin/moderators", data, {
+        withCredentials: true,
+    });
+    return res.data;
+};

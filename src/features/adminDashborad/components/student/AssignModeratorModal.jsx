@@ -81,9 +81,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
                 className="w-full bg-[#FAFAFA] border border-gray-100 rounded-[12px] px-4 py-3 text-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none cursor-pointer"
               >
                 <option value="">Select Available Roles</option>
-                <option value="junior">Junior Moderator</option>
-                <option value="senior">Senior Moderator</option>
-                <option value="admin">Admin Assistant</option>
+                <option value="moderator">Moderator</option>
               </select>
               <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

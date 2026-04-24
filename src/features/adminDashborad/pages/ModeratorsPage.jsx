@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -7,7 +8,9 @@ import UserCard from '../components/UserCard';
 import { Search, Plus, ChevronDown, MoreVertical, X } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
-import { getModeratorProfiles } from '@/api/user';
+import { getModeratorProfiles, adminCreateModerator, getAllUsers } from '@/api/user';
+import { Eye, EyeOff, LayoutGrid } from 'lucide-react';
+import AssignModeratorModal from '../components/student/AssignModeratorModal';
 import {
     Pagination,
     PaginationContent,
@@ -39,6 +42,29 @@ const ModeratorsPage = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Add Moderator Modal State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+    const [newModerator, setNewModerator] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        phone: '',
+        password: '',
+        role: 'moderator',
+        assignedFeatures: []
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+
+    const availableFeatures = [
+        "Calendar",
+        "Courses Management",
+        "Reports & Logs",
+        "Student Profiles"
+    ];
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -107,6 +133,53 @@ const ModeratorsPage = () => {
         }
     };
 
+    const handleFeatureToggle = (feature) => {
+        setNewModerator(prev => {
+            const features = prev.assignedFeatures.includes(feature)
+                ? prev.assignedFeatures.filter(f => f !== feature)
+                : [...prev.assignedFeatures, feature];
+            return { ...prev, assignedFeatures: features };
+        });
+    };
+
+    const handleAddModerator = async (e) => {
+        e.preventDefault();
+        setIsAddModalOpen(false);
+        setIsAssignModalOpen(true);
+    };
+
+    const handleFinalCreate = async (data) => {
+        setIsSubmitting(true);
+        setFormError('');
+        try {
+            const moderatorData = {
+                ...newModerator,
+                role: data.selectedRole || 'moderator',
+                assignedFeatures: data.features
+            };
+            await adminCreateModerator(moderatorData);
+            toast.success("Moderator created successfully!");
+            setIsAssignModalOpen(false);
+            setNewModerator({
+                firstname: '',
+                lastname: '',
+                email: '',
+                phone: '',
+                password: '',
+                role: 'moderator',
+                assignedFeatures: []
+            });
+            fetchModeratorsData();
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || 'Failed to add moderator';
+            setFormError(errorMsg);
+            toast.error(errorMsg);
+            setIsAddModalOpen(true); // Re-open step 1 if error
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const activeCount = moderators.filter(m => m.status === 'active' || m.status === undefined).length;
     const inactiveCount = moderators.filter(m => m.status === 'in-active').length;
     const poolCount = moderators.filter(m => m.status === 'pending').length;
@@ -150,10 +223,16 @@ const ModeratorsPage = () => {
                                     <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your Moderators</p>
                                 </div>
                                 <GradiantButton
-                                    className="w-full sm:w-auto px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2 items-center justify-center"
+                                    onClick={() => {
+                                        setIsAddModalOpen(true);
+                                        setModalStep(1);
+                                    }}
+                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
                                 >
-                                    <Plus size={18} className="bg-white text-[#3758EE] rounded-full p-0.5" />
-                                    Add New Moderators
+                                    <div className="flex items-center justify-center">
+                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                    </div>
+                                    <span className="hidden sm:block">Add New Moderator</span>
                                 </GradiantButton>
                             </div>
 
@@ -505,6 +584,130 @@ const ModeratorsPage = () => {
                     `}} />
                 </div>
             </div>
+
+            {/* Add Moderator Modal - Step 1 */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900">Add New Moderator</h3>
+                                <p className="text-sm text-gray-500">Step 1: Basic Information</p>
+                            </div>
+                            <button 
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={handleAddModerator} className="p-6 space-y-4">
+                            {formError && (
+                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
+                                    <X size={16} className="bg-red-500 text-white rounded-full p-0.5" />
+                                    {formError}
+                                </div>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder="Enter First Name"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                        value={newModerator.firstname}
+                                        onChange={(e) => setNewModerator({...newModerator, firstname: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Last Name"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                        value={newModerator.lastname}
+                                        onChange={(e) => setNewModerator({...newModerator, lastname: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
+                                <input
+                                    required
+                                    type="email"
+                                    placeholder="Enter Email Address"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newModerator.email}
+                                    onChange={(e) => setNewModerator({...newModerator, email: e.target.value})}
+                                />
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
+                                <input
+                                    required
+                                    type="tel"
+                                    placeholder="Enter Phone Number"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newModerator.phone}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[^0-9]/g, '');
+                                        setNewModerator({...newModerator, phone: val});
+                                    }}
+                                />
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                                <div className="relative">
+                                    <input
+                                        required
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter Password"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
+                                        value={newModerator.password}
+                                        onChange={(e) => setNewModerator({...newModerator, password: e.target.value})}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Step 2: Assign Moderator Modal (Shared Component) */}
+            <AssignModeratorModal
+                isOpen={isAssignModalOpen}
+                onClose={() => setIsAssignModalOpen(false)}
+                onSave={handleFinalCreate}
+            />
         </div>
     );
 };
