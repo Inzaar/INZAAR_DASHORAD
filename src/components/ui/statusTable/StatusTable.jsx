@@ -2,7 +2,7 @@ import { useState } from "react";
 import StatusRow from "./StatusRow";
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../Pagination";
 
-function StatusTable({ userCourses }) {
+function StatusTable({ userCourses, loading }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
@@ -10,6 +10,8 @@ function StatusTable({ userCourses }) {
     const allLectures = userCourses?.recentCourseActivity?.map((activity, index) => ({
         id: index,
         course: activity.course,
+        courseId: activity.courseId,
+        lectureId: activity.lectureId,
         lecture: activity.lecture,
         title: activity.title,
         date: activity.date,
@@ -60,7 +62,7 @@ function StatusTable({ userCourses }) {
         return pages;
     };
 
-    if (allLectures.length === 0) {
+    if (loading || allLectures.length === 0) {
         return (
             <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10 overflow-x-auto no-scrollbar">
                 <h3 className="font-bold text-gray-900 mb-6">Current status</h3>
@@ -77,7 +79,11 @@ function StatusTable({ userCourses }) {
                     </div>
                     <div className="flex flex-col gap-4">
                         <div className="flex items-center justify-center h-[100px]">
-                            <p className="text-gray-500">You have no enrolled courses yet !</p>
+                            {loading ? (
+                                <p className="text-gray-500 animate-pulse italic">Wait, we're fetching your course data...</p>
+                            ) : (
+                                <p className="text-gray-500">You have no enrolled courses yet !</p>
+                            )}
                         </div>
                     </div>
                 </div>
