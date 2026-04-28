@@ -14,7 +14,10 @@ function StatusRow({ data }) {
                 {data.status === 'Locked' && '🔒'} {data.status}
             </div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.comments}</div>
-            <Link to={`/course-view`} className="flex-1 min-w-[120px] flex items-center justify-center">
+            <Link 
+                to={`/course-view?id=${data.courseId}&lectureId=${data.lectureId}`} 
+                className="flex-1 min-w-[120px] flex items-center justify-center"
+            >
                 <GradiantButton className="p-[8px] rounded-[4px] whitespace-nowrap">Watch Again</GradiantButton>
             </Link>
         </div>

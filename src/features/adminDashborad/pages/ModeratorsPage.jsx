@@ -594,14 +594,14 @@ const ModeratorsPage = () => {
                                 <h3 className="text-xl font-bold text-gray-900">Add New Moderator</h3>
                                 <p className="text-sm text-gray-500">Step 1: Basic Information</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setIsAddModalOpen(false)}
                                 className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={handleAddModerator} className="p-6 space-y-4">
                             {formError && (
                                 <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
@@ -609,7 +609,7 @@ const ModeratorsPage = () => {
                                     {formError}
                                 </div>
                             )}
-                            
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
@@ -619,7 +619,7 @@ const ModeratorsPage = () => {
                                         placeholder="Enter First Name"
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                         value={newModerator.firstname}
-                                        onChange={(e) => setNewModerator({...newModerator, firstname: e.target.value})}
+                                        onChange={(e) => setNewModerator({ ...newModerator, firstname: e.target.value })}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
@@ -629,11 +629,11 @@ const ModeratorsPage = () => {
                                         placeholder="Enter Last Name"
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                         value={newModerator.lastname}
-                                        onChange={(e) => setNewModerator({...newModerator, lastname: e.target.value})}
+                                        onChange={(e) => setNewModerator({ ...newModerator, lastname: e.target.value })}
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
                                 <input
@@ -642,10 +642,10 @@ const ModeratorsPage = () => {
                                     placeholder="Enter Email Address"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                     value={newModerator.email}
-                                    onChange={(e) => setNewModerator({...newModerator, email: e.target.value})}
+                                    onChange={(e) => setNewModerator({ ...newModerator, email: e.target.value })}
                                 />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
                                 <input
@@ -656,11 +656,11 @@ const ModeratorsPage = () => {
                                     value={newModerator.phone}
                                     onChange={(e) => {
                                         const val = e.target.value.replace(/[^0-9]/g, '');
-                                        setNewModerator({...newModerator, phone: val});
+                                        setNewModerator({ ...newModerator, phone: val });
                                     }}
                                 />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
                                 <div className="relative">
@@ -670,7 +670,7 @@ const ModeratorsPage = () => {
                                         placeholder="Enter Password"
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
                                         value={newModerator.password}
-                                        onChange={(e) => setNewModerator({...newModerator, password: e.target.value})}
+                                        onChange={(e) => setNewModerator({ ...newModerator, password: e.target.value })}
                                     />
                                     <button
                                         type="button"
@@ -681,7 +681,7 @@ const ModeratorsPage = () => {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <div className="pt-4 flex gap-3">
                                 <button
                                     type="button"

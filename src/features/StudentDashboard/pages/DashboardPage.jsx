@@ -51,6 +51,7 @@ const DashboardPage = () => {
         }
 
         const fetchStudentDashboard = async () => {
+            setLoading(true);
             try {
                 const res = await getUserProfile();
                 setUserCourses(res.data.data);
@@ -61,6 +62,8 @@ const DashboardPage = () => {
                 if (error.response && error.response.status === 401) {
                     navigate('/login');
                 }
+            } finally {
+                setLoading(false);
             }
         }
         fetchStudentDashboard();
@@ -85,14 +88,15 @@ const DashboardPage = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    if (loading) {
-        return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
-                <Loader className="w-10 h-10 text-[#3758EE] animate-spin mb-4" />
-                <p className="text-[#6A6F78] font-medium animate-pulse">Loading dashboard...</p>
-            </div>
-        );
-    }
+    // Removed global loading to show fetching state inside components as requested
+    // if (loading) {
+    //     return (
+    //         <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
+    //             <Loader className="w-10 h-10 text-[#3758EE] animate-spin mb-4" />
+    //             <p className="text-[#6A6F78] font-medium animate-pulse">Loading dashboard...</p>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -141,7 +145,7 @@ const DashboardPage = () => {
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses} />
+                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
@@ -206,7 +210,11 @@ const DashboardPage = () => {
                                                 </div>
                                             </div>
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
-                                                {filteredLectures.length > 0 ? (
+                                                {loading ? (
+                                                    <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center animate-pulse italic">
+                                                        Wait, we're fetching your lecture data...
+                                                    </div>
+                                                ) : filteredLectures.length > 0 ? (
                                                     filteredLectures.map((lecture) => (
                                                         <LectureCard
                                                             key={lecture._id}
@@ -234,7 +242,7 @@ const DashboardPage = () => {
                                 </div>
                             </div>
 
-                            <StatusTable userCourses={userCourses} />
+                            <StatusTable userCourses={userCourses} loading={loading} />
                         </div>
 
                     </main>
