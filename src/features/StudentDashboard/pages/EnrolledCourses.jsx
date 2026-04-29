@@ -79,7 +79,7 @@ const EnrolledCourses = () => {
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
-                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses || []} />
+                                            <EnrolledCourse userCourses={userCourses?.enrolledCourses || []} loading={loading} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
@@ -91,7 +91,7 @@ const EnrolledCourses = () => {
                                 </div>
                             </div>
 
-                            <StatusTable userCourses={userCourses} />
+                            <StatusTable userCourses={userCourses} loading={loading} />
                         </div>
 
                     </main>
