@@ -188,7 +188,7 @@ const DashboardPage = () => {
                                                     </button>
 
                                                     {isLectureDropdownOpen && (
-                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50">
+                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
                                                             {lectureOptions.length > 0 ? (
                                                                 lectureOptions.map((option) => (
                                                                     <button
