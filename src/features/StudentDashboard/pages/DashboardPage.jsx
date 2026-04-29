@@ -18,7 +18,7 @@ const DashboardPage = () => {
     const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
     const [selectedLectureFilter, setSelectedLectureFilter] = useState("");
     const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     // const userId = localStorage.getItem('userId');
     // const firstName = localStorage.getItem('firstName');
     const progressPercentage = 40;
@@ -212,7 +212,7 @@ const DashboardPage = () => {
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
                                                 {loading ? (
                                                     <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center animate-pulse italic">
-                                                        Wait, we're fetching your lecture data...
+                                                        Wait, we're fetching your course data...
                                                     </div>
                                                 ) : filteredLectures.length > 0 ? (
                                                     filteredLectures.map((lecture) => (
