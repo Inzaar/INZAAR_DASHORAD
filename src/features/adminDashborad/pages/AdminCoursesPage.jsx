@@ -171,11 +171,11 @@ const AdminCoursesPage = () => {
 
                             {/* Enrollment Overview */}
                             {courseStats.length > 0 && (
-                                <CoursesEnrollmentOverview 
-                                    courseStats={courseStats} 
-                                    limit={12} 
-                                    showViewAll={false} 
-                                    showViewMore={true} 
+                                <CoursesEnrollmentOverview
+                                    courseStats={courseStats}
+                                    limit={12}
+                                    showViewAll={false}
+                                    showViewMore={true}
                                 />
                             )}
 
@@ -216,7 +216,7 @@ const AdminCoursesPage = () => {
                                 {/* Mobile Filter Dropdown */}
                                 <div className="sm:hidden mb-8 relative">
                                     <div className="relative">
-                                        <select 
+                                        <select
                                             value={activeTab}
                                             onChange={(e) => {
                                                 setActiveTab(e.target.value);
@@ -256,11 +256,10 @@ const AdminCoursesPage = () => {
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                             disabled={currentPage === 1}
-                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${
-                                                currentPage === 1 
-                                                ? 'text-gray-200 cursor-not-allowed' 
-                                                : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
-                                            }`}
+                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${currentPage === 1
+                                                    ? 'text-gray-200 cursor-not-allowed'
+                                                    : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
+                                                }`}
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                         </button>
@@ -269,7 +268,7 @@ const AdminCoursesPage = () => {
                                             {(() => {
                                                 const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
                                                 const pages = [];
-                                                
+
                                                 // Responsive page limit: show fewer on mobile
                                                 const maxVisible = window.innerWidth < 640 ? 3 : 5;
                                                 let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -284,11 +283,10 @@ const AdminCoursesPage = () => {
                                                         <button
                                                             key={i}
                                                             onClick={() => setCurrentPage(i)}
-                                                            className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-[13px] font-black rounded-xl transition-all duration-300 ${
-                                                                currentPage === i
+                                                            className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-[13px] font-black rounded-xl transition-all duration-300 ${currentPage === i
                                                                     ? 'bg-gradient-to-tr from-[#5D5FEF] to-[#3758EE] text-white shadow-xl shadow-blue-500/25 scale-105'
                                                                     : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {i}
                                                         </button>
@@ -301,11 +299,10 @@ const AdminCoursesPage = () => {
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / itemsPerPage), prev + 1))}
                                             disabled={currentPage === Math.ceil(filteredCourses.length / itemsPerPage)}
-                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${
-                                                currentPage === Math.ceil(filteredCourses.length / itemsPerPage)
-                                                ? 'text-gray-200 cursor-not-allowed'
-                                                : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
-                                            }`}
+                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${currentPage === Math.ceil(filteredCourses.length / itemsPerPage)
+                                                    ? 'text-gray-200 cursor-not-allowed'
+                                                    : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
+                                                }`}
                                         >
                                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                         </button>

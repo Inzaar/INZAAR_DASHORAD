@@ -73,6 +73,7 @@ const CourseView = () => {
     const [isEditLectureModalOpen, setIsEditLectureModalOpen] = useState(false);
     const [isSavingLecture, setIsSavingLecture] = useState(false);
     const [loadingLecture, setLoadingLecture] = useState(false);
+    const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
     const [editLectureData, setEditLectureData] = useState({
         id: "",
         title: "",
@@ -88,12 +89,23 @@ const CourseView = () => {
     const containerRef = useRef(null);
     const lastReportedRef = useRef(0);
     const completedIdsRef = useRef(new Set());
+    const adminMenuRef = useRef(null);
 
     const courseId = new URLSearchParams(window.location.search).get("id");
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
     const isQuizView = currentLecture?.type === 'Quiz';
 
     // Effects
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
+                setIsAdminMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     useEffect(() => {
         if (user?.role === 'admin') return;
         const fetchUserCourses = async () => {
@@ -519,27 +531,72 @@ const CourseView = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className={`py-4 pr-2`}>
-                            <div className="flex justify-between items-start mb-8 gap-4 w-full">
-                                <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">{courseData?.title}</h2>
+                            <div className="grid grid-cols-[1fr_auto] items-center gap-4 mb-8 w-full">
+                                <div className="min-w-0">
+                                    <h2 className="text-[26px] md:text-4xl font-extrabold text-gray-900 truncate leading-tight pr-2">{courseData?.title}</h2>
                                     {user?.role !== 'admin' && (
-                                        <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                        <p className="text-gray-500 text-[11px] md:text-[16px]">Let's learn something new today!</p>
                                     )}
                                 </div>
-                                {user?.role === 'admin' ? (
-                                    <div className="flex flex-wrap gap-2 sm:gap-3">
-                                        <GradiantButton className="bg-[#6366F1] px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none">
+
+                                {/* Desktop Buttons */}
+                                {user?.role === 'admin' && (
+                                    <div className="hidden md:flex items-center gap-3">
+                                        <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
                                             Download Certificate
                                         </GradiantButton>
                                         <GradiantButton
                                             onClick={handleEditLectureClick}
                                             disabled={loadingLecture}
-                                            className="bg-[#8B5CF6] px-6 sm:px-8 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap flex-1 sm:flex-none"
+                                            className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                         >
                                             {loadingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Edit"}
                                         </GradiantButton>
                                     </div>
-                                ) : (
+                                )}
+
+                                {/* Mobile Three-Dots for Admin */}
+                                {user?.role === 'admin' && (
+                                    <div className="md:hidden relative" ref={adminMenuRef}>
+                                        <button
+                                            onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+                                            className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                                        </button>
+
+                                        {isAdminMenuOpen && (
+                                            <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                                <button
+                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                    onClick={() => {
+                                                        setIsAdminMenuOpen(false);
+                                                    }}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6366F1]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                                    Download Certificate
+                                                </button>
+                                                <button
+                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                    onClick={() => {
+                                                        handleEditLectureClick();
+                                                        setIsAdminMenuOpen(false);
+                                                    }}
+                                                    disabled={loadingLecture}
+                                                >
+                                                    {loadingLecture ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin text-[#8B5CF6]" />
+                                                    ) : (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                                    )}
+                                                    Edit Lecture
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {user?.role !== 'admin' && (
                                     <div className="flex gap-2">
                                         <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Enrolled New Course
@@ -553,7 +610,7 @@ const CourseView = () => {
 
                             <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
 
-                            <div className={`relative flex flex-col lg:flex-row gap-6 mt-5 min-h-0`}>
+                            <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
                                 <div className={`w-full lg:w-[70%] flex flex-col gap-4`}>
                                     <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
                                     <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
@@ -564,22 +621,12 @@ const CourseView = () => {
                                                     lecture={currentLecture}
                                                     courseData={courseData}
                                                     onStart={() => {
-                                                        // ✅ Always use current page as returnPath, ignore any passed returnPath
-                                                        // This works for both cases:
-                                                        // - from admin-course-play: window.location = /admin-course-play?id=...
-                                                        // - from admin-course-view: window.location = /admin-course-view/69d3c9... (but this case
-                                                        //   now goes directly to admin-course-play with returnPath set, so onStart runs on admin-course-play)
-                                                        const currentPath = window.location.pathname + window.location.search;
-
-                                                        // Remove the returnPath param from currentPath to avoid nesting
                                                         const cleanParams = new URLSearchParams(window.location.search);
                                                         cleanParams.delete('returnPath');
                                                         cleanParams.delete('lectureId');
                                                         const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
                                                         const cleanPath = window.location.pathname + cleanSearch;
-
                                                         const returnPath = encodeURIComponent(cleanPath);
-
                                                         const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
                                                         if (currentLecture.quizId) {
                                                             navigate(`/quiz-take/${currentLecture.quizId}${query}`);
@@ -607,13 +654,7 @@ const CourseView = () => {
                                             ) : (
                                                 <div
                                                     className="w-full h-full flex items-center justify-center relative cursor-pointer"
-                                                    onClick={() => {
-                                                        // If it's a placeholder but should be a quiz (perhaps type is Quiz but no videoId)
-                                                        if (currentLecture?.type === 'Quiz') {
-                                                            // Logic already handles rendering LectureQuizAssessment above, 
-                                                            // but if we want "click anywhere" to show it even if videoId exists (unlikely)
-                                                        }
-                                                    }}
+                                                    onClick={() => { }}
                                                 >
                                                     <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
                                                     <div className="absolute inset-0 bg-black/50"></div>
@@ -659,118 +700,109 @@ const CourseView = () => {
                                             {/* Right Side Action Buttons Overlay */}
                                             {!isQuizView && (
                                                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
-                                                    {/* Profile Icon */}
                                                     <img
                                                         src="https://randomuser.me/api/portraits/men/32.jpg"
                                                         alt="Instructor"
                                                         className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
                                                     />
-
-                                                    {/* Action Buttons Stack */}
                                                     <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors shadow-lg group/btn">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
                                                     </button>
                                                     <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
                                                     </button>
-                                                    <button
-                                                        onClick={handleEditLectureClick}
-                                                        className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                                                    </button>
+                                                    {user?.role === 'admin' && (
+                                                        <button
+                                                            onClick={handleEditLectureClick}
+                                                            className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                                 {/* Lectures Playlist Section - Right Side - Only if not quiz */}
-                                <div className="w-full lg:w-[30%] flex flex-col gap-4">
+                                <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                     <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                    <div className="bg-white rounded-xl p-3 border border-gray-100 flex-1 overflow-x-auto lg:overflow-y-auto no-scrollbar lg:max-h-[calc(100vh-350px)] sticky top-0 scroll-smooth snap-x">
-                                        <div className="flex flex-row lg:flex-col gap-3">
-                                            {lectures.map((lecture, index) => (
-                                                <div
-                                                    key={lecture.id}
-                                                    onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
-                                                    className={`
-                                                    relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
-                                                    w-[75vw] sm:w-[320px] lg:w-full
-                                                    ${currentLecture?.id === lecture.id
-                                                            ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
-                                                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                                                        }
-                                                    ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
-                                                    ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
-                                                `}
-                                                >
-                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
-                                                        <img
-                                                            src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
-                                                            alt={lecture.title}
-                                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                        />
-
-                                                        {/* Overlays */}
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-
-                                                        {/* Title & Info completely overlaying the graphic */}
-                                                        <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
-                                                            <div className="flex justify-between items-start">
-                                                                <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
-                                                                    {lecture.title}
-                                                                </h4>
+                                    <div className="flex-1 relative lg:min-h-0">
+                                        <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth snap-x lg:snap-y">
+                                            <div className="flex flex-row lg:flex-col gap-3 min-w-max lg:min-w-0">
+                                                {lectures.map((lecture, index) => (
+                                                    <div
+                                                        key={lecture.id}
+                                                        onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
+                                                        className={`
+                                                        relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                                                        w-[260px] sm:w-[280px] lg:w-full
+                                                        ${currentLecture?.id === lecture.id
+                                                                ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
+                                                                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                            }
+                                                        ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
+                                                        ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
+                                                    `}
+                                                    >
+                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
+                                                            <img
+                                                                src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
+                                                                alt={lecture.title}
+                                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                            />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                                                <div className="flex justify-between items-start">
+                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                                                        {lecture.title}
+                                                                    </h4>
+                                                                </div>
+                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                                                    Lecture:{String(lecture.lectureNo).padStart(2, '0')}
+                                                                </div>
+                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                                                    Date: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                </div>
                                                             </div>
-                                                            <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                Lecture:{String(lecture.lectureNo).padStart(2, '0')}
-                                                            </div>
-                                                            <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                Date: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                            {lecture.isLocked ? (
+                                                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                    </div>
+                                                                </div>
+                                                            ) : lecture.type === 'Quiz' ? (
+                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                        <GraduationCap className="text-white w-5 h-5" />
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            <div className="absolute top-2 right-2 z-20">
+                                                                <img
+                                                                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                                    alt="Instructor"
+                                                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                                                />
                                                             </div>
                                                         </div>
-
-                                                        {lecture.isLocked ? (
-                                                            <div className="absolute inset-0 flex items-center justify-center z-10">
-                                                                <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                </div>
-                                                            </div>
-                                                        ) : lecture.type === 'Quiz' ? (
-                                                            <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                    <GraduationCap className="text-white w-5 h-5" />
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                                                                </div>
+                                                        {currentLecture?.id === lecture.id && (
+                                                            <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
+                                                        )}
+                                                        {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                                                            <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
                                                             </div>
                                                         )}
-
-                                                        <div className="absolute top-2 right-2 z-20">
-                                                            <img
-                                                                src="https://randomuser.me/api/portraits/men/32.jpg"
-                                                                alt="Instructor"
-                                                                className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
-                                                            />
-                                                        </div>
                                                     </div>
-
-                                                    {/* Active Indicator Strip */}
-                                                    {currentLecture?.id === lecture.id && (
-                                                        <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
-                                                    )}
-
-                                                    {/* Completion Checkmark */}
-                                                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
-                                                        <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -780,7 +812,6 @@ const CourseView = () => {
                             {!isQuizView && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
-
                                     <div className="flex flex-col gap-3 mb-6">
                                         {notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
                                             notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).map(note => (
@@ -798,206 +829,82 @@ const CourseView = () => {
                                                                         if (e.key === 'Escape') setEditingNoteId(null);
                                                                     }}
                                                                 />
-                                                                <button onClick={() => handleUpdateNote(note.id)} className="text-green-600 hover:text-green-700">
-                                                                    <Check size={18} />
-                                                                </button>
-                                                                <button onClick={() => setEditingNoteId(null)} className="text-red-500 hover:text-red-600">
-                                                                    <X size={18} />
-                                                                </button>
+                                                                <button onClick={() => handleUpdateNote(note.id)} className="text-blue-600 p-1 hover:bg-blue-50 rounded"><Check className="w-4 h-4" /></button>
+                                                                <button onClick={() => setEditingNoteId(null)} className="text-gray-400 p-1 hover:bg-gray-100 rounded"><X className="w-4 h-4" /></button>
                                                             </div>
                                                         ) : (
-                                                            <div className="cursor-pointer hover:text-blue-600 transition-colors" onClick={() => handleJumpToTime(note.videoTime)}>
-                                                                <span className="font-mono text-sm font-semibold text-gray-600 mr-2">{note.timestamp} –</span>
-                                                                <span className="text-gray-700">{note.text}</span>
+                                                            <div className="flex items-center gap-3">
+                                                                <button onClick={() => handleJumpToTime(note.videoTime)} className="text-[#3758EE] font-mono text-xs bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition-colors shrink-0">
+                                                                    {note.timestamp}
+                                                                </button>
+                                                                <p className="text-sm text-gray-700 leading-relaxed">{note.text}</p>
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {editingNoteId !== note.id && (
-                                                        <div className="flex gap-1 transition-opacity">
-                                                            <button
-                                                                onClick={() => startEditing(note)}
-                                                                className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                                title="Edit Note"
-                                                            >
-                                                                <Edit2 size={16} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteNote(note.id)}
-                                                                className="p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                                                title="Delete Note"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex gap-1 opacity-0 group-hover/note:opacity-100 transition-opacity ml-4">
+                                                        <button onClick={() => startEditing(note)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><Edit2 className="w-4 h-4" /></button>
+                                                        <button onClick={() => handleDeleteNote(note.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
+                                                    </div>
                                                 </div>
                                             )) : (
-                                                <p className="text-gray-400 text-sm italic">No notes added yet for this lecture.</p>
-                                            )}
+                                                <p className="text-gray-400 text-sm italic py-4">No notes added yet for this lecture.</p>
+                                            )
+                                        }
                                     </div>
-
                                     <div className="relative">
                                         <input
                                             type="text"
+                                            placeholder="Add a new note at this time..."
                                             value={newNote}
                                             onChange={(e) => setNewNote(e.target.value)}
                                             onKeyDown={handleAddNote}
-                                            placeholder="Add New Notes (Press Enter to save)"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-700"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all pl-12"
                                         />
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                        </div>
                                     </div>
                                 </div>
                             )}
-
-                            {user?.role !== 'admin' && (
-                                <LectureListTable
-                                    lectures={lectures}
-                                    notes={notes}
-                                    onWatch={(lec) => setCurrentLecture({
-                                        ...lec,
-                                        id: lec.id || lec._id
-                                    })}
-                                    currentLectureId={currentLecture?.id || currentLecture?._id}
-                                />
-                            )}
-                            {user?.role === 'admin' && <AdminLectureList lectures={lectures} onWatch={(lec) => setCurrentLecture(lec)} id={currentLecture?.id} />}
                         </div>
                     </main>
                 </div>
-
                 <style dangerouslySetInnerHTML={{
                     __html: `
-                    .no-scrollbar::-webkit-scrollbar {
-                        display: none;
-                    }
-                    .no-scrollbar {
-                        -ms-overflow-style: none;
-                        scrollbar-width: none;
-                    }
+                    .no-scrollbar::-webkit-scrollbar { display: none; }
+                    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 `}} />
-                <ConfirmDialog
-                    isOpen={isDeleteDialogOpen}
-                    onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}
-                    onConfirm={confirmDeleteNote}
-                    title="Delete Note"
-                    message="Are you sure you want to delete this note? This action cannot be undone."
-                    confirmText="Delete Note"
-                    type="danger"
-                    loading={isDeleting}
-                />
+            </div>
 
-                {/* Edit Lecture Modal */}
-                {isEditLectureModalOpen && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans">
-                        <div className="bg-white w-full max-w-[720px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
-                            <div className="px-8 pt-8 pb-6 bg-white">
-                                <div className="flex items-start gap-4 mb-1">
-                                    <div className="w-10 h-10 bg-[#eff6ff] rounded-[14px] flex items-center justify-center flex-shrink-0">
-                                        <div className="w-5.5 h-5.5 bg-[#4f46e5] rounded-[6px] flex items-center justify-center p-1 shadow-sm">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                                                <line x1="12" y1="22.08" x2="12" y2="12" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">Edit Lecture</h2>
-                                        <p className="text-[#64748b] text-[13px] font-medium leading-relaxed">Update the details for this lecture.</p>
-                                    </div>
-                                </div>
-                            </div>
+            <ConfirmDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirm={confirmDeleteNote}
+                title="Delete Note"
+                message="Are you sure you want to delete this note? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
 
-                            <div className="px-8 pb-8">
-                                <div className="space-y-5">
-                                    {/* Type */}
-                                    <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Select Type</label>
-                                        <div className="relative group">
-                                            <select
-                                                value={editLectureData.type}
-                                                onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })}
-                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-800 appearance-none shadow-sm cursor-pointer"
-                                            >
-                                                <option>Lecture</option>
-                                                <option>Quiz</option>
-                                                <option>Assignment</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                        </div>
-                                    </div>
-
-                                    {/* Title */}
-                                    <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Lecture Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Enter title"
-                                            value={editLectureData.title}
-                                            onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                        />
-                                    </div>
-
-                                    {/* Video URL */}
-                                    <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Video URL <span className="text-gray-400 font-normal text-[11px]">(MP4 / MOV)</span></label>
-                                        <input
-                                            type="text"
-                                            placeholder="https://example.com/lecture.mp4"
-                                            value={editLectureData.videoUrl}
-                                            onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                        />
-                                    </div>
-
-                                    {/* Audio + PDF */}
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div>
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Audio URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://example.com/audio.mp3"
-                                                value={editLectureData.audioUrl}
-                                                onChange={e => setEditLectureData({ ...editLectureData, audioUrl: e.target.value })}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Resource URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://example.com/resource.pdf"
-                                                value={editLectureData.pdfUrl}
-                                                onChange={e => setEditLectureData({ ...editLectureData, pdfUrl: e.target.value })}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Modal Footer */}
-                                <div className="mt-8 flex justify-between items-center bg-white gap-4">
-                                    <button
-                                        onClick={() => setIsEditLectureModalOpen(false)}
-                                        className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-bold rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <GradiantButton
-                                        onClick={handleSaveLecture}
-                                        disabled={isSavingLecture}
-                                        className="px-16 py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[14px]"
-                                    >
-                                        {isSavingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
-                                    </GradiantButton>
-                                </div>
-                            </div>
+            {/* Edit Lecture Modal */}
+            {isEditLectureModalOpen && user?.role === 'admin' && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-xl font-bold mb-4">Edit Lecture Details</h3>
+                        <div className="space-y-4">
+                            <div><label className="text-sm font-medium block mb-1">Title</label><input type="text" value={editLectureData.title} onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })} className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
+                            <div><label className="text-sm font-medium block mb-1">Type</label><select value={editLectureData.type} onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })} className="w-full border rounded-lg px-3 py-2"><option value="Lecture">Lecture</option><option value="Quiz">Quiz</option></select></div>
+                            <div><label className="text-sm font-medium block mb-1">Video URL (YouTube)</label><input type="text" value={editLectureData.videoUrl} onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })} className="w-full border rounded-lg px-3 py-2" /></div>
+                        </div>
+                        <div className="flex gap-3 mt-6 justify-end">
+                            <button onClick={() => setIsEditLectureModalOpen(false)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Cancel</button>
+                            <GradiantButton onClick={handleSaveLecture} disabled={isSavingLecture} className="px-6 py-2 bg-[#3758EE] text-white rounded-lg">{isSavingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}</GradiantButton>
                         </div>
                     </div>
-                )}
-            </div >
-        </div >
+                </div>
+            )}
+        </div>
     );
 };
 

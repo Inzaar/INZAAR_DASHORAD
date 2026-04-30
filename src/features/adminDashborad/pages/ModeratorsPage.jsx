@@ -534,39 +534,48 @@ const ModeratorsPage = () => {
                                                 <PaginationItem>
                                                     <PaginationPrevious
                                                         onClick={() => !isLoading && currentPage > 1 && setCurrentPage(prev => prev - 1)}
-                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-900 font-medium'}`}
+                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#4E60FF]'}`}
                                                     />
                                                 </PaginationItem>
 
-                                                {[...Array(totalPages)].map((_, i) => {
-                                                    const pageNum = i + 1;
-                                                    if (pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
-                                                        const isActive = currentPage === pageNum;
-                                                        return (
-                                                            <PaginationItem key={i}>
-                                                                <PaginationLink
-                                                                    onClick={() => !isLoading && setCurrentPage(pageNum)}
-                                                                    isActive={isActive}
-                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-lg text-[14px] font-medium transition-all ${isActive ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md hover:text-white hover:opacity-90' : 'text-gray-900 hover:bg-gray-100'}`}
-                                                                >
-                                                                    {pageNum}
-                                                                </PaginationLink>
-                                                            </PaginationItem>
-                                                        );
-                                                    } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                                                        return (
-                                                            <PaginationItem key={i}>
-                                                                <PaginationEllipsis />
-                                                            </PaginationItem>
-                                                        );
+                                                {(() => {
+                                                    const pages = [];
+                                                    for (let i = 1; i <= totalPages; i++) {
+                                                        if (
+                                                            i === 1 ||
+                                                            i === totalPages ||
+                                                            (i >= currentPage - 1 && i <= currentPage + 1)
+                                                        ) {
+                                                            const isActive = currentPage === i;
+                                                            pages.push(
+                                                                <PaginationItem key={i}>
+                                                                    <PaginationLink
+                                                                        onClick={() => !isLoading && setCurrentPage(i)}
+                                                                        isActive={isActive}
+                                                                        className={`cursor-pointer w-10 h-10 border-none rounded-xl text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-[0_4px_12px_rgba(78,96,255,0.3)] hover:text-white hover:opacity-90' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
+                                                                    >
+                                                                        {i}
+                                                                    </PaginationLink>
+                                                                </PaginationItem>
+                                                            );
+                                                        } else if (
+                                                            (i === currentPage - 2 && i > 1) ||
+                                                            (i === currentPage + 2 && i < totalPages)
+                                                        ) {
+                                                            pages.push(
+                                                                <PaginationItem key={i}>
+                                                                    <PaginationEllipsis className="text-gray-400" />
+                                                                </PaginationItem>
+                                                            );
+                                                        }
                                                     }
-                                                    return null;
-                                                })}
+                                                    return pages;
+                                                })()}
 
                                                 <PaginationItem>
                                                     <PaginationNext
                                                         onClick={() => !isLoading && currentPage < totalPages && setCurrentPage(prev => prev + 1)}
-                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-900 font-medium'}`}
+                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#4E60FF]'}`}
                                                     />
                                                 </PaginationItem>
                                             </PaginationContent>
