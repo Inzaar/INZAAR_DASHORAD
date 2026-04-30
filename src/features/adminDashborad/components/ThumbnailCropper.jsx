@@ -210,17 +210,17 @@ const ThumbnailCropper = ({ imageSrc, onApply, onCancel, defaultAspect = 16 / 10
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 md:px-8 py-4 border-t border-gray-100 flex justify-between items-center flex-shrink-0 bg-white">
+                <div className="px-5 md:px-8 py-3.5 border-t border-gray-100 flex justify-between items-center flex-shrink-0 bg-white gap-3">
                     <button
                         onClick={onCancel}
-                        className="px-8 py-2.5 bg-gray-100 text-[#64748b] font-bold rounded-xl hover:bg-gray-200 transition-all text-[14px]"
+                        className="flex-1 md:flex-none px-4 md:px-8 py-2 md:py-2.5 bg-gray-100 text-[#64748b] font-bold rounded-xl hover:bg-gray-200 transition-all text-[13px] md:text-[14px]"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleApply}
                         disabled={applying}
-                        className="px-10 py-2.5 bg-[#3b82f6] text-white font-bold rounded-xl hover:bg-blue-600 transition-all text-[14px] flex items-center gap-2 disabled:opacity-60"
+                        className="flex-[1.5] md:flex-none px-5 md:px-10 py-2 md:py-2.5 bg-[#3b82f6] text-white font-bold rounded-xl hover:bg-blue-600 transition-all text-[13px] md:text-[14px] flex items-center justify-center gap-2 disabled:opacity-60 shadow-sm"
                     >
                         {applying
                             ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Applying…</>

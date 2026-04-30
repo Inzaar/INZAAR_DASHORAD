@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { createCourseWithLectures, createCourse, uploadImage, getAdminCourseById, updateCourse } from '@/api/course';
@@ -70,6 +71,11 @@ const LectureCard = ({ item }) => (
 const AddCoursePage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     const [currentStep, setCurrentStep] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,6 +88,7 @@ const AddCoursePage = () => {
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState('');
     const [showCropper, setShowCropper] = useState(false);
+    const [cropSrc, setCropSrc] = useState('');
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -387,11 +394,30 @@ const AddCoursePage = () => {
     /* ────────────────────────── render ── */
     return (
         <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col items-center justify-center font-sans overflow-hidden font-['Public_Sans']">
-            <div className="w-full max-w-[1920px] min-h-screen max-h-[1680px] flex flex-col">
-                <Navbar />
+            <div className="w-full max-w-[1920px] min-h-screen max-h-[1680px] flex flex-col gap-4">
+                <Navbar onMenuClick={toggleSidebar} />
 
-                <div className="flex-1 p-6 md:p-8 overflow-y-auto no-scrollbar relative z-10">
-                    <div className="mx-auto flex flex-col min-h-full overflow-hidden">
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                    {isSidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                    )}
+
+                    <Sidebar
+                        onClose={() => setIsSidebarOpen(false)}
+                        className={`
+                        transition-transform duration-300 ease-in-out z-40
+                        lg:translate-x-0 lg:static lg:block
+                        fixed left-0 top-0 shadow-2xl
+                        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        w-64 h-full
+                    `}
+                    />
+
+                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
+                        <div className="py-4">
                         {showQuizFlow ? (
                             <CreateQuiz
                                 courseId={courseId}
@@ -405,7 +431,7 @@ const AddCoursePage = () => {
                         ) : (
                             <>
                                 {/* Header Row */}
-                                <div className="px-6 py-6 md:px-10 md:py-10 flex items-center justify-between border-b border-gray-50 flex-wrap md:flex-nowrap gap-4">
+                                <div className="px-4 py-6 md:px-10 md:py-10 flex items-center justify-between border-b border-gray-50 flex-wrap md:flex-nowrap gap-4">
                                     <div className="flex items-center gap-4 min-w-max">
                                         <div className="w-10 h-10 bg-[#eff6ff] rounded-[14px] flex items-center justify-center shadow-inner">
                                             <div className="w-5.5 h-5.5 bg-[#4f46e5] rounded-[6px] flex items-center justify-center p-1 shadow-sm">
@@ -420,9 +446,9 @@ const AddCoursePage = () => {
                                     </div>
 
                                     {/* Stepper */}
-                                    <div className="flex items-center gap-4 ml-auto w-full max-w-[900px]">
+                                    <div className="flex items-center gap-6 w-full max-w-[900px] overflow-x-auto no-scrollbar pb-2 md:pb-0 md:ml-auto">
                                         {steps.map((step) => (
-                                            <div key={step.id} className="flex-1 group">
+                                            <div key={step.id} className="flex-shrink-0 md:flex-1 min-w-[160px] md:min-w-0 group">
                                                 <div className={`h-[4px] w-full rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-[#3b82f6]' : 'bg-[#6b7280]'}`} />
                                                 <div className="mt-4 flex items-center gap-3">
                                                     <div className={`w-[22px] h-[22px] rounded-full border-2 transition-all duration-300 flex-shrink-0 flex items-center justify-center ${currentStep >= step.id ? 'border-[#3b82f6]' : 'border-[#6b7280]'}`}>
@@ -440,7 +466,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 1: Course Setup ── */}
                                 {currentStep === 1 && (
-                                    <div className="px-6 md:px-10 py-10 flex-1 text-left">
+                                    <div className="px-4 md:px-10 py-10 flex-1 text-left">
                                         <div className="max-w-[1300px] mx-auto">
                                             <div className="mb-10">
                                                 <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Course Setup</h3>
@@ -596,7 +622,7 @@ const AddCoursePage = () => {
                                                                     <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
                                                                     {courseForm.thumbnail && (
                                                                         <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
-                                                                            <CheckCircle size={14} /> Uploaded to Cloudinary
+                                                                            <CheckCircle size={14} /> Selected
                                                                         </span>
                                                                     )}
                                                                     <span className="text-[12px] text-[#3b82f6] font-medium">Click to change image</span>
@@ -606,7 +632,7 @@ const AddCoursePage = () => {
                                                                 <div className="flex flex-col items-center gap-3">
                                                                     {thumbnailPreview && <img src={thumbnailPreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
                                                                     <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
-                                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading…</span>
                                                                 </div>
                                                             )}
                                                             {!thumbnailPreview && !thumbnailUploading && (
@@ -641,7 +667,7 @@ const AddCoursePage = () => {
                                                                     <img src={certificatePreview} alt="Certificate preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
                                                                     {courseForm.certificateFile && (
                                                                         <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
-                                                                            <CheckCircle size={14} /> Uploaded to Cloudinary
+                                                                            <CheckCircle size={14} /> Selected
                                                                         </span>
                                                                     )}
                                                                     <span className="text-[12px] text-[#3b82f6] font-medium">Click to change template</span>
@@ -651,7 +677,7 @@ const AddCoursePage = () => {
                                                                 <div className="flex flex-col items-center gap-3">
                                                                     {certificatePreview && <img src={certificatePreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
                                                                     <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
-                                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading to Cloudinary…</span>
+                                                                    <span className="text-[13px] text-[#64748b] font-medium">Uploading…</span>
                                                                 </div>
                                                             )}
                                                             {!certificatePreview && !certificateUploading && (
@@ -673,7 +699,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 2: Add Course Content ── */}
                                 {currentStep === 2 && (
-                                    <div className="px-6 md:px-10 py-10 flex-1">
+                                    <div className="px-4 md:px-10 py-10 flex-1">
                                         <div className="max-w-[1400px] w-full mx-auto">
                                             <div className="mb-10">
                                                 <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
@@ -703,7 +729,7 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 3: Review & Publish ── */}
                                 {currentStep === 3 && (
-                                    <div className="px-6 md:px-10 py-10 flex-1 space-y-12">
+                                    <div className="px-4 md:px-10 py-10 flex-1 space-y-12">
                                         <div className="max-w-[1400px] mx-auto">
 
                                             {/* Success / Error Alerts */}
@@ -784,7 +810,7 @@ const AddCoursePage = () => {
                                 )}
 
                                 {/* Footer Actions */}
-                                <div className="px-6 md:px-10 py-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-20 mt-auto">
+                                <div className="px-4 md:px-10 py-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-20 mt-auto">
                                     <button
                                         onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
                                         className="w-full sm:w-auto px-6 md:px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm"
@@ -819,7 +845,8 @@ const AddCoursePage = () => {
                                 </div>
                             </>
                         )}
-                    </div>
+                        </div>
+                    </main>
                 </div>
 
                 {/* ── Add Lecture Flow ── */}

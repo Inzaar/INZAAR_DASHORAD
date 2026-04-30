@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -20,6 +20,18 @@ const AdminCourseDetailPage = () => {
     const [searchType, setSearchType] = useState('NAME');
     const [courseData, setCourseData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+    const adminMenuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
+                setIsAdminMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -91,21 +103,55 @@ const AdminCourseDetailPage = () => {
                     <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
                         <div className="py-4 pr-2">
                             {/* Header */}
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                                <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{courseData?.title || 'Loading...'}</h2>
-                                    <p className="text-gray-500 text-[14px]">{courseData?.description || ''}</p>
+                            <div className="grid grid-cols-[1fr_auto] items-center gap-4 mb-8 w-full">
+                                <div className="min-w-0">
+                                    <h2 className="text-[26px] md:text-[32px] font-extrabold text-gray-900 truncate leading-tight">{courseData?.title || 'Loading...'}</h2>
+                                    <p className="text-gray-500 text-[12px] md:text-[14px] line-clamp-1">{courseData?.description || ''}</p>
                                 </div>
-                                <div className="flex gap-3">
-                                    <GradiantButton className="bg-[#6366F1] px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity">
+
+                                {/* Desktop Buttons */}
+                                <div className="hidden md:flex items-center gap-3">
+                                    <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
                                         Download Certificate
                                     </GradiantButton>
                                     <GradiantButton
                                         onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
-                                        className="bg-[#8B5CF6] px-8 py-2 rounded-lg text-sm font-medium shadow-sm hover:opacity-90 transition-opacity"
+                                        className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                     >
                                         Edit
                                     </GradiantButton>
+                                </div>
+
+                                {/* Mobile Three-Dots */}
+                                <div className="md:hidden relative" ref={adminMenuRef}>
+                                    <button
+                                        onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+                                        className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                                    </button>
+
+                                    {isAdminMenuOpen && (
+                                        <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                            <button
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                onClick={() => setIsAdminMenuOpen(false)}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6366F1]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" y2="3" x2="12" /></svg>
+                                                Download Certificate
+                                            </button>
+                                            <button
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                onClick={() => {
+                                                    navigate(`/admin-add-course?edit=true&id=${id}`);
+                                                    setIsAdminMenuOpen(false);
+                                                }}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                                Edit Course
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
