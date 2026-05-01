@@ -60,7 +60,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             <div className="gap-[22px] flex flex-col min-[800px]:flex-row min-[600px]:px-10">
                 {/* div left */}
                 <div className="w-[300px]">
-                    <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md absolute top-[40px] left-[30px] flex items-center justify-center">
+                    <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md absolute top-[40px] left-2 min-[500px]:left-[30px] flex items-center justify-center">
                         {userPayload?.profileImageUrl || userInfo?.profileImageUrl ? (
                             <img
                                 src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
@@ -72,7 +72,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                         )}
                     </div>
 
-                    <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] left-[35px]">
+                    <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] min-[500px]:left-[35px]">
                         {/* <h5>Zain</h5> */}
                         <h4 className="font-bold w-full h-[38px] text-[30px]">{userInfo?.firstname || "[YOUR_NAME]"}</h4>
                         <a href="#" className="w-full h-[24px] text-[16px] underline">{userInfo?.email || "[EMAIL_ADDRESS]"}</a>
@@ -82,7 +82,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 </div>
 
                 <div className="w-full">
-                    <div className="w-full h-[120px] sm:h-[150px] md:h-[200px] flex items-center justify-end px-6 sm:px-0">
+                    <div className="hidden min-[500px]:flex w-full h-[120px] sm:h-[150px] md:h-[200px] items-center justify-end px-6 sm:px-0">
                         <div
                             onClick={() => setIsLogoutModalOpen(true)}
                             className="flex w-[130px] sm:w-[140px] h-[45px] sm:h-[50px] mt-6 sm:mt-10 rounded-xl justify-center items-center bg-[#f1f5f9] border border-gray-100 text-[#64748b] hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all cursor-pointer font-bold text-[14px] shadow-sm gap-2"
@@ -94,7 +94,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
                     <div className="w-full flex flex-col gap-[12px]">
                         {/* buttons */}
-                        <div className="w-[333px] h-[40px] rotate-0 opacity-100 p-1 flex bg-gray-200 rounded">
+                        <div className="w-[333px] h-[40px] rotate-0 opacity-100 p-1 flex bg-gray-200 rounded mt-50 min-[500px]:mt-20 md:mt-0">
                             {/* account button */}
                             <div className={`cursor-pointer w-[162px] h-[32px] flex items-center justify-center rounded ${activeTab === "account" ? "bg-white" : "bg-gray-200"}`}>
                                 <h6 onClick={() => handleTabClick("account")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "account" ? "text-[#18181B]" : "text-[#71717A]"}`}>Account</h6>
