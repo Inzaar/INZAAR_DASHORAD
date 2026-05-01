@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -38,6 +38,7 @@ const ModeratorReportsPage = () => {
     const [tableFrom, setTableFrom] = useState('');
     const [tableTo, setTableTo] = useState('');
     const [tableStatus, setTableStatus] = useState('');
+    const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -298,56 +299,203 @@ const ModeratorReportsPage = () => {
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">Moderators List</h3>
                                 </div>
 
-                                {/* Filter Bar */}
-                                <div className="flex flex-col xl:flex-row xl:items-end gap-4 mb-8">
-                                    <div className='flex-1 flex gap-2 flex-col min-w-0'>
+                                {/* Filters - Desktop */}
+                                <div className="hidden xl:flex flex-row gap-4 mb-8">
+                                    <div className='flex-1 flex gap-2 flex-col'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
-                                        <div className={`flex flex-col sm:flex-row relative bg-gray-50 border rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 border-gray-200`}>
-                                            <div className="relative flex-1 w-full sm:w-auto min-w-0">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                                                <input
-                                                    type="text"
-                                                    placeholder={`Search by ${tableSearchType.toLowerCase()}`}
-                                                    value={tableSearch}
-                                                    onChange={(e) => setTableSearch(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
-                                                    className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
-                                                />
-                                            </div>
-                                            <div className="flex items-center p-2 sm:p-1 gap-2 border-t sm:border-t-0 border-gray-200 justify-center">
-                                                <button onClick={() => setTableSearchType('PHONE')} className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                                            <input
+                                                type="text"
+                                                placeholder={`Search by ${tableSearchType.toLowerCase()}`}
+                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                value={tableSearch}
+                                                onChange={(e) => setTableSearch(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
+                                            />
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'PHONE') {
+                                                            setTableSearchType('PHONE');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
                                                     PHONE#
                                                 </button>
-                                                <button onClick={() => setTableSearchType('NAME')} className={`px-4 py-1.5 text-xs font-bold rounded shadow-sm transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#A78BFA] text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'NAME') {
+                                                            setTableSearchType('NAME');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
                                                     NAME
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2 shrink-0">
+                                    <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">From</span>
-                                        <input type="date" value={tableFrom} onChange={(e) => setTableFrom(e.target.value)} className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" />
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            value={tableFrom}
+                                            onChange={(e) => setTableFrom(e.target.value)}
+                                        />
                                     </div>
 
-                                    <div className="flex flex-col gap-2 shrink-0">
+                                    <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">To</span>
-                                        <input type="date" value={tableTo} onChange={(e) => setTableTo(e.target.value)} className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none" />
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            value={tableTo}
+                                            onChange={(e) => setTableTo(e.target.value)}
+                                        />
                                     </div>
 
-                                    <div className="flex flex-col gap-2 shrink-0">
+                                    <div className="flex flex-col gap-2">
                                         <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <select value={tableStatus} onChange={(e) => setTableStatus(e.target.value)} className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer">
-                                            <option value="">Select</option>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        </select>
+                                        <div className="relative">
+                                            <select
+                                                value={tableStatus}
+                                                onChange={(e) => setTableStatus(e.target.value)}
+                                                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="">Select</option>
+                                                <option value="active">Active</option>
+                                                <option value="inactive">Inactive</option>
+                                            </select>
+                                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
                                     </div>
 
-                                    <button className="flex items-center justify-center gap-2 px-4 h-10 shrink-0 bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap" onClick={handleTableClear}>
+                                    <button
+                                        onClick={handleTableClear}
+                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                    >
                                         <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
+                                        Clear
                                     </button>
+                                </div>
+
+                                {/* Filters - Responsive (Mobile Only) */}
+                                <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
+                                    <div className='flex flex-col gap-4'>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button
+                                                onClick={handleTableClear}
+                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                                            >
+                                                <BiFilterAlt className="w-4 h-4" />
+                                                Clear Filter
+                                            </button>
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setIsTableFilterOpen(!isTableFilterOpen)}
+                                                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isTableFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
+                                                >
+                                                    {isTableFilterOpen ? <X size={20} /> : <MoreVertical size={20} />}
+                                                </button>
+
+                                                {isTableFilterOpen && (
+                                                    <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
+                                                        <div className="space-y-5">
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <div className="relative">
+                                                                    <select
+                                                                        value={tableStatus}
+                                                                        onChange={(e) => setTableStatus(e.target.value)}
+                                                                        className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                                                                    >
+                                                                        <option value="">Select</option>
+                                                                        <option value="active">Active</option>
+                                                                        <option value="inactive">Inactive</option>
+                                                                    </select>
+                                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <input
+                                                                    type="date"
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    value={tableFrom}
+                                                                    onChange={(e) => setTableFrom(e.target.value)}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <input
+                                                                    type="date"
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    value={tableTo}
+                                                                    onChange={(e) => setTableTo(e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Advanced Search Segment UI as per request */}
+                                    <div className='flex flex-col gap-3'>
+                                        <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                                            <div className="flex items-center px-4 py-3 border-b border-gray-100">
+                                                <Search className="text-gray-400 w-5 h-5 mr-3" />
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Search by ${tableSearchType.toLowerCase()}`}
+                                                    className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
+                                                    value={tableSearch}
+                                                    onChange={(e) => setTableSearch(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
+                                                />
+                                            </div>
+                                            <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'PHONE') {
+                                                            setTableSearchType('PHONE');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    PHONE#
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'NAME') {
+                                                            setTableSearchType('NAME');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    NAME
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {loading ? (
