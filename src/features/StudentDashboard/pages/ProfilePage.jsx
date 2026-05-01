@@ -62,7 +62,7 @@ const ProfilePage = () => {
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="py-4 pr-2">
+                        <div className="">
                             {isLoading ? (
                                 <div className="w-full flex justify-center items-center py-20">
                                     <p className="text-gray-500 text-lg font-medium">Loading profile details...</p>

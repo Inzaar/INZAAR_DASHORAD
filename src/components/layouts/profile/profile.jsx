@@ -57,7 +57,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
             </div> */}
 
-            <div className="gap-[22px] flex flex-col min-[800px]:flex-row min-[600px]:px-10">
+            <div className="gap-[22px] flex flex-col min-[800px]:flex-row px-1 min-[600px]:px-10">
                 {/* div left */}
                 <div className="w-[300px]">
                     <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md absolute top-[40px] left-2 min-[500px]:left-[30px] flex items-center justify-center">
@@ -94,7 +94,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
                     <div className="w-full flex flex-col gap-[12px]">
                         {/* buttons */}
-                        <div className="w-[333px] h-[40px] rotate-0 opacity-100 p-1 flex bg-gray-200 rounded mt-50 min-[500px]:mt-20 md:mt-0">
+                        <div className="max-w-[333px] w-full h-[40px] rotate-0 opacity-100 p-1 flex bg-gray-200 rounded mt-50 min-[500px]:mt-20 md:mt-0">
                             {/* account button */}
                             <div className={`cursor-pointer w-[162px] h-[32px] flex items-center justify-center rounded ${activeTab === "account" ? "bg-white" : "bg-gray-200"}`}>
                                 <h6 onClick={() => handleTabClick("account")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "account" ? "text-[#18181B]" : "text-[#71717A]"}`}>Account</h6>
