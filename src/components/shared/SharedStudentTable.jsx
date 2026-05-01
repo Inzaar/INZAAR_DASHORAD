@@ -8,7 +8,9 @@ const SharedStudentTable = ({
     pagination = { page: 1, limit: 5, totalPages: 1 },
     onPageChange,
     title = "Students List",
-    showDropdown = false
+    showDropdown = false,
+    hasContainer = true,
+    showTitle = true
 }) => {
     const navigate = useNavigate();
 
@@ -39,16 +41,18 @@ const SharedStudentTable = ({
         return pages;
     };
 
-    return (
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6">
-            <div className="mb-6 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
-                {showDropdown && (
-                    <select className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none cursor-pointer">
-                        <option value="student_table">Student Table</option>
-                    </select>
-                )}
-            </div>
+    const content = (
+        <>
+            {showTitle && (
+                <div className="mb-6 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
+                    {showDropdown && (
+                        <select className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none cursor-pointer">
+                            <option value="student_table">Student Table</option>
+                        </select>
+                    )}
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex items-center justify-center py-16">
@@ -177,6 +181,16 @@ const SharedStudentTable = ({
                     </div>
                 </>
             )}
+        </>
+    );
+
+    if (!hasContainer) {
+        return content;
+    }
+
+    return (
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6">
+            {content}
         </div>
     );
 };
