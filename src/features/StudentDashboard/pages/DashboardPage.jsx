@@ -153,13 +153,19 @@ const DashboardPage = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="hidden min-[680px]:block min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%]">
-                                            <Calendar18 className="w-[200px] h-[200px]" />
+                                        <div className="hidden min-[680px]:flex min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%] flex-col">
+                                            <Calendar18 className="w-full h-full flex-1" />
                                         </div>
                                     </div>
 
                                     <div className="flex gap-6 max-[900px]:flex-col">
                                         <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={"Hours Spent"} />
+                                        
+                                        {/* Mobile Calendar - Visible only below 680px */}
+                                        <div className="min-[680px]:hidden w-full bg-white rounded-lg p-4 shadow-sm">
+                                            <Calendar18 className="w-full h-[350px]" />
+                                        </div>
+
                                         <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
