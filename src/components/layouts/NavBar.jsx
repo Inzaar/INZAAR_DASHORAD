@@ -5,7 +5,7 @@ import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-function Navbar({ onMenuClick }) {
+function Navbar({ onMenuClick, hideMenu = false }) {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
@@ -29,12 +29,14 @@ function Navbar({ onMenuClick }) {
             <div className="w-full flex flex-row justify-between items-center gap-2 sm:gap-4">
                 <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1">
                     <div className="flex items-center gap-1 sm:gap-3">
-                        <button
-                            onClick={onMenuClick}
-                            className="lg:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
-                        >
-                            <Menu size={20} className="sm:w-6 sm:h-6" />
-                        </button>
+                        {!hideMenu && (
+                            <button
+                                onClick={onMenuClick}
+                                className="lg:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
+                            >
+                                <Menu size={20} className="sm:w-6 sm:h-6" />
+                            </button>
+                        )}
                         <div className="min-w-0">
                             <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C] truncate">
                                 Dashboard
