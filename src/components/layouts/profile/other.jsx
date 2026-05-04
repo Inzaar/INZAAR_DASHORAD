@@ -5,9 +5,9 @@ function Other({ setUserPayload, userPayload, userInfo }) {
         <div className="w-full p-[24px] gap-[24px] rounded-[12px] b-[1px] bg-[#FFFFFF]  border border-[#E2E8F0]">
             <div className="w-full rotate-0 opacity-100 flex flex-col gap-[5px] ">
 
-                <div className="w-full gap-4 flex">
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
                     {/* gender field */}
-                    <div className="w-[50%] gap-2  flex flex-col">
+                    <div className="w-full sm:w-[50%] gap-2  flex flex-col">
                         <label>Gender* </label>
                         <div>
                             <select
@@ -24,7 +24,7 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                         </div>
                     </div>
                     {/* Date of birth*/}
-                    <div className="w-[50%]">
+                    <div className="w-full sm:w-[50%]">
                         <div className="w-full gap-2 flex flex-col">
                             <label>Date Of Birth* </label>
 
@@ -39,9 +39,9 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex">
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
                     {/* Educational qualification */}
-                    <div className=" gap-2 flex flex-col mt-6 w-[50%]">
+                    <div className=" gap-2 flex flex-col mt-6 w-full sm:w-[50%]">
                         <label>Educational Qualification* </label>
 
                         <input
@@ -53,7 +53,7 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                         />
                     </div>
                     {/* national */}
-                    <div className="w-[50%] gap-2 flex flex-col mt-6">
+                    <div className="w-full sm:w-[50%] gap-2 flex flex-col mt-6">
                         <label>Nationality* </label>
 
                         <input
@@ -66,7 +66,7 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex">
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
                     {/* permanent address */}
                     <div className=" gap-2 flex flex-col mt-6 flex-1">
                         <label>Permanent Address* </label>
@@ -81,7 +81,7 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex">
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
                     {/*Religious course */}
                     <div className=" gap-2 flex flex-col flex-1">
                         <label>
@@ -98,7 +98,7 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex">
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
                     {/*inzar courses*/}
                     <div className=" gap-2 flex flex-col flex-1">
                         <label>How Did You Come To Know About Inzaar/Course: </label>
