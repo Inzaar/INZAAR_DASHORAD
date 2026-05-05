@@ -31,7 +31,7 @@ const StudentCertificates = ({ profileData }) => {
     const [generatingId, setGeneratingId] = useState(null);
     const certCardRef = useRef(null);
     const [certDraft, setCertDraft] = useState(null);
-    
+
     // Calculate dynamic stats
     const totalCompleted = enrolledCourses.filter(c => c.isCompleted).length;
     const certsAvailable = enrolledCourses.filter(c => c.certificateUrl).length;
@@ -48,7 +48,7 @@ const StudentCertificates = ({ profileData }) => {
 
         try {
             const studentName = `${profileData?.user?.firstname || ''} ${profileData?.user?.lastname || ''}`.trim() || 'Student';
-            
+
             setCertDraft({
                 studentName,
                 courseName: course.title,
@@ -71,7 +71,7 @@ const StudentCertificates = ({ profileData }) => {
 
             toast.success("Certificate generated and saved!", { id: toastId });
             course.certificateUrl = uploaded.url;
-            
+
         } catch (error) {
             console.error(error);
             toast.error("Failed to generate certificate", { id: toastId });
@@ -195,9 +195,9 @@ const StudentCertificates = ({ profileData }) => {
                                         <td className="py-5 px-4">
                                             <div className="flex items-center gap-3 justify-center">
                                                 <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className="h-full bg-[#00C896] rounded-full transition-all duration-500" 
-                                                        style={{ width: `${cert.progress}%` }} 
+                                                    <div
+                                                        className="h-full bg-[#00C896] rounded-full transition-all duration-500"
+                                                        style={{ width: `${cert.progress}%` }}
                                                     />
                                                 </div>
                                                 <span className="font-bold text-gray-900 text-xs">{cert.progress}%</span>
@@ -213,17 +213,17 @@ const StudentCertificates = ({ profileData }) => {
                                         </td>
                                         <td className="py-5 px-6 text-center">
                                             {cert.certificateUrl ? (
-                                                <a 
-                                                    href={cert.certificateUrl} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer" 
+                                                <a
+                                                    href={cert.certificateUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-2 bg-[#818CF8] hover:bg-[#6366F1] text-white font-bold py-2 px-6 rounded-lg text-xs transition-all shadow-md active:scale-95"
                                                 >
                                                     <Download size={14} />
                                                     Download
                                                 </a>
                                             ) : cert.isCompleted ? (
-                                                <button 
+                                                <button
                                                     onClick={() => handleGenerate(cert)}
                                                     disabled={generatingId === cert.id}
                                                     className="inline-flex items-center gap-2 bg-[#818CF8] hover:bg-[#6366F1] text-white font-bold py-2 px-4 rounded-lg text-xs transition-all disabled:opacity-50"

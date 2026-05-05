@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, Lock } from 'lucide-react';
+import { Search, Download, Lock, Eye, FileText } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 import axiosInstance from '@/api/axiosInstance';
@@ -54,6 +54,50 @@ const Certificates = () => {
         fetchCertificates();
     }, []);
 
+    const downloadAsPDF = async (imgUrl, courseName) => {
+        try {
+            const { jsPDF } = await import('jspdf');
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = imgUrl;
+            img.onload = () => {
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [1122, 794]
+                });
+                doc.addImage(img, 'PNG', 0, 0, 1122, 794);
+                doc.save(`Certificate_${courseName.replace(/\s+/g, '_')}.pdf`);
+            };
+        } catch (e) {
+            console.error('PDF Download failed:', e);
+            alert("PDF generation failed. Please try again.");
+        }
+    };
+
+    const openAsPDF = async (imgUrl) => {
+        try {
+            const { jsPDF } = await import('jspdf');
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = imgUrl;
+            img.onload = () => {
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [1122, 794]
+                });
+                doc.addImage(img, 'PNG', 0, 0, 1122, 794);
+                const pdfBlob = doc.output('blob');
+                const url = URL.createObjectURL(pdfBlob);
+                window.open(url, '_blank');
+            };
+        } catch (e) {
+            console.error('PDF Open failed:', e);
+            alert("Failed to open PDF.");
+        }
+    };
+
     const handleGenerateCertificate = async (enrollment) => {
         if (generatingId) return;
         setGeneratingId(enrollment.enrollmentId);
@@ -75,7 +119,7 @@ const Certificates = () => {
 
             const { toBlob } = await import('html-to-image');
             const blob = await toBlob(certCardRef.current, {
-                pixelRatio: 2,
+                pixelRatio: 1, // Standard resolution to ensure small file size and prevent Network Errors
                 cacheBust: true,
                 style: { transform: 'scale(1)', transformOrigin: 'top left' }
             });
@@ -83,8 +127,11 @@ const Certificates = () => {
             if (!blob) throw new Error("Failed to generate image blob");
 
             try {
+                console.log('Generating certificate for enrollment:', enrollment);
                 const { uploadImage, saveCertificate } = await import('@/api/course');
                 const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
+                console.log('Uploaded certificate image:', uploaded.url);
+
                 await saveCertificate(enrollment.courseId, uploaded.url);
 
                 // Update UI
@@ -102,8 +149,8 @@ const Certificates = () => {
                 }));
 
             } catch (e) {
-                console.error('Upload side failed:', e);
-                alert("Failed to save certificate. Please try again.");
+                console.error('Upload/Save side failed:', e);
+                alert(`Failed to save certificate: ${e.response?.data?.message || e.message}`);
             } finally {
                 setGeneratingId(null);
                 setCertData(null);
@@ -111,7 +158,7 @@ const Certificates = () => {
 
         } catch (e) {
             console.error('Generation failed:', e);
-            alert("Failed to generate certificate.");
+            alert(`Failed to generate certificate: ${e.message}`);
             setGeneratingId(null);
             setCertData(null);
         }
@@ -156,8 +203,7 @@ const Certificates = () => {
         <div className="h-screen w-screen flex items-center justify-center">
             {/* Hidden Certificate Generator Card */}
             {certData && (
-                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, backgroundColor: 'transparent', color: 'initial' }}>
-                    {/* We need to import CertificateCard or render it. We'll require importing it at the top */}
+                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, width: '1122px', height: '794px', overflow: 'hidden' }}>
                     <CertificateCard
                         ref={certCardRef}
                         studentName={certData.studentName}
@@ -235,7 +281,7 @@ const Certificates = () => {
                                         </div>
                                     </div>
 
-                                    {currentData.length === 0 ? (
+                                    {filtered.length === 0 ? (
                                         <div className="text-center py-16 text-gray-400">
                                             <div className="text-5xl mb-4">🎓</div>
                                             <p className="font-medium text-gray-600">No certificates yet</p>
@@ -245,104 +291,124 @@ const Certificates = () => {
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="overflow-x-auto">
-                                            <div className="min-w-[900px]">
-
-                                                {/* Table Header — same 6 columns as original */}
-                                                <div className="grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center">
+                                        <div className="w-full overflow-hidden">
+                                            <div className="w-full">
+                                                {/* Table Header - Desktop Only */}
+                                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center">
                                                     <div className="col-span-3 text-left pl-4">Courses</div>
                                                     <div className="col-span-2">Title</div>
-                                                    <div className="col-span-2">Start &amp; End Date</div>
+                                                    <div className="col-span-2">Start & End Date</div>
                                                     <div className="col-span-2">Progress</div>
-                                                    <div className="col-span-2">Status</div>
-                                                    <div className="col-span-1">Action</div>
+                                                    <div className="col-span-1">Status</div>
+                                                    <div className="col-span-2">Action</div>
                                                 </div>
 
-                                                {/* Table Rows */}
-                                                <div className="flex flex-col gap-2">
+                                                {/* Table Rows / Mobile Cards */}
+                                                <div className="flex flex-col gap-4 md:gap-2">
                                                     {currentData.map((item) => (
-                                                        <div key={item.enrollmentId} className="grid grid-cols-12 gap-4 items-center py-4 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border-b border-gray-50 last:border-0">
+                                                        <div key={item.enrollmentId} className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4 transition-colors hover:bg-gray-50/50">
+                                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
-                                                            {/* Courses */}
-                                                            <div className="col-span-3 text-left pl-4 font-medium text-gray-800 flex items-center gap-2">
-                                                                {item.thumbnail ? (
-                                                                    <img src={item.thumbnail} alt={item.course} className="w-8 h-8 rounded object-cover shrink-0" />
-                                                                ) : (
-                                                                    <div className="w-8 h-8 rounded bg-gradient-to-br from-[#A892FF] to-[#3758EE] shrink-0" />
-                                                                )}
-                                                                <span className="truncate">{item.course}</span>
-                                                            </div>
-
-                                                            {/* Title */}
-                                                            <div className="col-span-2 text-center text-gray-600">{item.title}</div>
-
-                                                            {/* Start & End Date */}
-                                                            <div className="col-span-2 text-center flex flex-col text-xs text-gray-500">
-                                                                <span>{item.startDate}</span>
-                                                                <span>{item.endDate}</span>
-                                                            </div>
-
-                                                            {/* Progress */}
-                                                            <div className="col-span-2 text-center font-medium">
-                                                                <div className="flex items-center gap-2 justify-center">
-                                                                    <div className="w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                                        <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.progress}%` }} />
+                                                                {/* Course Info */}
+                                                                <div className="md:col-span-3 flex items-center gap-3 min-w-0">
+                                                                    <div className="shrink-0">
+                                                                        {item.thumbnail ? (
+                                                                            <img src={item.thumbnail} alt={item.course} className="w-10 h-10 md:w-8 md:h-8 rounded-lg object-cover" />
+                                                                        ) : (
+                                                                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-[#A892FF] to-[#3758EE]" />
+                                                                        )}
                                                                     </div>
-                                                                    <span>{item.progress}%</span>
+                                                                    <div className="min-w-0">
+                                                                        <span className="block font-bold md:font-medium text-gray-900 md:text-gray-800 truncate text-sm md:text-xs lg:text-sm">
+                                                                            {item.course}
+                                                                        </span>
+                                                                        <span className="md:hidden text-xs text-gray-500">Course</span>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
 
-                                                            {/* Status */}
-                                                            <div className="col-span-2 text-center">
-                                                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${item.status === 'Completed'
-                                                                    ? 'text-blue-600 bg-blue-50'
-                                                                    : item.status === 'Active'
-                                                                        ? 'text-green-600 bg-green-50'
-                                                                        : 'text-gray-500 bg-gray-100'
-                                                                    }`}>
-                                                                    {item.status}
-                                                                </span>
-                                                            </div>
+                                                                {/* Title - Desktop only or as secondary info on mobile */}
+                                                                <div className="md:col-span-2 text-left md:text-center">
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-0.5">Title</span>
+                                                                    <span className="text-gray-600 text-sm md:text-xs lg:text-sm truncate block">{item.title}</span>
+                                                                </div>
 
-                                                            {/* Action — Download only for completed courses */}
-                                                            <div className="col-span-1 flex justify-center">
-                                                                {item.status === 'Completed' ? (
-                                                                    item.certificateUrl ? (
-                                                                        <a
-                                                                            href={item.certificateUrl}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            download
-                                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-medium rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap"
-                                                                        >
-                                                                            <Download className="w-3 h-3" />
-                                                                            Download
-                                                                        </a>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => handleGenerateCertificate(item)}
-                                                                            disabled={generatingId === item.enrollmentId}
-                                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-medium rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 whitespace-nowrap"
-                                                                        >
-                                                                            {generatingId === item.enrollmentId ? (
-                                                                                <>
-                                                                                    <Loader className="w-3 h-3 animate-spin text-blue-500" />
-                                                                                    Generating
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <Lock className="w-3 h-3" />
-                                                                                    Generate Now
-                                                                                </>
-                                                                            )}
-                                                                        </button>
-                                                                    )
-                                                                ) : (
-                                                                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-400 text-xs rounded-lg cursor-not-allowed select-none whitespace-nowrap">
-                                                                        <Lock className="w-3 h-3" />
-                                                                        Pending
+                                                                {/* Start & End Date */}
+                                                                <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-center gap-2">
+                                                                    <div className="md:hidden">
+                                                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">Duration</span>
+                                                                    </div>
+                                                                    <div className="text-right md:text-center text-[11px] md:text-[10px] lg:text-xs text-gray-500">
+                                                                        <span className="md:block">{item.startDate}</span>
+                                                                        <span className="hidden md:block"> - </span>
+                                                                        <span className="md:block">{item.endDate}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Progress */}
+                                                                <div className="md:col-span-2">
+                                                                    <div className="flex flex-row md:flex-col items-center md:justify-center gap-3 md:gap-1">
+                                                                        <div className="md:hidden shrink-0">
+                                                                            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Progress</span>
+                                                                        </div>
+                                                                        <div className="flex-1 md:flex-initial flex items-center gap-2 justify-end md:justify-center w-full">
+                                                                            <div className="w-full md:w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                                                <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.progress}%` }} />
+                                                                            </div>
+                                                                            <span className="text-xs font-bold text-gray-700 min-w-[32px]">{item.progress}%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Status */}
+                                                                <div className="md:col-span-1 flex justify-between md:justify-center items-center">
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">Status</span>
+                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed'
+                                                                        ? 'text-blue-600 bg-blue-50'
+                                                                        : item.status === 'Active'
+                                                                            ? 'text-green-600 bg-green-50'
+                                                                            : 'text-gray-500 bg-gray-100'
+                                                                        }`}>
+                                                                        {item.status}
                                                                     </span>
-                                                                )}
+                                                                </div>
+
+                                                                {/* Action */}
+                                                                <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex justify-center">
+                                                                    {item.status === 'Completed' ? (
+                                                                        item.certificateUrl ? (
+                                                                            <button
+                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course)}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200"
+                                                                            >
+                                                                                <Download className="w-4 h-4 md:w-3 md:h-3" />
+                                                                                Download
+                                                                            </button>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => handleGenerateCertificate(item)}
+                                                                                disabled={generatingId === item.enrollmentId}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-4 py-2.5 md:py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                                                                            >
+                                                                                {generatingId === item.enrollmentId ? (
+                                                                                    <>
+                                                                                        <Loader className="w-4 h-4 animate-spin text-blue-500" />
+                                                                                        Generating...
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Lock className="w-4 h-4" />
+                                                                                        Generate Certificate
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                        )
+                                                                    ) : (
+                                                                        <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl md:rounded-lg cursor-not-allowed select-none border border-gray-100">
+                                                                            <Lock className="w-4 h-4 md:w-3 md:h-3" />
+                                                                            Progress Pending
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     ))}
