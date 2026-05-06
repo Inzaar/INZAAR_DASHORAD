@@ -142,7 +142,9 @@ const CourseView = () => {
                 const normalizedLecs = rawLectures.map(l => ({
                     ...l,
                     id: l.id || l._id,
-                    type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture')
+                    type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+                    pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
+                    audioUrl: Array.isArray(l.audioUrl) ? l.audioUrl : (l.audioUrl ? [l.audioUrl] : []),
                 }));
                 const videoLecs = normalizedLecs.filter(l => l.type !== 'Quiz');
                 const targetLec = targetLectureId ? normalizedLecs.find(l => l.id === targetLectureId) : null;
@@ -153,7 +155,9 @@ const CourseView = () => {
                         ...rawStart,
                         id: rawStart.id || rawStart._id,
                         lastWatchedTime: rawStart.lastWatchedTime || 0,
-                        type: rawStart.type || (rawStart.status === 'Quiz' ? 'Quiz' : 'Lecture')
+                        type: rawStart.type || (rawStart.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+                        pdfUrl: Array.isArray(rawStart.pdfUrl) ? rawStart.pdfUrl : (rawStart.pdfUrl ? [rawStart.pdfUrl] : []),
+                        audioUrl: Array.isArray(rawStart.audioUrl) ? rawStart.audioUrl : (rawStart.audioUrl ? [rawStart.audioUrl] : []),
                     });
                 }
             } catch (error) {

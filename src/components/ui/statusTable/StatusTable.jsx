@@ -17,7 +17,9 @@ function StatusTable({ userCourses, loading }) {
         date: activity.date,
         progress: activity.progress,
         status: activity.nextLectureStatus,
-        comments: activity.comments
+        comments: activity.comments,
+        moderatorName: activity.moderatorName,
+        moderatorContact: activity.moderatorContact
     })) || [];
 
     const totalPages = Math.ceil(allLectures.length / itemsPerPage) || 1;
@@ -69,12 +71,13 @@ function StatusTable({ userCourses, loading }) {
                 <div className="overflow-x-auto no-scrollbar">
                     <div className="min-w-[1080px]">
                         <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                            <div className="w-[134px]  flex items-center justify-center">Courses</div>
+                            <div className="w-[134px] flex items-center justify-center">Courses</div>
                             <div className="w-[134px] flex items-center justify-center">Lecture</div>
                             <div className="w-[134px] flex items-center justify-center">Title</div>
                             <div className="w-[134px] flex items-center justify-center">Date</div>
                             <div className="w-[134px] flex items-center justify-center">Progress</div>
                             <div className="w-[134px] flex items-center justify-center">Next Lecture</div>
+                            <div className="w-[134px] flex items-center justify-center">Contact Moderator</div>
                             <div className="w-[134px] flex items-center justify-center">Comments</div>
                             <div className="w-[134px] flex items-center justify-center">Action</div>
                         </div>
@@ -99,14 +102,15 @@ function StatusTable({ userCourses, loading }) {
             <div className="overflow-x-auto no-scrollbar">
                 <div className="min-w-[1080px]">
                     <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Courses</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Lecture</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Title</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Date</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Progress</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Next Lecture</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Comments</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center">Action</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Courses</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Lecture</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Title</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Date</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Progress</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Next Lecture</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Contact Moderator</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Comments</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Action</div>
                     </div>
                     <div className="flex flex-col gap-4">
                         {currentData.map((item) => (
