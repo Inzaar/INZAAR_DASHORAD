@@ -426,11 +426,10 @@ const AddCoursePage = () => {
                 })),
             };
 
-            if (isEditMode) {
-                await updateCourse(editId, payload);
-            } else {
-                await createCourseWithLectures(payload);
-            }
+            // Always use createCourseWithLectures for both creation and updates 
+            // to ensure lectures and their resources (PDF/Audio) are synced correctly.
+            await createCourseWithLectures(payload);
+            
             setSubmitSuccess(true);
             setTimeout(() => navigate('/admin-courses'), 1500);
         } catch (err) {
