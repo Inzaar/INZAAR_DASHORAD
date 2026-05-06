@@ -9,7 +9,7 @@ import YouTube from "react-youtube";
 import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, Upload, FileText, Volume2 } from "lucide-react";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
 import LectureListTable from "../components/LectureListTable";
@@ -58,6 +58,8 @@ const CourseView = () => {
     const [volume, setVolume] = useState(100);
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showAudioMenu, setShowAudioMenu] = useState(false);
+    const [showPdfMenu, setShowPdfMenu] = useState(false);
 
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState("");
@@ -79,8 +81,8 @@ const CourseView = () => {
         title: "",
         type: "Lecture",
         videoUrl: "",
-        audioUrl: "",
-        pdfUrl: "",
+        audioUrl: [],
+        pdfUrl: [],
     });
 
     // Refs
@@ -90,10 +92,13 @@ const CourseView = () => {
     const lastReportedRef = useRef(0);
     const completedIdsRef = useRef(new Set());
     const adminMenuRef = useRef(null);
+    const audioInputRef = useRef(null);
+    const pdfInputRef = useRef(null);
 
     const courseId = new URLSearchParams(window.location.search).get("id");
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
     const isQuizView = currentLecture?.type === 'Quiz';
+    const canEdit = user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)));
 
     // Effects
     useEffect(() => {
@@ -392,26 +397,19 @@ const CourseView = () => {
     };
 
     const handleEditLectureClick = async () => {
+        if (!currentLecture || !canEdit) return;
         const id = currentLecture?.id || currentLecture?._id;
         if (!id) return;
-        setLoadingLecture(true);
-        try {
-            const res = await getLectureById(id);
-            const data = res.data.data;
-            setEditLectureData({
-                id: data._id,
-                title: data.title || '',
-                type: data.type || 'Lecture',
-                videoUrl: data.videoUrl || '',
-                audioUrl: data.audioUrl || '',
-                pdfUrl: data.pdfUrl || '',
-            });
-            setIsEditLectureModalOpen(true);
-        } catch (err) {
-            console.error("Failed to fetch lecture details:", err);
-        } finally {
-            setLoadingLecture(false);
-        }
+        
+        setEditLectureData({
+            id: id,
+            title: currentLecture.title || '',
+            type: currentLecture.type || 'Lecture',
+            videoUrl: currentLecture.videoUrl || '',
+            audioUrl: Array.isArray(currentLecture.audioUrl) ? currentLecture.audioUrl : (currentLecture.audioUrl ? [currentLecture.audioUrl] : []),
+            pdfUrl: Array.isArray(currentLecture.pdfUrl) ? currentLecture.pdfUrl : (currentLecture.pdfUrl ? [currentLecture.pdfUrl] : []),
+        });
+        setIsEditLectureModalOpen(true);
     };
 
     const handleSaveLecture = async () => {
@@ -705,13 +703,54 @@ const CourseView = () => {
                                                         alt="Instructor"
                                                         className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
                                                     />
-                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors shadow-lg group/btn">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
-                                                    </button>
-                                                    <button className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-blue-500 rounded-full hover:bg-blue-50 transition-colors shadow-lg group/btn">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
-                                                    </button>
-                                                    {user?.role === 'admin' && (
+                                                    
+                                                    {/* PDF Resource Button & Menu */}
+                                                    <div className="relative">
+                                                        <button 
+                                                            onClick={() => { setShowPdfMenu(!showPdfMenu); setShowAudioMenu(false); }}
+                                                            className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
+                                                        </button>
+                                                        {showPdfMenu && currentLecture?.pdfUrl?.length > 0 && (
+                                                            <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
+                                                                </div>
+                                                                {currentLecture.pdfUrl.map((url, i) => (
+                                                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
+                                                                        <FileText size={14} className="text-red-400" />
+                                                                        <span className="truncate">Resource {i + 1}</span>
+                                                                    </a>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Audio Resource Button & Menu */}
+                                                    <div className="relative">
+                                                        <button 
+                                                            onClick={() => { setShowAudioMenu(!showAudioMenu); setShowPdfMenu(false); }}
+                                                            className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
+                                                        </button>
+                                                        {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
+                                                            <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
+                                                                </div>
+                                                                {currentLecture.audioUrl.map((url, i) => (
+                                                                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                                                        <Volume2 size={14} className="text-blue-400" />
+                                                                        <span className="truncate">Audio {i + 1}</span>
+                                                                    </a>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {canEdit && (
                                                         <button
                                                             onClick={handleEditLectureClick}
                                                             className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
@@ -888,18 +927,167 @@ const CourseView = () => {
             />
 
             {/* Edit Lecture Modal */}
-            {isEditLectureModalOpen && user?.role === 'admin' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-lg p-6 animate-in zoom-in-95 duration-200">
-                        <h3 className="text-xl font-bold mb-4">Edit Lecture Details</h3>
-                        <div className="space-y-4">
-                            <div><label className="text-sm font-medium block mb-1">Title</label><input type="text" value={editLectureData.title} onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })} className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20" /></div>
-                            <div><label className="text-sm font-medium block mb-1">Type</label><select value={editLectureData.type} onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })} className="w-full border rounded-lg px-3 py-2"><option value="Lecture">Lecture</option><option value="Quiz">Quiz</option></select></div>
-                            <div><label className="text-sm font-medium block mb-1">Video URL (YouTube)</label><input type="text" value={editLectureData.videoUrl} onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })} className="w-full border rounded-lg px-3 py-2" /></div>
+            {isEditLectureModalOpen && canEdit && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-sans">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-bold text-gray-900">Edit Lecture Details</h3>
+                            <button onClick={() => setIsEditLectureModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={24} />
+                            </button>
                         </div>
-                        <div className="flex gap-3 mt-6 justify-end">
-                            <button onClick={() => setIsEditLectureModalOpen(false)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Cancel</button>
-                            <GradiantButton onClick={handleSaveLecture} disabled={isSavingLecture} className="px-6 py-2 bg-[#3758EE] text-white rounded-lg">{isSavingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}</GradiantButton>
+                        
+                        <div className="space-y-6 overflow-y-auto no-scrollbar pr-2 flex-1">
+                            {/* Basic Info */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Lecture Title</label>
+                                    <input 
+                                        type="text" 
+                                        value={editLectureData.title} 
+                                        onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })} 
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Content Type</label>
+                                    <div className="relative">
+                                        <select 
+                                            value={editLectureData.type} 
+                                            onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })} 
+                                            className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm appearance-none cursor-pointer"
+                                        >
+                                            <option value="Lecture">Lecture</option>
+                                            <option value="Quiz">Quiz</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Video URL */}
+                            <div>
+                                <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Video URL <span className="text-gray-400 font-normal lowercase">(YouTube)</span></label>
+                                <input 
+                                    type="text" 
+                                    value={editLectureData.videoUrl} 
+                                    onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })} 
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" 
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                />
+                            </div>
+
+                            {/* Multiple Resource Uploads */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Audios */}
+                                <div className="space-y-4">
+                                    <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">Audio Files</label>
+                                    <div 
+                                        onClick={() => audioInputRef.current?.click()}
+                                        className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
+                                    >
+                                        {loadingLecture ? (
+                                            <Loader2 size={24} className="text-blue-500 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Upload size={24} className="text-gray-400 group-hover:text-blue-500" />
+                                                <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600">Add Audio</span>
+                                            </>
+                                        )}
+                                        <input 
+                                            ref={audioInputRef} 
+                                            type="file" 
+                                            accept="audio/*" 
+                                            className="hidden" 
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (!file) return;
+                                                const { uploadAudio } = await import('@/api/course');
+                                                const res = await uploadAudio(file);
+                                                setEditLectureData(prev => {
+                                                    if (prev.audioUrl?.includes(res.url)) return prev;
+                                                    return { ...prev, audioUrl: [...prev.audioUrl, res.url] };
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
+                                        {editLectureData.audioUrl.map((url, idx) => (
+                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
+                                                <span className="truncate flex-1 pr-4">Audio {idx + 1}</span>
+                                                <button onClick={() => setEditLectureData(prev => ({...prev, audioUrl: prev.audioUrl.filter((_, i) => i !== idx)}))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* PDFs */}
+                                <div className="space-y-4">
+                                    <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">PDF Resources</label>
+                                    <div 
+                                        onClick={() => pdfInputRef.current?.click()}
+                                        className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
+                                    >
+                                        {loadingLecture ? (
+                                            <Loader2 size={24} className="text-blue-500 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Upload size={24} className="text-gray-400 group-hover:text-blue-500" />
+                                                <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600">Add PDF</span>
+                                            </>
+                                        )}
+                                        <input 
+                                            ref={pdfInputRef} 
+                                            type="file" 
+                                            accept="application/pdf" 
+                                            className="hidden" 
+                                            onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (!file) return;
+                                                const { uploadPdf } = await import('@/api/course');
+                                                const res = await uploadPdf(file);
+                                                setEditLectureData(prev => {
+                                                    if (prev.pdfUrl?.includes(res.url)) return prev;
+                                                    return { ...prev, pdfUrl: [...prev.pdfUrl, res.url] };
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
+                                        {editLectureData.pdfUrl.map((url, idx) => (
+                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
+                                                <span className="truncate flex-1 pr-4">PDF {idx + 1}</span>
+                                                <button onClick={() => setEditLectureData(prev => ({...prev, pdfUrl: prev.pdfUrl.filter((_, i) => i !== idx)}))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 mt-8 pt-6 border-t border-gray-100">
+                            <button 
+                                onClick={() => setIsEditLectureModalOpen(false)} 
+                                className="flex-1 py-2.5 sm:py-3 px-6 bg-gray-50 text-gray-500 text-sm sm:text-base font-bold rounded-xl hover:bg-gray-100 transition-all active:scale-[0.98]"
+                            >
+                                Cancel
+                            </button>
+                            <GradiantButton 
+                                onClick={handleSaveLecture} 
+                                disabled={isSavingLecture} 
+                                className="flex-[1.5] sm:flex-[2] py-2.5 sm:py-3 px-4 sm:px-6 font-bold rounded-xl shadow-lg shadow-blue-500/20 text-sm sm:text-base whitespace-nowrap"
+                            >
+                                {isSavingLecture ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> 
+                                        <span>Saving...</span>
+                                    </div>
+                                ) : "Save Changes"}
+                            </GradiantButton>
                         </div>
                     </div>
                 </div>

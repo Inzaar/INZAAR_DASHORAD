@@ -87,6 +87,26 @@ export const uploadImage = async (file) => {
     return res.data.data; // { url, public_id }
 }
 
+export const uploadAudio = async (file) => {
+    const formData = new FormData();
+    formData.append("audio", file);
+    const res = await axiosInstance.post("/upload/audio", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+    });
+    return res.data.data; // { url, public_id }
+}
+
+export const uploadPdf = async (file) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    const res = await axiosInstance.post("/upload/pdf", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+    });
+    return res.data.data; // { url, public_id }
+}
+
 // Save a generated certificate URL back to the enrollment
 export const saveCertificate = async (courseId, certificateUrl) => {
     const res = await axiosInstance.patch(
