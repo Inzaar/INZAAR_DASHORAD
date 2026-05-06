@@ -18,7 +18,7 @@ function StatusRow({ data }) {
                     <>
                         <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">{data.moderatorName}</span>
                         <a 
-                            href={`https://wa.me/${data.moderatorContact.replace(/\D/g, '')}`} 
+                            href={`https://wa.me/${(data.moderatorContact || '').replace(/\D/g, '')}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="w-7 h-7 bg-[#25D366] text-white rounded-[20%] flex items-center justify-center shadow-sm hover:bg-[#20ba5a] transition-all hover:scale-110 active:scale-95"
