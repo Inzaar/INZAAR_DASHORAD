@@ -1,6 +1,55 @@
 import React, { useState } from 'react';
 import { Search, Lock, Unlock, FileText, Volume2, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
+const ResourceDropdown = ({ type, urls, children }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    if (!urls || urls.length === 0) return (
+        <button disabled className={`w-7 h-7 rounded flex items-center justify-center opacity-40 cursor-not-allowed ${type === 'pdf' ? 'bg-red-100 text-red-300' : 'bg-[#EBF4FF] text-[#A5C8FF]'}`}>
+            {children}
+        </button>
+    );
+
+    if (urls.length === 1) return (
+        <button 
+            onClick={(e) => { e.stopPropagation(); window.open(urls[0], '_blank', 'noopener,noreferrer'); }}
+            className={`w-7 h-7 rounded flex items-center justify-center transition-all ${type === 'pdf' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
+        >
+            {children}
+        </button>
+    );
+
+    return (
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-7 h-7 rounded flex items-center justify-center transition-all relative ${type === 'pdf' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
+            >
+                {children}
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-yellow-400 text-black text-[8px] font-bold rounded-full border border-white flex items-center justify-center">
+                    {urls.length}
+                </span>
+            </button>
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-32 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        {urls.map((url, i) => (
+                            <button
+                                key={i}
+                                onClick={() => { window.open(url, '_blank', 'noopener,noreferrer'); setIsOpen(false); }}
+                                className="w-full text-left px-3 py-1.5 text-[11px] font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 truncate"
+                            >
+                                {type.toUpperCase()} {i + 1}
+                            </button>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
 const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -120,20 +169,12 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
                                         </td>
                                         <td className="py-6">
                                             <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    disabled={!lecture.pdfUrl}
-                                                    onClick={() => window.open(lecture.pdfUrl, '_blank')}
-                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.pdfUrl ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-red-100 text-red-300 cursor-not-allowed'}`}
-                                                >
+                                                <ResourceDropdown type="pdf" urls={Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : [])}>
                                                     <FileText size={14} />
-                                                </button>
-                                                <button
-                                                    disabled={!lecture.audioUrl}
-                                                    onClick={() => window.open(lecture.audioUrl, '_blank')}
-                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.audioUrl ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]' : 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed'}`}
-                                                >
+                                                </ResourceDropdown>
+                                                <ResourceDropdown type="audio" urls={Array.isArray(lecture.audioUrl) ? lecture.audioUrl : (lecture.audioUrl ? [lecture.audioUrl] : [])}>
                                                     <Volume2 size={14} />
-                                                </button>
+                                                </ResourceDropdown>
                                                 <button
                                                     onClick={() => onWatch(lecture)}
                                                     className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}

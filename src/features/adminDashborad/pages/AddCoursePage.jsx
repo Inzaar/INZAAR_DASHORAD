@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { createCourseWithLectures, createCourse, uploadImage, getAdminCourseById, updateCourse } from '@/api/course';
+import { createCourseWithLectures, createCourse, uploadImage, uploadAudio, uploadPdf, getAdminCourseById, updateCourse } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
@@ -47,22 +47,22 @@ const LectureCard = ({ item }) => (
                     </div>
                 </div>
             )}
-            {item.audioUrl && (
-                <div className="space-y-1">
-                    <span className="text-[11px] text-[#64748b] font-bold">Audio</span>
+            {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
+                <div key={idx} className="space-y-1">
+                    <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
                     <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.audioUrl}</span>
+                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
                     </div>
                 </div>
-            )}
-            {item.pdfUrl && (
-                <div className="space-y-1">
-                    <span className="text-[11px] text-[#64748b] font-bold">PDF Resource</span>
+            ))}
+            {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
+                <div key={idx} className="space-y-1">
+                    <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
                     <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.pdfUrl}</span>
+                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
                     </div>
                 </div>
-            )}
+            ))}
         </div>
     </div>
 );
@@ -90,6 +90,8 @@ const AddCoursePage = () => {
     const [showCropper, setShowCropper] = useState(false);
     const [cropSrc, setCropSrc] = useState('');
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
+    const [isAudioUploading, setIsAudioUploading] = useState(false);
+    const [isPdfUploading, setIsPdfUploading] = useState(false);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const isEditMode = queryParams.get('edit') === 'true';
@@ -100,6 +102,8 @@ const AddCoursePage = () => {
     const [certificateUploading, setCertificateUploading] = useState(false);
     const [certificatePreview, setCertificatePreview] = useState('');
     const certificateInputRef = useRef(null);
+    const audioInputRef = useRef(null);
+    const pdfInputRef = useRef(null);
 
     /* ── Course Setup State ── */
     const [courseForm, setCourseForm] = useState({
@@ -173,8 +177,8 @@ const AddCoursePage = () => {
         type: 'Lecture',
         title: '',
         videoUrl: '',
-        audioUrl: '',
-        pdfUrl: '',
+        audioUrl: [],
+        pdfUrl: [],
     });
 
     const steps = [
@@ -247,6 +251,52 @@ const AddCoursePage = () => {
             setCertificateUploading(false);
         }
     };
+    
+    // Audio File Upload
+    const handleAudioFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+
+        setIsAudioUploading(true);
+        setSubmitError('');
+
+        try {
+            const { url } = await uploadAudio(file);
+            setNewItem(prev => {
+                if (prev.audioUrl?.includes(url)) return prev;
+                return { ...prev, audioUrl: [...(prev.audioUrl || []), url] };
+            });
+        } catch (err) {
+            console.error('Audio upload failed:', err);
+            setSubmitError('Audio upload failed. Please try again.');
+        } finally {
+            setIsAudioUploading(false);
+        }
+    };
+
+    // PDF File Upload
+    const handlePdfFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
+
+        setIsPdfUploading(true);
+        setSubmitError('');
+
+        try {
+            const { url } = await uploadPdf(file);
+            setNewItem(prev => {
+                if (prev.pdfUrl?.includes(url)) return prev;
+                return { ...prev, pdfUrl: [...(prev.pdfUrl || []), url] };
+            });
+        } catch (err) {
+            console.error('PDF upload failed:', err);
+            setSubmitError('PDF upload failed. Please try again.');
+        } finally {
+            setIsPdfUploading(false);
+        }
+    };
 
 
     const handleSaveItem = () => {
@@ -259,7 +309,9 @@ const AddCoursePage = () => {
                 lectureNo: prev.length + 1,
             },
         ]);
-        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: '', pdfUrl: '' });
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+        setIsAudioUploading(false);
+        setIsPdfUploading(false);
         setIsModalOpen(false);
     };
 
@@ -368,8 +420,8 @@ const AddCoursePage = () => {
                     type: item.type || 'Lecture',
                     lectureNo: idx + 1,
                     videoUrl: item.videoUrl || '',
-                    audioUrl: item.audioUrl || '',
-                    pdfUrl: item.pdfUrl || '',
+                    audioUrl: item.audioUrl || [],
+                    pdfUrl: item.pdfUrl || [],
                     ...(item.quizId && { quizId: item.quizId }),
                 })),
             };
@@ -860,8 +912,8 @@ const AddCoursePage = () => {
                                 </div>
                             </div>
 
-                            <div className="px-8 pb-8">
-                                <div className="space-y-5">
+                            <div className="px-8 pb-8 max-h-[70vh] overflow-y-auto no-scrollbar">
+                                <div className="space-y-6">
                                     {/* Type */}
                                     <div>
                                         <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Select Type</label>
@@ -904,26 +956,101 @@ const AddCoursePage = () => {
                                     </div>
 
                                     {/* Audio + PDF */}
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div>
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Audio URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://example.com/audio.mp3"
-                                                value={newItem.audioUrl}
-                                                onChange={e => setNewItem({ ...newItem, audioUrl: e.target.value })}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                            />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        {/* Audio Upload */}
+                                        <div className="flex flex-col min-h-0">
+                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Audio Files <span className="text-gray-400 font-normal text-[11px]">(Multiple)</span></label>
+                                            <div 
+                                                onClick={() => audioInputRef.current?.click()}
+                                                className={`relative w-full px-4 py-3 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${newItem.audioUrl?.length > 0 ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-400 bg-gray-50'}`}
+                                            >
+                                                {isAudioUploading ? (
+                                                    <div className="flex flex-col items-center gap-2 py-1">
+                                                        <Loader2 size={20} className="text-blue-500 animate-spin" />
+                                                        <span className="text-[12px] font-medium text-blue-500">Uploading...</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-1 py-1">
+                                                        <Upload size={20} className="text-gray-400" />
+                                                        <span className="text-[12px] font-medium text-gray-500">Add Audio File</span>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    ref={audioInputRef}
+                                                    type="file"
+                                                    accept="audio/*"
+                                                    onChange={handleAudioFileChange}
+                                                    className="hidden"
+                                                />
+                                            </div>
+                                            
+                                            {/* List of Audios */}
+                                            {newItem.audioUrl?.length > 0 && (
+                                                <div className="mt-3 space-y-2 max-h-[130px] overflow-y-auto no-scrollbar pr-1 border border-transparent">
+                                                    {newItem.audioUrl.map((url, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
+                                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                                <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
+                                                                <span className="text-[11px] font-medium text-gray-600 truncate">Audio {idx + 1}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => setNewItem({...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx)})}
+                                                                className="text-red-400 hover:text-red-600 p-1"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                        <div>
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Resource URL <span className="text-gray-400 font-normal text-[11px]">(Optional)</span></label>
-                                            <input
-                                                type="text"
-                                                placeholder="https://example.com/resource.pdf"
-                                                value={newItem.pdfUrl}
-                                                onChange={e => setNewItem({ ...newItem, pdfUrl: e.target.value })}
-                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                            />
+
+                                        {/* PDF Upload */}
+                                        <div className="flex flex-col min-h-0">
+                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Resource Files <span className="text-gray-400 font-normal text-[11px]">(Multiple PDFs)</span></label>
+                                            <div 
+                                                onClick={() => pdfInputRef.current?.click()}
+                                                className={`relative w-full px-4 py-3 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${newItem.pdfUrl?.length > 0 ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-400 bg-gray-50'}`}
+                                            >
+                                                {isPdfUploading ? (
+                                                    <div className="flex flex-col items-center gap-2 py-1">
+                                                        <Loader2 size={20} className="text-blue-500 animate-spin" />
+                                                        <span className="text-[12px] font-medium text-blue-500">Uploading...</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-1 py-1">
+                                                        <Upload size={20} className="text-gray-400" />
+                                                        <span className="text-[12px] font-medium text-gray-500">Add PDF File</span>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    ref={pdfInputRef}
+                                                    type="file"
+                                                    accept=".pdf,application/pdf"
+                                                    onChange={handlePdfFileChange}
+                                                    className="hidden"
+                                                />
+                                            </div>
+
+                                            {/* List of PDFs */}
+                                            {newItem.pdfUrl?.length > 0 && (
+                                                <div className="mt-3 space-y-2 max-h-[130px] overflow-y-auto no-scrollbar pr-1 border border-transparent">
+                                                    {newItem.pdfUrl.map((url, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
+                                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                                <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
+                                                                <span className="text-[11px] font-medium text-gray-600 truncate">PDF {idx + 1}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => setNewItem({...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx)})}
+                                                                className="text-red-400 hover:text-red-600 p-1"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
