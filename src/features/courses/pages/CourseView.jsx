@@ -63,6 +63,13 @@ const CourseView = () => {
     const [showPdfMenu, setShowPdfMenu] = useState(false);
     const [activeAudioUrl, setActiveAudioUrl] = useState(null);
     const [activePdfUrl, setActivePdfUrl] = useState(null);
+    const [pdfLoading, setPdfLoading] = useState(true);
+
+    useEffect(() => {
+        if (activePdfUrl) {
+            setPdfLoading(true);
+        }
+    }, [activePdfUrl]);
 
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState("");
@@ -1158,10 +1165,17 @@ const CourseView = () => {
                                 but most modern browsers will render the PDF if served in an iframe.
                                 We use a viewer fallback for better compatibility.
                             */}
+                            {pdfLoading && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10">
+                                    <Loader2 className="w-10 h-10 animate-spin text-red-500 mb-4" />
+                                    <p className="text-gray-500 font-medium">Loading document...</p>
+                                </div>
+                            )}
                             <iframe 
                                 src={`https://docs.google.com/viewer?url=${encodeURIComponent(activePdfUrl)}&embedded=true`}
-                                className="w-full h-full border-none"
+                                className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                                 title="PDF Viewer"
+                                onLoad={() => setPdfLoading(false)}
                             />
                         </div>
                     </div>

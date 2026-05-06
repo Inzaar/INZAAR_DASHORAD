@@ -23,7 +23,7 @@ const LectureCard = ({
         >
             {/* Background Image */}
             <img
-                src={image}
+                src={image || img}
                 alt={title}
                 className="absolute inset-0 w-full h-full object-cover"
             />
@@ -46,7 +46,7 @@ const LectureCard = ({
                     {/* Profile Image */}
                     <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shrink-0">
                         <img
-                            src={profileImage}
+                            src={profileImage || pImage}
                             alt="Instructor"
                             className="w-full h-full object-cover"
                         />
