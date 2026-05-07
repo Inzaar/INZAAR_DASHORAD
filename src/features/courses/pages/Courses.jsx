@@ -3,7 +3,7 @@ import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import CardCourse from '../components/CardCourse';
@@ -12,6 +12,9 @@ import icon from "../../../assets/logos/Abu_Yahya.png"
 
 const Courses = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab');
+    const courseIdParam = searchParams.get('courseId');
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -23,6 +26,13 @@ const Courses = () => {
     const [itemsPerPage, setItemsPerPage] = React.useState(20);
     const [courses, setCourses] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+
+    // Sync tab with URL parameter
+    useEffect(() => {
+        if (tabParam === 'new') {
+            setActiveTab('new');
+        }
+    }, [tabParam]);
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -39,6 +49,34 @@ const Courses = () => {
         };
         fetchCourses();
     }, []);
+
+    // Handle deep linking/scrolling
+    useEffect(() => {
+        if (!loading && courseIdParam && courses.length > 0) {
+            // Find the course and its index in the current filtered view
+            const filtered = (activeTab === 'new' ? courses.filter(c => c.isNewCourse) : courses);
+            const courseIndex = filtered.findIndex(c => c._id === courseIdParam);
+            
+            if (courseIndex !== -1) {
+                // Calculate which page it's on
+                const targetPage = Math.floor(courseIndex / itemsPerPage) + 1;
+                setCurrentPage(targetPage);
+
+                // Scroll to it after a short delay to ensure rendering
+                setTimeout(() => {
+                    const element = document.getElementById(`course-${courseIdParam}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add a temporary highlight effect
+                        element.classList.add('ring-4', 'ring-purple-400', 'ring-offset-4', 'rounded-2xl');
+                        setTimeout(() => {
+                            element.classList.remove('ring-4', 'ring-purple-400', 'ring-offset-4');
+                        }, 3000);
+                    }
+                }, 500);
+            }
+        }
+    }, [loading, courseIdParam, courses, activeTab, itemsPerPage]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -84,13 +122,13 @@ const Courses = () => {
     const handleTabChange = (tab) => {
         setActiveTab(tab);
         setCurrentPage(1); // Reset to first page
+        // Clean URL params when manually switching tabs
+        navigate('/courses', { replace: true });
     };
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
-            // Optionally scroll to top of grid  
-            // window.scrollTo(0, 0);  
         }
     };
 
@@ -206,11 +244,12 @@ const Courses = () => {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 place-items-center">
                                 {currentCourses.map((course) => (
-                                    <CardCourse key={course._id} course={course} />
+                                    <div key={course.id} id={`course-${course.id}`} className="transition-all duration-500">
+                                        <CardCourse course={course} />
+                                    </div>
                                 ))}
                             </div>
 
-                            {/* </div> */}
                             <PaginationContent className="w-full flex items-center justify-center lg:justify-end mt-8 gap-1">
                                 <PaginationItem>
                                     <PaginationPrevious

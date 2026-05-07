@@ -4,12 +4,14 @@ import { Menu } from "lucide-react";
 import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getMyNotifications } from "@/api/notification";
 
 function Navbar({ onMenuClick, hideMenu = false }) {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
     const [selectedLang, setSelectedLang] = React.useState("English");
+    const [unreadCount, setUnreadCount] = React.useState(0);
 
     const languages = [
         { name: "English", code: "en", flag: "https://flagcdn.com/us.svg" },
@@ -23,6 +25,18 @@ function Navbar({ onMenuClick, hideMenu = false }) {
         month: 'long',
         year: 'numeric'
     }).format(new Date());
+
+    React.useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const res = await getMyNotifications();
+                setUnreadCount(res.data.data.unreadCount || 0);
+            } catch (error) {
+                console.error("Error fetching unread count:", error);
+            }
+        };
+        if (user) fetchUnreadCount();
+    }, [user, navigate]); // Refetch when navigation happens (to clear it if we visited notifications)
 
     return (
         <div className="w-full h-auto md:min-h-[80px] py-3 md:py-0 flex items-center justify-center bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF] px-4 sm:px-6 md:px-8 shadow-sm">
@@ -49,8 +63,16 @@ function Navbar({ onMenuClick, hideMenu = false }) {
                 </div>
                 
                 <div className="flex items-center gap-2 sm:gap-4 shrink-0 px-2 sm:px-0">
-                    <div className="w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] bg-white/10 flex items-center justify-center rounded-lg shadow-sm border border-white/10 hover:bg-white/20 transition-all cursor-pointer">
+                    <div 
+                        onClick={() => user?.role === 'admin' ? navigate('/admin-notifications') : navigate('/notifications')}
+                        className="relative w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] bg-white/10 flex items-center justify-center rounded-lg shadow-sm border border-white/10 hover:bg-white/20 transition-all cursor-pointer"
+                    >
                         <CiBellOn className="text-[16px] sm:text-[20px] text-[#2C2C2C]" />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] sm:text-[11px] font-bold w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                                {unreadCount}
+                            </span>
+                        )}
                     </div>
                     
                     <div className="relative">
