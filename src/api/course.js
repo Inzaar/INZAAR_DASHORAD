@@ -15,6 +15,13 @@ export const getAllCourses = (params = {}) => {
     return res;
 }
 
+export const getCourseDetails = (courseId) => {
+    const res = axiosInstance.get(`/courses/${courseId}`, {
+        withCredentials: true,
+    });
+    return res;
+}
+
 // Create a single course (without lectures) and return its _id
 export const createCourse = async (data) => {
     const res = await axiosInstance.post("/courses", data, {

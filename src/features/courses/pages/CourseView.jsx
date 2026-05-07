@@ -941,6 +941,16 @@ const CourseView = () => {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Lecture List Table Section */}
+                            {!isQuizView && (
+                                <LectureListTable 
+                                    lectures={lectures} 
+                                    notes={notes} 
+                                    onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)} 
+                                    currentLectureId={currentLecture?.id || currentLecture?._id} 
+                                />
+                            )}
                         </div>
                     </main>
                 </div>

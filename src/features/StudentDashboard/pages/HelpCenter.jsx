@@ -3,13 +3,89 @@ import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, ChevronDown, Loader2 } from 'lucide-react';
+import { getAllCourses, getCourseDetails } from '@/api/course';
+import { useEffect } from 'react';
 
 const HelpCenter = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('contact');
     const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
+    const [complaintType, setComplaintType] = useState({
+        course: false,
+        lecture: false
+    });
+
+    // Data State
+    const [courses, setCourses] = useState([]);
+    const [lectures, setLectures] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState('');
+    const [selectedLecture, setSelectedLecture] = useState('');
+    const [loadingCourses, setLoadingCourses] = useState(false);
+    const [loadingLectures, setLoadingLectures] = useState(false);
+
+    // Dropdown Open State
+    const [isCourseDropdownOpen, setIsCourseDropdownOpen] = useState(false);
+    const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
+
+    // Fetch enrolled courses
+    useEffect(() => {
+        const fetchCourses = async () => {
+            if (complaintType.course || complaintType.lecture) {
+                setLoadingCourses(true);
+                try {
+                    const res = await getAllCourses();
+                    setCourses(res.data.data || []);
+                } catch (error) {
+                    console.error("Error fetching courses:", error);
+                } finally {
+                    setLoadingCourses(false);
+                }
+            }
+        };
+        fetchCourses();
+    }, [complaintType.course, complaintType.lecture]);
+
+    // Fetch lectures for selected course
+    useEffect(() => {
+        const fetchLectures = async () => {
+            if (selectedCourse && complaintType.lecture) {
+                setLoadingLectures(true);
+                try {
+                    const res = await getCourseDetails(selectedCourse);
+                    setLectures(res.data.data.lectures || []);
+                } catch (error) {
+                    console.error("Error fetching lectures:", error);
+                } finally {
+                    setLoadingLectures(false);
+                }
+            } else {
+                setLectures([]);
+                setSelectedLecture('');
+            }
+        };
+        fetchLectures();
+    }, [selectedCourse, complaintType.lecture]);
+
+    const handleCheckboxChange = (type) => {
+        setComplaintType(prev => ({
+            ...prev,
+            [type]: !prev[type]
+        }));
+    };
+
+    // Helper to get course/lecture names
+    const getSelectedCourseName = () => {
+        const course = courses.find(c => (c._id || c.id) === selectedCourse);
+        return course ? (course.title || course.courseId?.title) : "Choose a course...";
+    };
+
+    const getSelectedLectureName = () => {
+        const lecture = lectures.find(l => (l._id || l.id) === selectedLecture);
+        return lecture ? `Lec ${lecture.lectureNo}: ${lecture.title}` : "Choose a lecture...";
+    };
 
     const faqs = [
         {
@@ -133,9 +209,135 @@ const HelpCenter = () => {
                                                 />
                                             </div>
 
+                                            {/* Complaint Category Checkboxes */}
+                                            <div className="space-y-4 pt-2">
+                                                <p className="text-sm font-semibold text-gray-700 mb-3">Is your complaint related to:</p>
+                                                
+                                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+                                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                                        <div className="relative flex items-center justify-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={complaintType.course}
+                                                                onChange={() => handleCheckboxChange('course')}
+                                                                className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded checked:bg-purple-600 checked:border-purple-600 transition-all cursor-pointer"
+                                                            />
+                                                            <svg className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                        </div>
+                                                        <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">Any Course?</span>
+                                                    </label>
+
+                                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                                        <div className="relative flex items-center justify-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={complaintType.lecture}
+                                                                onChange={() => handleCheckboxChange('lecture')}
+                                                                className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded checked:bg-purple-600 checked:border-purple-600 transition-all cursor-pointer"
+                                                            />
+                                                            <svg className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                        </div>
+                                                        <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">Any Lecture?</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            {/* Dynamic Dropdowns */}
+                                            {(complaintType.course || complaintType.lecture) && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                                    {/* Custom Course Dropdown */}
+                                                    <div className="space-y-1.5 relative">
+                                                        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Select Course <span className="text-purple-500">*</span></label>
+                                                        <div 
+                                                            className={`relative h-10 w-full px-3 bg-gray-50/50 border rounded-xl flex items-center justify-between cursor-pointer transition-all hover:border-purple-300 ${isCourseDropdownOpen ? 'border-purple-500 ring-2 ring-purple-500/10 bg-white' : 'border-gray-200'}`}
+                                                            onClick={() => {
+                                                                setIsCourseDropdownOpen(!isCourseDropdownOpen);
+                                                                setIsLectureDropdownOpen(false);
+                                                            }}
+                                                        >
+                                                            <span className={`text-[13px] truncate ${!selectedCourse ? 'text-gray-400' : 'text-gray-700 font-medium'}`}>
+                                                                {getSelectedCourseName()}
+                                                            </span>
+                                                            <div className="text-gray-400 group-hover:text-purple-500 transition-colors">
+                                                                {loadingCourses ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronDown size={14} className={`transition-transform duration-200 ${isCourseDropdownOpen ? 'rotate-180' : ''}`} />}
+                                                            </div>
+
+                                                            {/* Dropdown List */}
+                                                            {isCourseDropdownOpen && (
+                                                                <div className="absolute top-[calc(100%+6px)] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-[100] max-h-[220px] overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
+                                                                    {courses.length > 0 ? courses.map((course) => (
+                                                                        <div
+                                                                            key={course._id || course.id}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setSelectedCourse(course._id || course.id);
+                                                                                setIsCourseDropdownOpen(false);
+                                                                            }}
+                                                                            className={`px-4 py-2 text-[13px] transition-colors cursor-pointer ${selectedCourse === (course._id || course.id) ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-purple-600'}`}
+                                                                        >
+                                                                            {course.title || course.courseId?.title}
+                                                                        </div>
+                                                                    )) : (
+                                                                        <div className="px-4 py-2 text-[13px] text-gray-400 italic text-center">No courses found</div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Custom Lecture Dropdown */}
+                                                    {complaintType.lecture && (
+                                                        <div className="space-y-1.5 relative">
+                                                            <label className={`text-[11px] font-bold uppercase tracking-wider ${!selectedCourse ? 'text-gray-300' : 'text-gray-500'}`}>
+                                                                Select Lecture <span className="text-purple-500">*</span>
+                                                            </label>
+                                                            <div 
+                                                                className={`relative h-10 w-full px-3 border rounded-xl flex items-center justify-between transition-all ${!selectedCourse ? 'bg-gray-50 border-gray-100 cursor-not-allowed' : 'bg-gray-50/50 hover:border-purple-300 cursor-pointer'} ${isLectureDropdownOpen ? 'border-purple-500 ring-2 ring-purple-500/10 bg-white' : 'border-gray-200'}`}
+                                                                onClick={() => {
+                                                                    if (!selectedCourse) return;
+                                                                    setIsLectureDropdownOpen(!isLectureDropdownOpen);
+                                                                    setIsCourseDropdownOpen(false);
+                                                                }}
+                                                            >
+                                                                <span className={`text-[13px] truncate ${!selectedLecture ? 'text-gray-400' : 'text-gray-700 font-medium'}`}>
+                                                                    {getSelectedLectureName()}
+                                                                </span>
+                                                                <div className="text-gray-400 group-hover:text-purple-500 transition-colors">
+                                                                    {loadingLectures ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronDown size={14} className={`transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`} />}
+                                                                </div>
+
+                                                                {/* Dropdown List */}
+                                                                {isLectureDropdownOpen && (
+                                                                    <div className="absolute top-[calc(100%+6px)] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-[100] max-h-[220px] overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
+                                                                        {lectures.length > 0 ? lectures.map((lecture) => (
+                                                                            <div
+                                                                                key={lecture._id || lecture.id}
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setSelectedLecture(lecture._id || lecture.id);
+                                                                                    setIsLectureDropdownOpen(false);
+                                                                                }}
+                                                                                className={`px-4 py-2 text-[13px] transition-colors cursor-pointer ${selectedLecture === (lecture._id || lecture.id) ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-purple-600'}`}
+                                                                            >
+                                                                                Lec {lecture.lectureNo}: {lecture.title}
+                                                                            </div>
+                                                                        )) : (
+                                                                            <div className="px-4 py-2 text-[13px] text-gray-400 italic text-center">
+                                                                                {!selectedCourse ? 'Select a course first' : 'No lectures found'}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
                                             <div className="space-y-2">
                                                 <label className="text-sm font-semibold text-gray-700">Issue / Question</label>
                                                 <textarea
+                                                    required
                                                     placeholder="Discuss your issue or question here..."
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 min-h-[160px] resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
