@@ -5,7 +5,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
 
-import { getMyNotifications, markNotificationsAsSeen } from '@/api/notification';
+import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
 import { Loader2, BellOff } from 'lucide-react';
 
 const NotificationPage = () => {
@@ -15,6 +15,29 @@ const NotificationPage = () => {
     const navigate = useNavigate();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const handleNotificationClick = async (notification) => {
+        try {
+            // Mark as read in backend
+            await markSingleAsRead(notification.id);
+            
+            // Update local state for immediate feedback
+            setNotifications(prev => prev.map(n => 
+                n.id === notification.id ? { ...n, isUnread: false } : n
+            ));
+
+            // Navigate if link exists
+            if (notification.title !== "Welcome Aboard" && notification.link) {
+                navigate(notification.link);
+            }
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+            // Still navigate even if marking as read fails
+            if (notification.title !== "Welcome Aboard" && notification.link) {
+                navigate(notification.link);
+            }
+        }
+    };
 
     React.useEffect(() => {
         const fetchNotifications = async () => {
@@ -28,11 +51,6 @@ const NotificationPage = () => {
             }
         };
         fetchNotifications();
-
-        // Mark as seen only when leaving the page
-        return () => {
-            markNotificationsAsSeen().catch(err => console.error("Error marking seen on unmount:", err));
-        };
     }, []);
 
     return (
@@ -85,13 +103,9 @@ const NotificationPage = () => {
                                     <Notification
                                         key={notification.id}
                                         isUnread={notification.isUnread}
-                                        message={`${notification.title} – ${notification.message}`}
+                                        message={notification.message}
                                         time={notification.time}
-                                        onClick={() => {
-                                            if (notification.title !== "Welcome Aboard" && notification.link) {
-                                                navigate(notification.link);
-                                            }
-                                        }}
+                                        onClick={() => handleNotificationClick(notification)}
                                         className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
                                     />
                                 ))

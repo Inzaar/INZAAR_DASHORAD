@@ -7,3 +7,7 @@ export const getMyNotifications = () => {
 export const markNotificationsAsSeen = () => {
     return axiosInstance.post("/notifications/mark-seen");
 };
+
+export const markSingleAsRead = (id) => {
+    return axiosInstance.post(`/notifications/mark-read/${id}`);
+};
