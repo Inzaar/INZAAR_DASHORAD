@@ -6,18 +6,22 @@ import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
 import { Plus, ChevronDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
 
 const AdminCoursesPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [searchParams] = useSearchParams();
+    const courseIdParam = searchParams.get('courseId');
     const navigate = useNavigate();
+
     const [activeTab, setActiveTab] = useState('All');
     const [courses, setCourses] = useState([]);
     const [courseStats, setCourseStats] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(window.innerWidth < 640 ? 4 : 12);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const handleResize = () => {
@@ -33,13 +37,13 @@ const AdminCoursesPage = () => {
 
     useEffect(() => {
         const fetchCoursesData = async () => {
+            setLoading(true);
             let coursesData = [];
             let enrollmentsData = [];
 
             try {
                 const coursesRes = await getAllCourses();
                 coursesData = coursesRes?.data?.data || [];
-                console.log("coursesData fetched:", coursesData.length);
             } catch (err) {
                 console.error("Error fetching courses:", err);
             }
@@ -47,7 +51,6 @@ const AdminCoursesPage = () => {
             try {
                 const enrollmentsRes = await getAllEnrollments();
                 enrollmentsData = enrollmentsRes?.data || [];
-                console.log("enrollmentsData fetched:", enrollmentsData?.length);
             } catch (err) {
                 console.error("Error fetching enrollments:", err);
             }
@@ -79,9 +82,46 @@ const AdminCoursesPage = () => {
                 });
                 setCourseStats(statsMatrix);
             }
+            setLoading(false);
         };
         fetchCoursesData();
     }, []);
+
+    // Handle deep linking/scrolling
+    useEffect(() => {
+        if (!loading && courseIdParam && courses.length > 0) {
+            // Find the course
+            const courseIndex = courses.findIndex(c => c.id === courseIdParam);
+            
+            if (courseIndex !== -1) {
+                const targetCourse = courses[courseIndex];
+                
+                // Set the correct tab based on course status
+                if (targetCourse.status === 'Draft') setActiveTab('Draft Courses');
+                else if (targetCourse.status === 'Active') setActiveTab('Active Courses');
+                else setActiveTab('All');
+
+                // Calculate page
+                const filtered = targetCourse.status === 'Draft' ? courses.filter(c => c.status === 'Draft') :
+                                 targetCourse.status === 'Active' ? courses.filter(c => c.status === 'Active') : courses;
+                const filteredIndex = filtered.findIndex(c => c.id === courseIdParam);
+                const targetPage = Math.floor(filteredIndex / itemsPerPage) + 1;
+                setCurrentPage(targetPage);
+
+                // Scroll and highlight
+                setTimeout(() => {
+                    const element = document.getElementById(`admin-course-${courseIdParam}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.classList.add('ring-4', 'ring-[#5D5FEF]', 'ring-offset-4', 'rounded-2xl', 'scale-105');
+                        setTimeout(() => {
+                            element.classList.remove('ring-4', 'ring-[#5D5FEF]', 'ring-offset-4', 'scale-105');
+                        }, 3000);
+                    }
+                }, 600);
+            }
+        }
+    }, [loading, courseIdParam, courses, itemsPerPage]);
 
     const activeCount = courses.filter(c => c.status === 'Active').length;
     const inactiveCount = courses.filter(c => c.status === 'Inactive').length;
@@ -93,8 +133,6 @@ const AdminCoursesPage = () => {
         { title: "Inactive Courses", value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
         { title: "Draft Courses", value: draftCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
     ];
-
-
 
     const filteredCourses = activeTab === 'All'
         ? courses
@@ -150,13 +188,6 @@ const AdminCoursesPage = () => {
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                 {stats.map((stat, index) => {
-                                    const typeMap = {
-                                        "Total Registered Courses": "all",
-                                        "Active Courses": "active",
-                                        "Inactive Courses": "inactive",
-                                        "Draft Courses": "draft"
-                                    };
-
                                     return (
                                         <StatsCard
                                             key={index}
@@ -202,6 +233,7 @@ const AdminCoursesPage = () => {
                                             onClick={() => {
                                                 setActiveTab(tab);
                                                 setCurrentPage(1);
+                                                navigate('/admin-courses', { replace: true });
                                             }}
                                             className={`px-6 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === tab
                                                 ? 'bg-[#A78BFA] text-white shadow-sm'
@@ -221,6 +253,7 @@ const AdminCoursesPage = () => {
                                             onChange={(e) => {
                                                 setActiveTab(e.target.value);
                                                 setCurrentPage(1);
+                                                navigate('/admin-courses', { replace: true });
                                             }}
                                             className="w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none appearance-none cursor-pointer shadow-sm"
                                         >
@@ -241,11 +274,12 @@ const AdminCoursesPage = () => {
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                         {filteredCourses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((course) => (
-                                            <CardCourse
-                                                key={course.id}
-                                                course={course}
-                                                isAdmin={true}
-                                            />
+                                            <div key={course.id} id={`admin-course-${course.id}`} className="transition-all duration-500">
+                                                <CardCourse
+                                                    course={course}
+                                                    isAdmin={true}
+                                                />
+                                            </div>
                                         ))}
                                     </div>
                                 )}
