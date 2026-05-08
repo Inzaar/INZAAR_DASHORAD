@@ -3,7 +3,7 @@ import Sidebar from '@/components/layouts/SideBar';
 import React from 'react';
 // Verify if you are using Vite/React (react-router-dom) or Next.js (next/navigation)
 import { useNavigate } from 'react-router-dom';
-import { getMyNotifications, markNotificationsAsSeen } from '@/api/notification';
+import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
 import { Loader2, BellOff } from 'lucide-react';
 
 import Notification from '@/components/shared/notification/Notification';
@@ -15,6 +15,43 @@ const AdminNotification = () => {
     const navigate = useNavigate();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const handleNotificationClick = async (notification) => {
+        try {
+            // Mark as read in backend
+            await markSingleAsRead(notification.id);
+            
+            // Update local state for immediate feedback
+            setNotifications(prev => prev.map(n => 
+                n.id === notification.id ? { ...n, isUnread: false } : n
+            ));
+
+            // Navigate if link exists
+            if (notification.title !== "Welcome Aboard" && notification.link) {
+                let targetLink = notification.link;
+                // Redirect to admin-specific pages if needed
+                if (targetLink.startsWith("/dashboard")) {
+                    targetLink = targetLink.replace("/dashboard", "/admin-calendar");
+                } else if (targetLink.startsWith("/courses")) {
+                    targetLink = targetLink.replace("/courses", "/admin-courses");
+                }
+                
+                navigate(targetLink);
+            }
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+            // Still navigate
+            if (notification.title !== "Welcome Aboard" && notification.link) {
+                let targetLink = notification.link;
+                if (targetLink.startsWith("/dashboard")) {
+                    targetLink = targetLink.replace("/dashboard", "/admin-calendar");
+                } else if (targetLink.startsWith("/courses")) {
+                    targetLink = targetLink.replace("/courses", "/admin-courses");
+                }
+                navigate(targetLink);
+            }
+        }
+    };
 
     React.useEffect(() => {
         const fetchNotifications = async () => {
@@ -28,11 +65,6 @@ const AdminNotification = () => {
             }
         };
         fetchNotifications();
-
-        // Mark as seen only when leaving the page
-        return () => {
-            markNotificationsAsSeen().catch(err => console.error("Error marking seen on unmount:", err));
-        };
     }, []);
 
     return (
@@ -85,22 +117,9 @@ const AdminNotification = () => {
                                     <Notification
                                         key={notification.id}
                                         isUnread={notification.isUnread}
-                                        message={`${notification.title} – ${notification.message}`}
+                                        message={notification.message}
                                         time={notification.time}
-                                        onClick={() => {
-                                            if (notification.title !== "Welcome Aboard" && notification.link) {
-                                                let targetLink = notification.link;
-                                                // Redirect to admin-specific pages if needed
-                                                // Use startsWith because links now contain query params like ?tab=new
-                                                if (targetLink.startsWith("/dashboard")) {
-                                                    targetLink = targetLink.replace("/dashboard", "/admin-calendar");
-                                                } else if (targetLink.startsWith("/courses")) {
-                                                    targetLink = targetLink.replace("/courses", "/admin-courses");
-                                                }
-                                                
-                                                navigate(targetLink);
-                                            }
-                                        }}
+                                        onClick={() => handleNotificationClick(notification)}
                                         className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
                                     />
                                 ))

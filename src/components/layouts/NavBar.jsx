@@ -69,7 +69,7 @@ function Navbar({ onMenuClick, hideMenu = false }) {
                     >
                         <CiBellOn className="text-[16px] sm:text-[20px] text-[#2C2C2C]" />
                         {unreadCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] sm:text-[11px] font-bold w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                            <span className="absolute -top-2 -right-2 bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[9px] sm:text-[10px] font-black min-w-[18px] sm:min-w-[22px] h-[18px] sm:h-[22px] px-1 flex items-center justify-center rounded-full border-2 border-white shadow-md z-10 transition-all">
                                 {unreadCount}
                             </span>
                         )}
