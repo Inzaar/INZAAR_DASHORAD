@@ -272,9 +272,9 @@ const AdminCoursesPage = () => {
                                         There is no any course registered for now
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 items-start justify-items-center">
                                         {filteredCourses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((course) => (
-                                            <div key={course.id} id={`admin-course-${course.id}`} className="transition-all duration-500">
+                                            <div key={course.id} id={`admin-course-${course.id}`} className="w-full max-w-[340px] transition-all duration-500">
                                                 <CardCourse
                                                     course={course}
                                                     isAdmin={true}
