@@ -44,33 +44,50 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
   return (
     <>
-      <Card className={`w-full max-w-[380px] h-auto min-h-[305px] flex flex-col items-start rounded-[10px] justify-between gap-2 p-2 bg-white`}>
-        <div className="w-full h-[161px] rounded-[10px] relative">
+      <div className="w-full max-w-[340px] flex flex-col gap-3 group animate-in fade-in duration-500">
+        {/* Image Section */}
+        <div className="w-full aspect-[16/10] rounded-[15px] overflow-hidden relative shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
           <img
             src={image}
             alt={course.title}
-            className="w-full h-[161px] rounded-[10px] object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          <div className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+            <img src={course.icon} alt="instructor" className="w-5 h-5 object-contain" />
+          </div>
           {course.isNew && (
-            <span className="absolute top-2 left-2 bg-[#FF4F4F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px]">
+            <span className="absolute top-3 left-3 bg-[#FF4F4F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] shadow-sm">
               New
             </span>
           )}
-          <img src={course.icon} alt="profile-icon" className='absolute bottom-3 right-4 w-[15px] h-[17px]' />
         </div>
-        <div className='w-full h-[98px] flex flex-col items-start justify-between gap-1'>
-          <h3 className='font-bold text-[14px]'>{course.title}</h3>
-          <p className='font-medium text-[10px]'>{course.time}</p>
-          <p className='text-[12px] font-normal line-clamp-2 text-ellipsis overflow-hidden'>{course.description}</p>
+
+        {/* Content Section */}
+        <div className="flex flex-col gap-2 px-1">
+          <div className="flex justify-between items-start gap-3">
+            <h3 className="font-bold text-[16px] leading-[1.3] text-gray-900 line-clamp-2 min-h-[42px]">{course.title}</h3>
+            <span className="text-[11px] text-gray-400 whitespace-nowrap pt-1 font-medium">{course.date}</span>
+          </div>
+          
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[12px] text-gray-500 font-medium tracking-tight">{course.time}</p>
+            <p className="text-[12.5px] text-gray-600 line-clamp-2 leading-[1.5] font-normal min-h-[38px]">
+              {course.description}
+            </p>
+          </div>
         </div>
-        <GradiantButton
-          className="w-[auto] px-4 h-[26px] text-[14px] font-[400] rounded-[3px]"
-          onClick={handleEnroll}
-          disabled={isEnrolling}
-        >
-          {isAdmin ? "View Details" : "Enroll Now"}
-        </GradiantButton>
-      </Card>
+
+        {/* Button Section */}
+        <div className="mt-1">
+          <GradiantButton
+            className="px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all w-fit"
+            onClick={handleEnroll}
+            disabled={isEnrolling}
+          >
+            {isAdmin ? "View Details" : "Enroll now"}
+          </GradiantButton>
+        </div>
+      </div>
 
       {isEnrolling && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

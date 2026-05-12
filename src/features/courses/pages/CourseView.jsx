@@ -4,7 +4,7 @@ import Navbar from "@/components/layouts/NavBar";
 import StatusTable from "@/components/ui/statusTable/StatusTable";
 import Analytics from "@/features/StudentDashboard/components/Analytics";
 import Sidebar from "@/components/layouts/SideBar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
 import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
@@ -105,10 +105,12 @@ const CourseView = () => {
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
 
+    const location = useLocation();
+    const isAdminView = location.pathname.startsWith('/admin');
     const courseId = new URLSearchParams(window.location.search).get("id");
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
     const isQuizView = currentLecture?.type === 'Quiz';
-    const canEdit = user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)));
+    const canEdit = (user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)))) && isAdminView;
 
     // Effects
     useEffect(() => {
@@ -139,7 +141,7 @@ const CourseView = () => {
         const fetchCourse = async () => {
             setLoading(true);
             try {
-                const res = (user?.role === 'admin' || user?.role === 'moderator')
+                const res = isAdminView
                     ? await getAdminCourseById(courseId)
                     : await getCourseById(courseId);
                 const data = res.data.data;
@@ -414,7 +416,7 @@ const CourseView = () => {
         if (!currentLecture || !canEdit) return;
         const id = currentLecture?.id || currentLecture?._id;
         if (!id) return;
-        
+
         setEditLectureData({
             id: id,
             title: currentLecture.title || '',
@@ -552,7 +554,7 @@ const CourseView = () => {
                                 </div>
 
                                 {/* Desktop Buttons */}
-                                {user?.role === 'admin' && (
+                                {canEdit && (
                                     <div className="hidden md:flex items-center gap-3">
                                         <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
                                             Download Certificate
@@ -568,7 +570,7 @@ const CourseView = () => {
                                 )}
 
                                 {/* Mobile Three-Dots for Admin */}
-                                {user?.role === 'admin' && (
+                                {canEdit && (
                                     <div className="md:hidden relative" ref={adminMenuRef}>
                                         <button
                                             onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
@@ -717,17 +719,17 @@ const CourseView = () => {
                                                         alt="Instructor"
                                                         className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
                                                     />
-                                                    
+
                                                     {/* PDF Resource Button & Menu */}
                                                     <div className="relative">
-                                                        <button 
-                                                            onClick={() => { 
+                                                        <button
+                                                            onClick={() => {
                                                                 if (!currentLecture?.pdfUrl || currentLecture.pdfUrl.length === 0) {
                                                                     toast.error("No additional PDF resources");
                                                                     return;
                                                                 }
-                                                                setShowPdfMenu(!showPdfMenu); 
-                                                                setShowAudioMenu(false); 
+                                                                setShowPdfMenu(!showPdfMenu);
+                                                                setShowAudioMenu(false);
                                                             }}
                                                             className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
                                                         >
@@ -739,8 +741,8 @@ const CourseView = () => {
                                                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
                                                                 </div>
                                                                 {currentLecture.pdfUrl.map((url, i) => (
-                                                                    <button 
-                                                                        key={i} 
+                                                                    <button
+                                                                        key={i}
                                                                         onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
                                                                         className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                                                                     >
@@ -754,14 +756,14 @@ const CourseView = () => {
 
                                                     {/* Audio Resource Button & Menu */}
                                                     <div className="relative">
-                                                        <button 
-                                                            onClick={() => { 
+                                                        <button
+                                                            onClick={() => {
                                                                 if (!currentLecture?.audioUrl || currentLecture.audioUrl.length === 0) {
                                                                     toast.error("No additional audio files");
                                                                     return;
                                                                 }
-                                                                setShowAudioMenu(!showAudioMenu); 
-                                                                setShowPdfMenu(false); 
+                                                                setShowAudioMenu(!showAudioMenu);
+                                                                setShowPdfMenu(false);
                                                             }}
                                                             className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
                                                         >
@@ -773,8 +775,8 @@ const CourseView = () => {
                                                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
                                                                 </div>
                                                                 {currentLecture.audioUrl.map((url, i) => (
-                                                                    <button 
-                                                                        key={i} 
+                                                                    <button
+                                                                        key={i}
                                                                         onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
                                                                         className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
                                                                     >
@@ -786,14 +788,14 @@ const CourseView = () => {
                                                         )}
                                                     </div>
 
-                                                    {canEdit && (
+                                                    {/* {canEdit && (
                                                         <button
                                                             onClick={handleEditLectureClick}
                                                             className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
                                                         >
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                                                         </button>
-                                                    )}
+                                                    )} */}
                                                 </div>
                                             )}
                                         </div>
@@ -944,11 +946,11 @@ const CourseView = () => {
 
                             {/* Lecture List Table Section */}
                             {!isQuizView && (
-                                <LectureListTable 
-                                    lectures={lectures} 
-                                    notes={notes} 
-                                    onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)} 
-                                    currentLectureId={currentLecture?.id || currentLecture?._id} 
+                                <LectureListTable
+                                    lectures={lectures}
+                                    notes={notes}
+                                    onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)}
+                                    currentLectureId={currentLecture?.id || currentLecture?._id}
                                 />
                             )}
                         </div>
@@ -982,25 +984,25 @@ const CourseView = () => {
                                 <X size={24} />
                             </button>
                         </div>
-                        
+
                         <div className="space-y-6 overflow-y-auto no-scrollbar pr-2 flex-1">
                             {/* Basic Info */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Lecture Title</label>
-                                    <input 
-                                        type="text" 
-                                        value={editLectureData.title} 
-                                        onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })} 
-                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" 
+                                    <input
+                                        type="text"
+                                        value={editLectureData.title}
+                                        onChange={e => setEditLectureData({ ...editLectureData, title: e.target.value })}
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                                     />
                                 </div>
                                 <div>
                                     <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Content Type</label>
                                     <div className="relative">
-                                        <select 
-                                            value={editLectureData.type} 
-                                            onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })} 
+                                        <select
+                                            value={editLectureData.type}
+                                            onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })}
                                             className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm appearance-none cursor-pointer"
                                         >
                                             <option value="Lecture">Lecture</option>
@@ -1014,11 +1016,11 @@ const CourseView = () => {
                             {/* Video URL */}
                             <div>
                                 <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Video URL <span className="text-gray-400 font-normal lowercase">(YouTube)</span></label>
-                                <input 
-                                    type="text" 
-                                    value={editLectureData.videoUrl} 
-                                    onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })} 
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" 
+                                <input
+                                    type="text"
+                                    value={editLectureData.videoUrl}
+                                    onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })}
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                                     placeholder="https://www.youtube.com/watch?v=..."
                                 />
                             </div>
@@ -1028,7 +1030,7 @@ const CourseView = () => {
                                 {/* Audios */}
                                 <div className="space-y-4">
                                     <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">Audio Files</label>
-                                    <div 
+                                    <div
                                         onClick={() => audioInputRef.current?.click()}
                                         className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
                                     >
@@ -1040,11 +1042,11 @@ const CourseView = () => {
                                                 <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600">Add Audio</span>
                                             </>
                                         )}
-                                        <input 
-                                            ref={audioInputRef} 
-                                            type="file" 
-                                            accept="audio/*" 
-                                            className="hidden" 
+                                        <input
+                                            ref={audioInputRef}
+                                            type="file"
+                                            accept="audio/*"
+                                            className="hidden"
                                             onChange={async (e) => {
                                                 const file = e.target.files?.[0];
                                                 if (!file) return;
@@ -1061,7 +1063,7 @@ const CourseView = () => {
                                         {editLectureData.audioUrl.map((url, idx) => (
                                             <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
                                                 <span className="truncate flex-1 pr-4">Audio {idx + 1}</span>
-                                                <button onClick={() => setEditLectureData(prev => ({...prev, audioUrl: prev.audioUrl.filter((_, i) => i !== idx)}))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                <button onClick={() => setEditLectureData(prev => ({ ...prev, audioUrl: prev.audioUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
@@ -1072,7 +1074,7 @@ const CourseView = () => {
                                 {/* PDFs */}
                                 <div className="space-y-4">
                                     <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">PDF Resources</label>
-                                    <div 
+                                    <div
                                         onClick={() => pdfInputRef.current?.click()}
                                         className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
                                     >
@@ -1084,11 +1086,11 @@ const CourseView = () => {
                                                 <span className="text-xs font-semibold text-gray-500 group-hover:text-blue-600">Add PDF</span>
                                             </>
                                         )}
-                                        <input 
-                                            ref={pdfInputRef} 
-                                            type="file" 
-                                            accept="application/pdf" 
-                                            className="hidden" 
+                                        <input
+                                            ref={pdfInputRef}
+                                            type="file"
+                                            accept="application/pdf"
+                                            className="hidden"
                                             onChange={async (e) => {
                                                 const file = e.target.files?.[0];
                                                 if (!file) return;
@@ -1105,7 +1107,7 @@ const CourseView = () => {
                                         {editLectureData.pdfUrl.map((url, idx) => (
                                             <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
                                                 <span className="truncate flex-1 pr-4">PDF {idx + 1}</span>
-                                                <button onClick={() => setEditLectureData(prev => ({...prev, pdfUrl: prev.pdfUrl.filter((_, i) => i !== idx)}))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                <button onClick={() => setEditLectureData(prev => ({ ...prev, pdfUrl: prev.pdfUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
@@ -1116,20 +1118,20 @@ const CourseView = () => {
                         </div>
 
                         <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 mt-8 pt-6 border-t border-gray-100">
-                            <button 
-                                onClick={() => setIsEditLectureModalOpen(false)} 
+                            <button
+                                onClick={() => setIsEditLectureModalOpen(false)}
                                 className="flex-1 py-2.5 sm:py-3 px-6 bg-gray-50 text-gray-500 text-sm sm:text-base font-bold rounded-xl hover:bg-gray-100 transition-all active:scale-[0.98]"
                             >
                                 Cancel
                             </button>
-                            <GradiantButton 
-                                onClick={handleSaveLecture} 
-                                disabled={isSavingLecture} 
+                            <GradiantButton
+                                onClick={handleSaveLecture}
+                                disabled={isSavingLecture}
                                 className="flex-[1.5] sm:flex-[2] py-2.5 sm:py-3 px-4 sm:px-6 font-bold rounded-xl shadow-lg shadow-blue-500/20 text-sm sm:text-base whitespace-nowrap"
                             >
                                 {isSavingLecture ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> 
+                                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                         <span>Saving...</span>
                                     </div>
                                 ) : "Save Changes"}
@@ -1153,15 +1155,15 @@ const CourseView = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <a 
-                                    href={activePdfUrl} 
-                                    download 
+                                <a
+                                    href={activePdfUrl}
+                                    download
                                     className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-all text-sm font-bold"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
                                     Download
                                 </a>
-                                <button 
+                                <button
                                     onClick={() => setActivePdfUrl(null)}
                                     className="p-2.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all"
                                 >
@@ -1181,7 +1183,7 @@ const CourseView = () => {
                                     <p className="text-gray-500 font-medium">Loading document...</p>
                                 </div>
                             )}
-                            <iframe 
+                            <iframe
                                 src={`https://docs.google.com/viewer?url=${encodeURIComponent(activePdfUrl)}&embedded=true`}
                                 className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                                 title="PDF Viewer"
@@ -1203,17 +1205,17 @@ const CourseView = () => {
                                 </div>
                                 <span className="text-sm font-bold text-gray-800">Playing Audio Resource</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setActiveAudioUrl(null)}
                                 className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-all"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <audio 
-                            src={activeAudioUrl} 
-                            controls 
-                            autoPlay 
+                        <audio
+                            src={activeAudioUrl}
+                            controls
+                            autoPlay
                             onPlay={() => {
                                 if (playerRef.current) {
                                     playerRef.current.pauseVideo();

@@ -178,7 +178,7 @@ const Courses = () => {
 
     return (
         <div className="h-screen  w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-white font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
 
@@ -242,9 +242,9 @@ const Courses = () => {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 place-items-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 items-start justify-items-center">
                                 {currentCourses.map((course) => (
-                                    <div key={course.id} id={`course-${course.id}`} className="transition-all duration-500">
+                                    <div key={course.id} id={`course-${course.id}`} className="w-full max-w-[340px] transition-all duration-500">
                                         <CardCourse course={course} />
                                     </div>
                                 ))}
