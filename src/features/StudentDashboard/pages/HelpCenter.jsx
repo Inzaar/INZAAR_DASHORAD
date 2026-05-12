@@ -210,7 +210,7 @@ const HelpCenter = () => {
                                             </div>
 
                                             {/* Complaint Category Checkboxes */}
-                                            <div className="space-y-4 pt-2">
+                                            {/* <div className="space-y-4 pt-2">
                                                 <p className="text-sm font-semibold text-gray-700 mb-3">Is your complaint related to:</p>
                                                 
                                                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
@@ -240,12 +240,11 @@ const HelpCenter = () => {
                                                         <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">Any Lecture?</span>
                                                     </label>
                                                 </div>
-                                            </div>
+                                            </div> */}
 
                                             {/* Dynamic Dropdowns */}
-                                            {(complaintType.course || complaintType.lecture) && (
+                                            {/* {(complaintType.course || complaintType.lecture) && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
-                                                    {/* Custom Course Dropdown */}
                                                     <div className="space-y-1.5 relative">
                                                         <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Select Course <span className="text-purple-500">*</span></label>
                                                         <div 
@@ -262,7 +261,6 @@ const HelpCenter = () => {
                                                                 {loadingCourses ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronDown size={14} className={`transition-transform duration-200 ${isCourseDropdownOpen ? 'rotate-180' : ''}`} />}
                                                             </div>
 
-                                                            {/* Dropdown List */}
                                                             {isCourseDropdownOpen && (
                                                                 <div className="absolute top-[calc(100%+6px)] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-[100] max-h-[220px] overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
                                                                     {courses.length > 0 ? courses.map((course) => (
@@ -285,7 +283,6 @@ const HelpCenter = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Custom Lecture Dropdown */}
                                                     {complaintType.lecture && (
                                                         <div className="space-y-1.5 relative">
                                                             <label className={`text-[11px] font-bold uppercase tracking-wider ${!selectedCourse ? 'text-gray-300' : 'text-gray-500'}`}>
@@ -306,7 +303,6 @@ const HelpCenter = () => {
                                                                     {loadingLectures ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronDown size={14} className={`transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`} />}
                                                                 </div>
 
-                                                                {/* Dropdown List */}
                                                                 {isLectureDropdownOpen && (
                                                                     <div className="absolute top-[calc(100%+6px)] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-[100] max-h-[220px] overflow-y-auto no-scrollbar animate-in fade-in zoom-in-95 duration-200">
                                                                         {lectures.length > 0 ? lectures.map((lecture) => (
@@ -332,7 +328,7 @@ const HelpCenter = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
+                                            )} */}
 
                                             <div className="space-y-2">
                                                 <label className="text-sm font-semibold text-gray-700">Issue / Question</label>
