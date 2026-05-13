@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
 
 import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
-import { Loader2, BellOff } from 'lucide-react';
+import { Loader, BellOff } from 'lucide-react';
 
 const NotificationPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -94,9 +94,8 @@ const NotificationPage = () => {
 
                         <div className="flex flex-col">
                             {loading ? (
-                                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                    <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
-                                    <p className="text-gray-500 font-medium">Loading notifications...</p>
+                                <div className="flex items-center justify-center h-[60vh]">
+                                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                 </div>
                             ) : notifications.length > 0 ? (
                                 notifications.map((notification) => (

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown, Loader } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -441,9 +441,8 @@ const CourseReportsPage = () => {
                                 </div>
 
                                 {loading ? (
-                                    <div className="flex items-center justify-center py-16">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
-                                        <span className="ml-3 text-gray-500 text-sm">Loading courses...</span>
+                                    <div className="flex items-center justify-center py-24">
+                                        <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
                                 ) : courses.length === 0 ? (
                                     <div className="flex items-center justify-center py-16">

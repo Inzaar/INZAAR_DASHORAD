@@ -5,11 +5,10 @@ import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import UserCard from '../components/UserCard';
-import { Search, Plus, ChevronDown, MoreVertical, X } from 'lucide-react';
+import { Search, Plus, ChevronDown, MoreVertical, X, Loader, Eye, EyeOff, LayoutGrid } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getModeratorProfiles, adminCreateModerator, getAllUsers } from '@/api/user';
-import { Eye, EyeOff, LayoutGrid } from 'lucide-react';
 import AssignModeratorModal from '../components/student/AssignModeratorModal';
 import {
     Pagination,
@@ -257,10 +256,7 @@ const ModeratorsPage = () => {
                             <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 min-h-[600px] relative">
                                 {isLoading && (
                                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-[24px]">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-10 h-10 border-4 border-[#3758EE] border-t-transparent rounded-full animate-spin"></div>
-                                            <span className="text-sm font-medium text-gray-600">Loading...</span>
-                                        </div>
+                                        <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
                                 )}
 

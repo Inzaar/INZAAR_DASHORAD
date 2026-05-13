@@ -4,7 +4,7 @@ import React from 'react';
 // Verify if you are using Vite/React (react-router-dom) or Next.js (next/navigation)
 import { useNavigate } from 'react-router-dom';
 import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
-import { Loader2, BellOff } from 'lucide-react';
+import { Loader, BellOff } from 'lucide-react';
 
 import Notification from '@/components/shared/notification/Notification';
 
@@ -108,9 +108,8 @@ const AdminNotification = () => {
 
                         <div className="flex flex-col">
                             {loading ? (
-                                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                    <Loader2 className="w-10 h-10 text-[#6984E6] animate-spin" />
-                                    <p className="text-gray-500 animate-pulse">Fetching system notifications...</p>
+                                <div className="flex items-center justify-center h-[60vh]">
+                                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                 </div>
                             ) : notifications.length > 0 ? (
                                 notifications.map((notification) => (
