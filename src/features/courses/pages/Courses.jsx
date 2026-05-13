@@ -56,7 +56,7 @@ const Courses = () => {
             // Find the course and its index in the current filtered view
             const filtered = (activeTab === 'new' ? courses.filter(c => c.isNewCourse) : courses);
             const courseIndex = filtered.findIndex(c => c._id === courseIdParam);
-            
+
             if (courseIndex !== -1) {
                 // Calculate which page it's on
                 const targetPage = Math.floor(courseIndex / itemsPerPage) + 1;
@@ -193,7 +193,7 @@ const Courses = () => {
                         onClose={() => setIsSidebarOpen(false)}
                         className={`
                         transition-transform duration-300 ease-in-out z-40
-                        lg:translate-x-0 lg:static lg:block
+                        lg:translate-x-0 lg:static lg:block lg:h-full lg:shrink-0
                         fixed left-0 top-0 shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
