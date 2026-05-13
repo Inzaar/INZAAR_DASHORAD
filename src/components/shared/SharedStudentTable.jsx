@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { Loader } from 'lucide-react';
 
 const SharedStudentTable = ({
     students = [],
@@ -55,9 +56,8 @@ const SharedStudentTable = ({
             )}
 
             {loading ? (
-                <div className="flex items-center justify-center py-16">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6366F1]"></div>
-                    <span className="ml-3 text-gray-500 text-sm">Loading students...</span>
+                <div className="flex items-center justify-center py-24">
+                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                 </div>
             ) : students.length === 0 ? (
                 <div className="flex items-center justify-center py-16">

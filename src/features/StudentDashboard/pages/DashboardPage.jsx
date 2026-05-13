@@ -209,7 +209,13 @@ const DashboardPage = () => {
                                                                     </button>
                                                                 ))
                                                             ) : (
-                                                                <div className="px-3 py-2 text-sm text-gray-400">No courses found</div>
+                                                                loading ? (
+                                                                    <div className="flex justify-center p-4">
+                                                                        <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="px-3 py-2 text-sm text-gray-400">No courses found</div>
+                                                                )
                                                             )}
                                                         </div>
                                                     )}
@@ -217,8 +223,8 @@ const DashboardPage = () => {
                                             </div>
                                             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
                                                 {loading ? (
-                                                    <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center animate-pulse italic">
-                                                        Wait, we're fetching your course data...
+                                                    <div className="w-full h-[160px] flex items-center justify-center">
+                                                        <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                                                     </div>
                                                 ) : filteredLectures.length > 0 ? (
                                                     filteredLectures.map((lecture) => (

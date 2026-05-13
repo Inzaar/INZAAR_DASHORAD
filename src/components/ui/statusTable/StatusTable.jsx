@@ -1,6 +1,7 @@
 import { useState } from "react";
 import StatusRow from "./StatusRow";
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../Pagination";
+import { Loader } from "lucide-react";
 
 function StatusTable({ userCourses, loading }) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +85,7 @@ function StatusTable({ userCourses, loading }) {
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-center h-[100px]">
                                 {loading ? (
-                                    <p className="text-gray-500 animate-pulse italic">Wait, we're fetching your course data...</p>
+                                    <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                                 ) : (
                                     <p className="text-gray-500">You have no enrolled courses yet !</p>
                                 )}

@@ -4,6 +4,7 @@ import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import Profile from '@/components/layouts/profile/profile';
 import { getUserById } from '@/api/auth';
+import { Loader } from 'lucide-react';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -64,8 +65,8 @@ const ProfilePage = () => {
                     }}>
                         <div className="">
                             {isLoading ? (
-                                <div className="w-full flex justify-center items-center py-20">
-                                    <p className="text-gray-500 text-lg font-medium">Loading profile details...</p>
+                                <div className="w-full h-[70vh] flex justify-center items-center">
+                                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                 </div>
                             ) : userInfo ? (
                                 <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} />

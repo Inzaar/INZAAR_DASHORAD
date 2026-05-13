@@ -5,7 +5,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus, ChevronDown, Loader } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
@@ -267,7 +267,11 @@ const AdminCoursesPage = () => {
                                 </div>
 
                                 {/* Courses Grid */}
-                                {filteredCourses.length === 0 ? (
+                                {loading ? (
+                                    <div className="w-full py-24 flex items-center justify-center">
+                                        <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
+                                    </div>
+                                ) : filteredCourses.length === 0 ? (
                                     <div className="w-full py-16 flex items-center justify-center text-gray-500 font-medium text-lg">
                                         There is no any course registered for now
                                     </div>

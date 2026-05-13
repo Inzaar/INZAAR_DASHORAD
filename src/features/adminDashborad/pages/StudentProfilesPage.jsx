@@ -3,7 +3,7 @@ import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
-import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff } from 'lucide-react';
+import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff, Loader } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getStudentProfiles, adminCreateStudent } from '@/api/user';
@@ -423,10 +423,7 @@ const StudentProfilesPage = () => {
                                 <div className="overflow-x-auto relative min-h-[400px]">
                                     {isLoading && (
                                         <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <div className="w-10 h-10 border-4 border-[#3758EE] border-t-transparent rounded-full animate-spin"></div>
-                                                <span className="text-sm font-medium text-gray-600">Loading...</span>
-                                            </div>
+                                            <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                         </div>
                                     )}
                                     <table className="w-full min-w-[1000px]">
