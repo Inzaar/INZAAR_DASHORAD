@@ -721,72 +721,76 @@ const CourseView = () => {
                                                     />
 
                                                     {/* PDF Resource Button & Menu */}
-                                                    <div className="relative">
-                                                        <button
-                                                            onClick={() => {
-                                                                if (!currentLecture?.pdfUrl || currentLecture.pdfUrl.length === 0) {
-                                                                    toast.error("No additional PDF resources");
-                                                                    return;
-                                                                }
-                                                                setShowPdfMenu(!showPdfMenu);
-                                                                setShowAudioMenu(false);
-                                                            }}
-                                                            className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
-                                                        </button>
-                                                        {showPdfMenu && currentLecture?.pdfUrl?.length > 0 && (
-                                                            <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
-                                                                <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
+                                                    {currentLecture?.pdfUrl && currentLecture.pdfUrl.length > 0 && (
+                                                        <div className="relative">
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!currentLecture?.pdfUrl || currentLecture.pdfUrl.length === 0) {
+                                                                        toast.error("No additional PDF resources");
+                                                                        return;
+                                                                    }
+                                                                    setShowPdfMenu(!showPdfMenu);
+                                                                    setShowAudioMenu(false);
+                                                                }}
+                                                                className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
+                                                            </button>
+                                                            {showPdfMenu && currentLecture?.pdfUrl?.length > 0 && (
+                                                                <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                    <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
+                                                                    </div>
+                                                                    {currentLecture.pdfUrl.map((url, i) => (
+                                                                        <button
+                                                                            key={i}
+                                                                            onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
+                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
+                                                                        >
+                                                                            <FileText size={14} className="text-red-400" />
+                                                                            <span className="truncate">Resource {i + 1}</span>
+                                                                        </button>
+                                                                    ))}
                                                                 </div>
-                                                                {currentLecture.pdfUrl.map((url, i) => (
-                                                                    <button
-                                                                        key={i}
-                                                                        onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
-                                                                        className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
-                                                                    >
-                                                                        <FileText size={14} className="text-red-400" />
-                                                                        <span className="truncate">Resource {i + 1}</span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                            )}
+                                                        </div>
+                                                    )}
 
                                                     {/* Audio Resource Button & Menu */}
-                                                    <div className="relative">
-                                                        <button
-                                                            onClick={() => {
-                                                                if (!currentLecture?.audioUrl || currentLecture.audioUrl.length === 0) {
-                                                                    toast.error("No additional audio files");
-                                                                    return;
-                                                                }
-                                                                setShowAudioMenu(!showAudioMenu);
-                                                                setShowPdfMenu(false);
-                                                            }}
-                                                            className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
-                                                        </button>
-                                                        {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
-                                                            <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
-                                                                <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
+                                                    {currentLecture?.audioUrl && currentLecture.audioUrl.length > 0 && (
+                                                        <div className="relative">
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!currentLecture?.audioUrl || currentLecture.audioUrl.length === 0) {
+                                                                        toast.error("No additional audio files");
+                                                                        return;
+                                                                    }
+                                                                    setShowAudioMenu(!showAudioMenu);
+                                                                    setShowPdfMenu(false);
+                                                                }}
+                                                                className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
+                                                            </button>
+                                                            {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
+                                                                <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                    <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
+                                                                    </div>
+                                                                    {currentLecture.audioUrl.map((url, i) => (
+                                                                        <button
+                                                                            key={i}
+                                                                            onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
+                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
+                                                                        >
+                                                                            <Volume2 size={14} className="text-blue-400" />
+                                                                            <span className="truncate">Audio {i + 1}</span>
+                                                                        </button>
+                                                                    ))}
                                                                 </div>
-                                                                {currentLecture.audioUrl.map((url, i) => (
-                                                                    <button
-                                                                        key={i}
-                                                                        onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
-                                                                        className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
-                                                                    >
-                                                                        <Volume2 size={14} className="text-blue-400" />
-                                                                        <span className="truncate">Audio {i + 1}</span>
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                            )}
+                                                        </div>
+                                                    )}
 
                                                     {/* {canEdit && (
                                                         <button
