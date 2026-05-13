@@ -71,7 +71,7 @@ function Sidebar({ className, onClose }) {
     '/admin-add-course': 'Courses Management',
     '/registered-users': 'Student Profiles',
     '/registered-courses': 'Courses Management',
-    
+
     // Auth
     '/logout': 'Logout'
   };
@@ -132,22 +132,22 @@ function Sidebar({ className, onClose }) {
 
     if (itemName === 'Courses Management' || itemName === 'Courses') {
       if (user?.role === 'admin' || user?.role === 'moderator') {
-          navigate('/admin-courses');
-          if (onClose) onClose();
-          return;
+        navigate('/admin-courses');
+        if (onClose) onClose();
+        return;
       }
     }
 
     if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(itemName)) {
-       // It handles the sub-items for reports
-       const subRoutes = {
-           'Student Reports': '/reports',
-           'Moderator Reports': '/moderator-reports',
-           'Course Reports': '/course-reports'
-       };
-       navigate(subRoutes[itemName]);
-       if (onClose) onClose();
-       return;
+      // It handles the sub-items for reports
+      const subRoutes = {
+        'Student Reports': '/reports',
+        'Moderator Reports': '/moderator-reports',
+        'Course Reports': '/course-reports'
+      };
+      navigate(subRoutes[itemName]);
+      if (onClose) onClose();
+      return;
     }
 
     const path = Object.keys(pathToName).find(key => pathToName[key] === itemName);
@@ -203,7 +203,7 @@ function Sidebar({ className, onClose }) {
   };
 
   return (
-    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-[100dvh] max-h-screen ${className}`}>
+    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
         <div className='text-[#6A6F78] text-[14px] ml-3 font-medium truncate pr-2'>Welcome, {user?.firstname || user?.name || "User"}</div>
@@ -212,8 +212,7 @@ function Sidebar({ className, onClose }) {
         </button>
       </div>
 
-      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500]'>
-
+      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] lg:max-h-[70vh]'>
         <div className='w-full flex flex-col items-start gap-2'>
           {menuItems.map(renderMenuItem)}
         </div>
@@ -224,39 +223,32 @@ function Sidebar({ className, onClose }) {
             {moderatorFeatures.map(renderMenuItem)}
           </div>
         )}
-
-        {/* Footer (Logout) follows list items */}
-        <div className='w-full flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-4 mt-6 shrink-0 pb-4'>
-          <div className='uppercase text-[10px] font-bold text-gray-400 pl-3'>{isAdminRoute ? 'Admin' : 'User'}</div>
-          <Sideabrbbutton
-            isActive={activeItem === 'Logout'}
-            onClick={() => handleItemClick('Logout')}
-          >
-            Logout
-          </Sideabrbbutton>
-        </div>
+      </div>
+      
+      {/* Footer (Logout) fixed to bottom */}
+      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-2 shrink-0 pb-10'>
+        <Sideabrbbutton
+          isActive={activeItem === 'Logout'}
+          onClick={() => handleItemClick('Logout')}
+        >
+          Logout
+        </Sideabrbbutton>
       </div>
 
 
-      <LogoutModal 
+      <LogoutModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={logout}
       />
       <style dangerouslySetInnerHTML={{
         __html: `
+          .custom-sidebar-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+          }
           .custom-sidebar-scrollbar::-webkit-scrollbar {
-            width: 4px;
-          }
-           .custom-sidebar-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          .custom-sidebar-scrollbar::-webkit-scrollbar-thumb {
-            background: transparent;
-            border-radius: 10px;
-          }
-          .custom-sidebar-scrollbar:hover::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            display: none; /* Chrome, Safari and Opera */
           }
         `
       }} />
