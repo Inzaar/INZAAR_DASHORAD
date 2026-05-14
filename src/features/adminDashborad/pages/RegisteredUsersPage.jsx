@@ -298,17 +298,16 @@ const RegisteredUsersPage = () => {
                                     </table>
                                 </div>
 
-                                {/* Pagination */}
-                                <div className="flex justify-end items-center gap-2 mt-12 pb-2">
-                                    <button className="flex items-center gap-1 text-[13px] font-bold text-gray-400 hover:text-gray-900 transition-colors">
-                                        <ChevronLeft size={16} /> Previous
+                                <div className="flex justify-end items-center gap-1 sm:gap-2 mt-12 pb-2">
+                                    <button className="flex items-center gap-1 text-[13px] font-bold text-gray-400 hover:text-[#7C3AED] transition-colors">
+                                        <ChevronLeft size={16} /> <span className="hidden sm:inline">Previous</span>
                                     </button>
-                                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-bold text-gray-400 hover:bg-gray-100">1</button>
-                                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-bold bg-[#6366F1] text-white shadow-lg shadow-blue-500/30">2</button>
-                                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-bold text-gray-400 hover:bg-gray-100">3</button>
+                                    <button className="w-9 h-9 flex items-center justify-center rounded-[12px] text-[13px] font-bold text-gray-400 hover:bg-gray-50 hover:text-[#7C3AED]">1</button>
+                                    <button className="w-9 h-9 flex items-center justify-center rounded-[12px] text-[13px] font-bold bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200">2</button>
+                                    <button className="w-9 h-9 flex items-center justify-center rounded-[12px] text-[13px] font-bold text-gray-400 hover:bg-gray-50 hover:text-[#7C3AED]">3</button>
                                     <span className="text-gray-300 font-bold px-1">...</span>
-                                    <button className="flex items-center gap-1 text-[13px] font-bold text-gray-800 hover:text-gray-900 transition-colors">
-                                        Next <ChevronRight size={16} />
+                                    <button className="flex items-center gap-1 text-[13px] font-bold text-gray-400 hover:text-[#7C3AED] transition-colors">
+                                        <span className="hidden sm:inline">Next</span> <ChevronRight size={16} />
                                     </button>
                                 </div>
                             </div>

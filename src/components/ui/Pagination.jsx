@@ -70,7 +70,7 @@ function PaginationPrevious({
       className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
       {...props}>
       <ChevronLeftIcon className="size-4" />
-      <span className="font-medium">Previous</span>
+      <span className="hidden sm:inline font-medium">Previous</span>
     </PaginationLink>
   );
 }
@@ -85,7 +85,7 @@ function PaginationNext({
       size="default"
       className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
       {...props}>
-      <span className="font-medium">Next</span>
+      <span className="hidden sm:inline font-medium">Next</span>
       <ChevronRightIcon className="size-4" />
     </PaginationLink>
   );

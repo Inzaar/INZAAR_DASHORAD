@@ -548,7 +548,7 @@ const StudentProfilesPage = () => {
                                             <PaginationItem>
                                                 <PaginationPrevious
                                                     onClick={() => !isLoading && currentPage > 1 && setCurrentPage(prev => prev - 1)}
-                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#4E60FF]'}`}
+                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
                                                 />
                                             </PaginationItem>
 
@@ -568,7 +568,7 @@ const StudentProfilesPage = () => {
                                                                 <PaginationLink
                                                                     onClick={() => !isLoading && setCurrentPage(i)}
                                                                     isActive={isActive}
-                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-xl text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-[0_4px_12px_rgba(78,96,255,0.3)] hover:text-white hover:opacity-90' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
+                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-[12px] text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200 hover:text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-[#7C3AED]'}`}
                                                                 >
                                                                     {i}
                                                                 </PaginationLink>
@@ -591,7 +591,7 @@ const StudentProfilesPage = () => {
                                             <PaginationItem>
                                                 <PaginationNext
                                                     onClick={() => !isLoading && currentPage < totalPages && setCurrentPage(prev => prev + 1)}
-                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-600 hover:text-[#4E60FF]'}`}
+                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
                                                 />
                                             </PaginationItem>
                                         </PaginationContent>

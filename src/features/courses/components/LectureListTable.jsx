@@ -192,37 +192,44 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
             </div>
 
 
-            {/* Pagination */}
-            <div className="flex items-center justify-end mt-10 gap-2">
+            <div className="flex items-center justify-end mt-10 gap-1 sm:gap-2">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 disabled:opacity-40"
+                    className={`flex items-center gap-1 px-2 py-1.5 text-sm font-medium transition-colors ${currentPage === 1
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-500 hover:text-[#7C3AED]'
+                        }`}
                 >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="hidden sm:inline">Previous</span>
                 </button>
 
-                {[...Array(totalPages)].map((_, i) => (
-                    <button
-                        key={i + 1}
-                        onClick={() => handlePageChange(i + 1)}
-                        className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center transition-all ${currentPage === i + 1
-                            ? 'bg-[#6366F1] text-white shadow-md shadow-blue-200'
-                            : 'text-gray-500 hover:bg-gray-100'
-                            }`}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
+                <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button
+                            key={i + 1}
+                            onClick={() => handlePageChange(i + 1)}
+                            className={`w-9 h-9 rounded-[12px] text-sm font-bold flex items-center justify-center transition-all ${currentPage === i + 1
+                                ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
+                                : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
+                                }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                </div>
 
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 disabled:opacity-40"
+                    className={`flex items-center gap-1 px-2 py-1.5 text-sm font-medium transition-colors ${currentPage === totalPages
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-500 hover:text-[#7C3AED]'
+                        }`}
                 >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-5 h-5" />
                 </button>
             </div>
         </div>

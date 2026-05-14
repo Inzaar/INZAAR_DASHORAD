@@ -139,34 +139,42 @@ const AdminLectureList = ({ lectures, onWatch, id }) => {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-end items-center gap-2 mt-8">
+                    <div className="flex justify-end items-center gap-1 sm:gap-2 mt-8 pb-4">
                         <button 
                             disabled={currentPage === 1}
                             onClick={() => handlePageChange(currentPage - 1)}
-                            className="flex items-center gap-1 text-[13px] font-medium text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                            className={`flex items-center gap-1 text-sm font-medium transition-colors ${currentPage === 1
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-500 hover:text-[#7C3AED]'
+                                }`}
                         >
-                            <ChevronLeft size={16} /> Previous
+                            <ChevronLeft size={18} /> <span className="hidden sm:inline">Previous</span>
                         </button>
                         
-                        {Array.from({ length: totalPages }).map((_, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => handlePageChange(idx + 1)}
-                                className={cn(
-                                    "w-8 h-8 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all",
-                                    currentPage === idx + 1 ? "bg-[#6366F1] text-white shadow-lg shadow-blue-500/30" : "text-gray-400 hover:bg-gray-100"
-                                )}
-                            >
-                                {idx + 1}
-                            </button>
-                        ))}
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: totalPages }).map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handlePageChange(idx + 1)}
+                                    className={`w-9 h-9 flex items-center justify-center rounded-[12px] text-sm font-bold transition-all ${currentPage === idx + 1
+                                        ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
+                                        : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            ))}
+                        </div>
                         
                         <button 
                             disabled={currentPage === totalPages}
                             onClick={() => handlePageChange(currentPage + 1)}
-                            className="flex items-center gap-1 text-[13px] font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
+                            className={`flex items-center gap-1 text-sm font-medium transition-colors ${currentPage === totalPages
+                                ? 'text-gray-300 cursor-not-allowed'
+                                : 'text-gray-500 hover:text-[#7C3AED]'
+                                }`}
                         >
-                            Next <ChevronRight size={16} />
+                            <span className="hidden sm:inline">Next</span> <ChevronRight size={18} />
                         </button>
                     </div>
                 )}
