@@ -5,7 +5,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
-import { Plus, ChevronDown, Loader } from 'lucide-react';
+import { Plus, ChevronDown, Loader, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
@@ -290,40 +290,36 @@ const AdminCoursesPage = () => {
 
                                 {/* Enhanced Pagination */}
                                 {filteredCourses.length > itemsPerPage && (
-                                    <div className="flex items-center justify-center sm:justify-end gap-1.5 sm:gap-2 mt-10 pb-6 overflow-hidden">
+                                    <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 mt-10 pb-6">
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                             disabled={currentPage === 1}
-                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${currentPage === 1
-                                                ? 'text-gray-200 cursor-not-allowed'
-                                                : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
+                                            className={`flex items-center gap-1 px-2 sm:px-3 py-2 text-sm font-medium transition-colors ${currentPage === 1
+                                                ? 'text-gray-300 cursor-not-allowed'
+                                                : 'text-gray-500 hover:text-[#7C3AED]'
                                                 }`}
                                         >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                            <ChevronLeft size={18} />
+                                            <span className="hidden sm:inline">Previous</span>
                                         </button>
 
-                                        <div className="flex items-center gap-1 sm:gap-2">
+                                        <div className="flex items-center gap-1">
                                             {(() => {
                                                 const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
                                                 const pages = [];
-
-                                                // Responsive page limit: show fewer on mobile
                                                 const maxVisible = window.innerWidth < 640 ? 3 : 5;
                                                 let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
                                                 let end = Math.min(totalPages, start + maxVisible - 1);
-
-                                                if (end - start + 1 < maxVisible) {
-                                                    start = Math.max(1, end - maxVisible + 1);
-                                                }
+                                                if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
                                                 for (let i = start; i <= end; i++) {
                                                     pages.push(
                                                         <button
                                                             key={i}
                                                             onClick={() => setCurrentPage(i)}
-                                                            className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-[13px] font-black rounded-xl transition-all duration-300 ${currentPage === i
-                                                                ? 'bg-gradient-to-tr from-[#5D5FEF] to-[#3758EE] text-white shadow-xl shadow-blue-500/25 scale-105'
-                                                                : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                                            className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-[12px] transition-all ${currentPage === i
+                                                                ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
+                                                                : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
                                                                 }`}
                                                         >
                                                             {i}
@@ -337,12 +333,13 @@ const AdminCoursesPage = () => {
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / itemsPerPage), prev + 1))}
                                             disabled={currentPage === Math.ceil(filteredCourses.length / itemsPerPage)}
-                                            className={`p-2.5 flex items-center justify-center rounded-xl transition-all ${currentPage === Math.ceil(filteredCourses.length / itemsPerPage)
-                                                ? 'text-gray-200 cursor-not-allowed'
-                                                : 'text-gray-600 hover:bg-[#5D5FEF]/5 hover:text-[#5D5FEF] border border-transparent hover:border-[#5D5FEF]/10'
+                                            className={`flex items-center gap-1 px-2 sm:px-3 py-2 text-sm font-medium transition-colors ${currentPage === Math.ceil(filteredCourses.length / itemsPerPage)
+                                                ? 'text-gray-300 cursor-not-allowed'
+                                                : 'text-gray-500 hover:text-[#7C3AED]'
                                                 }`}
                                         >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                            <span className="hidden sm:inline">Next</span>
+                                            <ChevronRight size={18} />
                                         </button>
                                     </div>
                                 )}
