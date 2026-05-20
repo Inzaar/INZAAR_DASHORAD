@@ -49,7 +49,7 @@ function BatchList({ onClose, moderatorId }) {
   });
   
   const courses = coursesResponse?.data?.data || [];
-  
+
   const filteredBatches = batches.filter(batch => {
     const matchesSearch = batch.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCourse = selectedCourseId ? batch.courseId?._id === selectedCourseId : true;
@@ -71,7 +71,7 @@ function BatchList({ onClose, moderatorId }) {
       {/* Course Selection */}
       <div className='flex flex-col gap-[8px]'>
         <label className='font-medium text-[14px] sm:text-[16px] text-[#1A1A1A]'>Course name</label>
-        <select 
+        <select
           value={selectedCourseId}
           onChange={(e) => setSelectedCourseId(e.target.value)}
           className="w-full h-[44px] sm:h-[48px] border border-[#E4E4E4] rounded-[6px] px-4 text-[#A7A7A7] outline-none appearance-none bg-no-repeat bg-[right_1rem_center]"
@@ -117,7 +117,7 @@ function BatchList({ onClose, moderatorId }) {
               />
               <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A7A7A7]" />
             </div>
-            <GradiantButton 
+            <GradiantButton
               onClick={() => {
                 setSearchQuery(inputValue);
                 setCurrentPage(1);
@@ -161,34 +161,34 @@ function BatchList({ onClose, moderatorId }) {
               {!isLoading && !isError && filteredBatches
                 .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                 .map((batch, index) => {
-                const isActive = batch.status === 'published';
-                const statusLabel = isActive ? 'Active' : 'Inactive';
-                const dateDisplay = batch.createdAt ? format(new Date(batch.createdAt), 'dd-MMM-yyyy') : 'N/A';
-                const mentorDisplay = batch.assignedModerator?.fullName || batch.assignedModerator?.name || batch.assignedModerator?.username || 'N/A';
+                  const isActive = batch.status === 'published';
+                  const statusLabel = isActive ? 'Active' : 'Inactive';
+                  const dateDisplay = batch.createdAt ? format(new Date(batch.createdAt), 'dd-MMM-yyyy') : 'N/A';
+                  const mentorDisplay = batch.assignedModerator?.fullName || batch.assignedModerator?.name || batch.assignedModerator?.username || 'N/A';
 
-                return (
-                  <div key={batch._id || index} className="grid grid-cols-6 items-center px-4 py-4 border-b border-[#EDEDED] last:border-0 text-[13px] sm:text-[14px] text-[#4B5563]">
-                    <div className="font-medium text-[#1A1A1A]">{batch.name}</div>
-                    <div className="text-center">{batch.limit || 'N/A'}</div>
-                    <div className="text-center">{dateDisplay}</div>
-                    <div className="text-center">{mentorDisplay}</div>
-                    <div className={`text-center font-medium ${isActive ? "text-[#3758EE]" : "text-[#EF4444]"}`}>
-                      {statusLabel}
+                  return (
+                    <div key={batch._id || index} className="grid grid-cols-6 items-center px-4 py-4 border-b border-[#EDEDED] last:border-0 text-[13px] sm:text-[14px] text-[#4B5563]">
+                      <div className="font-medium text-[#1A1A1A]">{batch.name}</div>
+                      <div className="text-center">{batch.limit || 'N/A'}</div>
+                      <div className="text-center">{dateDisplay}</div>
+                      <div className="text-center">{mentorDisplay}</div>
+                      <div className={`text-center font-medium ${isActive ? "text-[#3758EE]" : "text-[#EF4444]"}`}>
+                        {statusLabel}
+                      </div>
+                      <div className="text-right">
+                        <GradiantButton
+                          onClick={() => assignMutation.mutate(batch._id)}
+                          disabled={assignMutation.isPending || batch.assignedModerator?._id === moderatorId}
+                          className={`px-3 sm:px-4 py-1.5 rounded-[4px] text-white text-[11px] sm:text-xs font-semibold ${isActive ? "opacity-100" : "opacity-30"}`}
+                        >
+                          {assignMutation.isPending && assignMutation.variables === batch._id ? "Assigning..." :
+                            batch.assignedModerator?._id === moderatorId ? "Assigned" :
+                              batch.assignedModerator ? "Replace Moderator" : "Assign Batch"}
+                        </GradiantButton>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <GradiantButton 
-                        onClick={() => assignMutation.mutate(batch._id)}
-                        disabled={assignMutation.isPending || batch.assignedModerator?._id === moderatorId}
-                        className={`px-3 sm:px-4 py-1.5 rounded-[4px] text-white text-[11px] sm:text-xs font-semibold ${isActive ? "opacity-100" : "opacity-30"}`}
-                      >
-                        {assignMutation.isPending && assignMutation.variables === batch._id ? "Assigning..." : 
-                         batch.assignedModerator?._id === moderatorId ? "Assigned" : 
-                         batch.assignedModerator ? "Replace Moderator" : "Assign Batch"}
-                      </GradiantButton>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           </div>
         </div>
@@ -199,8 +199,8 @@ function BatchList({ onClose, moderatorId }) {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
-                    href="#" 
+                  <PaginationPrevious
+                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       setCurrentPage(prev => Math.max(1, prev - 1));
@@ -210,8 +210,8 @@ function BatchList({ onClose, moderatorId }) {
                 </PaginationItem>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
                   <PaginationItem key={pageNumber}>
-                    <PaginationLink 
-                      href="#" 
+                    <PaginationLink
+                      href="#"
                       isActive={currentPage === pageNumber}
                       onClick={(e) => {
                         e.preventDefault();
@@ -223,8 +223,8 @@ function BatchList({ onClose, moderatorId }) {
                   </PaginationItem>
                 ))}
                 <PaginationItem>
-                  <PaginationNext 
-                    href="#" 
+                  <PaginationNext
+                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       setCurrentPage(prev => Math.min(totalPages, prev + 1));

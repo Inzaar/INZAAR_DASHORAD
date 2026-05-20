@@ -1,17 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { Plus, Minus, ChevronDown, Loader2 } from 'lucide-react';
 import { getAllCourses, getCourseDetails } from '@/api/course';
-import { useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { submitSupportIssue } from '@/api/support';
+import toast from 'react-hot-toast';
 
 const HelpCenter = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('contact');
     const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [issue, setIssue] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            setName(user.name || '');
+            setEmail(user.email || '');
+        }
+    }, [user]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!name.trim() || !email.trim() || !issue.trim()) {
+            toast.error("Please fill in all fields");
+            return;
+        }
+
+        setSubmitting(true);
+        const toastId = toast.loading("Sending your message to admin support...");
+        try {
+            const response = await submitSupportIssue({ name, email, issue });
+            if (response && response.success) {
+                toast.success("Support ticket sent successfully to admin!", { id: toastId });
+                setIssue('');
+            } else {
+                toast.error(response?.message || "Failed to send support request", { id: toastId });
+            }
+        } catch (error) {
+            console.error("Support submission error:", error);
+            toast.error(error?.response?.data?.message || "An error occurred while sending your request.", { id: toastId });
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const [complaintType, setComplaintType] = useState({
         course: false,
@@ -190,12 +230,15 @@ const HelpCenter = () => {
                                             <p className="text-gray-500 text-sm">Fill out the form below to get in touch with our support team.</p>
                                         </div>
 
-                                        <form className="space-y-6">
+                                        <form onSubmit={handleSubmit} className="space-y-6">
                                             <div className="space-y-2">
                                                 <label className="text-sm font-semibold text-gray-700">Name</label>
                                                 <input
                                                     type="text"
-                                                    defaultValue="Ruben Herwitz"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    required
+                                                    placeholder="Your name"
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
@@ -204,7 +247,10 @@ const HelpCenter = () => {
                                                 <label className="text-sm font-semibold text-gray-700">Email</label>
                                                 <input
                                                     type="email"
-                                                    defaultValue="rubenherwitz@gmail.com"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    required
+                                                    placeholder="Your email address"
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
@@ -334,14 +380,27 @@ const HelpCenter = () => {
                                                 <label className="text-sm font-semibold text-gray-700">Issue / Question</label>
                                                 <textarea
                                                     required
+                                                    value={issue}
+                                                    onChange={(e) => setIssue(e.target.value)}
                                                     placeholder="Discuss your issue or question here..."
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 min-h-[160px] resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
                                             <div className="flex justify-end pt-4">
-                                                <GradiantButton className="px-10 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-purple-500/20">
-                                                    Submit
+                                                <GradiantButton 
+                                                    type="submit" 
+                                                    disabled={submitting}
+                                                    className="px-10 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                                                >
+                                                    {submitting ? (
+                                                        <>
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                            Submitting...
+                                                        </>
+                                                    ) : (
+                                                        "Submit"
+                                                    )}
                                                 </GradiantButton>
                                             </div>
                                         </form>
