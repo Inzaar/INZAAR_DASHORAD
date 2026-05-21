@@ -56,7 +56,10 @@ const AppRouter = () => {
                 <Route path="/admin-notifications" element={<AdminNotification />} />
                 <Route path="/admin-add-course" element={<AddCoursePage />} />
                 <Route path="/admin-moderators" element={<ModeratorsPage />} />
-                <Route path="/student-profiles" element={<StudentProfilesPage />} />
+                <Route path="/student-profiles" element={<StudentProfilesPage genderFilter="All" />} />
+                <Route path="/student-profiles/all" element={<StudentProfilesPage genderFilter="All" />} />
+                <Route path="/student-profiles/male" element={<StudentProfilesPage genderFilter="Male" />} />
+                <Route path="/student-profiles/female" element={<StudentProfilesPage genderFilter="Female" />} />
                 <Route path="/admin-courses" element={<AdminCoursesPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/moderator-reports" element={<ModeratorReportsPage />} />

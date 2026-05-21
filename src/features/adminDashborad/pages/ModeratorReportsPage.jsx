@@ -14,8 +14,11 @@ import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import axiosInstance from '@/api/axiosInstance';
 
+import { useAuth } from '@/context/AuthContext';
+
 const ModeratorReportsPage = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -60,6 +63,11 @@ const ModeratorReportsPage = () => {
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 5);
+
+            if (user?.role === 'moderator' && user?.gender) {
+                params.append('gender', user.gender);
+            }
+
             if (tableStatus) params.append('status', tableStatus);
             if (tableFrom) params.append('from', tableFrom);
             if (tableTo) params.append('to', tableTo);

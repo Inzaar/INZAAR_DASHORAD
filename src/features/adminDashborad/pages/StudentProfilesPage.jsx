@@ -3,10 +3,12 @@ import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
+import ChartStatsCard from '../components/ChartStatsCard';
 import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff, Loader } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getStudentProfiles, adminCreateStudent } from '@/api/user';
+import { useAuth } from '@/context/AuthContext';
 import {
     Pagination,
     PaginationContent,
@@ -17,7 +19,9 @@ import {
     PaginationPrevious,
 } from "@/components/ui/Pagination";
 
-const StudentProfilesPage = () => {
+const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
+    const { user } = useAuth();
+    const genderFilter = (user?.role === 'moderator' && user?.gender) ? user.gender : propGenderFilter;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
@@ -57,7 +61,7 @@ const StudentProfilesPage = () => {
     const fetchStudentsData = async () => {
         try {
             setIsLoading(true);
-            const res = await getStudentProfiles(currentPage, 10, searchText, statusFilter, fromDate, toDate, searchType);
+            const res = await getStudentProfiles(currentPage, 10, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
             if (res?.data) {
                 setStudents(res.data.students || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -74,6 +78,12 @@ const StudentProfilesPage = () => {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        setCurrentPage(1);
+        setStatusFilter("");
+        fetchStudentsData();
+    }, [genderFilter]);
 
     useEffect(() => {
         fetchStudentsData();
@@ -126,10 +136,10 @@ const StudentProfilesPage = () => {
     const pendingCount = students.filter(s => s.status === 'Pending').length;
 
     const stats = [
-        { title: "Total Registered Students", value: (statsData?.totalRegistered || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
+        { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}Students`, value: (statsData?.totalRegistered || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
         { title: "Active Students", value: (statsData?.active || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "Active" },
         { title: "Inactive Students", value: (statsData?.inactive || 0).toString(), trend: "- 2.4%", trendDirection: "down", trendText: "vs last month", type: "In-active" },
-        { title: "Pending Students", value: (statsData?.pending || 0).toString(), trend: "+ 1.2%", trendDirection: "up", trendText: "vs last month", isGray: true, type: "Pending" },
+        { title: `Pending ${genderFilter === 'All' ? '' : genderFilter + ' '}Students`, value: (statsData?.pending || 0).toString(), trend: "+ 1.2%", trendDirection: "up", trendText: "vs last month", isGray: true, type: "Pending" },
     ];
 
     return (
@@ -160,8 +170,8 @@ const StudentProfilesPage = () => {
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">Students</h2>
-                                    <p className="text-gray-500 text-[16px]">Manage All Your Students</p>
+                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Students' : `${genderFilter} Students`}</h2>
+                                    <p className="text-gray-500 text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Students</p>
                                 </div>
                                 <GradiantButton
                                     onClick={() => setIsAddModalOpen(true)}
@@ -174,7 +184,7 @@ const StudentProfilesPage = () => {
                                 </GradiantButton>
                             </div>
 
-                            {/* Stats Grid */}
+                            {/* 4 Basic Stats Grid (Always shown) */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
@@ -191,6 +201,32 @@ const StudentProfilesPage = () => {
                                 ))}
                             </div>
 
+                            {/* 2 Chart Stats Grid (Shown only for All Students) */}
+                            {genderFilter === 'All' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <ChartStatsCard 
+                                        title="Total Male Students"
+                                        total={statsData?.genderBreakdown?.male?.total || 0}
+                                        active={statsData?.genderBreakdown?.male?.active || 0}
+                                        inactive={statsData?.genderBreakdown?.male?.inactive || 0}
+                                        trend="2.4%"
+                                        trendDirection="up"
+                                        trendText="vs last month"
+                                        color="#00C896"
+                                    />
+                                    <ChartStatsCard 
+                                        title="Total Female Students"
+                                        total={statsData?.genderBreakdown?.female?.total || 0}
+                                        active={statsData?.genderBreakdown?.female?.active || 0}
+                                        inactive={statsData?.genderBreakdown?.female?.inactive || 0}
+                                        trend="2.4%"
+                                        trendDirection="up"
+                                        trendText="vs last month"
+                                        color="#00C896"
+                                    />
+                                </div>
+                            )}
+
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
                                 <div className="mb-6 flex justify-between items-center">
@@ -205,20 +241,20 @@ const StudentProfilesPage = () => {
                                 </div>
 
                                 {/* Filters - Desktop */}
-                                <div className="hidden xl:flex flex-row gap-4 mb-8">
+                                <div className="hidden xl:flex flex-row items-end gap-6 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
-                                        <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
-                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                                        <p className="text-xs text-gray-400 font-bold tracking-wide">ADVANCED SEARCH</p>
+                                        <div className="flex items-center bg-white border border-gray-200 rounded-md p-1 transition-all duration-200 group focus-within:ring-1 focus-within:ring-blue-500/50 focus-within:border-blue-500 h-[42px]">
+                                            <Search className="text-gray-400 w-[18px] h-[18px] ml-2 mr-2 shrink-0" />
                                             <input
                                                 type="text"
-                                                placeholder={`Search by ${searchType.toLowerCase()}`}
-                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                placeholder="Search by name"
+                                                className="flex-1 bg-transparent text-[13px] text-gray-700 placeholder:text-gray-400 focus:outline-none min-w-0"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
                                                 onKeyDown={handleSearchKeyDown}
                                             />
-                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                            <div className="flex items-center gap-1.5 shrink-0 mr-1">
                                                 <button
                                                     onClick={() => {
                                                         if (searchType !== 'PHONE') {
@@ -228,7 +264,7 @@ const StudentProfilesPage = () => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded transition-all duration-200 tracking-wide ${searchType === 'PHONE' ? 'bg-[#7E57FF] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -241,7 +277,7 @@ const StudentProfilesPage = () => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded transition-all duration-200 tracking-wide ${searchType === 'NAME' ? 'bg-[#7E57FF] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -250,32 +286,32 @@ const StudentProfilesPage = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">From</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">From</span>
                                         <input
                                             type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
                                             value={fromDate}
                                             onChange={(e) => setFromDate(e.target.value)}
                                         />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">To</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">To</span>
                                         <input
                                             type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
                                             value={toDate}
                                             onChange={(e) => setToDate(e.target.value)}
                                         />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
-                                        <div className="relative">
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Status</span>
+                                        <div className="relative w-[150px]">
                                             <select
                                                 value={statusFilter}
                                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                                className="w-full px-3 h-[42px] bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
                                             >
                                                 <option value="">All Statuses</option>
                                                 <option value="Active">Active</option>
@@ -295,10 +331,10 @@ const StudentProfilesPage = () => {
                                             setToDate("");
                                             setCurrentPage(1);
                                         }}
-                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                        className="flex items-center gap-2 px-4 h-[42px] bg-[#E2E4E9] text-[#6A6F78] font-bold text-[13px] rounded-md hover:bg-gray-300 transition-colors whitespace-nowrap ml-auto"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
-                                        Clear
+                                        Clear Filter
                                     </button>
                                 </div>
 
@@ -542,8 +578,8 @@ const StudentProfilesPage = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="flex justify-center items-center mt-12">
-                                    <Pagination>
+                                <div className="flex justify-end items-center mt-12 mb-2">
+                                    <Pagination className="justify-end mx-0">
                                         <PaginationContent className="gap-2">
                                             <PaginationItem>
                                                 <PaginationPrevious
@@ -656,6 +692,21 @@ const StudentProfilesPage = () => {
                                         onChange={(e) => setNewStudent({ ...newStudent, lastname: e.target.value })}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
+                                <select
+                                    required
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newStudent.gender || ""}
+                                    onChange={(e) => setNewStudent({ ...newStudent, gender: e.target.value })}
+                                >
+                                    <option value="" disabled>Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
 
                             <div className="space-y-1.5">

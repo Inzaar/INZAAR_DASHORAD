@@ -14,9 +14,11 @@ import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import SharedStudentTable from '@/components/shared/SharedStudentTable';
 import axiosInstance from '@/api/axiosInstance';
+import { useAuth } from '@/context/AuthContext';
 
 const ReportsPage = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [searchType, setSearchType] = useState('NAME');
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
@@ -65,6 +67,10 @@ const ReportsPage = () => {
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 5);
+
+            if (user?.role === 'moderator' && user?.gender) {
+                params.append('gender', user.gender);
+            }
 
             // Apply table filters
             if (tableStatus) params.append('status', tableStatus);

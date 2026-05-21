@@ -11,6 +11,7 @@ function Sidebar({ className, onClose }) {
   const location = useLocation(); // Gets the current URL (e.g., /profile)
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [isReportsExpanded, setIsReportsExpanded] = useState(false);
+  const [isStudentsExpanded, setIsStudentsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
@@ -56,6 +57,9 @@ function Sidebar({ className, onClose }) {
     '/admin-moderators': 'Moderators',
     '/moderator-details': 'Moderators',
     '/student-profiles': 'Student Profiles',
+    '/student-profiles/all': 'All Students',
+    '/student-profiles/male': 'Male Students',
+    '/student-profiles/female': 'Female Students',
     '/admin-courses': 'Courses Management',
     '/reports': 'Student Reports',
     '/moderator-reports': 'Moderator Reports',
@@ -92,6 +96,9 @@ function Sidebar({ className, onClose }) {
       if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName) || currentName === 'Reports & Logs') {
         setIsReportsExpanded(true);
       }
+      if (['All Students', 'Male Students', 'Female Students'].includes(currentName) || currentName === 'Student Profiles') {
+        setIsStudentsExpanded(true);
+      }
     }
   }, [location.pathname]);
 
@@ -110,6 +117,16 @@ function Sidebar({ className, onClose }) {
   const handleItemClick = (itemName) => {
     if (itemName === 'Reports & Logs') {
       setIsReportsExpanded(!isReportsExpanded);
+      return;
+    }
+    if (itemName === 'Student Profiles') {
+      if (user?.role === 'moderator') {
+        setActiveItem('Student Profiles');
+        navigate('/student-profiles');
+        if (onClose) onClose();
+        return;
+      }
+      setIsStudentsExpanded(!isStudentsExpanded);
       return;
     }
 
@@ -150,6 +167,17 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
+    if (['All Students', 'Male Students', 'Female Students'].includes(itemName)) {
+      const subRoutes = {
+        'All Students': '/student-profiles/all',
+        'Male Students': '/student-profiles/male',
+        'Female Students': '/student-profiles/female'
+      };
+      navigate(subRoutes[itemName]);
+      if (onClose) onClose();
+      return;
+    }
+
     const path = Object.keys(pathToName).find(key => pathToName[key] === itemName);
     if (path) {
       navigate(path);
@@ -177,15 +205,92 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isReportsExpanded && (
             <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
-              <Sideabrbbutton isActive={activeItem === 'Student Reports'} onClick={() => handleItemClick('Student Reports')}>
+              <button 
+                onClick={() => handleItemClick('Student Reports')}
+                className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'Student Reports' ? 'text-[#3758EE] font-medium' : 'text-[#6A6F78] hover:text-[#3758EE]'}`}
+              >
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'Student Reports' ? 'bg-[#3758EE]' : 'bg-gray-300'}`}></span>
                 Student Reports
-              </Sideabrbbutton>
-              <Sideabrbbutton isActive={activeItem === 'Moderator Reports'} onClick={() => handleItemClick('Moderator Reports')}>
+              </button>
+              <button 
+                onClick={() => handleItemClick('Moderator Reports')}
+                className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'Moderator Reports' ? 'text-[#3758EE] font-medium' : 'text-[#6A6F78] hover:text-[#3758EE]'}`}
+              >
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'Moderator Reports' ? 'bg-[#3758EE]' : 'bg-gray-300'}`}></span>
                 Moderator Reports
-              </Sideabrbbutton>
-              <Sideabrbbutton isActive={activeItem === 'Course Reports'} onClick={() => handleItemClick('Course Reports')}>
+              </button>
+              <button 
+                onClick={() => handleItemClick('Course Reports')}
+                className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'Course Reports' ? 'text-[#3758EE] font-medium' : 'text-[#6A6F78] hover:text-[#3758EE]'}`}
+              >
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'Course Reports' ? 'bg-[#3758EE]' : 'bg-gray-300'}`}></span>
                 Course Reports
-              </Sideabrbbutton>
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    if (item === 'Student Profiles') {
+      if (user?.role === 'moderator') {
+        const isAnyStudentActive = ['All Students', 'Male Students', 'Female Students', 'Student Profiles'].includes(activeItem);
+        return (
+          <Sideabrbbutton
+            key={item}
+            isActive={isAnyStudentActive}
+            onClick={(e) => {
+              e.preventDefault();
+              handleItemClick('Student Profiles');
+            }}
+          >
+            Student Profiles
+          </Sideabrbbutton>
+        );
+      }
+
+      const isAnyStudentActive = ['All Students', 'Male Students', 'Female Students', 'Student Profiles'].includes(activeItem);
+      return (
+        <div key={item} className="w-full flex flex-col gap-1">
+          <Sideabrbbutton
+            isActive={isAnyStudentActive}
+            onClick={(e) => {
+              e.preventDefault();
+              handleItemClick(item);
+            }}
+          >
+            <div className="flex items-center justify-between w-full pr-2">
+              <span>{item}</span>
+              {isStudentsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </Sideabrbbutton>
+          {isStudentsExpanded && (
+            <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
+              {user?.role === 'admin' && (
+                <>
+                  <button 
+                    onClick={() => handleItemClick('All Students')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'All Students' ? 'text-[#6A6F78] font-medium' : 'text-[#6A6F78] hover:text-[#6A6F78]'}`}
+                  >
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'All Students' ? 'bg-[#6A6F78]' : 'bg-gray-300'}`}></span>
+                    All Students
+                  </button>
+                  <button 
+                    onClick={() => handleItemClick('Male Students')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'Male Students' ? 'text-[#3758EE] font-medium' : 'text-[#6A6F78] hover:text-[#3758EE]'}`}
+                  >
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'Male Students' ? 'bg-[#3758EE]' : 'bg-[#3758EE] opacity-50'}`}></span>
+                    Male Students
+                  </button>
+                  <button 
+                    onClick={() => handleItemClick('Female Students')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors ${activeItem === 'Female Students' ? 'text-[#A269FF] font-medium' : 'text-[#6A6F78] hover:text-[#A269FF]'}`}
+                  >
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 ${activeItem === 'Female Students' ? 'bg-[#A269FF]' : 'bg-[#A269FF] opacity-50'}`}></span>
+                    Female Students
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
