@@ -51,6 +51,7 @@ const ModeratorsPage = () => {
         email: '',
         phone: '',
         password: '',
+        gender: '',
         role: 'moderator',
         assignedFeatures: []
     });
@@ -165,6 +166,7 @@ const ModeratorsPage = () => {
                 email: '',
                 phone: '',
                 password: '',
+                gender: '',
                 role: 'moderator',
                 assignedFeatures: []
             });
@@ -684,6 +686,23 @@ const ModeratorsPage = () => {
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
+                                <div className="relative">
+                                    <select
+                                        required
+                                        value={newModerator.gender}
+                                        onChange={(e) => setNewModerator({ ...newModerator, gender: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+                                    >
+                                        <option value="" disabled>Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 </div>
                             </div>
 
