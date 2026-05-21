@@ -42,9 +42,9 @@ function RegisterPageP1() {
   const handleNext = (e) => {
     e.preventDefault();
     
-    // Basic validation for fields
-    if (!formData.firstname || !formData.lastname || !formData.username || !formData.email || !formData.password || !formData.phone) {
-      setError('Please fill in all required fields (including Second Name).');
+    // Basic validation for fields (lastname is optional)
+    if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
+      setError('Please fill in all required fields.');
       return;
     }
 

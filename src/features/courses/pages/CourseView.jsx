@@ -202,7 +202,7 @@ const CourseView = () => {
             }
         };
         fetchAllNotes();
-    }, [courseData?.id, user?.role]);
+    }, [courseData?.courseId || courseData?._id, user?.role]);
 
     // Build lectures list from API data
     const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
@@ -280,6 +280,10 @@ const CourseView = () => {
     useEffect(() => {
         setProgress(0);
         lastReportedRef.current = 0;
+        if (currentLecture?.type === 'Quiz') {
+            playerRef.current = null;
+            return;
+        }
         const interval = setInterval(() => {
             if (playerRef.current && playerRef.current.getCurrentTime) {
                 const cur = playerRef.current.getCurrentTime();
@@ -949,14 +953,12 @@ const CourseView = () => {
                             )}
 
                             {/* Lecture List Table Section */}
-                            {!isQuizView && (
-                                <LectureListTable
-                                    lectures={lectures}
-                                    notes={notes}
-                                    onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)}
-                                    currentLectureId={currentLecture?.id || currentLecture?._id}
-                                />
-                            )}
+                            <LectureListTable
+                                lectures={lectures}
+                                notes={notes}
+                                onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)}
+                                currentLectureId={currentLecture?.id || currentLecture?._id}
+                            />
                         </div>
                     </main>
                 </div>

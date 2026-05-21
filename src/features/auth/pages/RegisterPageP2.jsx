@@ -45,9 +45,9 @@ function RegisterPageP2() {
     setError('');
 
     try {
-      // Final validation
-      if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress || !formData.referralSource) {
-        throw new Error('Please fill in all required fields (Gender, DOB, Nationality, Address, and Referral Source).');
+      // Final validation (referralSource is optional)
+      if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress) {
+        throw new Error('Please fill in all required fields (Gender, DOB, Nationality, and Address).');
       }
 
       const res = await registerUser(formData);
