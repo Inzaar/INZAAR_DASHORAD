@@ -16,6 +16,8 @@ import AssignModeratorModal from "../components/student/AssignModeratorModal";
 import { assignUserRole } from "@/api/user";
 import toast from "react-hot-toast";
 import { Check } from "lucide-react";
+import { BsChatDotsFill } from "react-icons/bs";
+import { FaWhatsapp } from "react-icons/fa";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -182,12 +184,30 @@ const ModeratorDetails = () => {
                   <h1 className=" text-xl font-semibold text-gray-700">
                     Profile
                   </h1>
-                  <GradiantButton
-                    onClick={() => navigate('/admin-moderators')}
-                    className=" bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm md:mt-0"
-                  >
-                    Back to list
-                  </GradiantButton>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
+                      Send Message <BsChatDotsFill className="text-white/90" size={14} />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (profileData?.user?.phone) {
+                          const phone = profileData.user.phone.replace(/\D/g, '');
+                          window.open(`https://wa.me/${phone}`, '_blank');
+                        } else {
+                          toast.error("Phone number not available");
+                        }
+                      }}
+                      className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm"
+                    >
+                      WhatsApp <FaWhatsapp size={16} />
+                    </button>
+                    <GradiantButton
+                      onClick={() => navigate('/admin-moderators')}
+                      className="bg-[#A892FF] hover:bg-[#937aff] text-white px-5 py-2 rounded-[4px] text-sm md:mt-0 font-medium shadow-sm"
+                    >
+                      Back to list
+                    </GradiantButton>
+                  </div>
                 </div>
 
                 <div className="flex flex-row justify-between items-center w-full gap-2 mt-4 sm:mt-0">

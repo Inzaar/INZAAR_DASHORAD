@@ -13,7 +13,8 @@ import StudentPerformance from "../components/student/StudentPerformance";
 import StudentCourseDashboard from "../components/student/StudentCourseDashboard";
 import StudentCertificates from "../components/student/StudentCertificates";
 import AssignModeratorModal from "../components/student/AssignModeratorModal";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { BsThreeDotsVertical, BsChatDotsFill } from "react-icons/bs";
+import { FaWhatsapp } from "react-icons/fa";
 
 const StudentDetailsPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -122,12 +123,30 @@ const StudentDetailsPage = () => {
                                 {/* Header Title and Back Button */}
                                 <div className="hidden sm:flex sm:flex-row justify-between items-start sm:items-center mb-4">
                                     <h1 className="text-xl font-semibold text-gray-700">Profile</h1>
-                                    <GradiantButton
-                                        onClick={() => navigate(-1)}
-                                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-[4px] text-sm mt-2 sm:mt-0"
-                                    >
-                                        Back to list
-                                    </GradiantButton>
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
+                                            Send Message <BsChatDotsFill className="text-white/90" size={14} />
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                if (profileData?.user?.phone) {
+                                                    const phone = profileData.user.phone.replace(/\D/g, '');
+                                                    window.open(`https://wa.me/${phone}`, '_blank');
+                                                } else {
+                                                    toast.error("Phone number not available");
+                                                }
+                                            }}
+                                            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm"
+                                        >
+                                            WhatsApp <FaWhatsapp size={16} />
+                                        </button>
+                                        <GradiantButton
+                                            onClick={() => navigate(-1)}
+                                            className="bg-[#A892FF] hover:bg-[#937aff] text-white px-5 py-2 rounded-[4px] text-sm mt-2 sm:mt-0 font-medium shadow-sm"
+                                        >
+                                            Back to list
+                                        </GradiantButton>
+                                    </div>
                                 </div>
 
                                 {/* Tabs and Actions Bar */}
