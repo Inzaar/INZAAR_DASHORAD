@@ -550,7 +550,7 @@ const AdminCalendar = () => {
                                 </div>
 
                                 {/* React Calendar Section */}
-                                <div className="bg-white rounded-xl border p-4 sm:p-6 shadow-sm flex-1 custom-calendar-container mb-6 flex flex-col overflow-hidden min-h-[500px]">
+                                <div className="bg-white rounded-xl border p-4 sm:p-6 shadow-sm flex-col custom-calendar-container mb-6 flex overflow-visible min-h-[500px] shrink-0">
 
                                     {/* Custom Header */}
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -741,6 +741,9 @@ const AdminCalendar = () => {
                 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+                /* Prevent the calendar itself from scrolling vertically, forcing it to expand */
+                .custom-scrollbar { overflow-y: hidden !important; }
 
                 @media (max-width: 1024px) {
                     .react-calendar__tile { min-height: 100px !important; }
