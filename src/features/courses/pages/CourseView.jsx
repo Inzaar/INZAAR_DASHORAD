@@ -51,6 +51,7 @@ const CourseView = () => {
     const [certData, setCertData] = useState(null);
     const [generatingCert, setGeneratingCert] = useState(false);
     const [currentLecture, setCurrentLecture] = useState(null);
+    const [shouldAutoplay, setShouldAutoplay] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
@@ -75,6 +76,17 @@ const CourseView = () => {
     const [newNote, setNewNote] = useState("");
     const [editingNoteId, setEditingNoteId] = useState(null);
     const [editingText, setEditingText] = useState("");
+    const [justAddedNoteId, setJustAddedNoteId] = useState(null);
+
+    useEffect(() => {
+        if (justAddedNoteId) {
+            const element = document.getElementById(`note-${justAddedNoteId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setJustAddedNoteId(null);
+            }
+        }
+    }, [notes, justAddedNoteId]);
 
     // Delete Confirmation Logic
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -104,6 +116,7 @@ const CourseView = () => {
     const adminMenuRef = useRef(null);
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
+    const videoSectionRef = useRef(null);
 
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
@@ -228,8 +241,14 @@ const CourseView = () => {
         playerRef.current = event.target;
         setDuration(event.target.getDuration());
         setVolume(event.target.getVolume());
-        if (currentLecture?.lastWatchedTime > 0) {
-            event.target.seekTo(currentLecture.lastWatchedTime, true);
+        if (shouldAutoplay) {
+            if (currentLecture?.lastWatchedTime > 0) {
+                event.target.seekTo(currentLecture.lastWatchedTime, true);
+            }
+            event.target.playVideo();
+            setShouldAutoplay(false);
+        } else {
+            event.target.pauseVideo();
         }
     };
 
@@ -369,7 +388,7 @@ const CourseView = () => {
                     videoTime: saved.videoTime
                 }].sort((a, b) => a.videoTime - b.videoTime));
                 setNewNote("");
-
+                setJustAddedNoteId(saved._id);
             } catch (error) {
                 console.error("Error saving note:", error);
             }
@@ -525,7 +544,7 @@ const CourseView = () => {
             )}
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className={`flex flex-col lg:flex-row px-2 sm:px-4 lg:px-6 xl:px-8 gap-4 flex-1 overflow-hidden relative`}>
+                <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
 
                     {isSidebarOpen && (
                         <div
@@ -629,7 +648,7 @@ const CourseView = () => {
                             <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
-                                <div className={`w-full lg:w-[70%] flex flex-col gap-4`}>
+                                <div ref={videoSectionRef} className={`w-full lg:w-[70%] flex flex-col gap-4`}>
                                     <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
                                     <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
                                         <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
@@ -655,15 +674,16 @@ const CourseView = () => {
                                                 />
                                             ) : currentLecture?.videoId ? (
                                                 <YouTube
-                                                    key={currentLecture.id}
                                                     videoId={currentLecture.videoId}
                                                     onReady={onPlayerReady}
                                                     opts={{
                                                         height: '100%',
                                                         width: '100%',
                                                         playerVars: {
-                                                            autoplay: 0,
+                                                            autoplay: shouldAutoplay ? 1 : 0,
                                                             rel: 0,
+                                                            start: currentLecture?.lastWatchedTime || 0,
+                                                            startSeconds: currentLecture?.lastWatchedTime || 0,
                                                         },
                                                     }}
                                                     className="w-full h-full"
@@ -818,7 +838,12 @@ const CourseView = () => {
                                                 {lectures.map((lecture, index) => (
                                                     <div
                                                         key={lecture.id}
-                                                        onClick={() => !lecture.isLocked && setCurrentLecture(lecture)}
+                                                        onClick={() => {
+                                                            if (!lecture.isLocked) {
+                                                                setShouldAutoplay(false);
+                                                                setCurrentLecture(lecture);
+                                                            }
+                                                        }}
                                                         className={`
                                                         relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
                                                         w-[260px] sm:w-[280px] lg:w-full
@@ -897,10 +922,10 @@ const CourseView = () => {
                             {!isQuizView && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
-                                    <div className="flex flex-col gap-3 mb-6">
+                                    <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                                         {notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
                                             notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).map(note => (
-                                                <div key={note.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center group/note">
+                                                <div key={note.id} id={`note-${note.id}`} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center group/note animate-in fade-in duration-200">
                                                     <div className="flex-1">
                                                         {editingNoteId === note.id ? (
                                                             <div className="flex gap-2">
@@ -956,7 +981,17 @@ const CourseView = () => {
                             <LectureListTable
                                 lectures={lectures}
                                 notes={notes}
-                                onWatch={(lecture) => !lecture.isLocked && setCurrentLecture(lecture)}
+                                onWatch={(lecture) => {
+                                    if (!lecture.isLocked) {
+                                        const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
+                                        setShouldAutoplay(true);
+                                        setCurrentLecture(lecture);
+                                        if (isSameVideo && playerRef.current) {
+                                            playerRef.current.playVideo();
+                                        }
+                                        videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }
+                                }}
                                 currentLectureId={currentLecture?.id || currentLecture?._id}
                             />
                         </div>
@@ -966,6 +1001,10 @@ const CourseView = () => {
                     __html: `
                     .no-scrollbar::-webkit-scrollbar { display: none; }
                     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 3px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
                 `}} />
             </div>
 
