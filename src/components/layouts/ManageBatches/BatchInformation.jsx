@@ -3,7 +3,9 @@ import { Hash, BookOpen, Users, Calendar } from 'lucide-react';
 
 const BatchInformation = ({ data }) => {
     // Derive display values from the real batch data prop
-    const batchId = data?.name || data?.batchId || (data?._id ? data._id.substring(0, 8) : 'N/A');
+    const batchIdBase = data?.name || data?.batchId || (data?._id ? data._id.substring(0, 8) : 'N/A');
+    const genderSuffix = (data?.genderType === 'Male' || data?.genderType === 'Female') ? ` (${data.genderType})` : '';
+    const batchId = `${batchIdBase}${genderSuffix}`;
     const courseName = data?.courseId?.title || data?.courseName || 'Unknown Course';
     const studentsCount = data?.studentsCount || (data?.enrolledCount !== undefined
         ? `${data.enrolledCount} / ${data?.limit || 50}`

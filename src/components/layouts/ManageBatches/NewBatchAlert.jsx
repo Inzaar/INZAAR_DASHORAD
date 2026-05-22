@@ -38,6 +38,7 @@ const NewBatchAlert = () => {
                             ...batch,
                             batchId: batch.name || batch._id.substring(0, 8),
                             courseName: batch.courseId?.title || 'Unknown Course',
+                            genderType: batch.genderType || 'Unassigned',
                             studentsCount: `${studentCount} / ${limit}`,
                             isOverCapacity: studentCount > limit,
                             createdDate: new Date(batch.createdAt).toLocaleDateString(),
@@ -125,7 +126,10 @@ const NewBatchAlert = () => {
                         </div>
                         <div className="min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Batch</p>
-                            <p className="text-[13px] font-bold text-gray-700">{batchData.batchId}</p>
+                            <p className="text-[13px] font-bold text-gray-700">
+                                {batchData.batchId}
+                                {(batchData.genderType === 'Male' || batchData.genderType === 'Female') ? ` (${batchData.genderType})` : ''}
+                            </p>
                         </div>
                     </div>
 

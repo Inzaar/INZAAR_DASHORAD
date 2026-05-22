@@ -104,11 +104,17 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
 
     if (!isOpen) return null;
 
-    // Filter moderators based on search
-    const filteredModerators = moderators.filter(mod =>
-        mod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        mod.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Filter moderators based on search and gender
+    const filteredModerators = moderators.filter(mod => {
+        // Enforce gender segregation: if batch is Male or Female, only show matching moderators
+        const requiredGender = batchData?.genderType;
+        if (requiredGender === 'Male' || requiredGender === 'Female') {
+            if (mod.gender !== requiredGender) return false;
+        }
+
+        return mod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               mod.email.toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
