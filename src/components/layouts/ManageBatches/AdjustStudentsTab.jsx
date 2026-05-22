@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, Users, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { getAllBatches, moveStudents } from '@/api/batch';
+import { getAllBatches, getBatchesByCourse, moveStudents } from '@/api/batch';
 
 // ── Toast component ──────────────────────────────────────────────────────────
 const Toast = ({ type, message }) => (
@@ -15,8 +15,9 @@ const Toast = ({ type, message }) => (
 );
 
 // ── Slider component ──────────────────────────────────────────────────────────
-const StudentSlider = ({ max, value, onChange, availableSpace }) => {
-    const effectiveMax = Math.min(max, availableSpace);
+const StudentSlider = ({ max, value, onChange }) => {
+    // Capacity check is ignored here on the frontend as per requirements
+    const effectiveMax = max;
     const fillPct = effectiveMax > 0 ? (value / effectiveMax) * 100 : 0;
     const color = '#5D5FEF'; 
 
@@ -78,16 +79,10 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                 return;
             }
             try {
-                // We use getAllBatches because getBatchesByCourse is returning 404 on the remote server.
-                // This ensures it works even if the backend is not fully updated.
-                const allBatches = await getAllBatches();
-                const apiData = allBatches || [];
+                const apiData = await getBatchesByCourse(courseId) || [];
                 
-                // Filter for batches belonging to the same course
-                const siblings = apiData.filter(b => {
-                    const bCourseId = b.courseId?._id || b.courseId;
-                    return String(bCourseId) === String(courseId) && String(b._id) !== String(sourceBatchId);
-                });
+                // Filter out the source batch
+                const siblings = apiData.filter(b => String(b._id) !== String(sourceBatchId));
 
                 // Map siblings to match the expected structure
                 const formattedSiblings = siblings.map(b => ({
@@ -169,18 +164,17 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                     </div>
                     {isSource ? (
                         <span className="px-2.5 py-1 bg-[#FEF3C7] text-[#D97706] rounded font-black text-[9px] uppercase tracking-tighter border border-[#FDE68A]">Source</span>
-                    ) : available === 0 ? (
+                    ) : available <= 0 ? (
                         <span className="px-2.5 py-1 bg-[#FEEFEE] text-[#EF4444] rounded font-black text-[9px] uppercase tracking-tighter border border-[#FECACA]">Full</span>
                     ) : null}
                 </div>
 
-                {!isSource && available > 0 && (
+                {!isSource && (
                     <div className="mb-5 px-1">
                         <StudentSlider 
                             max={sourceStudents} 
                             value={sliderVal} 
                             onChange={(v) => handleSliderChange(batch._id, v)} 
-                            availableSpace={available}
                         />
                     </div>
                 )}
@@ -188,7 +182,10 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                 <div className="grid grid-cols-3 gap-2 bg-gray-50/50 p-2.5 rounded-lg border border-gray-50">
                     <div>
                         <p className="text-gray-400 text-[8px] font-black uppercase tracking-widest mb-1">Students</p>
-                        <p className="text-gray-800 font-extrabold text-[13px]">{enrolled} / {limit}</p>
+                        <p className={`font-extrabold text-[13px] flex items-center gap-1 ${enrolled > limit ? 'text-red-500' : 'text-gray-800'}`}>
+                            {enrolled} / {limit}
+                            {enrolled > limit && <AlertCircle className="w-3 h-3 text-red-500" title="Capacity exceeded" />}
+                        </p>
                     </div>
                     <div className="text-center border-x border-gray-100">
                         <p className="text-gray-400 text-[8px] font-black uppercase tracking-widest mb-1">Moderator</p>
@@ -197,7 +194,7 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                     <div className="text-right">
                         <p className="text-gray-400 text-[8px] font-black uppercase tracking-widest mb-1">{isSource ? 'Status' : 'Space'}</p>
                         <p className={`font-extrabold text-[13px] ${isSource ? 'text-[#5D5FEF]' : (available === 0 ? 'text-red-500' : 'text-green-600')}`}>
-                            {isSource ? (batch.status || (batch.assignedModerator ? 'Active' : 'Pending')) : (available === 0 ? 'Full' : `${available} Left`)}
+                            {isSource ? (batch.status || (batch.assignedModerator ? 'Active' : 'Pending')) : (available <= 0 ? 'Full' : `${available} Left`)}
                         </p>
                     </div>
                 </div>

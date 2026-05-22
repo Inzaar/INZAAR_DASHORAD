@@ -29,15 +29,17 @@ const NewBatchAlert = () => {
                 const batchesWithStats = unassigned.reduce((acc, batch) => {
                     const studentCount = allEnrollments.filter(e => {
                         const eBatchId = e.batchId?._id || e.batchId;
-                        return eBatchId === batch._id;
+                        return String(eBatchId) === String(batch._id);
                     }).length;
 
                     if (studentCount > 0) {
+                        const limit = batch.limit || 50;
                         acc.push({
                             ...batch,
                             batchId: batch.name || batch._id.substring(0, 8),
                             courseName: batch.courseId?.title || 'Unknown Course',
-                            studentsCount: `${studentCount} / ${batch.limit || 50}`,
+                            studentsCount: `${studentCount} / ${limit}`,
+                            isOverCapacity: studentCount > limit,
                             createdDate: new Date(batch.createdAt).toLocaleDateString(),
                             status: 'Moderator Not Assigned'
                         });
@@ -129,7 +131,10 @@ const NewBatchAlert = () => {
 
                     <div className="flex flex-col justify-center">
                         <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Students</p>
-                        <p className="text-[13px] font-bold text-gray-700">{batchData.studentsCount}</p>
+                        <p className={`text-[13px] font-bold flex items-center gap-1 ${batchData.isOverCapacity ? 'text-red-500' : 'text-gray-700'}`}>
+                            {batchData.studentsCount}
+                            {batchData.isOverCapacity && <AlertCircle className="w-3 h-3 text-red-500" title="Capacity exceeded" />}
+                        </p>
                     </div>
 
                     <div className="flex flex-col justify-center">
