@@ -426,12 +426,86 @@ const ResourcesModal = ({ activeResources, onClose }) => {
 };
 
 
+const NotesModal = ({ activeNotes, onClose }) => {
+    if (!activeNotes) return null;
+
+    const { lectureNo, title, notesList } = activeNotes;
+
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-200 animate-in fade-in"
+                onClick={onClose}
+            />
+            
+            {/* Modal Container */}
+            <div 
+                className="relative bg-white rounded-[28px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_-15px_rgba(0,0,0,0.3)] border border-gray-100 p-6 flex flex-col animate-in zoom-in-95 fade-in duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                            <FileText size={20} />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                                {lectureNo} Notes
+                            </h3>
+                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{title}</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={onClose} 
+                        className="p-1.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all cursor-pointer"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Notes List */}
+                <div className="space-y-3 max-h-[350px] overflow-y-auto custom-modal-scrollbar text-left">
+                    {notesList.map((note, idx) => (
+                        <div 
+                            key={note.id || idx}
+                            className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 hover:bg-slate-100/50 transition-colors"
+                        >
+                            <div className="flex items-center justify-between">
+                                <span className="text-[#3758EE] font-mono text-xs bg-blue-50 px-2 py-0.5 rounded font-semibold">
+                                    {note.timestamp}
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                                {note.text}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    .custom-modal-scrollbar::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .custom-modal-scrollbar {
+                        -ms-overflow-style: none;  /* IE and Edge */
+                        scrollbar-width: none;  /* Firefox */
+                    }
+                `}} />
+            </div>
+        </div>,
+        document.body
+    );
+};
+
 const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [activeResources, setActiveResources] = useState(null);
     const [pdfPopover, setPdfPopover] = useState(null);
     const [viewingPdf, setViewingPdf] = useState(null);
+    const [activeNotes, setActiveNotes] = useState(null);
     const itemsPerPage = 5;
 
     // Filter lectures based on search term (lecture number)
@@ -537,12 +611,25 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
                                             </div>
                                         </td>
                                         <td className="py-6">
-                                            <div className="relative mx-auto w-[160px] h-10 bg-white border border-gray-100 rounded p-1.5 overflow-hidden">
-                                                <p className="text-[11px] text-gray-500 text-left line-clamp-2 leading-tight">
-                                                    {latestNote}
-                                                </p>
-                                                {latestNote !== 'N/A' && (
-                                                    <div className="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-l-[6px] border-t-blue-500 border-l-transparent"></div>
+                                            <div className="flex items-center justify-center">
+                                                {lectureNotes.length > 0 ? (
+                                                    <button
+                                                        onClick={() => setActiveNotes({
+                                                            lectureNo: displayLectureNo,
+                                                            title: lecture.title,
+                                                            notesList: lectureNotes
+                                                        })}
+                                                        className="px-4 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-xs active:scale-[0.98] cursor-pointer"
+                                                    >
+                                                        See Notes
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        disabled
+                                                        className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-150 rounded-xl cursor-not-allowed"
+                                                    >
+                                                        No Notes
+                                                    </button>
                                                 )}
                                             </div>
                                         </td>
@@ -652,11 +739,17 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
                 </button>
             </div>
             {activeResources && (
-                <ResourcesModal 
-                    activeResources={activeResources} 
-                    onClose={() => setActiveResources(null)} 
-                />
-            )}
+                                                <ResourcesModal 
+                                                    activeResources={activeResources} 
+                                                    onClose={() => setActiveResources(null)} 
+                                                />
+                                            )}
+                                            {activeNotes && (
+                                                <NotesModal 
+                                                    activeNotes={activeNotes} 
+                                                    onClose={() => setActiveNotes(null)} 
+                                                />
+                                            )}
             {pdfPopover && (
                 <PdfResourcesPopover
                     popover={pdfPopover}
