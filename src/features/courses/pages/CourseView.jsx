@@ -11,6 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
 import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, Upload, FileText, Volume2 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
 import LectureListTable from "../components/LectureListTable";
@@ -614,8 +615,44 @@ const CourseView = () => {
                                     </div>
                                 )}
 
-                                {user?.role !== 'admin' && (
-                                    <div className="flex gap-2">
+                                {!isAdminView && user?.role !== 'admin' && (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <button 
+                                            disabled={!courseData?.assignedModeratorPhone}
+                                            onClick={() => {
+                                                if (courseData?.assignedModeratorPhone) {
+                                                    const phone = courseData.assignedModeratorPhone.replace(/\D/g, '');
+                                                    window.open(`https://wa.me/${phone}`, '_blank');
+                                                }
+                                            }}
+                                            title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
+                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${
+                                                courseData?.assignedModeratorPhone 
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white" 
+                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                            }`}
+                                        >
+                                            WhatsApp <FaWhatsapp size={16} />
+                                        </button>
+                                        {/* Mobile icon-only WhatsApp button */}
+                                        <button 
+                                            disabled={!courseData?.assignedModeratorPhone}
+                                            onClick={() => {
+                                                if (courseData?.assignedModeratorPhone) {
+                                                    const phone = courseData.assignedModeratorPhone.replace(/\D/g, '');
+                                                    window.open(`https://wa.me/${phone}`, '_blank');
+                                                }
+                                            }}
+                                            title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
+                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${
+                                                courseData?.assignedModeratorPhone 
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white" 
+                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                            }`}
+                                        >
+                                            <FaWhatsapp size={20} />
+                                        </button>
+
                                         <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Enrolled New Course
                                         </GradiantButton>
