@@ -81,8 +81,17 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
             try {
                 const apiData = await getBatchesByCourse(courseId) || [];
                 
-                // Filter out the source batch
-                const siblings = apiData.filter(b => String(b._id) !== String(sourceBatchId));
+                // Filter out the source batch and mismatching genders
+                const sourceGender = batchData?.genderType || 'Unassigned';
+                const siblings = apiData.filter(b => {
+                    if (String(b._id) === String(sourceBatchId)) return false;
+                    
+                    const targetGender = b.genderType || 'Unassigned';
+                    if (targetGender !== 'Unassigned' && sourceGender !== 'Unassigned' && targetGender !== sourceGender) {
+                        return false;
+                    }
+                    return true;
+                });
 
                 // Map siblings to match the expected structure
                 const formattedSiblings = siblings.map(b => ({
@@ -157,7 +166,9 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                         </div>
                         <div>
                             <h5 className="font-bold text-gray-900 text-[14px] leading-none mb-1">
-                                {batch.name || batch.batchId || 'Unnamed Batch'} {isSource && '(Current)'}
+                                {batch.name || batch.batchId || 'Unnamed Batch'} 
+                                {(batch.genderType === 'Male' || batch.genderType === 'Female') ? ` (${batch.genderType})` : ''}
+                                {isSource ? ' (Current)' : ''}
                             </h5>
                             <p className="text-gray-400 text-[10px] font-bold uppercase tracking-tighter">ID: {batch.batchId || String(batch._id || batch.id).substring(0, 8)}</p>
                         </div>
