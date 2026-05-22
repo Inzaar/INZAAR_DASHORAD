@@ -7,6 +7,7 @@ import AuthHeading from '../components/AuthHeading'
 import Input1 from '../../../components/ui/inputs/Input1'
 import PhoneInput from '../../../components/ui/inputs/PhoneInput'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
+import GoogleLoginButton from '../../../components/ui/buttons/GoogleLoginButton'
 import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
 import AuthText from '../components/AuthText';
@@ -130,6 +131,11 @@ function RegisterPageP1() {
             Next
           </GradiantButton>
         </button>
+
+        <div className="w-full max-w-[500px] flex flex-col items-center justify-center mt-6 mb-2">
+          <p className="text-[#636363] text-[16px] mb-4">Or sign up with</p>
+          <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} />
+        </div>
 
         <div className={`max-w-[548px] w-full flex flex-col gap-4 ${shouldShake ? 'animate-shake' : ''}`}>
           {/* Checkbox 1 */}

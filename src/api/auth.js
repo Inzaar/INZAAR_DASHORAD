@@ -5,6 +5,11 @@ export const login = (data) => {
     return res;
 }
 
+export const googleAuthLogin = (data) => {
+    const res = axiosInstance.post("/users/google", data);
+    return res;
+}
+
 export const register = (data) => {
     const res = axiosInstance.post("/users/register", data);
     return res;

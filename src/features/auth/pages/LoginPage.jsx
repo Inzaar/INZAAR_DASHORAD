@@ -5,6 +5,7 @@ import AuthHeading from '../components/AuthHeading';
 import Input1 from '@/components/ui/inputs/Input1';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import GrayButton from '@/components/ui/buttons/GrayButton';
+import GoogleLoginButton from '@/components/ui/buttons/GoogleLoginButton';
 import AuthText from '../components/AuthText';
 import { login } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -125,7 +126,8 @@ const LoginPage = () => {
         </form>
 
         <p className='text-[#636363] text-[16px]'>Or</p>
-        <GrayButton className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-5">
+        <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="mt-5 mb-3 !w-[calc(100%_-_60px)]" />
+        <GrayButton className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-2">
           Continue As A Guest
         </GrayButton>
         <AuthText />
