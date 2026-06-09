@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -15,55 +15,81 @@ const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
-const LectureCard = ({ item }) => (
-    <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans">
-        <div className="relative aspect-[16/10] bg-gray-900 group">
-            <img
-                src="https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"
-                alt="Course Preview"
-                className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-            />
-            <div className="absolute top-3 left-3 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
-                    <img src="https://ui-avatars.com/api/?name=Abu+Yahya&background=random" alt="User" />
+const LectureCard = ({ item, onEdit, onDelete }) => (
+    <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+        <div>
+            <div className="relative aspect-[16/10] bg-gray-900 group">
+                <img
+                    src="https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"
+                    alt="Course Preview"
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                />
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
+                        <img src="https://ui-avatars.com/api/?name=Abu+Yahya&background=random" alt="User" />
+                    </div>
+                    <span className="text-white text-[12px] font-bold shadow-sm">Instructor</span>
                 </div>
-                <span className="text-white text-[12px] font-bold shadow-sm">Instructor</span>
+                <div className="absolute bottom-3 left-3 text-white text-[12px] font-bold">
+                    Lecture-{String(item.lectureNo || item.number || 1).padStart(2, '0')}
+                </div>
+                <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
             </div>
-            <div className="absolute bottom-3 left-3 text-white text-[12px] font-bold">
-                Lecture-{String(item.lectureNo || item.number || 1).padStart(2, '0')}
+            <div className="p-4 space-y-4">
+                <div className="flex justify-between items-start">
+                    <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
+                    <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
+                </div>
+                {item.videoUrl && (
+                    <div className="space-y-1">
+                        <span className="text-[11px] text-[#64748b] font-bold">Video</span>
+                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.videoUrl}</span>
+                        </div>
+                    </div>
+                )}
+                {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
+                    <div key={idx} className="space-y-1">
+                        <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
+                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
+                        </div>
+                    </div>
+                ))}
+                {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
+                    <div key={idx} className="space-y-1">
+                        <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
+                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
+                        </div>
+                    </div>
+                ))}
             </div>
-            <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
         </div>
-        <div className="p-4 space-y-4">
-            <div className="flex justify-between items-start">
-                <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
-                <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
+        {(onEdit || onDelete) && (
+            <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
+                {onEdit && (
+                    <button
+                        type="button"
+                        onClick={onEdit}
+                        className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                    >
+                        <Pencil size={12} />
+                        Edit
+                    </button>
+                )}
+                {onDelete && (
+                    <button
+                        type="button"
+                        onClick={onDelete}
+                        className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                    >
+                        <Trash2 size={12} />
+                        Delete
+                    </button>
+                )}
             </div>
-            {item.videoUrl && (
-                <div className="space-y-1">
-                    <span className="text-[11px] text-[#64748b] font-bold">Video</span>
-                    <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.videoUrl}</span>
-                    </div>
-                </div>
-            )}
-            {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
-                <div key={idx} className="space-y-1">
-                    <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
-                    <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
-                    </div>
-                </div>
-            ))}
-            {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
-                <div key={idx} className="space-y-1">
-                    <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
-                    <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                        <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
-                    </div>
-                </div>
-            ))}
-        </div>
+        )}
     </div>
 );
 
@@ -78,6 +104,7 @@ const AddCoursePage = () => {
     };
 
     const [currentStep, setCurrentStep] = useState(1);
+    const [editingIndex, setEditingIndex] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalStep, setModalStep] = useState('select-type'); // 'select-type' | 'item-form'
     const [showQuizFlow, setShowQuizFlow] = useState(false);
@@ -152,8 +179,8 @@ const AddCoursePage = () => {
                             type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
                             lectureNo: l.lectureNo,
                             videoUrl: l.videoUrl || '',
-                            audioUrl: l.audioUrl || '',
-                            pdfUrl: l.pdfUrl || '',
+                            audioUrl: Array.isArray(l.audioUrl) ? l.audioUrl : (l.audioUrl ? [l.audioUrl] : []),
+                            pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
                             quizId: l.quizId || null,
                         })));
                     }
@@ -301,18 +328,62 @@ const AddCoursePage = () => {
 
     const handleSaveItem = () => {
         if (!newItem.title.trim()) return;
-        setCourseItems(prev => [
-            ...prev,
-            {
-                ...newItem,
-                id: Date.now(),
-                lectureNo: prev.length + 1,
-            },
-        ]);
+
+        if (editingIndex !== null) {
+            setCourseItems(prev => prev.map((item, idx) =>
+                idx === editingIndex
+                    ? { ...item, ...newItem }
+                    : item
+            ));
+            setEditingIndex(null);
+        } else {
+            setCourseItems(prev => [
+                ...prev,
+                {
+                    ...newItem,
+                    id: Date.now(),
+                    lectureNo: prev.length + 1,
+                },
+            ]);
+        }
+
         setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
         setIsAudioUploading(false);
         setIsPdfUploading(false);
         setIsModalOpen(false);
+    };
+
+    const handleCloseModal = () => {
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+        setEditingIndex(null);
+        setIsAudioUploading(false);
+        setIsPdfUploading(false);
+        setIsModalOpen(false);
+    };
+
+    const handleEditItemClick = (index) => {
+        const item = courseItems[index];
+        setNewItem({
+            type: item.type || 'Lecture',
+            title: item.title || '',
+            videoUrl: item.videoUrl || '',
+            audioUrl: Array.isArray(item.audioUrl) ? item.audioUrl : (item.audioUrl ? [item.audioUrl] : []),
+            pdfUrl: Array.isArray(item.pdfUrl) ? item.pdfUrl : (item.pdfUrl ? [item.pdfUrl] : []),
+            quizId: item.quizId || null,
+        });
+        setEditingIndex(index);
+        setModalStep('item-form');
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteItemClick = (index) => {
+        setCourseItems(prev => {
+            const updated = prev.filter((_, idx) => idx !== index);
+            return updated.map((item, idx) => ({
+                ...item,
+                lectureNo: idx + 1
+            }));
+        });
     };
 
     const handleAddLecturesClick = () => {
@@ -344,14 +415,8 @@ const AddCoursePage = () => {
         setShowQuizFlow(false);
     };
 
-    // Auto-save course as draft to get a real courseId before quiz creation
+    // Auto-save course as draft to get a real courseId before quiz creation, or update existing course details
     const handleAdvanceToStep2 = async () => {
-        if (courseId) {
-            // Already saved — just advance
-            setCurrentStep(2);
-            return;
-        }
-
         // --- Validation ---
         if (!courseForm.title || courseForm.title.trim() === '') {
             setValidationModal({
@@ -376,20 +441,23 @@ const AddCoursePage = () => {
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
-                status: 'draft',
+                ...(isEditMode ? {} : { status: 'draft' }),
             };
-            const res = await createCourse(payload);
-            console.log('[AddCoursePage] DRAFT SAVE FULL RESPONSE:', res);
 
-            // Extract _id from the ApiResponse object's data field
-            const savedId = res?.data?._id || res?._id;
-
-            console.log('[AddCoursePage] EXTRACTED courseId:', savedId);
-            if (savedId) setCourseId(savedId);
+            if (courseId) {
+                // If courseId is already set, update the existing course details on the backend
+                await updateCourse(courseId, payload);
+            } else {
+                const res = await createCourse(payload);
+                console.log('[AddCoursePage] DRAFT SAVE FULL RESPONSE:', res);
+                const savedId = res?.data?._id || res?._id;
+                console.log('[AddCoursePage] EXTRACTED courseId:', savedId);
+                if (savedId) setCourseId(savedId);
+            }
             setCurrentStep(2);
         } catch (err) {
-            console.error('Draft save error:', err);
-            setSubmitError(err?.response?.data?.message || 'Failed to save draft. Please try again.');
+            console.error('Save course step 1 error:', err);
+            setSubmitError(err?.response?.data?.message || 'Failed to save course details. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -741,8 +809,13 @@ const AddCoursePage = () => {
                                             </div>
 
                                             <div className="flex flex-wrap items-stretch justify-start gap-8 mt-4">
-                                                {courseItems.map((item) => (
-                                                    <LectureCard key={item.id} item={item} />
+                                                {courseItems.map((item, idx) => (
+                                                    <LectureCard
+                                                        key={item.id}
+                                                        item={item}
+                                                        onEdit={() => handleEditItemClick(idx)}
+                                                        onDelete={() => handleDeleteItemClick(idx)}
+                                                    />
                                                 ))}
                                                 <div
                                                     onClick={handleAddLecturesClick}
@@ -905,8 +978,8 @@ const AddCoursePage = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">Add New {newItem.type}</h2>
-                                        <p className="text-[#64748b] text-[13px] font-medium leading-relaxed">Fill in the details for your new {newItem.type.toLowerCase()}.</p>
+                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">{editingIndex !== null ? 'Edit' : 'Add New'} {newItem.type}</h2>
+                                        <p className="text-[#64748b] text-[13px] font-medium leading-relaxed">Fill in the details for your {newItem.type.toLowerCase()}.</p>
                                     </div>
                                 </div>
                             </div>
@@ -944,10 +1017,10 @@ const AddCoursePage = () => {
 
                                     {/* Video URL */}
                                     <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Video URL <span className="text-gray-400 font-normal text-[11px]">(MP4 / MOV)</span></label>
+                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Video URL <span className="text-gray-400 font-normal text-[11px]">(YouTube)</span></label>
                                         <input
                                             type="text"
-                                            placeholder="https://example.com/lecture.mp4"
+                                            placeholder="https://www.youtube.com/watch?v=..."
                                             value={newItem.videoUrl}
                                             onChange={e => setNewItem({ ...newItem, videoUrl: e.target.value })}
                                             className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
@@ -965,8 +1038,8 @@ const AddCoursePage = () => {
                                             >
                                                 {isAudioUploading ? (
                                                     <div className="flex flex-col items-center gap-2 py-1">
-                                                        <Loader2 size={20} className="text-blue-500 animate-spin" />
-                                                        <span className="text-[12px] font-medium text-blue-500">Uploading...</span>
+                                                        <Loader2 size={20} className="text-[#8B5CF6] animate-spin" />
+                                                        <span className="text-[12px] font-medium text-[#8B5CF6]">Uploading...</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex flex-col items-center gap-1 py-1">
@@ -1013,8 +1086,8 @@ const AddCoursePage = () => {
                                             >
                                                 {isPdfUploading ? (
                                                     <div className="flex flex-col items-center gap-2 py-1">
-                                                        <Loader2 size={20} className="text-blue-500 animate-spin" />
-                                                        <span className="text-[12px] font-medium text-blue-500">Uploading...</span>
+                                                        <Loader2 size={20} className="text-[#8B5CF6] animate-spin" />
+                                                        <span className="text-[12px] font-medium text-[#8B5CF6]">Uploading...</span>
                                                     </div>
                                                 ) : (
                                                     <div className="flex flex-col items-center gap-1 py-1">
@@ -1057,7 +1130,7 @@ const AddCoursePage = () => {
                                 {/* Modal Footer */}
                                 <div className="mt-8 flex justify-between items-center bg-white gap-4">
                                     <button
-                                        onClick={() => setIsModalOpen(false)}
+                                        onClick={handleCloseModal}
                                         className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-bold rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
                                     >
                                         Cancel

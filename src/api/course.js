@@ -37,11 +37,15 @@ export const getAdminCourseById = (courseId) => {
     return res;
 }
 
-// Fetch complete course detail for the logged-in user
-export const getCourseById = (courseId) => {
-    const res = axiosInstance.get(`/enrollments/my-courses/${courseId}`, {
+// Fetch complete course detail for the logged-in user or a specific student (for admins/mods)
+export const getCourseById = (courseId, userId = null) => {
+    const config = {
         withCredentials: true,
-    });
+    };
+    if (userId) {
+        config.params = { userId };
+    }
+    const res = axiosInstance.get(`/enrollments/my-courses/${courseId}`, config);
     return res;
 }
 

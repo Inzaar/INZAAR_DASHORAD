@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MetricCard from '@/components/shared/MetricCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
@@ -7,6 +8,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import performance from '@/assets/images/performance.png';
 
 const StudentPerformance = ({ profileData }) => {
+    const navigate = useNavigate();
     const user = profileData?.user || {};
     const stats = profileData?.stats || {
         totalEnrolled: 0,
@@ -21,6 +23,7 @@ const StudentPerformance = ({ profileData }) => {
 
     const tableData = enrolledCourses.map(e => ({
         id: e.id,
+        courseId: e.courseId,
         courseName: e.title,
         moderators: e.moderators || [],
         startDate: "08-Jan-2025", // Placeholder
@@ -182,7 +185,10 @@ const StudentPerformance = ({ profileData }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <GradiantButton className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors">
+                                        <GradiantButton 
+                                            onClick={() => navigate(`/admin-course-play?id=${row.courseId || row.id}&userId=${user._id || user.id}`)}
+                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
+                                        >
                                             View Details
                                         </GradiantButton>
                                     </td>

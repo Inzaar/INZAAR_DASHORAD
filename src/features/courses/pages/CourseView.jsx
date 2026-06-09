@@ -98,6 +98,8 @@ const CourseView = () => {
     const [isEditLectureModalOpen, setIsEditLectureModalOpen] = useState(false);
     const [isSavingLecture, setIsSavingLecture] = useState(false);
     const [loadingLecture, setLoadingLecture] = useState(false);
+    const [isAudioUploading, setIsAudioUploading] = useState(false);
+    const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
     const [editLectureData, setEditLectureData] = useState({
         id: "",
@@ -123,6 +125,7 @@ const CourseView = () => {
     const isAdminView = location.pathname.startsWith('/admin');
     const courseId = new URLSearchParams(window.location.search).get("id");
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
+    const userId = new URLSearchParams(window.location.search).get("userId");
     const isQuizView = currentLecture?.type === 'Quiz';
     const canEdit = (user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)))) && isAdminView;
 
@@ -155,9 +158,9 @@ const CourseView = () => {
         const fetchCourse = async () => {
             setLoading(true);
             try {
-                const res = isAdminView
+                const res = (isAdminView && !userId)
                     ? await getAdminCourseById(courseId)
-                    : await getCourseById(courseId);
+                    : await getCourseById(courseId, userId);
                 const data = res.data.data;
                 setCourseData(data);
 
@@ -315,7 +318,7 @@ const CourseView = () => {
                     setProgress(percent);
                     const now = Date.now();
                     const lectureId = currentLecture?.id || currentLecture?._id;
-                    if (user?.role !== 'admin' && lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
+                    if (user?.role !== 'admin' && user?.role !== 'moderator' && lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
                         lastReportedRef.current = now;
                         updateLectureProgress(courseId, {
                             lectureId,
@@ -452,6 +455,12 @@ const CourseView = () => {
         setIsEditLectureModalOpen(true);
     };
 
+    const closeEditModal = () => {
+        setIsEditLectureModalOpen(false);
+        setIsAudioUploading(false);
+        setIsPdfUploading(false);
+    };
+
     const handleSaveLecture = async () => {
         if (!editLectureData.title.trim()) return;
         setIsSavingLecture(true);
@@ -477,7 +486,7 @@ const CourseView = () => {
                 videoId: updated.videoUrl ? extractYouTubeId(updated.videoUrl) : prev.videoId
             }));
 
-            setIsEditLectureModalOpen(false);
+            closeEditModal();
         } catch (err) {
             console.error("Failed to update lecture:", err);
         } finally {
@@ -1062,7 +1071,7 @@ const CourseView = () => {
                     <div className="bg-white rounded-2xl w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-2xl font-bold text-gray-900">Edit Lecture Details</h3>
-                            <button onClick={() => setIsEditLectureModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={closeEditModal} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={24} />
                             </button>
                         </div>
@@ -1113,10 +1122,21 @@ const CourseView = () => {
                                 <div className="space-y-4">
                                     <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">Audio Files</label>
                                     <div
-                                        onClick={() => audioInputRef.current?.click()}
-                                        className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
+                                        onClick={() => {
+                                            if (!isAudioUploading && !loadingLecture) {
+                                                audioInputRef.current?.click();
+                                            }
+                                        }}
+                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
+                                            isAudioUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
+                                        }`}
                                     >
-                                        {loadingLecture ? (
+                                        {isAudioUploading ? (
+                                            <>
+                                                <Loader2 size={24} className="text-[#8B5CF6] animate-spin" />
+                                                <span className="text-xs font-semibold text-[#8B5CF6]">Uploading...</span>
+                                            </>
+                                        ) : loadingLecture ? (
                                             <Loader2 size={24} className="text-blue-500 animate-spin" />
                                         ) : (
                                             <>
@@ -1132,12 +1152,20 @@ const CourseView = () => {
                                             onChange={async (e) => {
                                                 const file = e.target.files?.[0];
                                                 if (!file) return;
-                                                const { uploadAudio } = await import('@/api/course');
-                                                const res = await uploadAudio(file);
-                                                setEditLectureData(prev => {
-                                                    if (prev.audioUrl?.includes(res.url)) return prev;
-                                                    return { ...prev, audioUrl: [...prev.audioUrl, res.url] };
-                                                });
+                                                e.target.value = '';
+                                                setIsAudioUploading(true);
+                                                try {
+                                                    const { uploadAudio } = await import('@/api/course');
+                                                    const res = await uploadAudio(file);
+                                                    setEditLectureData(prev => {
+                                                        if (prev.audioUrl?.includes(res.url)) return prev;
+                                                        return { ...prev, audioUrl: [...prev.audioUrl, res.url] };
+                                                    });
+                                                } catch (err) {
+                                                    console.error("Audio upload failed:", err);
+                                                } finally {
+                                                    setIsAudioUploading(false);
+                                                }
                                             }}
                                         />
                                     </div>
@@ -1157,10 +1185,21 @@ const CourseView = () => {
                                 <div className="space-y-4">
                                     <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">PDF Resources</label>
                                     <div
-                                        onClick={() => pdfInputRef.current?.click()}
-                                        className="w-full h-24 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
+                                        onClick={() => {
+                                            if (!isPdfUploading && !loadingLecture) {
+                                                pdfInputRef.current?.click();
+                                            }
+                                        }}
+                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
+                                            isPdfUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
+                                        }`}
                                     >
-                                        {loadingLecture ? (
+                                        {isPdfUploading ? (
+                                            <>
+                                                <Loader2 size={24} className="text-[#8B5CF6] animate-spin" />
+                                                <span className="text-xs font-semibold text-[#8B5CF6]">Uploading...</span>
+                                            </>
+                                        ) : loadingLecture ? (
                                             <Loader2 size={24} className="text-blue-500 animate-spin" />
                                         ) : (
                                             <>
@@ -1176,12 +1215,20 @@ const CourseView = () => {
                                             onChange={async (e) => {
                                                 const file = e.target.files?.[0];
                                                 if (!file) return;
-                                                const { uploadPdf } = await import('@/api/course');
-                                                const res = await uploadPdf(file);
-                                                setEditLectureData(prev => {
-                                                    if (prev.pdfUrl?.includes(res.url)) return prev;
-                                                    return { ...prev, pdfUrl: [...prev.pdfUrl, res.url] };
-                                                });
+                                                e.target.value = '';
+                                                setIsPdfUploading(true);
+                                                try {
+                                                    const { uploadPdf } = await import('@/api/course');
+                                                    const res = await uploadPdf(file);
+                                                    setEditLectureData(prev => {
+                                                        if (prev.pdfUrl?.includes(res.url)) return prev;
+                                                        return { ...prev, pdfUrl: [...prev.pdfUrl, res.url] };
+                                                    });
+                                                } catch (err) {
+                                                    console.error("PDF upload failed:", err);
+                                                } finally {
+                                                    setIsPdfUploading(false);
+                                                }
                                             }}
                                         />
                                     </div>
@@ -1201,7 +1248,7 @@ const CourseView = () => {
 
                         <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 mt-8 pt-6 border-t border-gray-100">
                             <button
-                                onClick={() => setIsEditLectureModalOpen(false)}
+                                onClick={closeEditModal}
                                 className="flex-1 py-2.5 sm:py-3 px-6 bg-gray-50 text-gray-500 text-sm sm:text-base font-bold rounded-xl hover:bg-gray-100 transition-all active:scale-[0.98]"
                             >
                                 Cancel

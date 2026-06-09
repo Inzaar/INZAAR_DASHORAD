@@ -214,14 +214,14 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
         <div className="w-full mx-auto">
 
           {/* Header */}
-          <div className="w-full flex justify-between items-center bg-white text-gray-900 border border-[#ECECEC] p-4 rounded-[10px] mb-6 shadow-sm">
-            <h3 className="text-[18px] font-bold">Profile Details</h3>
+          <div className="w-full flex justify-between items-center mb-6">
+            <h3 className="text-[18px] font-medium">Profile Details</h3>
 
             <div className="flex gap-[12px] items-center">
               <button
                 type="button"
                 onClick={() => setShowPasswordModal(true)}
-                className="w-[140px] h-[40px] bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all rounded-[4px] text-gray-600 text-[13px] lg:text-sm lg:w-[177px] hidden min-[640px]:block font-medium"
+                className="w-[140px] h-[40px] bg-[#A7A7A7] hover:bg-gray-500 transition-all rounded-[4px] text-white text-[13px] lg:text-sm lg:w-[177px] hidden min-[640px]:block font-medium"
               >
                 Change Password
               </button>
@@ -230,7 +230,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
               <button
                 type="button"
                 onClick={() => setShowPasswordModal(true)}
-                className="flex min-[640px]:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] border border-gray-200 bg-white text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-all"
+                className="flex min-[640px]:hidden w-[40px] h-[40px] justify-center items-center rounded-[8px] bg-[#A7A7A7] hover:bg-gray-500 transition-all text-white"
               >
                 <FaLock className="w-4" />
               </button>
