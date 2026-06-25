@@ -198,7 +198,7 @@ const CourseView = () => {
 
     useEffect(() => {
         const fetchAllNotes = async () => {
-            if (!courseData || user?.role === 'admin') return;
+            if (!courseData) return;
             const lecs = courseData.lecturePlaylist || courseData.lectures || [];
             if (lecs.length === 0) return;
 
@@ -645,7 +645,7 @@ const CourseView = () => {
 
                                 {!isAdminView && user?.role !== 'admin' && (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <button 
+                                        <button
                                             disabled={!courseData?.assignedModeratorPhone}
                                             onClick={() => {
                                                 if (courseData?.assignedModeratorPhone) {
@@ -654,16 +654,15 @@ const CourseView = () => {
                                                 }
                                             }}
                                             title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
-                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${
-                                                courseData?.assignedModeratorPhone 
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white" 
+                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${courseData?.assignedModeratorPhone
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
                                                     : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                            }`}
+                                                }`}
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
                                         </button>
                                         {/* Mobile icon-only WhatsApp button */}
-                                        <button 
+                                        <button
                                             disabled={!courseData?.assignedModeratorPhone}
                                             onClick={() => {
                                                 if (courseData?.assignedModeratorPhone) {
@@ -672,11 +671,10 @@ const CourseView = () => {
                                                 }
                                             }}
                                             title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
-                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${
-                                                courseData?.assignedModeratorPhone 
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white" 
+                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${courseData?.assignedModeratorPhone
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
                                                     : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                            }`}
+                                                }`}
                                         >
                                             <FaWhatsapp size={20} />
                                         </button>
@@ -965,7 +963,7 @@ const CourseView = () => {
                             </div>
 
                             {/* Lecture Notes Section */}
-                            {!isQuizView && (
+                            {!isAdminView && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
                                     <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
@@ -1027,6 +1025,7 @@ const CourseView = () => {
                             <LectureListTable
                                 lectures={lectures}
                                 notes={notes}
+                                isAdminView={isAdminView}
                                 onWatch={(lecture) => {
                                     if (!lecture.isLocked) {
                                         const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
@@ -1127,9 +1126,8 @@ const CourseView = () => {
                                                 audioInputRef.current?.click();
                                             }
                                         }}
-                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
-                                            isAudioUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
-                                        }`}
+                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${isAudioUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
+                                            }`}
                                     >
                                         {isAudioUploading ? (
                                             <>
@@ -1190,9 +1188,8 @@ const CourseView = () => {
                                                 pdfInputRef.current?.click();
                                             }
                                         }}
-                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
-                                            isPdfUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
-                                        }`}
+                                        className={`w-full h-24 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${isPdfUploading ? 'border-[#8B5CF6]/50 bg-[#8B5CF6]/5' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
+                                            }`}
                                     >
                                         {isPdfUploading ? (
                                             <>

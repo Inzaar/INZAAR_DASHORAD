@@ -36,9 +36,9 @@ export const getStudentProfiles = async (page = 1, limit = 10, search = "", stat
     return res.data;
 };
 
-export const getModeratorProfiles = async (page = 1, limit = 6, search = "", status = "", fromDate = "", toDate = "", searchType = "NAME") => {
+export const getModeratorProfiles = async (page = 1, limit = 6, search = "", status = "", gender = "", fromDate = "", toDate = "", searchType = "NAME") => {
     const res = await axiosInstance.get("/users/moderators/profiles", {
-        params: { page, limit, search, status, fromDate, toDate, searchType },
+        params: { page, limit, search, status, gender, fromDate, toDate, searchType },
         withCredentials: true,
     });
     return res.data;
