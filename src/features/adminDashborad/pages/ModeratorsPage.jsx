@@ -20,7 +20,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/Pagination";
 
-const ModeratorsPage = () => {
+const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
@@ -71,7 +71,7 @@ const ModeratorsPage = () => {
     const fetchModeratorsData = async () => {
         try {
             setIsLoading(true);
-            const res = await getModeratorProfiles(currentPage, 6, searchText, statusFilter, fromDate, toDate, searchType);
+            const res = await getModeratorProfiles(currentPage, 6, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
             if (res?.data) {
                 setModerators(res.data.moderators || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -98,11 +98,10 @@ const ModeratorsPage = () => {
                         const response = await getAllUsers();
                         if (response?.data) {
                             const apiMods = response.data.filter(user => user.role === 'moderator');
-                            setModerators(prev => {
-                                // Only update if we don't have moderators or if specifically needed
-                                // (Keeping user's logic intent)
-                                return apiMods;
-                            });
+                            const filteredMods = genderFilter && genderFilter !== "All" 
+                                ? apiMods.filter(m => m.gender === genderFilter)
+                                : apiMods;
+                            setModerators(filteredMods);
                         }
                     } catch (error) {
                         console.error("Failed to fetch moderators:", error);
@@ -111,7 +110,7 @@ const ModeratorsPage = () => {
             ]);
         };
         fetchAllData();
-    }, [currentPage, statusFilter, fromDate, toDate]);
+    }, [currentPage, statusFilter, fromDate, toDate, genderFilter]);
 
     const handleSearchClick = () => {
         setCurrentPage(1);

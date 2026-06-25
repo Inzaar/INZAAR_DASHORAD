@@ -499,7 +499,7 @@ const NotesModal = ({ activeNotes, onClose }) => {
     );
 };
 
-const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
+const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminView }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [activeResources, setActiveResources] = useState(null);
@@ -574,7 +574,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
                                 <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Date</th>
                                 <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Progress</th>
                                 <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Status</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Comments</th>
+                                {!isAdminView && <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Comments</th>}
                                 <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Action</th>
                             </tr>
                         </thead>
@@ -610,29 +610,31 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId }) => {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="py-6">
-                                            <div className="flex items-center justify-center">
-                                                {lectureNotes.length > 0 ? (
-                                                    <button
-                                                        onClick={() => setActiveNotes({
-                                                            lectureNo: displayLectureNo,
-                                                            title: lecture.title,
-                                                            notesList: lectureNotes
-                                                        })}
-                                                        className="px-4 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-xs active:scale-[0.98] cursor-pointer"
-                                                    >
-                                                        See Notes
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        disabled
-                                                        className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-150 rounded-xl cursor-not-allowed"
-                                                    >
-                                                        No Notes
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
+                                        {!isAdminView && (
+                                            <td className="py-6">
+                                                <div className="flex items-center justify-center">
+                                                    {lectureNotes.length > 0 ? (
+                                                        <button
+                                                            onClick={() => setActiveNotes({
+                                                                lectureNo: displayLectureNo,
+                                                                title: lecture.title,
+                                                                notesList: lectureNotes
+                                                            })}
+                                                            className="px-4 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-xs active:scale-[0.98] cursor-pointer"
+                                                        >
+                                                            See Notes
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            disabled
+                                                            className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-150 rounded-xl cursor-not-allowed"
+                                                        >
+                                                            No Notes
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
                                         <td className="py-6">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button

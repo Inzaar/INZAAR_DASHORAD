@@ -111,7 +111,9 @@ const Courses = () => {
     });
 
     const filteredCourses = (activeTab === 'new'
-        ? courses.filter(c => c.isNewCourse)
+        ? [...courses]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 3)
         : courses
     ).map(formatCourseForCard);
 

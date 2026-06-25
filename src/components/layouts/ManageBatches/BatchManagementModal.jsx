@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Search, PlusCircle, User, Users, Loader2, Check, Edit2, UserX } from 'lucide-react';
 import BatchInformation from './BatchInformation';
 import AdjustStudentsTab from './AdjustStudentsTab';
 import { fetchAllModerators, assignBatch, removeModerator } from '../../../api/user';
+import CreateModeratorModal from '../../../features/adminDashborad/components/CreateModeratorModal';
 
 const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign' }) => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(initialTab);
     const [moderators, setModerators] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -12,6 +15,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
     const [searchQuery, setSearchQuery] = useState('');
     const [assignedModId, setAssignedModId] = useState(batchData?.assignedModerator?._id || batchData?.assignedModerator);
     const [isEditMode, setIsEditMode] = useState(!(batchData?.assignedModerator?._id || batchData?.assignedModerator));
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Sync state with batchData when it opens
     useEffect(() => {
@@ -223,7 +227,10 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                                             className="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D5FEF]/10 focus:bg-white focus:border-[#5D5FEF]/20 transition-all text-[11px]"
                                         />
                                     </div>
-                                    <button className="px-4 py-2 border border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-[11px] flex items-center justify-center gap-2 hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95">
+                                    <button
+                                        onClick={() => setIsCreateModalOpen(true)}
+                                        className="px-4 py-2 border border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-[11px] flex items-center justify-center gap-2 hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95"
+                                    >
                                         <PlusCircle className="w-4 h-4" /> Add New
                                     </button>
                                 </div>
@@ -348,6 +355,25 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                      background: #94a3b8;
                  }
             `}} />
+
+            <CreateModeratorModal 
+                isOpen={isCreateModalOpen} 
+                onClose={() => setIsCreateModalOpen(false)} 
+                onSuccess={async () => {
+                    // Refetch moderators to include the newly created one
+                    setLoading(true);
+                    try {
+                        const response = await fetchAllModerators();
+                        if (response.success) {
+                            setModerators(response.data.moderatorList);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching moderators:", error);
+                    } finally {
+                        setLoading(false);
+                    }
+                }} 
+            />
         </div>
     );
 };
