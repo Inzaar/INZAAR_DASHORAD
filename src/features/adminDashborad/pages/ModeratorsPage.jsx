@@ -90,27 +90,14 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     };
 
     useEffect(() => {
-        const fetchAllData = async () => {
-            await Promise.all([
-                fetchModeratorsData(),
-                (async () => {
-                    try {
-                        const response = await getAllUsers();
-                        if (response?.data) {
-                            const apiMods = response.data.filter(user => user.role === 'moderator');
-                            const filteredMods = genderFilter && genderFilter !== "All" 
-                                ? apiMods.filter(m => m.gender === genderFilter)
-                                : apiMods;
-                            setModerators(filteredMods);
-                        }
-                    } catch (error) {
-                        console.error("Failed to fetch moderators:", error);
-                    }
-                })()
-            ]);
-        };
-        fetchAllData();
-    }, [currentPage, statusFilter, fromDate, toDate, genderFilter]);
+        setCurrentPage(1);
+        setStatusFilter("");
+        fetchModeratorsData();
+    }, [genderFilter]);
+
+    useEffect(() => {
+        fetchModeratorsData();
+    }, [currentPage, statusFilter, fromDate, toDate]);
 
     const handleSearchClick = () => {
         setCurrentPage(1);
@@ -185,7 +172,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const poolCount = moderators.filter(m => m.status === 'pending').length;
 
     const stats = [
-        { title: "Total Moderators", value: (statsData?.totalModerators || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
+        { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}Moderators`, value: (statsData?.totalModerators || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
         { title: "Active Moderators", value: (statsData?.activeModerators || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "Active" },
         { title: "Inactive Moderators", value: (statsData?.inactiveModerators || 0).toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month", type: "Inactive" },
         { title: "Moderators in Pool", value: (statsData?.moderatorsInPool || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "Pool" },
@@ -219,8 +206,8 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">Moderators</h2>
-                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your Moderators</p>
+                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Moderators' : `${genderFilter} Moderators`}</h2>
+                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Moderators</p>
                                 </div>
                                 <GradiantButton
                                     onClick={() => {
