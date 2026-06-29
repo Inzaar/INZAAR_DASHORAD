@@ -121,10 +121,10 @@ const QuizTakePage = () => {
         );
     }
 
-    if (!quizData || questions.length === 0) {
+    if (!quizData) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#F3F4F6]">
-                <p className="text-gray-500 font-medium mb-4">Quiz not found or has no questions.</p>
+                <p className="text-gray-500 font-medium mb-4">Quiz not found.</p>
                 <button onClick={() => navigate(-1)} className="px-4 py-2 bg-blue-500 text-white rounded">Go Back</button>
             </div>
         );
