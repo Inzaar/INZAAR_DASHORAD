@@ -174,15 +174,15 @@ const AdminCoursesPage = () => {
                                     <h2 className="text-[24px] font-bold text-gray-900 mb-1">Courses</h2>
                                     <p className="text-gray-500 text-[16px]">Manage All Your Courses</p>
                                 </div>
-                                <GradiantButton
+                                <button
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-[#8B5CF6] text-white font-medium rounded-xl sm:rounded-lg hover:bg-purple-600 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                                 >
-                                    <div className="flex items-center justify-center">
-                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                    <div className="flex items-center justify-center bg-white rounded-full p-0.5">
+                                        <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
                                     </div>
-                                    <span className="hidden sm:block">Add New Course</span>
-                                </GradiantButton>
+                                    <span className="hidden sm:block text-[14px]">Add New Course</span>
+                                </button>
                             </div>
 
                             {/* Stats Grid */}

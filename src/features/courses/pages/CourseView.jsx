@@ -318,21 +318,27 @@ const CourseView = () => {
                     setProgress(percent);
                     const now = Date.now();
                     const lectureId = currentLecture?.id || currentLecture?._id;
-                    if (user?.role !== 'admin' && user?.role !== 'moderator' && lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
+                    
+                    // Allow anyone to record progress (if they aren't enrolled, the backend will just reject it). This allows admins to test unlocking.
+                    if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
                         lastReportedRef.current = now;
+                        let finalPercent = Math.min(Math.round(percent), 100);
+                        if (finalPercent >= 95) finalPercent = 100; // Auto-complete near the end
+                        
                         updateLectureProgress(courseId, {
                             lectureId,
-                            watchedPercentage: Math.min(Math.round(percent), 100),
+                            watchedPercentage: finalPercent,
                             lastWatchedTime: Math.floor(cur),
                         }).then(async (data) => {
                             const unlockPercent = courseData?.unlockCriteria || 100;
-                            if (percent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
+                            if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
                                 completedIdsRef.current.add(lectureId);
                                 setCourseData(prev => {
                                     if (!prev) return prev;
                                     const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
                                     return {
                                         ...prev,
+                                        lectureCompleted: (prev.lectureCompleted || 0) + 1,
                                         lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
                                             if (l._id === lectureId || l.id === lectureId) return { ...l, isCompleted: true };
                                             if (i === idx + 1 && l.isLocked) return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
