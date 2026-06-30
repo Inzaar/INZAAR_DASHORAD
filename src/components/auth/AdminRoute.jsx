@@ -1,10 +1,11 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Loader from '@/components/ui/Loader';
 
 const AdminRoute = () => {
     const { user, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) {
         return <Loader />;
@@ -28,14 +29,14 @@ const AdminRoute = () => {
             '/admin-calendar': 'Calendar',
             '/admin-notifications': 'Notification',
             '/admin-moderators': 'Moderators',
-            '/moderator-details': 'Moderators',
+            '/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
             '/student-profiles': 'Student Profiles',
             '/admin-courses': 'Courses Management',
             '/reports': 'Reports & Logs', 
             '/moderator-reports': 'Reports & Logs',
             '/course-reports': 'Reports & Logs',
-            '/admin/student-details': 'Student Profiles',
-            '/admin/moderator-details': 'Moderators',
+            '/admin/student-details': ['Student Profiles', 'Reports & Logs', 'Courses Management', 'Dashboard'],
+            '/admin/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
             '/admin/course-details': 'Courses Management',
             '/admin-course-view': 'Courses Management',
             '/admin-course-play': 'Courses Management',
@@ -60,10 +61,13 @@ const AdminRoute = () => {
 
         // If this route mandates a feature, check the moderator's assigned array
         if (requiredFeature) {
-            // Check if feature is in assignedFeatures array (case-incensitive fallback)
-            const hasFeature = user.assignedFeatures?.includes(requiredFeature) || 
-                             user.assignedFeatures?.some(f => f?.toLowerCase() === requiredFeature.toLowerCase() || 
-                                                             (requiredFeature === 'Courses Management' && f === 'Courses'));
+            const featuresToCheck = Array.isArray(requiredFeature) ? requiredFeature : [requiredFeature];
+            // Check if any of the required features is in assignedFeatures array (case-insensitive fallback)
+            const hasFeature = featuresToCheck.some(feat => 
+                user.assignedFeatures?.includes(feat) || 
+                user.assignedFeatures?.some(f => f?.toLowerCase() === feat.toLowerCase() || 
+                                                 (feat === 'Courses Management' && f === 'Courses'))
+            );
             
             // If they lack the required feature, firmly bounce them back to dashboard
             if (!hasFeature) {
