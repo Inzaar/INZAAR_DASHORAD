@@ -264,7 +264,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded transition-all duration-200 tracking-wide ${searchType === 'PHONE' ? 'bg-[#7E57FF] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -277,7 +277,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded transition-all duration-200 tracking-wide ${searchType === 'NAME' ? 'bg-[#7E57FF] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -315,7 +315,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             >
                                                 <option value="">All Statuses</option>
                                                 <option value="Active">Active</option>
-                                                <option value="In-active">Inactive</option>
+                                                <option value="In-active">In-active</option>
                                                 <option value="Pending">Pending</option>
                                                 <option value="Deleted">Deleted</option>
                                             </select>
@@ -433,7 +433,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -446,7 +446,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -462,23 +462,23 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                         </div>
                                     )}
-                                    <table className="w-full min-w-[1000px]">
+                                    <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                                         <thead>
-                                            <tr className="border-b border-gray-100">
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 uppercase">Student</th>
-                                                <th className="text-left font-bold text-[13px] text-gray-800 pb-4 uppercase">Contact Info</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 uppercase">Enrollments</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 uppercase">Avg. Progress</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 uppercase">Last Active</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 uppercase">Status</th>
-                                                <th className="text-center font-bold text-[13px] text-gray-800 pb-4 uppercase">Action</th>
+                                            <tr>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Name</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Contact</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Enrollments</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Progress</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Last Login</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Status</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-50">
+                                        <tbody>
                                             {students.length === 0 ? (
                                                 !isLoading && (
                                                     <tr>
-                                                        <td colSpan="7" className="py-20 text-center">
+                                                        <td colSpan="7" className="py-20 text-center bg-[#F8F9FA] rounded-xl">
                                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                                 <Search size={48} className="opacity-20" />
                                                                 <p className="font-medium text-[16px]">No students found matching your criteria</p>
@@ -494,78 +494,44 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 )
                                             ) : (
                                                 students.map((student) => (
-                                                    <tr key={student.id} className="hover:bg-blue-50/30 transition-colors group">
-                                                        <td className="py-5 pl-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm border border-blue-200 overflow-hidden shadow-sm">
-                                                                    {student.profileImageUrl ? (
-                                                                        <img src={student.profileImageUrl} alt="" className="w-full h-full object-cover" />
-                                                                    ) : (
-                                                                        (student.name || "S").charAt(0).toUpperCase()
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[14px] font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">{student.name}</span>
-                                                                    <span className="text-[11px] text-gray-400 font-medium">ID: {student.id.toString().slice(-6).toUpperCase()}</span>
-                                                                </div>
+                                                    <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
+                                                        <td className="py-4 rounded-l-xl text-center">
+                                                            <span className="text-[14px] text-gray-800">{student.name}</span>
+                                                        </td>
+                                                        <td className="py-4 text-center">
+                                                            <div className="flex flex-col items-center justify-center">
+                                                                <span className="text-[13px] text-gray-800 leading-tight">{student.email}</span>
+                                                                <span className="text-[13px] text-gray-800">{student.phone}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="py-5">
-                                                            <div className="flex flex-col gap-[2px]">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                                                    <span className="text-[13px] font-medium text-gray-700">{student.email}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                                                    <span className="text-[13px] text-gray-500">{student.phone}</span>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="py-5 text-center">
-                                                            <div className="flex flex-col gap-1 items-center">
+                                                        <td className="py-4 text-center">
+                                                            <div className="flex flex-col items-center justify-center">
                                                                 {!student.enrollments || student.enrollments.length === 0 ? (
-                                                                    <span className="text-gray-400 text-[11px] font-bold">Not Enrolled</span>
+                                                                    <span className="text-gray-400 text-[13px]">Not Enrolled</span>
                                                                 ) : (
-                                                                    <div className="flex flex-col items-center">
-                                                                        <span className="text-[14px] text-blue-600 font-[900] hover:underline cursor-pointer decoration-2 underline-offset-2">
-                                                                            {student.enrollments.length} {student.enrollments.length === 1 ? 'Course' : 'Courses'}
+                                                                    student.enrollments.map((course, idx) => (
+                                                                        <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
+                                                                            {course.title || course.name || course}
                                                                         </span>
-                                                                    </div>
+                                                                    ))
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="py-5 text-center">
-                                                            <div className="flex flex-col items-center gap-1.5">
-                                                                <span className="text-[14px] font-bold text-gray-800">{student.progress || '0%'}</span>
-                                                                <div className="w-20 bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                                                                    <div
-                                                                        className={`h-full rounded-full transition-all duration-500 ${parseInt(student.progress) > 80 ? 'bg-green-500' :
-                                                                            parseInt(student.progress) > 40 ? 'bg-blue-500' : 'bg-orange-400'
-                                                                            }`}
-                                                                        style={{ width: student.progress || '0%' }}
-                                                                    ></div>
-                                                                </div>
-                                                            </div>
+                                                        <td className="py-4 text-center">
+                                                            <span className="text-[14px] text-gray-800">{student.progress || '0%'}</span>
                                                         </td>
-                                                        <td className="py-5 text-center">
-                                                            <span className="text-[13px] font-medium text-gray-700 whitespace-nowrap">{student.lastLogin}</span>
+                                                        <td className="py-4 text-center">
+                                                            <span className="text-[14px] text-gray-800">{student.lastLogin || '-'}</span>
                                                         </td>
-                                                        <td className="py-5 text-center">
-                                                            <span className={`
-                                                                text-[12px] font-[900] uppercase tracking-widest transition-all duration-300
-                                                                ${student.status === 'Active' ? 'text-[#10B981]' :
-                                                                    student.status === 'Pending' ? 'text-[#F97316]' :
-                                                                        student.status === 'Deleted' ? 'text-[#9CA3AF]' :
-                                                                            'text-[#EF4444]'}
-                                                            `}>
-                                                                {student.status === 'In-active' ? 'IN-ACTIVE' : student.status.toUpperCase()}
+                                                        <td className="py-4 text-center">
+                                                            <span className={`text-[14px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                                                {student.status === 'In-active' ? 'In-active' : student.status}
                                                             </span>
                                                         </td>
-                                                        <td className="py-5 text-center">
+                                                        <td className="py-4 text-center rounded-r-xl">
                                                             <button
                                                                 onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white text-[12px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
+                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
                                                             >
                                                                 View Profile
                                                             </button>
@@ -604,7 +570,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 <PaginationLink
                                                                     onClick={() => !isLoading && setCurrentPage(i)}
                                                                     isActive={isActive}
-                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-[12px] text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200 hover:text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-[#7C3AED]'}`}
+                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-[8px] text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-md hover:text-white' : 'text-gray-600 hover:bg-gray-100'}`}
                                                                 >
                                                                     {i}
                                                                 </PaginationLink>
