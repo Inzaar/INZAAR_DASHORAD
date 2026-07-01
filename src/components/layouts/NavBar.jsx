@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getMyNotifications } from "@/api/notification";
 
-function Navbar({ onMenuClick, hideMenu = false, title = "Dashboard" }) {
+function Navbar({ onMenuClick, hideMenu = false, title }) {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
@@ -53,7 +53,7 @@ function Navbar({ onMenuClick, hideMenu = false, title = "Dashboard" }) {
                         )}
                         <div className="min-w-0">
                             <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C] truncate">
-                                {title}
+                                {title || "Dashboard"}
                             </div>
                             <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-tight text-[#2C2C2C]/80 truncate">
                                 {today}
