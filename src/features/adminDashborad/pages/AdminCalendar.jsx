@@ -190,10 +190,7 @@ import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import Input1 from '@/components/ui/inputs/Input1';
-import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { isSameDay, isWithinInterval, startOfDay } from 'date-fns';
-import StatusTable from '@/components/ui/statusTable/StatusTable';
-import dummyUserCourses from '@/constants/dummyData';
+import { isWithinInterval, startOfDay } from 'date-fns';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event';
 import { toast } from 'react-hot-toast';
 
@@ -205,21 +202,6 @@ const AdminCalendar = () => {
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
-
-    const colorOptions = [
-        { name: 'Indigo', value: 'bg-indigo-500' },
-        { name: 'Purple', value: 'bg-purple-500' },
-        { name: 'Rose', value: 'bg-rose-500' },
-        { name: 'Amber', value: 'bg-amber-500' },
-        { name: 'Emerald', value: 'bg-emerald-500' },
-        { name: 'Sky', value: 'bg-sky-500' },
-        { name: 'Pink', value: 'bg-pink-500' },
-        { name: 'Lime', value: 'bg-lime-500' },
-        { name: 'Orange', value: 'bg-orange-500' },
-        { name: 'Violet', value: 'bg-violet-500' },
-        { name: 'Teal', value: 'bg-teal-500' },
-        { name: 'Cyan', value: 'bg-cyan-500' },
-    ];
 
     const fetchEvents = async () => {
         try {
@@ -233,7 +215,7 @@ const AdminCalendar = () => {
                     canceledBy: ev.canceledBy || null,
                     startDate: new Date(ev.fromDate),
                     endDate: new Date(ev.toDate),
-                    color: ev.color || 'bg-indigo-500'
+                    color: 'bg-gradient-to-r from-[#6366F1] to-[#A855F7]'
                 }));
                 setEvents(mappedEvents);
             }
@@ -267,9 +249,10 @@ const AdminCalendar = () => {
 
     // Form State
     const [eventTitle, setEventTitle] = useState('');
+    const [eventType, setEventType] = useState('');
     const [startDate, setStartDate] = useState(getFormattedDate(today));
-    const [endDate, setEndDate] = useState(getFormattedDate(tenDaysLater));
-    const [selectedColor, setSelectedColor] = useState('bg-indigo-500');
+    const [endDate, setEndDate] = useState(getFormattedDate(today));
+    const [selectedColor, setSelectedColor] = useState('bg-gradient-to-r from-[#6366F1] to-[#A855F7]');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingEvent, setEditingEvent] = useState(null);
 
@@ -284,7 +267,7 @@ const AdminCalendar = () => {
         try {
             const eventData = {
                 title: eventTitle,
-                type: "Event",
+                type: eventType || "Event",
                 fromDate: new Date(startDate).toISOString(),
                 toDate: (endDate ? new Date(endDate) : new Date(startDate)).toISOString(),
                 color: selectedColor,
@@ -304,9 +287,10 @@ const AdminCalendar = () => {
             await fetchEvents();
             // Reset form
             setEventTitle('');
+            setEventType('');
             setStartDate(getFormattedDate(today));
-            setEndDate(getFormattedDate(tenDaysLater));
-            setSelectedColor('bg-indigo-500');
+            setEndDate(getFormattedDate(today));
+            setSelectedColor('bg-gradient-to-r from-[#6366F1] to-[#A855F7]');
             if (view === 'list') setView('calendar');
         } catch (error) {
             console.error("Failed to save event:", error);
@@ -319,9 +303,10 @@ const AdminCalendar = () => {
     const handleEditClick = (ev) => {
         setEditingEvent(ev);
         setEventTitle(ev.title);
+        setEventType(ev.type);
         setStartDate(getFormattedDate(ev.startDate));
         setEndDate(getFormattedDate(ev.endDate));
-        setSelectedColor(ev.color || 'bg-indigo-500');
+        setSelectedColor(ev.color || 'bg-gradient-to-r from-[#6366F1] to-[#A855F7]');
         setView('calendar'); // Switch to form view
     };
 
@@ -386,32 +371,19 @@ const AdminCalendar = () => {
         );
 
         return (
-            <div className="flex flex-col gap-1 mt-1 w-full overflow-visible">
-                {dayEvents.map(event => {
-                    const isStart = isSameDay(date, event.startDate);
-                    const isEnd = isSameDay(date, event.endDate);
-                    const isMiddle = !isStart && !isEnd;
-
-                    return (
-                        <div
-                            key={event.id}
-                            className={`h-5 text-[9px] flex items-center px-1 text-white truncate z-10 
-                                ${event.color}
-                                ${event.status === 'canceled' ? 'opacity-40 grayscale-[0.3] border-y border-white/10' : ''}
-                                ${isStart ? 'rounded-l-md ml-0.5' : ''} 
-                                ${isEnd ? 'rounded-r-md mr-0.5' : ''}
-                                ${isMiddle ? 'mx-[-4px]' : ''}
-                            `}
-                        >
-                            {(isStart || date.getDay() === 0) ? (
-                                <span>
-                                    {event.title}
-                                    {event.status === 'canceled' && <span className="ml-1 opacity-80 font-bold">[Canceled]</span>}
-                                </span>
-                            ) : ''}
-                        </div>
-                    );
-                })}
+            <div className="flex flex-col gap-1.5 mt-2 w-full overflow-visible">
+                {dayEvents.map(event => (
+                    <div
+                        key={event.id}
+                        className={`h-[24px] text-[11px] flex items-center px-2 text-white truncate z-10 rounded-full mb-[2px] mx-1 shadow-sm ${event.color} ${event.status === 'canceled' ? 'opacity-40 grayscale-[0.3]' : ''}`}
+                    >
+                        <span className="flex items-center gap-1 font-medium">
+                            {event.title.toLowerCase().includes('game') && <span className="text-[10px]">⚽</span>}
+                            {event.title}
+                            {event.status === 'canceled' && <span className="ml-1 opacity-80 font-bold">[Canceled]</span>}
+                        </span>
+                    </div>
+                ))}
             </div>
         );
     };
@@ -463,17 +435,17 @@ const AdminCalendar = () => {
 
                     <main className="flex-1 flex flex-col gap-4 overflow-y-visible lg:overflow-y-auto no-scrollbar scrollbar-hide pb-10 lg:pb-0">
                         {/* Toggle Switch */}
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="bg-[#F3F4F6] p-1 rounded-md flex">
+                        <div className="flex items-center gap-2 mb-4 w-full md:w-[400px]">
+                            <div className="bg-[#F8F9FA] p-1 rounded-md flex w-full border border-gray-100">
                                 <button
                                     onClick={() => setView('calendar')}
-                                    className={`px-6 py-2 text-sm font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                                    className={`flex-1 py-2 text-[14px] font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                                 >
                                     Add New Event
                                 </button>
                                 <button
                                     onClick={() => setView('list')}
-                                    className={`px-6 py-2 text-sm font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                                    className={`flex-1 py-2 text-[14px] font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                                 >
                                     List
                                 </button>
@@ -483,7 +455,7 @@ const AdminCalendar = () => {
                         {view === 'calendar' ? (
                             <>
                                 {/* Add Event Form (Simplified) */}
-                                <div className="bg-white rounded-xl border p-6 shadow-sm">
+                                <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6 border border-[#EAEDF2]">
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-[#3758EE] text-[16px] font-bold">
                                             {editingEvent ? '✎ Edit Event' : '+ Add New Event'}
@@ -493,9 +465,9 @@ const AdminCalendar = () => {
                                                 onClick={() => {
                                                     setEditingEvent(null);
                                                     setEventTitle('');
+                                                    setEventType('');
                                                     setStartDate(getFormattedDate(today));
-                                                    setEndDate(getFormattedDate(tenDaysLater));
-                                                    setSelectedColor('bg-indigo-500');
+                                                    setEndDate(getFormattedDate(today));
                                                 }}
                                                 className="text-xs text-rose-500 hover:underline font-bold"
                                             >
@@ -503,48 +475,54 @@ const AdminCalendar = () => {
                                             </button>
                                         )}
                                     </div>
-                                    <div className="flex flex-col gap-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                                            <div className="md:col-span-6">
-                                                <Input1 label="Event title" name={"event title"} value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                        <div className="md:col-span-4">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[14px] font-medium text-gray-700">Event title name</label>
+                                                <input type="text" placeholder="enter title name" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] outline-none focus:border-[#3758EE] transition-colors" value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
                                             </div>
-                                            <div className="md:col-span-3">
-                                                <div className="flex flex-col gap-1">
-                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">From</label>
-                                                    <input type="date" className="h-[52px] border rounded-lg px-3 focus:ring-2 focus:ring-[#5D5FEF]/10 outline-none transition-all" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                                </div>
-                                            </div>
-                                            <div className="md:col-span-3">
-                                                <div className="flex flex-col gap-1">
-                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">To</label>
-                                                    <input type="date" className="h-[52px] border rounded-lg px-3 focus:ring-2 focus:ring-[#5D5FEF]/10 outline-none transition-all" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[14px] font-medium text-gray-700">Event Type</label>
+                                                <div className="relative">
+                                                    <select className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors appearance-none bg-white" value={eventType} onChange={(e) => {
+                                                        setEventType(e.target.value);
+                                                        // Automatically set color based on type
+                                                        setSelectedColor('bg-gradient-to-r from-[#6366F1] to-[#A855F7]');
+                                                    }}>
+                                                        <option value="" disabled hidden>Select</option>
+                                                        <option value="Class" className="text-black">Class</option>
+                                                        <option value="Game" className="text-black">Game</option>
+                                                        <option value="Meeting" className="text-black">Meeting</option>
+                                                        <option value="Other" className="text-black">Other</option>
+                                                    </select>
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="flex flex-col md:flex-row justify-between items-end gap-6 pt-2 border-t border-gray-50 mt-2">
-                                            <div className="flex flex-col gap-2 w-full md:w-auto">
-                                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Choose Label Color</label>
-                                                <div className="flex flex-wrap gap-3 items-center px-1 min-h-[44px]">
-                                                    {colorOptions.map((color) => (
-                                                        <button
-                                                            key={color.value}
-                                                            onClick={() => setSelectedColor(color.value)}
-                                                            className={`w-8 h-8 rounded-full transition-all duration-200 ${color.value} ${selectedColor === color.value ? 'ring-4 ring-offset-2 ring-[#5D5FEF]/30 scale-110 shadow-lg' : 'hover:scale-110 hover:shadow-md'}`}
-                                                            title={color.name}
-                                                        />
-                                                    ))}
-                                                </div>
+                                        <div className="md:col-span-2">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[14px] font-medium text-gray-700">From</label>
+                                                <input type="date" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                                             </div>
-                                            <div className="w-full md:w-[200px]">
-                                                <GradiantButton 
-                                                    onClick={handleAddEvent} 
-                                                    disabled={isSubmitting}
-                                                    className={`h-[52px] rounded-lg w-full ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                >
-                                                    {editingEvent ? 'Update Event' : 'Add Event'}
-                                                </GradiantButton>
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <div className="flex flex-col gap-1.5">
+                                                <label className="text-[14px] font-medium text-gray-700">To</label>
+                                                <input type="date" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                                             </div>
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <button 
+                                                onClick={handleAddEvent} 
+                                                disabled={isSubmitting}
+                                                className={`h-[44px] w-full bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white rounded-md font-medium text-[15px] shadow-sm hover:opacity-90 transition-opacity ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {editingEvent ? 'Update Event' : 'Add Event'}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -553,19 +531,19 @@ const AdminCalendar = () => {
                                 <div className="bg-white rounded-xl border p-4 sm:p-6 shadow-sm flex-col custom-calendar-container mb-6 flex overflow-visible min-h-[500px] shrink-0">
 
                                     {/* Custom Header */}
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                                        <h2 className="text-[22px] sm:text-[28px] text-[#18181B] font-bold">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 px-4 pt-4">
+                                        <h2 className="text-[20px] text-[#6B7280] font-medium">
                                             {activeStartDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                                         </h2>
                                         <div className="flex items-center gap-2 w-full sm:w-auto">
                                             <button
                                                 onClick={handleToday}
-                                                className="flex-1 sm:flex-none px-6 py-2 bg-[#A892FF] text-white rounded-md text-sm font-bold hover:bg-[#937aff] transition-all active:scale-95 shadow-lg shadow-[#A892FF]/20"
+                                                className="px-6 py-2 bg-[#C7D2FE] text-[#4338CA] rounded-md text-[14px] font-medium hover:bg-[#A5B4FC] transition-all"
                                             >
                                                 today
                                             </button>
-                                            <button onClick={handlePrev} className="w-10 h-10 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1 transition-all active:scale-95">‹</button>
-                                            <button onClick={handleNext} className="w-10 h-10 flex items-center justify-center bg-[#6366F1] text-white rounded-md hover:bg-[#4f46e5] text-xl pb-1 transition-all active:scale-95">›</button>
+                                            <button onClick={handlePrev} className="w-9 h-9 flex items-center justify-center bg-[#8B5CF6] text-white rounded-md hover:bg-[#7c3aed] text-xl pb-1 transition-all">‹</button>
+                                            <button onClick={handleNext} className="w-9 h-9 flex items-center justify-center bg-[#8B5CF6] text-white rounded-md hover:bg-[#7c3aed] text-xl pb-1 transition-all">›</button>
                                         </div>
                                     </div>
 
@@ -730,12 +708,15 @@ const AdminCalendar = () => {
                 <style dangerouslySetInnerHTML={{
                     __html: `
                 .react-calendar { width: 100% !important; border: none !important; font-family: inherit !important; }
-                .react-calendar__tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start !important; border: 1px solid #f1f5f9 !important; position: relative; padding: 10px !important; transition: background 0.2s; }
+                .react-calendar__tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start !important; border: 1px solid #EAEDF2 !important; position: relative; padding: 10px !important; transition: background 0.2s; background: white; }
                 .react-calendar__tile:hover { background: #f8fafc !important; }
-                .react-calendar__month-view__days__day--neighboringMonth { background-color: #f9fafb; color: #cbd5e1; }
-                .react-calendar__tile--now { background: #eef2ff !important; color: #4f46e5 !important; font-weight: bold; }
-                .react-calendar__month-view__weekdays { text-transform: uppercase; font-weight: 700; font-size: 0.75rem; color: #94a3b8; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+                .react-calendar__month-view__days__day--neighboringMonth { color: #cbd5e1; }
+                .react-calendar__tile--now { background: white !important; }
+                .react-calendar__tile--now > abbr { background: #3758EE; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; }
+                .react-calendar__month-view__weekdays { text-transform: capitalize; font-weight: 500; font-size: 14px; color: #6B7280; padding-bottom: 12px; border-bottom: none; }
                 .react-calendar__month-view__weekdays__weekday abbr { text-decoration: none; cursor: default; }
+                .react-calendar__month-view__days { border-top: 1px solid #EAEDF2; border-left: 1px solid #EAEDF2; }
+                .react-calendar__tile { border-top: none !important; border-left: none !important; border-right: 1px solid #EAEDF2 !important; border-bottom: 1px solid #EAEDF2 !important; }
 
                 .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }

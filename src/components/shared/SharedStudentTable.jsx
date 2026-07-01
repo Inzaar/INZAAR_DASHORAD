@@ -66,37 +66,37 @@ const SharedStudentTable = ({
             ) : (
                 <>
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1000px]">
+                        <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                             <thead>
-                                <tr className="border-b border-gray-100">
-                                    <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
-                                    <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                    <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
-                                    <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
-                                    <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
-                                    <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
-                                    <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">Action</th>
+                                <tr>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Name</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Contact</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Enrollments</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Progress</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Last Login</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Status</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody>
                                 {students.map((student) => (
-                                    <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 pl-4">
-                                            <span className="text-[14px] font-medium text-gray-700">{student.name}</span>
+                                    <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
+                                        <td className="py-4 rounded-l-xl text-center">
+                                            <span className="text-[14px] text-gray-800">{student.name}</span>
                                         </td>
-                                        <td className="py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-[13px] text-gray-600">{student.email}</span>
-                                                <span className="text-[13px] text-gray-500">{student.phone}</span>
+                                        <td className="py-4 text-center">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <span className="text-[13px] text-gray-800 leading-tight">{student.email}</span>
+                                                <span className="text-[13px] text-gray-800">{student.phone}</span>
                                             </div>
                                         </td>
                                         <td className="py-4 text-center">
-                                            <div className="flex flex-col gap-1 items-center">
+                                            <div className="flex flex-col items-center justify-center">
                                                 {(student.enrollments || []).length > 0 ? (
                                                     <>
                                                         {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                            <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                {course}
+                                                            <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
+                                                                {course.title || course.name || course}
                                                             </span>
                                                         ))}
                                                         {student.enrollments.length > 3 && (
@@ -106,27 +106,24 @@ const SharedStudentTable = ({
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <span className="text-[12px] text-gray-400">No enrollments</span>
+                                                    <span className="text-gray-400 text-[13px]">Not Enrolled</span>
                                                 )}
                                             </div>
                                         </td>
                                         <td className="py-4 text-center">
-                                            <span className="text-[14px] font-medium text-gray-700">{student.progress}</span>
+                                            <span className="text-[14px] text-gray-800">{student.progress || '0%'}</span>
                                         </td>
                                         <td className="py-4 text-center">
-                                            <span className="text-[14px] font-medium text-gray-700">{formatDate(student.lastLogin)}</span>
+                                            <span className="text-[14px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
                                         </td>
                                         <td className="py-4 text-center">
-                                            <span className={`text-[13px] px-2 py-1 rounded-full ${student.status === 'Active'
-                                                ? 'text-[#00C896]'
-                                                : 'text-red-500'
-                                                }`}>
-                                                {student.status}
+                                            <span className={`text-[14px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                                {student.status === 'In-active' ? 'In-active' : student.status}
                                             </span>
                                         </td>
-                                        <td className="py-4 text-center">
+                                        <td className="py-4 text-center rounded-r-xl">
                                             <GradiantButton
-                                                className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#A892FF] hover:bg-[#6C5DDC]"
+                                                className="text-[13px] px-4 py-2 font-medium rounded-md hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7]"
                                                 onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                             >
                                                 View Profile
@@ -155,9 +152,9 @@ const SharedStudentTable = ({
                                     <button
                                         key={p}
                                         onClick={() => onPageChange(p)}
-                                        className={`w-9 h-9 flex items-center justify-center text-sm font-bold rounded-[12px] transition-all ${p === pagination.page
-                                            ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
-                                            : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
+                                        className={`w-9 h-9 flex items-center justify-center text-sm font-bold rounded-[8px] transition-all ${p === pagination.page
+                                            ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-md'
+                                            : 'text-gray-600 hover:text-[#6366F1] hover:bg-gray-100'
                                             }`}
                                     >
                                         {p}
