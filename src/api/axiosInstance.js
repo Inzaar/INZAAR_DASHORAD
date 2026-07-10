@@ -3,6 +3,7 @@ const axiosInstance = axios.create({
     baseURL: "https://c94a-2400-adc7-2918-d000-41db-36fc-ca02-db03.ngrok-free.app/api/v1",
     headers: {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "69420"
     },
     withCredentials: true,
 });
