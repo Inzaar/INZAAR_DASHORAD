@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Monitor, ClipboardCheck, X } from 'lucide-react';
+import { Monitor, MessageCircleQuestion, X } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
 const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
@@ -15,10 +15,10 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
             icon: Monitor,
         },
         {
-            id: 'Quiz',
-            title: 'Quiz',
-            description: 'Add an assessment between lectures with multiple questions, options, scoring, and completion settings.',
-            icon: ClipboardCheck,
+            id: 'QA',
+            title: 'Q&A',
+            description: 'Add a Q&A session as a video lecture. Students can watch and attempt it the same way as a regular lecture.',
+            icon: MessageCircleQuestion,
         },
     ];
 

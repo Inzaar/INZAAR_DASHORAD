@@ -418,13 +418,9 @@ const AddCoursePage = () => {
     };
 
     const handleContentTypeContinue = (type) => {
-        if (type === 'Quiz') {
-            setIsModalOpen(false);
-            setShowQuizFlow(true);
-        } else {
-            setNewItem(prev => ({ ...prev, type }));
-            setModalStep('item-form');
-        }
+        // QA and Lecture both open the video-form flow
+        setNewItem(prev => ({ ...prev, type }));
+        setModalStep('item-form');
     };
 
     const handleQuizComplete = ({ _id, title }) => {

@@ -1102,7 +1102,7 @@ const CourseView = () => {
                                             className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm appearance-none cursor-pointer"
                                         >
                                             <option value="Lecture">Lecture</option>
-                                            <option value="Quiz">Quiz</option>
+                                            <option value="QA">Q&A</option>
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                                     </div>
