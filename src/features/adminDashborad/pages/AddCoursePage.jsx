@@ -9,7 +9,6 @@ import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
 import CreateQuiz from '../components/CreateQuiz';
-import CreateAssignment from '../components/CreateAssignment';
 
 /* ─────────────────────────────────────── helpers ── */
 const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
@@ -109,7 +108,6 @@ const AddCoursePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalStep, setModalStep] = useState('select-type'); // 'select-type' | 'item-form'
     const [showQuizFlow, setShowQuizFlow] = useState(false);
-    const [showAssignmentFlow, setShowAssignmentFlow] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -174,7 +172,7 @@ const AddCoursePage = () => {
                         thumbnail: data.thumbnail || '',
                         certificateFile: data.certificateFile || '',
                     });
-
+                    
                     if (data.thumbnail) setThumbnailPreview(data.thumbnail);
                     if (data.certificateFile) setCertificatePreview(data.certificateFile);
 
@@ -439,19 +437,6 @@ const AddCoursePage = () => {
         setShowQuizFlow(false);
     };
 
-    const handleAssignmentComplete = (data) => {
-        setCourseItems(prev => [
-            ...prev,
-            {
-                id: Date.now(),
-                title: data.title,
-                type: 'Assignment',
-                lectureNo: prev.length + 1,
-            }
-        ]);
-        setShowAssignmentFlow(false);
-    };
-
     // Auto-save course as draft to get a real courseId before quiz creation, or update existing course details
     const handleAdvanceToStep2 = async () => {
         // --- Validation ---
@@ -492,13 +477,9 @@ const AddCoursePage = () => {
                 if (savedId) setCourseId(savedId);
             }
             setCurrentStep(2);
-            // Scroll to top of the scrollable container when advancing
-            document.querySelector('.custom-scrollbar')?.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
             console.error('Save course step 1 error:', err);
             setSubmitError(err?.response?.data?.message || 'Failed to save course details. Please try again.');
-            // Scroll to top to show the error message
-            document.querySelector('.custom-scrollbar')?.scrollTo({ top: 0, behavior: 'smooth' });
         } finally {
             setIsSubmitting(false);
         }
@@ -574,7 +555,7 @@ const AddCoursePage = () => {
             // Always use createCourseWithLectures for both creation and updates 
             // to ensure lectures and their resources (PDF/Audio) are synced correctly.
             await createCourseWithLectures(payload);
-
+            
             setSubmitSuccess(true);
             setTimeout(() => navigate('/admin-courses'), 1500);
         } catch (err) {
@@ -589,8 +570,8 @@ const AddCoursePage = () => {
 
     /* ────────────────────────── render ── */
     return (
-        <div className="h-screen w-full bg-[#f8f9fa] flex flex-col items-center justify-center font-sans overflow-hidden font-['Public_Sans']">
-            <div className={`w-full max-w-[1920px] h-full flex flex-col ${showQuizFlow || showAssignmentFlow ? '' : 'gap-4'}`}>
+        <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col items-center justify-center font-sans overflow-hidden font-['Public_Sans']">
+            <div className="w-full max-w-[1920px] min-h-screen max-h-[1680px] flex flex-col gap-4">
                 <Navbar onMenuClick={toggleSidebar} hideMenu={true} />
 
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
@@ -647,6 +628,7 @@ const AddCoursePage = () => {
                                             );
                                         })}
                                     </div>
+                                </div>
 
                                 {/* ── STEP 1: Course Setup ── */}
                                 {currentStep === 1 && (
@@ -714,7 +696,9 @@ const AddCoursePage = () => {
                                                             </select>
                                                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                         </div>
+                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
                                                     </div>
+                                                </div>
 
                                                 {/* Right Column */}
                                                 <div className="space-y-6">
@@ -790,6 +774,7 @@ const AddCoursePage = () => {
                                                         <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
                                                     </div>
                                                 </div>
+                                            </div>
 
                                             {/* Thumbnail Upload */}
                                             <div className="mt-10">
@@ -858,10 +843,24 @@ const AddCoursePage = () => {
                                                 <p className="text-[#64748b] font-medium text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
                                             </div>
 
-                                                {submitError && (
-                                                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
-                                                        <AlertCircle size={20} />
-                                                        <span className="font-bold text-[14px]">{submitError}</span>
+                                            <div className="flex flex-wrap items-stretch justify-start gap-8 mt-4">
+                                                {courseItems.map((item, idx) => (
+                                                    <LectureCard
+                                                        key={item.id}
+                                                        item={item}
+                                                        onEdit={() => handleEditItemClick(idx)}
+                                                        onDelete={() => handleDeleteItemClick(idx)}
+                                                    />
+                                                ))}
+                                                <div
+                                                    onClick={handleAddLecturesClick}
+                                                    className="w-full max-w-[280px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300 min-h-[300px]"
+                                                >
+                                                    <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                            <line x1="12" y1="5" x2="12" y2="19" />
+                                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                                        </svg>
                                                     </div>
                                                     <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
                                                 </div>
@@ -889,14 +888,35 @@ const AddCoursePage = () => {
                                                 </div>
                                             )}
 
-                                                <div className="flex flex-wrap items-stretch justify-start gap-8 mt-4">
-                                                    {courseItems.map((item, idx) => (
-                                                        <LectureCard
-                                                            key={item.id}
-                                                            item={item}
-                                                            onEdit={() => handleEditItemClick(idx)}
-                                                            onDelete={() => handleDeleteItemClick(idx)}
-                                                        />
+                                            {/* Course Setup Review */}
+                                            <div className="bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <h3 className="text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
+                                                    <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-20">
+                                                    {[
+                                                        { label: 'Course Title', value: courseForm.title || '—' },
+                                                        { label: 'Release Date', value: courseForm.releaseDate || '—' },
+                                                        { label: 'Instructor', value: courseForm.instructor || '—' },
+                                                        { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
+                                                        { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
+                                                        { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
+                                                        { label: 'Course Duration', value: courseForm.duration || '—' },
+                                                        { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
+                                                        { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
+                                                        { label: 'Certificate File', value: courseForm.certificateFile || '—' },
+                                                    ].map((field, idx) => (
+                                                        <div key={idx} className="space-y-2 overflow-hidden">
+                                                            <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
+                                                            {field.label === 'Certificate File' && field.value !== '—' ? (
+                                                                <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
+                                                                    {field.value}
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
+                                                            )}
+                                                        </div>
                                                     ))}
                                                 </div>
                                                 {courseForm.thumbnail && (
@@ -911,94 +931,31 @@ const AddCoursePage = () => {
                                                         >
                                                             <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
                                                         </div>
-                                                        <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    )}
 
-                                    {/* ── STEP 3: Review & Publish ── */}
-                                    {currentStep === 3 && (
-                                        <div className="px-4 md:px-10 py-10 flex-1 space-y-12">
-                                            <div className="max-w-[1400px] mx-auto">
-
-                                                {/* Success / Error Alerts */}
-                                                {submitSuccess && (
-                                                    <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
-                                                        <CheckCircle size={20} />
-                                                        <span className="font-bold text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
-                                                    </div>
-                                                )}
-                                                {submitError && (
-                                                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
-                                                        <AlertCircle size={20} />
-                                                        <span className="font-bold text-[14px]">{submitError}</span>
-                                                    </div>
-                                                )}
-
-                                                {/* Course Setup Review */}
-                                                <div className="bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                    <div className="flex items-center justify-between mb-8">
-                                                        <h3 className="text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
-                                                        <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-20">
-                                                        {[
-                                                            { label: 'Course Title', value: courseForm.title || '—' },
-                                                            { label: 'Release Date', value: courseForm.releaseDate || '—' },
-                                                            { label: 'Instructor', value: courseForm.instructor || '—' },
-                                                            { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
-                                                            { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
-                                                            { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
-                                                            { label: 'Course Duration', value: courseForm.duration || '—' },
-                                                            { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
-                                                            { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
-                                                            { label: 'Certificate File', value: courseForm.certificateFile || '—' },
-                                                        ].map((field, idx) => (
-                                                            <div key={idx} className="space-y-2 overflow-hidden">
-                                                                <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
-                                                                {field.label === 'Certificate File' && field.value !== '—' ? (
-                                                                    <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
-                                                                        {field.value}
-                                                                    </a>
-                                                                ) : (
-                                                                    <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
-                                                                )}
-                                                            </div>
+                                            {/* Lectures Review */}
+                                            <div className="mt-10 bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <h3 className="text-[22px] font-bold text-[#0f172a]">
+                                                        Lectures Content <span className="text-[16px] text-[#64748b] font-medium ml-2">({courseItems.length} lectures)</span>
+                                                    </h3>
+                                                    <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
+                                                </div>
+                                                {courseItems.length === 0 ? (
+                                                    <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
+                                                ) : (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                                        {courseItems.map((item) => (
+                                                            <LectureCard key={item.id} item={item} />
                                                         ))}
                                                     </div>
-                                                    {courseForm.thumbnail && (
-                                                        <div className="mt-10">
-                                                            <span className="text-[12px] text-[#64748b] font-medium block mb-4">Thumbnail</span>
-                                                            <div className="w-full border-2 border-dashed border-gray-200 rounded-[20px] py-10 flex items-center justify-center">
-                                                                <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Lectures Review */}
-                                                <div className="mt-10 bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                    <div className="flex items-center justify-between mb-8">
-                                                        <h3 className="text-[22px] font-bold text-[#0f172a]">
-                                                            Lectures Content <span className="text-[16px] text-[#64748b] font-medium ml-2">({courseItems.length} lectures)</span>
-                                                        </h3>
-                                                        <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
-                                                    </div>
-                                                    {courseItems.length === 0 ? (
-                                                        <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
-                                                    ) : (
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                                                            {courseItems.map((item) => (
-                                                                <LectureCard key={item.id} item={item} />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
                             </>
                         )}
