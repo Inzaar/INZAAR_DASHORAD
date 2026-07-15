@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { createCourseWithLectures, createCourse, uploadImage, uploadAudio, uploadPdf, getAdminCourseById, updateCourse } from '@/api/course';
+import { createCourseWithLectures, createCourse, uploadImage, uploadAudio, uploadVideo, uploadPdf, getAdminCourseById, updateCourse } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
@@ -121,12 +121,18 @@ const AddCoursePage = () => {
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const [isAudioUploading, setIsAudioUploading] = useState(false);
     const [isPdfUploading, setIsPdfUploading] = useState(false);
+    const [isVideoUploading, setIsVideoUploading] = useState(false);
+    const [isModalVideoHovered, setIsModalVideoHovered] = useState(false);
+    const [isModalAudioHovered, setIsModalAudioHovered] = useState(false);
+    const [isModalPdfHovered, setIsModalPdfHovered] = useState(false);
+    const videoInputRef = useRef(null);
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const isEditMode = queryParams.get('edit') === 'true';
     const editId = queryParams.get('id');
 
     const thumbnailInputRef = useRef(null);
+    const [isThumbnailHovered, setIsThumbnailHovered] = useState(false);
 
     const [certificateUploading, setCertificateUploading] = useState(false);
     const [certificatePreview, setCertificatePreview] = useState('');
@@ -280,7 +286,27 @@ const AddCoursePage = () => {
             setCertificateUploading(false);
         }
     };
+    
+    // Video File Upload
+    const handleVideoFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = '';
 
+        setIsVideoUploading(true);
+        setSubmitError('');
+
+        try {
+            const { url } = await uploadVideo(file);
+            setNewItem(prev => ({ ...prev, videoUrl: url }));
+        } catch (err) {
+            console.error('Video upload failed:', err);
+            setSubmitError('Video upload failed. Please try again.');
+        } finally {
+            setIsVideoUploading(false);
+        }
+    };
+    
     // Audio File Upload
     const handleAudioFileChange = async (e) => {
         const file = e.target.files?.[0];
@@ -394,16 +420,9 @@ const AddCoursePage = () => {
     };
 
     const handleContentTypeContinue = (type) => {
-        if (type === 'Quiz') {
-            setIsModalOpen(false);
-            setShowQuizFlow(true);
-        } else if (type === 'Assignment') {
-            setIsModalOpen(false);
-            setShowAssignmentFlow(true);
-        } else {
-            setNewItem(prev => ({ ...prev, type }));
-            setModalStep('item-form');
-        }
+        // QA and Lecture both open the video-form flow
+        setNewItem(prev => ({ ...prev, type }));
+        setModalStep('item-form');
     };
 
     const handleQuizComplete = ({ _id, title }) => {
@@ -485,6 +504,42 @@ const AddCoursePage = () => {
         }
     };
 
+    const handleSaveDraftClick = async () => {
+        setIsSubmitting(true);
+        setSubmitError('');
+        try {
+            const payload = {
+                title: courseForm.title || 'Untitled Draft',
+                instructor: courseForm.instructor || '',
+                addBy: user?.name || user?.firstname || 'Admin',
+                batchStrength: Number(courseForm.batchStrength) || 0,
+                totalLectures: Number(courseForm.totalLectures) || 0,
+                certificateCriteria: Number(courseForm.certificateCriteria) || 0,
+                unlockCriteria: Number(courseForm.unlockCriteria) || 0,
+                duration: courseForm.duration || '',
+                releaseDate: courseForm.releaseDate || new Date().toISOString(),
+                thumbnail: courseForm.thumbnail || '',
+                certificateFile: courseForm.certificateFile || '',
+                status: 'draft',
+            };
+
+            if (courseId) {
+                await updateCourse(courseId, payload);
+            } else {
+                const res = await createCourse(payload);
+                const savedId = res?.data?._id || res?._id;
+                if (savedId) setCourseId(savedId);
+            }
+            setSubmitSuccess(true);
+            setTimeout(() => navigate('/admin-courses'), 1000);
+        } catch (err) {
+            console.error('Draft save failed:', err);
+            setSubmitError(err?.response?.data?.message || 'Failed to save draft.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     /* ── Submit to API ── */
     const handleSubmit = async (status = 'published') => {
         setIsSubmitting(true);
@@ -538,321 +593,301 @@ const AddCoursePage = () => {
             <div className={`w-full max-w-[1920px] h-full flex flex-col ${showQuizFlow || showAssignmentFlow ? '' : 'gap-4'}`}>
                 <Navbar onMenuClick={toggleSidebar} hideMenu={true} />
 
-                <div className={`flex flex-col lg:flex-row flex-1 overflow-hidden relative ${showQuizFlow || showAssignmentFlow ? '' : 'px-4 gap-4 pb-4'}`}>
-
-                    <main className={`flex-1 ${showQuizFlow || showAssignmentFlow ? 'overflow-hidden flex flex-col' : 'overflow-y-auto no-scrollbar pb-10'}`}>
-                        <div className={`flex flex-col ${showQuizFlow || showAssignmentFlow ? 'flex-1 min-h-0' : 'py-4 min-h-full'}`}>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                    <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
+                        <main className="flex-1 overflow-y-auto no-scrollbar pb-0 relative">
+                            <div className="py-4">
                             {showQuizFlow ? (
-                                <CreateQuiz
-                                    courseId={courseId}
-                                    onBackToSelection={() => {
-                                        setShowQuizFlow(false);
-                                        setModalStep('select-type');
-                                        setIsModalOpen(true);
-                                    }}
-                                    onComplete={handleQuizComplete}
-                                />
-                            ) : showAssignmentFlow ? (
-                                <CreateAssignment
-                                    courseId={courseId}
-                                    onBackToSelection={() => {
-                                        setShowAssignmentFlow(false);
-                                        setModalStep('select-type');
-                                        setIsModalOpen(true);
-                                    }}
-                                    onComplete={handleAssignmentComplete}
-                                />
-                            ) : (
-                                <>
-                                    {/* Header Row */}
-                                    <div className="px-4 py-6 md:px-10 md:py-10 flex items-center justify-between border-b border-gray-50 flex-wrap md:flex-nowrap gap-4">
-                                        <div className="flex items-center gap-4 min-w-max">
-                                            <div className="w-10 h-10 bg-[#eff6ff] rounded-[14px] flex items-center justify-center shadow-inner">
-                                                <div className="w-5.5 h-5.5 bg-[#4f46e5] rounded-[6px] flex items-center justify-center p-1 shadow-sm">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                                                        <line x1="12" y1="22.08" x2="12" y2="12" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">{isEditMode ? 'Edit Course' : 'Add New Course'}</h2>
+                            <CreateQuiz
+                                courseId={courseId}
+                                onBackToSelection={() => {
+                                    setShowQuizFlow(false);
+                                    setModalStep('select-type');
+                                    setIsModalOpen(true);
+                                }}
+                                onComplete={handleQuizComplete}
+                            />
+                        ) : (
+                            <>
+                                {/* Header Row */}
+                                <div className="px-8 py-5 flex flex-col md:flex-row items-center justify-between border-b border-gray-100 gap-4 bg-white">
+                                    <div className="flex items-center gap-3.5">
+                                        <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                                <line x1="12" y1="22.08" x2="12" y2="12" />
+                                            </svg>
                                         </div>
+                                        <h2 className="text-[18px] font-bold text-gray-800 tracking-tight">
+                                            {isEditMode ? 'Edit Course' : 'Add New Course'}
+                                        </h2>
+                                    </div>
 
-                                        {/* Stepper */}
-                                        <div className="flex items-center gap-6 w-full max-w-[900px] overflow-x-auto no-scrollbar pb-2 md:pb-0 md:ml-auto">
-                                            {steps.map((step) => (
-                                                <div key={step.id} className="flex-shrink-0 md:flex-1 min-w-[160px] md:min-w-0 group">
-                                                    <div className={`h-[4px] w-full rounded-full transition-all duration-300 ${currentStep >= step.id ? 'bg-[#3b82f6]' : 'bg-[#6b7280]'}`} />
-                                                    <div className="mt-4 flex items-center gap-3">
-                                                        <div className={`w-[22px] h-[22px] rounded-full border-2 transition-all duration-300 flex-shrink-0 flex items-center justify-center ${currentStep >= step.id ? 'border-[#3b82f6]' : 'border-[#6b7280]'}`}>
-                                                            {currentStep > step.id && <div className="w-2 h-2 bg-[#3b82f6] rounded-full" />}
-                                                            {currentStep === step.id && <div className="w-2 h-2 bg-[#3b82f6] rounded-full" />}
+                                    {/* Stepper */}
+                                    <div className="flex items-center w-full md:w-auto max-w-[850px] gap-6 md:ml-auto">
+                                        {steps.map((step) => {
+                                            const isActive = currentStep === step.id;
+                                            const isCompleted = currentStep > step.id;
+                                            return (
+                                                <div key={step.id} className="flex-1 min-w-[200px] md:min-w-[240px] flex flex-col">
+                                                    {/* Top Bar Indicator */}
+                                                    <div className={`h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
+                                                    
+                                                    {/* Circle + Label */}
+                                                    <div className="mt-3 flex items-center justify-center gap-2">
+                                                        <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isActive || isCompleted ? 'border-[#3758EE]' : 'border-gray-300'}`}>
+                                                            {(isActive || isCompleted) && <div className="w-2 h-2 bg-[#3758EE] rounded-full" />}
                                                         </div>
-                                                        <span className={`text-[13px] font-bold transition-all duration-300 whitespace-nowrap ${currentStep >= step.id ? 'text-[#3b82f6]' : 'text-[#6b7280]'}`}>
+                                                        <span className={`text-[12px] font-bold tracking-wide whitespace-nowrap transition-all duration-300 ${isActive || isCompleted ? 'text-[#3758EE]' : 'text-gray-400'}`}>
                                                             {step.label}
                                                         </span>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            );
+                                        })}
                                     </div>
 
-                                    {/* ── STEP 1: Course Setup ── */}
-                                    {currentStep === 1 && (
-                                        <div className="px-4 md:px-10 py-10 flex-1 text-left">
-                                            <div className="max-w-[1300px] mx-auto">
-                                                <div className="mb-10">
-                                                    <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Course Setup</h3>
-                                                    <p className="text-[#64748b] font-medium text-[15px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
-                                                </div>
+                                {/* ── STEP 1: Course Setup ── */}
+                                {currentStep === 1 && (
+                                    <div className="px-8 md:px-12 py-10 pb-32 flex-1 text-left bg-white">
+                                        <div className="max-w-[1300px] mx-auto">
+                                            <div className="mb-10">
+                                                <h3 className="text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
+                                                <p className="text-gray-400 font-medium text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
+                                            </div>
 
-                                                {submitError && (
-                                                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6 max-w-[1300px]">
-                                                        <AlertCircle size={20} />
-                                                        <span className="font-bold text-[14px]">{submitError}</span>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
+                                                {/* Left Column */}
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Title</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter title"
+                                                            value={courseForm.title}
+                                                            onChange={e => handleCourseFormChange('title', e.target.value)}
+                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                        />
                                                     </div>
-                                                )}
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                                                    {/* Left Column */}
-                                                    <div className="space-y-8">
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Course Title</label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Enter title"
-                                                                value={courseForm.title}
-                                                                onChange={e => handleCourseFormChange('title', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Instructor</label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Enter name"
-                                                                value={courseForm.instructor}
-                                                                onChange={e => handleCourseFormChange('instructor', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Batch Strength</label>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="10 students per batch"
-                                                                value={courseForm.batchStrength}
-                                                                onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-500 shadow-sm"
-                                                            />
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">If 100 students enroll → system auto-creates 10 batches.</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Certificate Eligibility (%)</label>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="Enter %"
-                                                                value={courseForm.certificateCriteria}
-                                                                onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm"
-                                                            />
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Course Duration</label>
-                                                            <div className="relative group">
-                                                                <select
-                                                                    value={courseForm.duration}
-                                                                    onChange={e => handleCourseFormChange('duration', e.target.value)}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm"
-                                                                >
-                                                                    <option value="">Select</option>
-                                                                    {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                                                                </select>
-                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                            </div>
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter name"
+                                                            value={courseForm.instructor}
+                                                            onChange={e => handleCourseFormChange('instructor', e.target.value)}
+                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Block Strength</label>
+                                                        <input
+                                                            type="text"
+                                                            readOnly
+                                                            value="10 students per block"
+                                                            className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                        />
+                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">If 100 students enroll &rarr; system auto-creates 10 block.</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Enter"
+                                                            value={courseForm.certificateCriteria}
+                                                            onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
+                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm placeholder:text-gray-300"
+                                                        />
+                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
+                                                        <div className="relative group">
+                                                            <select
+                                                                value={courseForm.duration}
+                                                                onChange={e => handleCourseFormChange('duration', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                            >
+                                                                <option value="">Select</option>
+                                                                {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                                                            </select>
+                                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                         </div>
                                                     </div>
 
-                                                    {/* Right Column */}
-                                                    <div className="space-y-8">
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Release Date</label>
+                                                {/* Right Column */}
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Release Date</label>
+                                                        <div className="relative group">
                                                             <input
                                                                 type="date"
                                                                 value={courseForm.releaseDate}
                                                                 onChange={e => handleCourseFormChange('releaseDate', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm"
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm"
                                                             />
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">
-                                                                Add by <span className="text-gray-400 font-normal text-[10px] lowercase">(read-only)</span>
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                readOnly
-                                                                value={user?.name || user?.firstname || 'Admin'}
-                                                                className="w-full px-4 py-3 border border-gray-100 rounded-lg outline-none text-[14px] text-gray-500 bg-gray-50 shadow-sm cursor-not-allowed"
-                                                            />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">
+                                                            Add by <span className="text-gray-400 font-normal text-[11px]">(read-only)</span>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            readOnly
+                                                            placeholder="Select"
+                                                            value={user?.name || user?.firstname || 'Select'}
+                                                            className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Enter total lectures"
+                                                            value={courseForm.totalLectures}
+                                                            onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
+                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                        />
+                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Upload Certificate</label>
+                                                        <input
+                                                            ref={certificateInputRef}
+                                                            type="file"
+                                                            accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                            className="hidden"
+                                                            onChange={handleCertificateFileChange}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => !certificateUploading && certificateInputRef.current?.click()}
+                                                            className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
+                                                        >
+                                                            <span className="text-[14px] text-gray-400 font-medium truncate max-w-[85%]">
+                                                                {certificateUploading ? "Uploading..." : (courseForm.certificateFile ? (courseForm.certificateFile.split('/').pop() || "certificate.png") : "Browse file")}
+                                                            </span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+                                                                <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Course (%)</label>
+                                                        <div className="relative group">
+                                                            <select
+                                                                value={courseForm.unlockCriteria}
+                                                                onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                            >
+                                                                <option value="">Enter</option>
+                                                                {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
+                                                            </select>
+                                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Total Lectures</label>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="Enter total lectures"
-                                                                value={courseForm.totalLectures}
-                                                                onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
-                                                                className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                            />
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">
-                                                                Certificate File URL
-                                                                <span className="text-[10px] text-gray-400 font-normal ml-2">(Uploaded automatically)</span>
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="https://example.com/certificate.png"
-                                                                value={courseForm.certificateFile}
-                                                                readOnly
-                                                                className="w-full px-4 py-3 border border-gray-100 rounded-lg outline-none text-[14px] text-gray-500 bg-gray-50 shadow-sm cursor-not-allowed"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Unlock Next Lecture (%)</label>
-                                                            <div className="relative group">
-                                                                <select
-                                                                    value={courseForm.unlockCriteria}
-                                                                    onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm"
-                                                                >
-                                                                    <option value="">Select %</option>
-                                                                    {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
-                                                                </select>
-                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                            </div>
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">% of lecture must be viewed to unlock next.</p>
-                                                        </div>
+                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
                                                     </div>
                                                 </div>
 
-                                                {/* Thumbnail Upload */}
-                                                <div className="mt-12">
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                                        {/* Course Thumbnail */}
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Course Thumbnail</label>
-                                                            <input
-                                                                ref={thumbnailInputRef}
-                                                                type="file"
-                                                                accept="image/jpg,image/jpeg,image/png,image/webp"
-                                                                className="hidden"
-                                                                onChange={handleThumbnailFileChange}
-                                                            />
-                                                            <div
-                                                                onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
-                                                                className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
-                                                        ${thumbnailUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
-                                                            >
-                                                                {thumbnailPreview && !thumbnailUploading && (
-                                                                    <div className="w-full flex flex-col items-center gap-4">
-                                                                        <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
-                                                                        {courseForm.thumbnail && (
-                                                                            <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
-                                                                                <CheckCircle size={14} /> Selected
-                                                                            </span>
-                                                                        )}
-                                                                        <span className="text-[12px] text-[#3b82f6] font-medium">Click to change image</span>
-                                                                    </div>
-                                                                )}
-                                                                {thumbnailUploading && (
-                                                                    <div className="flex flex-col items-center gap-3">
-                                                                        {thumbnailPreview && <img src={thumbnailPreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
-                                                                        <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
-                                                                        <span className="text-[13px] text-[#64748b] font-medium">Uploading…</span>
-                                                                    </div>
-                                                                )}
-                                                                {!thumbnailPreview && !thumbnailUploading && (
-                                                                    <>
-                                                                        <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
-                                                                            <ImageIcon size={30} strokeWidth={2} />
-                                                                        </div>
-                                                                        <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse file</button>
-                                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">JPG / PNG / WEBP</p>
-                                                                    </>
-                                                                )}
-                                                            </div>
+                                            {/* Thumbnail Upload */}
+                                            <div className="mt-10">
+                                                <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Course Thumbnail</label>
+                                                <input
+                                                    ref={thumbnailInputRef}
+                                                    type="file"
+                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                    onChange={handleThumbnailFileChange}
+                                                />
+                                                <div
+                                                    onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
+                                                    onMouseEnter={() => setIsThumbnailHovered(true)}
+                                                    onMouseLeave={() => setIsThumbnailHovered(false)}
+                                                    className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group bg-white
+                                                    ${thumbnailUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
+                                                    style={{
+                                                        backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isThumbnailHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                        borderRadius: '12px'
+                                                    }}
+                                                >
+                                                    {thumbnailPreview && !thumbnailUploading ? (
+                                                        <div className="w-full flex flex-col items-center gap-3">
+                                                            <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-xl object-cover shadow-md border border-white" />
+                                                            {courseForm.thumbnail && (
+                                                                <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
+                                                                    <CheckCircle size={12} /> Uploaded Successfully
+                                                                </span>
+                                                            )}
+                                                            <span className="text-[12px] text-indigo-600 font-bold hover:underline">Click to change image</span>
                                                         </div>
-
-                                                        {/* Certificate Template */}
-                                                        <div>
-                                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-4">Upload Certificate Template <span className="text-gray-400 font-normal ml-2">(Optional)</span></label>
-                                                            <input
-                                                                ref={certificateInputRef}
-                                                                type="file"
-                                                                accept="image/jpg,image/jpeg,image/png,image/webp"
-                                                                className="hidden"
-                                                                onChange={handleCertificateFileChange}
-                                                            />
-                                                            <div
-                                                                onClick={() => !certificateUploading && certificateInputRef.current?.click()}
-                                                                className={`w-full border-2 border-dashed rounded-[24px] transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group
-                                                        ${certificateUploading ? 'border-blue-300 bg-blue-50/30 cursor-wait' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/10'}`}
-                                                            >
-                                                                {certificatePreview && !certificateUploading && (
-                                                                    <div className="w-full flex flex-col items-center gap-4">
-                                                                        <img src={certificatePreview} alt="Certificate preview" className="max-h-52 max-w-[80%] rounded-2xl object-cover shadow-lg border border-white" />
-                                                                        {courseForm.certificateFile && (
-                                                                            <span className="text-[11px] text-green-600 font-bold flex items-center gap-1.5">
-                                                                                <CheckCircle size={14} /> Selected
-                                                                            </span>
-                                                                        )}
-                                                                        <span className="text-[12px] text-[#3b82f6] font-medium">Click to change template</span>
-                                                                    </div>
-                                                                )}
-                                                                {certificateUploading && (
-                                                                    <div className="flex flex-col items-center gap-3">
-                                                                        {certificatePreview && <img src={certificatePreview} alt="preview" className="max-h-32 rounded-xl opacity-50 object-cover" />}
-                                                                        <Loader2 size={28} className="animate-spin text-[#3b82f6]" />
-                                                                        <span className="text-[13px] text-[#64748b] font-medium">Uploading…</span>
-                                                                    </div>
-                                                                )}
-                                                                {!certificatePreview && !certificateUploading && (
-                                                                    <>
-                                                                        <div className="w-16 h-16 bg-white rounded-[18px] shadow-lg border border-gray-50 flex items-center justify-center text-[#1e293b] mb-5 group-hover:scale-105 transition-transform duration-300">
-                                                                            <ImageIcon size={30} strokeWidth={2} />
-                                                                        </div>
-                                                                        <button type="button" className="px-8 py-2.5 bg-[#f3f4f6] text-[#0f172a] text-[13px] font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors shadow-sm">Browse template</button>
-                                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[2px]">900x636 PNG Recommended</p>
-                                                                    </>
-                                                                )}
-                                                            </div>
+                                                    ) : thumbnailUploading ? (
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                            <span className="text-[12px] text-gray-500 font-bold">Uploading thumbnail...</span>
                                                         </div>
-                                                    </div>
+                                                    ) : (
+                                                        <>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-4 transition-transform group-hover:scale-105 duration-300">
+                                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                                <path d="M12 12v9" />
+                                                                <path d="m16 16-4-4-4 4" />
+                                                            </svg>
+                                                            <button
+                                                                type="button"
+                                                                className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                            >
+                                                                Browse file
+                                                            </button>
+                                                            <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {/* ── STEP 2: Add Course Content ── */}
-                                    {currentStep === 2 && (
-                                        <div className="px-4 md:px-10 py-10 flex-1">
-                                            <div className="max-w-[1400px] w-full mx-auto">
-                                                <div className="mb-10">
-                                                    <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
-                                                    <p className="text-[#64748b] font-medium text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
-                                                </div>
+                                {/* ── STEP 2: Add Course Content ── */}
+                                {currentStep === 2 && (
+                                    <div className="px-4 md:px-10 py-10 pb-32 flex-1">
+                                        <div className="max-w-[1400px] w-full mx-auto">
+                                            <div className="mb-10">
+                                                <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
+                                                <p className="text-[#64748b] font-medium text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
+                                            </div>
 
                                                 {submitError && (
                                                     <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
                                                         <AlertCircle size={20} />
                                                         <span className="font-bold text-[14px]">{submitError}</span>
                                                     </div>
-                                                )}
+                                                    <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ── STEP 3: Review & Publish ── */}
+                                {currentStep === 3 && (
+                                    <div className="px-4 md:px-10 py-10 pb-32 flex-1 space-y-12">
+                                        <div className="max-w-[1400px] mx-auto">
+
+                                            {/* Success / Error Alerts */}
+                                            {submitSuccess && (
+                                                <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
+                                                    <CheckCircle size={20} />
+                                                    <span className="font-bold text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
+                                                </div>
+                                            )}
+                                            {submitError && (
+                                                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
+                                                    <AlertCircle size={20} />
+                                                    <span className="font-bold text-[14px]">{submitError}</span>
+                                                </div>
+                                            )}
 
                                                 <div className="flex flex-wrap items-stretch justify-start gap-8 mt-4">
                                                     {courseItems.map((item, idx) => (
@@ -863,15 +898,18 @@ const AddCoursePage = () => {
                                                             onDelete={() => handleDeleteItemClick(idx)}
                                                         />
                                                     ))}
-                                                    <div
-                                                        onClick={handleAddLecturesClick}
-                                                        className="w-full max-w-[280px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300 min-h-[300px]"
-                                                    >
-                                                        <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                                <line x1="12" y1="5" x2="12" y2="19" />
-                                                                <line x1="5" y1="12" x2="19" y2="12" />
-                                                            </svg>
+                                                </div>
+                                                {courseForm.thumbnail && (
+                                                    <div className="mt-10">
+                                                        <span className="text-[12px] text-[#64748b] font-medium block mb-4">Upload Course Thumbnail</span>
+                                                        <div
+                                                            className="w-full py-10 flex items-center justify-center bg-white"
+                                                            style={{
+                                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239CA3AF' stroke-width='2.5' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                                borderRadius: '20px'
+                                                            }}
+                                                        >
+                                                            <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
                                                         </div>
                                                         <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
                                                     </div>
@@ -962,45 +1000,49 @@ const AddCoursePage = () => {
                                         </div>
                                     )}
 
-                                    {/* Footer Actions */}
-                                    <div className="px-4 md:px-10 py-8 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-20 mt-auto">
-                                        <button
-                                            onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
-                                            className="w-full sm:w-auto px-6 md:px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm"
-                                        >
-                                            {currentStep === 1 ? 'Cancel' : 'Back'}
-                                        </button>
-                                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                            {!isEditMode && (
-                                                <button
-                                                    onClick={() => currentStep === 3 ? handleSubmit('draft') : null}
-                                                    disabled={isSubmitting}
-                                                    className="w-full sm:w-auto px-6 md:px-12 py-3.5 bg-[#f3f4f6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50"
-                                                >
-                                                    Save as draft
-                                                </button>
-                                            )}
-                                            <GradiantButton
-                                                onClick={() => {
-                                                    if (currentStep === 1) handleAdvanceToStep2();
-                                                    else if (currentStep === 2) setCurrentStep(3);
-                                                    else handleSubmit('published');
-                                                }}
-                                                disabled={isSubmitting}
-                                                className="w-full sm:w-auto px-6 md:px-12 py-3.5 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70"
-                                            >
-                                                {isSubmitting
-                                                    ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving…</span>
-                                                    : currentStep === 3 ? (isEditMode ? 'Edit Course' : 'Save & Publish') : 'Next'
-                                                }
-                                            </GradiantButton>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+                            </>
+                        )}
                         </div>
                     </main>
+
+                    {/* Footer Actions */}
+                    {!showQuizFlow && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+                            <button
+                                onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
+                                className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[14px]"
+                            >
+                                {currentStep === 1 ? 'Cancel' : 'Back'}
+                            </button>
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                {!isEditMode && (
+                                    <button
+                                        onClick={handleSaveDraftClick}
+                                        disabled={isSubmitting}
+                                        className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#F3F4F6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50 text-[14px]"
+                                    >
+                                        Save as draft
+                                    </button>
+                                )}
+                                <GradiantButton
+                                    onClick={() => {
+                                        if (currentStep === 1) handleAdvanceToStep2();
+                                        else if (currentStep === 2) setCurrentStep(3);
+                                        else handleSubmit('published');
+                                    }}
+                                    disabled={isSubmitting}
+                                    className="w-full sm:w-auto px-6 md:px-12 py-3 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70 text-[14px]"
+                                >
+                                    {isSubmitting
+                                        ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving…</span>
+                                        : currentStep === 3 ? (isEditMode ? 'Edit Course' : 'Save & Publish') : 'Next'
+                                    }
+                                </GradiantButton>
+                            </div>
+                        </div>
+                    )}
                 </div>
+            </div>
 
                 {/* ── Add Lecture Flow ── */}
                 <SelectContentTypeModal
@@ -1011,164 +1053,281 @@ const AddCoursePage = () => {
 
                 {isModalOpen && modalStep === 'item-form' && (
                     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans">
-                        <div className="bg-white w-full max-w-[720px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
-                            <div className="px-8 pt-8 pb-6 bg-white">
-                                <div className="flex items-start gap-4 mb-1">
-                                    <div className="w-10 h-10 bg-[#eff6ff] rounded-[14px] flex items-center justify-center flex-shrink-0">
-                                        <div className="w-5.5 h-5.5 bg-[#4f46e5] rounded-[6px] flex items-center justify-center p-1 shadow-sm">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                                                <line x1="12" y1="22.08" x2="12" y2="12" />
-                                            </svg>
-                                        </div>
+                        <div className="bg-white w-full max-w-[850px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden">
+                            <div className="px-8 pt-8 pb-4 bg-white">
+                                <div className="flex items-center gap-4 mb-1">
+                                    <div className="w-12 h-12 bg-[#EEF2FF] rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                                        </svg>
                                     </div>
                                     <div>
-                                        <h2 className="text-[20px] font-bold text-[#0f172a] tracking-tight">{editingIndex !== null ? 'Edit' : 'Add New'} {newItem.type}</h2>
-                                        <p className="text-[#64748b] text-[13px] font-medium leading-relaxed">Fill in the details for your {newItem.type.toLowerCase()}.</p>
+                                        <h2 className="text-[20px] font-bold text-gray-800 tracking-tight">
+                                            {editingIndex !== null ? 'Edit' : 'Add New'} Course Item
+                                        </h2>
+                                        <p className="text-gray-400 text-[13px] font-medium leading-relaxed">
+                                            Select the type of content you want to add and upload the required files.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="px-8 pb-8 max-h-[70vh] overflow-y-auto no-scrollbar">
+                            <div className="px-8 pb-8 max-h-[75vh] overflow-y-auto no-scrollbar">
                                 <div className="space-y-6">
-                                    {/* Type */}
-                                    <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Select Type</label>
-                                        <div className="relative group">
-                                            <select
-                                                value={newItem.type}
-                                                onChange={e => setNewItem({ ...newItem, type: e.target.value })}
-                                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-800 appearance-none shadow-sm cursor-pointer"
-                                            >
-                                                <option>Lecture</option>
-                                                <option>Quiz</option>
-                                                <option>Assignment</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    {/* Row 1: Lecture name and Lecture Number */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter title"
+                                                value={newItem.title}
+                                                onChange={e => setNewItem({ ...newItem, title: e.target.value })}
+                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture Number<span className="text-gray-400 font-normal text-[11px]">(Auto-Generated)</span></label>
+                                            <input
+                                                type="text"
+                                                readOnly
+                                                value={newItem.lectureNo || (editingIndex !== null ? (editingIndex + 1) : (courseItems.length + 1))}
+                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                            />
                                         </div>
                                     </div>
 
-                                    {/* Title */}
+                                    {/* Upload Video Lecture Section */}
                                     <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Lecture Name</label>
+                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Video Lecture</label>
                                         <input
-                                            type="text"
-                                            placeholder="Enter title"
-                                            value={newItem.title}
-                                            onChange={e => setNewItem({ ...newItem, title: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            ref={videoInputRef}
+                                            type="file"
+                                            accept="video/*"
+                                            className="hidden"
+                                            onChange={handleVideoFileChange}
                                         />
+                                        <div
+                                            onClick={() => !isVideoUploading && videoInputRef.current?.click()}
+                                            onMouseEnter={() => setIsModalVideoHovered(true)}
+                                            onMouseLeave={() => setIsModalVideoHovered(false)}
+                                            className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                            ${isVideoUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
+                                            style={{
+                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalVideoHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                borderRadius: '12px'
+                                            }}
+                                        >
+                                            {newItem.videoUrl && !isVideoUploading ? (
+                                                <div className="w-full flex flex-col items-center gap-3 px-4">
+                                                    <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
+                                                        <CheckCircle size={12} /> Video Attached Successfully
+                                                    </span>
+                                                    <span className="text-[12px] text-indigo-600 font-bold hover:underline truncate max-w-[80%]">{newItem.videoUrl.split('/').pop()}</span>
+                                                    <span className="text-[11px] text-gray-400 font-medium">Click to change video</span>
+                                                </div>
+                                            ) : isVideoUploading ? (
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                    <span className="text-[12px] text-gray-500 font-bold">Uploading video...</span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                        <path d="M12 12v9" />
+                                                        <path d="m16 16-4-4-4 4" />
+                                                    </svg>
+                                                    <button
+                                                        type="button"
+                                                        className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                    >
+                                                        Browse file
+                                                    </button>
+                                                    <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Video URL */}
+                                    {/* Or Upload URL */}
                                     <div>
-                                        <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Video URL <span className="text-gray-400 font-normal text-[11px]">(YouTube)</span></label>
+                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Or Upload URL</label>
                                         <input
                                             type="text"
-                                            placeholder="https://www.youtube.com/watch?v=..."
+                                            placeholder="https://youtube.com"
                                             value={newItem.videoUrl}
                                             onChange={e => setNewItem({ ...newItem, videoUrl: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
                                         />
                                     </div>
 
-                                    {/* Audio + PDF */}
+                                    {/* Audio and PDF Optional Section */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                        {/* Audio Upload */}
-                                        <div className="flex flex-col min-h-0">
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Audio Files <span className="text-gray-400 font-normal text-[11px]">(Multiple)</span></label>
+                                        {/* Optional Audio Upload */}
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Optional Audio Upload</label>
+                                            <input
+                                                ref={audioInputRef}
+                                                type="file"
+                                                accept="audio/*"
+                                                className="hidden"
+                                                onChange={handleAudioFileChange}
+                                            />
                                             <div
-                                                onClick={() => audioInputRef.current?.click()}
-                                                className={`relative w-full px-4 py-3 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${newItem.audioUrl?.length > 0 ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-400 bg-gray-50'}`}
+                                                onClick={() => !isAudioUploading && audioInputRef.current?.click()}
+                                                onMouseEnter={() => setIsModalAudioHovered(true)}
+                                                onMouseLeave={() => setIsModalAudioHovered(false)}
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-6 cursor-pointer group bg-white
+                                                ${isAudioUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
+                                                style={{
+                                                    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                    borderRadius: '12px'
+                                                }}
                                             >
                                                 {isAudioUploading ? (
-                                                    <div className="flex flex-col items-center gap-2 py-1">
-                                                        <Loader2 size={20} className="text-[#8B5CF6] animate-spin" />
-                                                        <span className="text-[12px] font-medium text-[#8B5CF6]">Uploading...</span>
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Loader2 size={20} className="animate-spin text-indigo-600" />
+                                                        <span className="text-[12px] text-gray-500 font-medium">Uploading...</span>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex flex-col items-center gap-1 py-1">
-                                                        <Upload size={20} className="text-gray-400" />
-                                                        <span className="text-[12px] font-medium text-gray-500">Add Audio File</span>
-                                                    </div>
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-2 transition-transform group-hover:scale-105 duration-300">
+                                                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                            <path d="M12 12v9" />
+                                                            <path d="m16 16-4-4-4 4" />
+                                                        </svg>
+                                                        <button
+                                                            type="button"
+                                                            className="px-4 py-1.5 bg-gray-100 text-black text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm"
+                                                        >
+                                                            Browse file
+                                                        </button>
+                                                        <span className="text-[10px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                    </>
                                                 )}
-                                                <input
-                                                    ref={audioInputRef}
-                                                    type="file"
-                                                    accept="audio/*"
-                                                    onChange={handleAudioFileChange}
-                                                    className="hidden"
-                                                />
                                             </div>
 
                                             {/* List of Audios */}
                                             {newItem.audioUrl?.length > 0 && (
-                                                <div className="mt-3 space-y-2 max-h-[130px] overflow-y-auto no-scrollbar pr-1 border border-transparent">
+                                                <div className="mt-2 space-y-2 max-h-[100px] overflow-y-auto no-scrollbar">
                                                     {newItem.audioUrl.map((url, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
-                                                            <div className="flex items-center gap-2 overflow-hidden">
-                                                                <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
-                                                                <span className="text-[11px] font-medium text-gray-600 truncate">Audio {idx + 1}</span>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) })}
+                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
+                                                            <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">Audio {idx + 1}</span>
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setNewItem({...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx)});
+                                                                }}
                                                                 className="text-red-400 hover:text-red-600 p-1"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <Trash2 size={12} />
                                                             </button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
+
+                                            <div className="mt-3">
+                                                <label className="block text-[12px] font-bold text-gray-500 mb-1.5">Or Upload URL</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://youtube.com"
+                                                    value={newItem.audioUrl && newItem.audioUrl.length > 0 && !newItem.audioUrl[0].includes('cloudinary') ? newItem.audioUrl[0] : ''}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setNewItem(prev => ({
+                                                            ...prev,
+                                                            audioUrl: val ? [val] : []
+                                                        }));
+                                                    }}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] placeholder:text-gray-300 shadow-sm"
+                                                />
+                                            </div>
                                         </div>
 
-                                        {/* PDF Upload */}
-                                        <div className="flex flex-col min-h-0">
-                                            <label className="block text-[14px] font-bold text-[#0f172a] mb-2">Resource Files <span className="text-gray-400 font-normal text-[11px]">(Multiple PDFs)</span></label>
+                                        {/* Optional PDF/Resource Upload */}
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Optional PDF Upload</label>
+                                            <input
+                                                ref={pdfInputRef}
+                                                type="file"
+                                                accept=".pdf,application/pdf"
+                                                className="hidden"
+                                                onChange={handlePdfFileChange}
+                                            />
                                             <div
-                                                onClick={() => pdfInputRef.current?.click()}
-                                                className={`relative w-full px-4 py-3 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer transition-all ${newItem.pdfUrl?.length > 0 ? 'border-blue-400 bg-blue-50/30' : 'border-gray-200 hover:border-blue-400 bg-gray-50'}`}
+                                                onClick={() => !isPdfUploading && pdfInputRef.current?.click()}
+                                                onMouseEnter={() => setIsModalPdfHovered(true)}
+                                                onMouseLeave={() => setIsModalPdfHovered(false)}
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-6 cursor-pointer group bg-white
+                                                ${isPdfUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
+                                                style={{
+                                                    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalPdfHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                    borderRadius: '12px'
+                                                }}
                                             >
                                                 {isPdfUploading ? (
-                                                    <div className="flex flex-col items-center gap-2 py-1">
-                                                        <Loader2 size={20} className="text-[#8B5CF6] animate-spin" />
-                                                        <span className="text-[12px] font-medium text-[#8B5CF6]">Uploading...</span>
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Loader2 size={20} className="animate-spin text-indigo-600" />
+                                                        <span className="text-[12px] text-gray-500 font-medium">Uploading...</span>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex flex-col items-center gap-1 py-1">
-                                                        <Upload size={20} className="text-gray-400" />
-                                                        <span className="text-[12px] font-medium text-gray-500">Add PDF File</span>
-                                                    </div>
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-2 transition-transform group-hover:scale-105 duration-300">
+                                                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                            <path d="M12 12v9" />
+                                                            <path d="m16 16-4-4-4 4" />
+                                                        </svg>
+                                                        <button
+                                                            type="button"
+                                                            className="px-4 py-1.5 bg-gray-100 text-black text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm"
+                                                        >
+                                                            Browse file
+                                                        </button>
+                                                        <span className="text-[10px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                    </>
                                                 )}
-                                                <input
-                                                    ref={pdfInputRef}
-                                                    type="file"
-                                                    accept=".pdf,application/pdf"
-                                                    onChange={handlePdfFileChange}
-                                                    className="hidden"
-                                                />
                                             </div>
 
                                             {/* List of PDFs */}
                                             {newItem.pdfUrl?.length > 0 && (
-                                                <div className="mt-3 space-y-2 max-h-[130px] overflow-y-auto no-scrollbar pr-1 border border-transparent">
+                                                <div className="mt-2 space-y-2 max-h-[100px] overflow-y-auto no-scrollbar">
                                                     {newItem.pdfUrl.map((url, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
-                                                            <div className="flex items-center gap-2 overflow-hidden">
-                                                                <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
-                                                                <span className="text-[11px] font-medium text-gray-600 truncate">PDF {idx + 1}</span>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => setNewItem({ ...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx) })}
+                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
+                                                            <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">PDF {idx + 1}</span>
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setNewItem({...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx)});
+                                                                }}
                                                                 className="text-red-400 hover:text-red-600 p-1"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <Trash2 size={12} />
                                                             </button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
+
+                                            <div className="mt-3">
+                                                <label className="block text-[12px] font-bold text-gray-500 mb-1.5">Or Upload URL</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="https://youtube.com"
+                                                    value={newItem.pdfUrl && newItem.pdfUrl.length > 0 && !newItem.pdfUrl[0].includes('cloudinary') ? newItem.pdfUrl[0] : ''}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        setNewItem(prev => ({
+                                                            ...prev,
+                                                            pdfUrl: val ? [val] : []
+                                                        }));
+                                                    }}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] placeholder:text-gray-300 shadow-sm"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1177,7 +1336,7 @@ const AddCoursePage = () => {
                                 <div className="mt-8 flex justify-between items-center bg-white gap-4">
                                     <button
                                         onClick={handleCloseModal}
-                                        className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-bold rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
+                                        className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-normal rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
                                     >
                                         Cancel
                                     </button>

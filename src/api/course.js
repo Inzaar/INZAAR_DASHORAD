@@ -108,6 +108,16 @@ export const uploadAudio = async (file) => {
     return res.data.data; // { url, public_id }
 }
 
+export const uploadVideo = async (file) => {
+    const formData = new FormData();
+    formData.append("video", file);
+    const res = await axiosInstance.post("/upload/video", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+    });
+    return res.data.data; // { url, public_id }
+}
+
 export const uploadPdf = async (file) => {
     const formData = new FormData();
     formData.append("pdf", file);
