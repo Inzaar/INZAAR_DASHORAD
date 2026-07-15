@@ -8,6 +8,8 @@ import EnrolledCourses from "@/features/StudentDashboard/pages/EnrolledCourses";
 import Courses from "@/features/courses/pages/Courses";
 import CourseView from "@/features/courses/pages/CourseView";
 import QuizTakePage from "@/features/courses/pages/QuizTakePage";
+import AssignmentSubmission from "@/features/StudentDashboard/components/AssignmentSubmission";
+import AssignmentSubmitted from "@/features/StudentDashboard/components/AssignmentSubmitted";
 import Certificates from "@/features/StudentDashboard/pages/Certificates";
 import HelpCenter from "@/features/StudentDashboard/pages/HelpCenter";
 import NotificationPage from "@/features/StudentDashboard/pages/NotificationPage";
@@ -88,6 +90,8 @@ const AppRouter = () => {
             </Route>
             <Route element={<ProtectedRoute />}>
                 <Route path="/quiz-take/:id" element={<QuizTakePage />} />
+                <Route path="/assignment" element={<AssignmentSubmission />} />
+                <Route path="/assignment-submitted" element={<AssignmentSubmitted />} />
             </Route>
 
             {/* Fallback routes */}

@@ -689,12 +689,22 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                 >
                                                     <Volume2 size={14} />
                                                 </button>
-                                                <button
-                                                    onClick={() => onWatch(lecture)}
-                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
-                                                >
-                                                    <PlayCircle size={14} />
-                                                </button>
+                                                {lecture.type === 'Assignment' ? (
+                                                    <button
+                                                        onClick={() => onWatch(lecture)}
+                                                        className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${lecture.isLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#3758EE] text-white hover:bg-[#2a46c7] hover:scale-105 active:scale-95 shadow-sm'}`}
+                                                        disabled={lecture.isLocked}
+                                                    >
+                                                        📋 {t('start_assignment', 'Start')}
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => onWatch(lecture)}
+                                                        className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
+                                                    >
+                                                        <PlayCircle size={14} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

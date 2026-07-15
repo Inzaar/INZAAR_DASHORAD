@@ -902,8 +902,27 @@ const CourseView = () => {
                                                         key={lecture.id}
                                                         onClick={() => {
                                                             if (!lecture.isLocked) {
-                                                                setShouldAutoplay(false);
-                                                                setCurrentLecture(lecture);
+                                                                if (lecture.type === 'Assignment') {
+                                                                    navigate('/assignment', {
+                                                                        state: {
+                                                                            returnUrl: window.location.pathname + window.location.search,
+                                                                            assignment: {
+                                                                                number: String(lecture.lectureNo).padStart(2, '0'),
+                                                                                title: lecture.title,
+                                                                                description: `Submit your assignment for ${lecture.title}.`,
+                                                                                instructions: lecture.instructions || 'Please complete and upload your assignment file.',
+                                                                                dueDate: lecture.dueDate || 'See course details',
+                                                                                status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
+                                                                                acceptedFormats: 'PDF, DOC, DOCX',
+                                                                                attempts: 'Unlimited before due date',
+                                                                                maxFileSizeMB: 25,
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                } else {
+                                                                    setShouldAutoplay(false);
+                                                                    setCurrentLecture(lecture);
+                                                                }
                                                             }
                                                         }}
                                                         className={`
@@ -915,6 +934,7 @@ const CourseView = () => {
                                                             }
                                                         ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
                                                         ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
+                                                        ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
                                                     `}
                                                     >
                                                         <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
@@ -941,6 +961,12 @@ const CourseView = () => {
                                                                 <div className="absolute inset-0 flex items-center justify-center z-10">
                                                                     <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                    </div>
+                                                                </div>
+                                                            ) : lecture.type === 'Assignment' ? (
+                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                        <span className="text-white text-lg">📋</span>
                                                                     </div>
                                                                 </div>
                                                             ) : lecture.type === 'Quiz' ? (
@@ -1045,15 +1071,33 @@ const CourseView = () => {
                                 notes={notes}
                                 isAdminView={isAdminView}
                                 onWatch={(lecture) => {
-                                    if (!lecture.isLocked) {
-                                        const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
-                                        setShouldAutoplay(true);
-                                        setCurrentLecture(lecture);
-                                        if (isSameVideo && playerRef.current) {
-                                            playerRef.current.playVideo();
-                                        }
-                                        videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    if (lecture.isLocked) return;
+                                    if (lecture.type === 'Assignment') {
+                                        navigate('/assignment', {
+                                            state: {
+                                                returnUrl: window.location.pathname + window.location.search,
+                                                assignment: {
+                                                    number: String(lecture.lectureNo).padStart(2, '0'),
+                                                    title: lecture.title,
+                                                    description: `Submit your assignment for ${lecture.title}.`,
+                                                    instructions: lecture.instructions || 'Please complete and upload your assignment file.',
+                                                    dueDate: lecture.dueDate || 'See course details',
+                                                    status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
+                                                    acceptedFormats: 'PDF, DOC, DOCX',
+                                                    attempts: 'Unlimited before due date',
+                                                    maxFileSizeMB: 25,
+                                                }
+                                            }
+                                        });
+                                        return;
                                     }
+                                    const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
+                                    setShouldAutoplay(true);
+                                    setCurrentLecture(lecture);
+                                    if (isSameVideo && playerRef.current) {
+                                        playerRef.current.playVideo();
+                                    }
+                                    videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                 }}
                                 currentLectureId={currentLecture?.id || currentLecture?._id}
                             />
