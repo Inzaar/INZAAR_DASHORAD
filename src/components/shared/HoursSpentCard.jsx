@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { cn } from "@/lib/utils";
+import { useTranslation } from 'react-i18next';
 
 const HoursSpentCard = ({
     userCourses,
@@ -7,6 +8,7 @@ const HoursSpentCard = ({
     name
 }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const { t } = useTranslation();
 
     // Check if the component is being used for Moderator Performance
     // Matching "Moderator" case-insensitively to be robust
@@ -14,13 +16,13 @@ const HoursSpentCard = ({
 
     // Default mock data structure to preserve order and expected values
     const defaultData = [
-        { day: 'Sun', key: 'sun', expected: 15 },
-        { day: 'Mon', key: 'mon', expected: 24 },
-        { day: 'Tue', key: 'tue', expected: 12 },
-        { day: 'Wed', key: 'wed', expected: 20 },
-        { day: 'Thu', key: 'thu', expected: 15 },
-        { day: 'Fri', key: 'fri', expected: 22 },
-        { day: 'Sat', key: 'sat', expected: 15 },
+        { day: t('day_sun', 'Sun'), key: 'sun', expected: 15 },
+        { day: t('day_mon', 'Mon'), key: 'mon', expected: 24 },
+        { day: t('day_tue', 'Tue'), key: 'tue', expected: 12 },
+        { day: t('day_wed', 'Wed'), key: 'wed', expected: 20 },
+        { day: t('day_thu', 'Thu'), key: 'thu', expected: 15 },
+        { day: t('day_fri', 'Fri'), key: 'fri', expected: 22 },
+        { day: t('day_sat', 'Sat'), key: 'sat', expected: 15 },
     ];
 
     // Moderator Mock Data (15 items)
@@ -119,17 +121,17 @@ const HoursSpentCard = ({
         )}>
             {/* Header & Legend */}
             <div className="flex flex-col gap-4">
-                <h3 className="text-lg font-bold text-black">{name}</h3>
+                <h3 className="text-lg font-bold text-black leading-normal pb-1">{name}</h3>
                 {(name === "Hours Spent" || isModerator) && (
                     <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-[2px] bg-gradient-to-r from-[#3758EE] to-[#B666E7]"></div>
-                            <span className="text-gray-500">{isModerator ? "Performance" : "Spend time"}</span>
+                            <span className="text-gray-500">{isModerator ? t("performance", "Performance") : t("spend_time", "Spend time")}</span>
                         </div>
                         {!isModerator && (
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
-                                <span className="text-gray-500">Expected Time</span>
+                                <span className="text-gray-500">{t("expected_time", "Expected Time")}</span>
                             </div>
                         )}
                     </div>

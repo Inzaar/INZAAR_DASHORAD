@@ -5,21 +5,32 @@ import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getMyNotifications } from "@/api/notification";
+import { useTranslation } from "react-i18next";
 
 function Navbar({ onMenuClick, hideMenu = false, title }) {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { i18n, t } = useTranslation();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
-    const [selectedLang, setSelectedLang] = React.useState("English");
     const [unreadCount, setUnreadCount] = React.useState(0);
 
     const languages = [
-        { name: "English", code: "en", flag: "https://flagcdn.com/us.svg" },
-        { name: "Urdu", code: "ur", flag: "https://flagcdn.com/pk.svg" },
-        { name: "Arabic", code: "ar", flag: "https://flagcdn.com/sa.svg" },
+        { name: "English", code: "en", flag: "https://flagcdn.com/us.svg", dir: "ltr" },
+        { name: "Urdu", code: "ur", flag: "https://flagcdn.com/pk.svg", dir: "rtl" },
+        { name: "Arabic", code: "ar", flag: "https://flagcdn.com/sa.svg", dir: "rtl" },
     ];
 
-    const today = new Intl.DateTimeFormat('en-US', {
+    const currentLangCode = (i18n.language || 'en').split('-')[0];
+    const currentLang = languages.find(l => l.code === currentLangCode) || languages[0];
+
+    const handleLanguageChange = (lang) => {
+        i18n.changeLanguage(lang.code);
+        document.documentElement.dir = lang.dir;
+        document.documentElement.lang = lang.code;
+        setIsLangOpen(false);
+    };
+
+    const today = new Intl.DateTimeFormat(i18n.language || 'en-US', {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
@@ -52,10 +63,10 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                             </button>
                         )}
                         <div className="min-w-0">
-                            <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C] truncate">
-                                {title || "Dashboard"}
+                            <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-normal tracking-tight text-[#2C2C2C] pb-1">
+                                {t((title || 'Dashboard').toLowerCase().replace(/ /g, '_'), title || 'Dashboard')}
                             </div>
-                            <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-tight text-[#2C2C2C]/80 truncate">
+                            <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-normal text-[#2C2C2C]/80">
                                 {today}
                             </div>
                         </div>
@@ -81,12 +92,12 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                             className="bg-white/10 flex items-center justify-center rounded-lg shadow-sm cursor-pointer hover:bg-white/20 transition-all p-1.5 sm:px-3 gap-1.5 sm:gap-2 border border-white/10"
                         >
                             <img 
-                                src={languages.find(l => l.name === selectedLang)?.flag} 
+                                src={currentLang.flag} 
                                 alt="" 
                                 className="w-[16px] sm:w-[18px] h-auto rounded-[2px] shadow-sm"
                             />
-                            <span className="text-[#2C2C2C] text-[12px] sm:text-sm font-bold hidden min-[400px]:inline">{selectedLang === "English" ? "EN" : selectedLang === "Urdu" ? "UR" : "AR"}</span>
-                            <span className="text-[#2C2C2C] text-sm font-bold hidden sm:inline">{selectedLang}</span>
+                            <span className="text-[#2C2C2C] text-[12px] sm:text-sm font-bold hidden min-[400px]:inline">{currentLang.code.toUpperCase()}</span>
+                            <span className="text-[#2C2C2C] text-sm font-bold hidden sm:inline">{t(currentLang.name.toLowerCase(), currentLang.name)}</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="14"
@@ -108,14 +119,11 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                                 {languages.map((lang) => (
                                     <button
                                         key={lang.code}
-                                        onClick={() => {
-                                            setSelectedLang(lang.name);
-                                            setIsLangOpen(false);
-                                        }}
-                                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors flex items-center gap-3 ${selectedLang === lang.name ? 'text-[#5D5FEF] font-bold bg-blue-50/50' : 'text-gray-700 font-medium'}`}
+                                        onClick={() => handleLanguageChange(lang)}
+                                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors flex items-center gap-3 ${currentLang.code === lang.code ? 'text-[#5D5FEF] font-bold bg-blue-50/50' : 'text-gray-700 font-medium'}`}
                                     >
                                         <img src={lang.flag} alt="" className="w-[18px] h-auto rounded-[2px] shadow-sm" />
-                                        {lang.name}
+                                        {t(lang.name.toLowerCase(), lang.name)}
                                     </button>
                                 ))}
                             </div>

@@ -20,9 +20,9 @@ const AdminNotification = () => {
         try {
             // Mark as read in backend
             await markSingleAsRead(notification.id);
-            
+
             // Update local state for immediate feedback
-            setNotifications(prev => prev.map(n => 
+            setNotifications(prev => prev.map(n =>
                 n.id === notification.id ? { ...n, isUnread: false } : n
             ));
 
@@ -35,7 +35,7 @@ const AdminNotification = () => {
                 } else if (targetLink.startsWith("/courses")) {
                     targetLink = targetLink.replace("/courses", "/admin-courses");
                 }
-                
+
                 navigate(targetLink);
             }
         } catch (error) {

@@ -193,8 +193,10 @@ import Input1 from '@/components/ui/inputs/Input1';
 import { isWithinInterval, startOfDay } from 'date-fns';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const AdminCalendar = () => {
+    const { t, i18n } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [view, setView] = useState('calendar'); // 'calendar' or 'list'
     const [events, setEvents] = useState([]);
@@ -344,7 +346,7 @@ const AdminCalendar = () => {
     const confirmCancel = async () => {
         if (!eventToCancel) return;
         try {
-            await updateEvent(eventToCancel, { 
+            await updateEvent(eventToCancel, {
                 status: 'canceled',
                 canceledBy: 'Admin'
             });
@@ -404,7 +406,8 @@ const AdminCalendar = () => {
     });
 
     const formatShortWeekday = (locale, date) => {
-        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+        const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        return t(`day_${days[date.getDay()]}`);
     };
 
     const toggleSidebar = () => {
@@ -441,13 +444,13 @@ const AdminCalendar = () => {
                                     onClick={() => setView('calendar')}
                                     className={`flex-1 py-2 text-[14px] font-medium transition-all ${view === 'calendar' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                                 >
-                                    Add New Event
+                                    {t('add_new_event', 'Add New Event')}
                                 </button>
                                 <button
                                     onClick={() => setView('list')}
                                     className={`flex-1 py-2 text-[14px] font-medium transition-all ${view === 'list' ? 'bg-white text-gray-900 rounded shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                                 >
-                                    List
+                                    {t('list', 'List')}
                                 </button>
                             </div>
                         </div>
@@ -458,10 +461,10 @@ const AdminCalendar = () => {
                                 <div className="bg-white rounded-[16px] p-6 shadow-sm mb-6 border border-[#EAEDF2]">
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-[#3758EE] text-[16px] font-bold">
-                                            {editingEvent ? '✎ Edit Event' : '+ Add New Event'}
+                                            {editingEvent ? t('edit_event_title', '✎ Edit Event') : t('add_new_event_title', '+ Add New Event')}
                                         </h3>
                                         {editingEvent && (
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     setEditingEvent(null);
                                                     setEventTitle('');
@@ -471,57 +474,57 @@ const AdminCalendar = () => {
                                                 }}
                                                 className="text-xs text-rose-500 hover:underline font-bold"
                                             >
-                                                Cancel Edit
+                                                {t('cancel_edit', 'Cancel Edit')}
                                             </button>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                         <div className="md:col-span-4">
                                             <div className="flex flex-col gap-1.5">
-                                                <label className="text-[14px] font-medium text-gray-700">Event title name</label>
-                                                <input type="text" placeholder="enter title name" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] outline-none focus:border-[#3758EE] transition-colors" value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
+                                                <label className="text-[14px] font-medium text-gray-700">{t('event_title_name', 'Event title name')}</label>
+                                                <input type="text" placeholder={t('enter_title_name', 'enter title name')} className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] outline-none focus:border-[#3758EE] transition-colors" value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
                                             </div>
                                         </div>
                                         <div className="md:col-span-2">
                                             <div className="flex flex-col gap-1.5">
-                                                <label className="text-[14px] font-medium text-gray-700">Event Type</label>
+                                                <label className="text-[14px] font-medium text-gray-700">{t('event_type', 'Event Type')}</label>
                                                 <div className="relative">
                                                     <select className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors appearance-none bg-white" value={eventType} onChange={(e) => {
                                                         setEventType(e.target.value);
                                                         // Automatically set color based on type
                                                         setSelectedColor('bg-gradient-to-r from-[#6366F1] to-[#A855F7]');
                                                     }}>
-                                                        <option value="" disabled hidden>Select</option>
-                                                        <option value="Class" className="text-black">Class</option>
-                                                        <option value="Game" className="text-black">Game</option>
-                                                        <option value="Meeting" className="text-black">Meeting</option>
-                                                        <option value="Other" className="text-black">Other</option>
+                                                        <option value="" disabled hidden>{t('select', 'Select')}</option>
+                                                        <option value="Class" className="text-black">{t('class', 'Class')}</option>
+                                                        <option value="Game" className="text-black">{t('game', 'Game')}</option>
+                                                        <option value="Meeting" className="text-black">{t('meeting', 'Meeting')}</option>
+                                                        <option value="Other" className="text-black">{t('other', 'Other')}</option>
                                                     </select>
                                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="md:col-span-2">
                                             <div className="flex flex-col gap-1.5">
-                                                <label className="text-[14px] font-medium text-gray-700">From</label>
+                                                <label className="text-[14px] font-medium text-gray-700">{t('from', 'From')}</label>
                                                 <input type="date" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                                             </div>
                                         </div>
                                         <div className="md:col-span-2">
                                             <div className="flex flex-col gap-1.5">
-                                                <label className="text-[14px] font-medium text-gray-700">To</label>
+                                                <label className="text-[14px] font-medium text-gray-700">{t('to', 'To')}</label>
                                                 <input type="date" className="h-[44px] w-full border border-gray-200 rounded-md px-3 text-[14px] text-gray-500 outline-none focus:border-[#3758EE] transition-colors" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                                             </div>
                                         </div>
                                         <div className="md:col-span-2">
-                                            <button 
-                                                onClick={handleAddEvent} 
+                                            <button
+                                                onClick={handleAddEvent}
                                                 disabled={isSubmitting}
                                                 className={`h-[44px] w-full bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white rounded-md font-medium text-[15px] shadow-sm hover:opacity-90 transition-opacity ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             >
-                                                {editingEvent ? 'Update Event' : 'Add Event'}
+                                                {editingEvent ? t('update_event', 'Update Event') : t('add_event', 'Add Event')}
                                             </button>
                                         </div>
                                     </div>
@@ -533,14 +536,14 @@ const AdminCalendar = () => {
                                     {/* Custom Header */}
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 px-4 pt-4">
                                         <h2 className="text-[20px] text-[#6B7280] font-medium">
-                                            {activeStartDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            {activeStartDate.toLocaleString(i18n.language || 'default', { month: 'long', year: 'numeric' })}
                                         </h2>
                                         <div className="flex items-center gap-2 w-full sm:w-auto">
                                             <button
                                                 onClick={handleToday}
                                                 className="px-6 py-2 bg-[#C7D2FE] text-[#4338CA] rounded-md text-[14px] font-medium hover:bg-[#A5B4FC] transition-all"
                                             >
-                                                today
+                                                {t('today', 'today')}
                                             </button>
                                             <button onClick={handlePrev} className="w-9 h-9 flex items-center justify-center bg-[#8B5CF6] text-white rounded-md hover:bg-[#7c3aed] text-xl pb-1 transition-all">‹</button>
                                             <button onClick={handleNext} className="w-9 h-9 flex items-center justify-center bg-[#8B5CF6] text-white rounded-md hover:bg-[#7c3aed] text-xl pb-1 transition-all">›</button>
@@ -566,48 +569,48 @@ const AdminCalendar = () => {
                         ) : (
                             <div className="bg-white rounded-xl border border-[#EAEDF2] shadow-sm flex-1 flex flex-col overflow-hidden mb-6">
                                 <div className="p-6 border-b border-[#EAEDF2]">
-                                    <h2 className="text-[18px] font-bold text-gray-800">Event Table</h2>
+                                    <h2 className="text-[18px] font-bold text-gray-800">{t('event_table', 'Event Table')}</h2>
                                 </div>
 
-                                <div className="overflow-x-auto flex-1 custom-scrollbar">
+                                <div className="overflow-auto flex-1 custom-table-scrollbar">
                                     <table className="w-full text-left">
                                         <thead className="bg-[#F8F9FA]">
                                             <tr>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600">Event Name</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Type</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Date</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Status</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Created By</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Canceled By</th>
-                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">Action</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600">{t('event_name', 'Event Name')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('type', 'Type')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('date', 'Date')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('status', 'Status')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('created_by', 'Created By')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('canceled_by', 'Canceled By')}</th>
+                                                <th className="py-4 px-6 text-[14px] font-bold text-gray-600 text-center">{t('action', 'Action')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-[#EAEDF2]">
                                             {currentEvents.length === 0 ? (
                                                 <tr>
                                                     <td colSpan="7" className="py-12 text-center text-gray-500 font-medium">
-                                                        No events found on this page.
+                                                        {t('no_events_found', 'No events found on this page.')}
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 currentEvents.map((ev, idx) => (
                                                     <tr key={ev.id} className={`${idx % 2 === 1 ? 'bg-[#FDFDFF]' : 'bg-white'} hover:bg-gray-50/80 transition-colors`}>
                                                         <td className="py-5 px-6">
-                                                            <span className="text-[14px] font-medium text-gray-700">{ev.title}</span>
+                                                            <span className="text-[14px] font-medium text-gray-700">{t(ev.title, ev.title)}</span>
                                                         </td>
                                                         <td className="py-5 px-6 text-center">
-                                                            <span className="text-[14px] text-gray-600">{ev.type}</span>
+                                                            <span className="text-[14px] text-gray-600">{t(ev.type.toLowerCase(), ev.type)}</span>
                                                         </td>
                                                         <td className="py-5 px-6 text-center">
                                                             <div className="flex flex-col items-center justify-center min-w-[100px]">
                                                                 <div className="text-[13px] font-bold text-gray-700 whitespace-nowrap">
-                                                                    {ev.startDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
+                                                                    {ev.startDate.toLocaleDateString(i18n.language || 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
                                                                 </div>
                                                                 {ev.endDate && ev.startDate.getTime() !== ev.endDate.getTime() && (
                                                                     <>
                                                                         <div className="h-2 w-[1px] bg-gray-200 my-0.5"></div>
                                                                         <div className="text-[13px] font-bold text-gray-400 whitespace-nowrap">
-                                                                            {ev.endDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
+                                                                            {ev.endDate.toLocaleDateString(i18n.language || 'en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')}
                                                                         </div>
                                                                     </>
                                                                 )}
@@ -616,36 +619,36 @@ const AdminCalendar = () => {
                                                         <td className="py-5 px-6 text-center">
                                                             <span className={`text-[14px] font-semibold capitalize ${ev.status === 'canceled' ? 'text-[#FF4D4D]' : ev.status === 'upcoming' ? 'text-[#EAB308]' : 'text-[#10B981]'
                                                                 }`}>
-                                                                {ev.status === 'canceled' ? 'Cancelled' : ev.status}
+                                                                {ev.status === 'canceled' ? t('cancelled', 'Cancelled') : t(ev.status.toLowerCase(), ev.status)}
                                                             </span>
                                                         </td>
                                                         <td className="py-5 px-6 text-center">
-                                                            <span className="text-[14px] text-gray-600">Admin</span>
+                                                            <span className="text-[14px] text-gray-600">{t('admin', 'Admin')}</span>
                                                         </td>
                                                         <td className="py-5 px-6 text-center">
-                                                            <span className="text-[14px] text-gray-400">{ev.canceledBy || 'N/A'}</span>
+                                                            <span className="text-[14px] text-gray-400">{ev.canceledBy ? t(ev.canceledBy.toLowerCase(), ev.canceledBy) : t('not_applicable', 'N/A')}</span>
                                                         </td>
                                                         <td className="py-5 px-6">
                                                             <div className="flex items-center justify-center gap-2">
                                                                 {ev.status !== 'canceled' && (
-                                                                    <button 
+                                                                    <button
                                                                         onClick={() => handleCancelEvent(ev.id)}
                                                                         className="px-4 py-1.5 bg-[#F59E0B] text-white rounded text-[13px] font-medium hover:bg-[#d97706] transition-all active:scale-95 shadow-sm shadow-amber-200"
                                                                     >
-                                                                        Cancel
+                                                                        {t('cancel', 'Cancel')}
                                                                     </button>
                                                                 )}
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleEditClick(ev)}
                                                                     className="px-4 py-1.5 bg-[#6366F1] text-white rounded text-[13px] font-medium hover:bg-[#4f46e5] transition-all active:scale-95 shadow-sm shadow-[#6366F1]/20"
                                                                 >
-                                                                    Edit
+                                                                    {t('edit', 'Edit')}
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleDeleteClick(ev.id)}
                                                                     className="px-4 py-1.5 bg-[#F43F5E] text-white rounded text-[13px] font-medium hover:bg-[#e11d48] transition-all active:scale-95 shadow-sm shadow-[#F43F5E]/20"
                                                                 >
-                                                                    Delete
+                                                                    {t('delete', 'Delete')}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -664,7 +667,7 @@ const AdminCalendar = () => {
                                             disabled={currentPage === 1}
                                             className={`flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-800'}`}
                                         >
-                                            <span className="text-xl leading-none mb-1">‹</span> Previous
+                                            <span className="text-xl leading-none mb-1">‹</span> {t('previous', 'Previous')}
                                         </button>
 
                                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
@@ -695,7 +698,7 @@ const AdminCalendar = () => {
                                             disabled={currentPage === totalPages || totalPages === 0}
                                             className={`flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${currentPage === totalPages || totalPages === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-800'}`}
                                         >
-                                            Next <span className="text-xl leading-none mb-1">›</span>
+                                            {t('next', 'Next')} <span className="text-xl leading-none mb-1">›</span>
                                         </button>
                                     </div>
                                 </div>
@@ -726,6 +729,11 @@ const AdminCalendar = () => {
                 /* Prevent the calendar itself from scrolling vertically, forcing it to expand */
                 .custom-scrollbar { overflow-y: hidden !important; }
 
+                .custom-table-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+                .custom-table-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+                .custom-table-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+                .custom-table-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
                 @media (max-width: 1024px) {
                     .react-calendar__tile { min-height: 100px !important; }
                 }
@@ -743,7 +751,7 @@ const AdminCalendar = () => {
 
                 {showCancelConfirm && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div 
+                        <div
                             className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
                             onClick={() => setShowCancelConfirm(false)}
                         />
@@ -752,22 +760,22 @@ const AdminCalendar = () => {
                                 <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-6">
                                     <span className="text-3xl">⚠️</span>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Cancel Event?</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cancel_event_confirm_title', 'Cancel Event?')}</h3>
                                 <p className="text-gray-500 mb-8 leading-relaxed">
-                                    Are you sure you want to cancel this event? It will still appear on the calendar but as "Canceled".
+                                    {t('cancel_event_confirm_msg', 'Are you sure you want to cancel this event? It will still appear on the calendar but as "Canceled".')}
                                 </p>
                                 <div className="flex gap-3 w-full">
-                                    <button 
+                                    <button
                                         onClick={() => setShowCancelConfirm(false)}
                                         className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-95"
                                     >
-                                        Keep Event
+                                        {t('keep_event', 'Keep Event')}
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={confirmCancel}
                                         className="flex-1 px-6 py-3 bg-[#F59E0B] text-white rounded-xl font-bold hover:bg-[#d97706] transition-all active:scale-95 shadow-lg shadow-amber-200"
                                     >
-                                        Cancel Event
+                                        {t('cancel_event', 'Cancel Event')}
                                     </button>
                                 </div>
                             </div>
@@ -778,7 +786,7 @@ const AdminCalendar = () => {
                 {/* Delete Confirmation Modal */}
                 {showDeleteConfirm && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div 
+                        <div
                             className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
                             onClick={() => setShowDeleteConfirm(false)}
                         />
@@ -787,22 +795,22 @@ const AdminCalendar = () => {
                                 <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-6">
                                     <span className="text-3xl">🗑️</span>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Event?</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{t('delete_event_confirm_title', 'Delete Event?')}</h3>
                                 <p className="text-gray-500 mb-8 leading-relaxed">
-                                    Are you sure you want to delete this event? This action cannot be undone.
+                                    {t('delete_event_confirm_msg', 'Are you sure you want to delete this event? This action cannot be undone.')}
                                 </p>
                                 <div className="flex gap-3 w-full">
-                                    <button 
+                                    <button
                                         onClick={() => setShowDeleteConfirm(false)}
                                         className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-95"
                                     >
-                                        Cancel
+                                        {t('cancel', 'Cancel')}
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={confirmDelete}
                                         className="flex-1 px-6 py-3 bg-[#F43F5E] text-white rounded-xl font-bold hover:bg-[#e11d48] transition-all active:scale-95 shadow-lg shadow-rose-200"
                                     >
-                                        Delete
+                                        {t('delete', 'Delete')}
                                     </button>
                                 </div>
                             </div>

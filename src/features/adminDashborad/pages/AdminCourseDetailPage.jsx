@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -14,6 +15,8 @@ import Analytics from '@/features/StudentDashboard/components/Analytics';
 import { getAdminCourseById } from '@/api/course';
 
 const AdminCourseDetailPage = () => {
+    const { t } = useTranslation();
+
     const { id } = useParams();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -233,8 +236,8 @@ const AdminCourseDetailPage = () => {
                                     <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
                                     <span className="text-gray-400">...</span>
                                     <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        Next
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                        {t("next", "Next")}
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -242,10 +245,10 @@ const AdminCourseDetailPage = () => {
                             {/* Students List Table (Reused) */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900">Student Table</h3>
+                                    <h3 className="text-lg font-bold text-gray-900">{t("student_table", "Student Table")}</h3>
                                     <div className="relative">
                                         <select className="appearance-none bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded px-3 py-1.5 pr-7 focus:outline-none">
-                                            <option>Student Table</option>
+                                            <option>{t("student_table", "Student Table")}</option>
                                         </select>
                                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -262,13 +265,13 @@ const AdminCourseDetailPage = () => {
                                     <table className="w-full min-w-[900px]">
                                         <thead>
                                             <tr className="border-b border-gray-100">
-                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
-                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[20%]">Enrollments</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">Progress</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[15%]">Last Login</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">Status</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">Action</th>
+                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 pl-4 w-[15%]">{t("name", "Name")}</th>
+                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 w-[20%]">{t("contact", "Contact")}</th>
+                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[20%]">{t("enrollments", "Enrollments")}</th>
+                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("progress", "Progress")}</th>
+                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[15%]">{t("last_login", "Last Login")}</th>
+                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("status", "Status")}</th>
+                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("action", "Action")}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
@@ -329,8 +332,8 @@ const AdminCourseDetailPage = () => {
                                     <button className="w-7 h-7 flex items-center justify-center text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
                                     <span className="text-gray-400 text-xs">...</span>
                                     <button className="flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-gray-900">
-                                        Next
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                        {t("next", "Next")}
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                     </button>
                                 </div>
                             </div>

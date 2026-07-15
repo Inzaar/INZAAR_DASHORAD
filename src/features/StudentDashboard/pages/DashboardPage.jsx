@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { getStudentDashboard, getUserProfile } from '@/api/dashboards';
 import { Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,6 +44,7 @@ const DashboardPage = () => {
 
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!user) {
@@ -127,11 +129,15 @@ const DashboardPage = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
-                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam o Alaikum {userData?.firstname} 👋🏻</h2>
-                                    <p className="text-gray-500 text-[10px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    <h2 className="text-[18px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-2 leading-[1.8] pt-4 pb-2">
+                                        {t('aslam_o_alaikum', 'Aslam o Alaikum')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')} 👋🏻
+                                    </h2>
+                                    <p className="text-gray-500 text-[10px] min-[641px]:text-[16px] leading-[1.8] pb-4">
+                                        {t('lets_learn_something_new_today', "Let's learn something new today!")}
+                                    </p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    Enrolled New Course
+                                    {t('enrolled_new_course', 'Enrolled New Course')}
                                 </GradiantButton>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     +
@@ -140,11 +146,11 @@ const DashboardPage = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics userCourses={userCourses} name="Performance Overview" />
+                                    <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t("enrolled_courses", "Enrolled Courses")}</h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
@@ -159,7 +165,7 @@ const DashboardPage = () => {
                                     </div>
 
                                     <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={"Hours Spent"} />
+                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
                                         
                                         {/* Mobile Calendar - Visible only below 680px */}
                                         <div className="min-[680px]:hidden w-full bg-white rounded-lg p-4 shadow-sm">
@@ -168,14 +174,14 @@ const DashboardPage = () => {
 
                                         <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
-                                                <h3 className="text-lg font-bold text-gray-900">Ongoing Lectures</h3>
+                                                <h3 className="text-lg font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
                                                 <div className="relative z-20">
                                                     <button
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
                                                         className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[120px] justify-between"
                                                     >
                                                         <span className="truncate max-w-[150px]">
-                                                            {selectedCourseData?.title || "Select Course"}
+                                                            {t(selectedCourseData?.title, selectedCourseData?.title) || t('select_course', 'Select Course')}
                                                         </span>
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
@@ -195,26 +201,26 @@ const DashboardPage = () => {
 
                                                     {isLectureDropdownOpen && (
                                                         <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
-                                                            {lectureOptions.length > 0 ? (
-                                                                lectureOptions.map((option) => (
-                                                                    <button
-                                                                        key={option._id}
-                                                                        onClick={() => {
-                                                                            setSelectedLectureFilter(option._id);
-                                                                            setIsLectureDropdownOpen(false);
-                                                                        }}
-                                                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option._id ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
-                                                                    >
-                                                                        {option.title}
-                                                                    </button>
-                                                                ))
-                                                            ) : (
-                                                                loading ? (
-                                                                    <div className="flex justify-center p-4">
-                                                                        <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
-                                                                    </div>
+                                                                {lectureOptions.length > 0 ? (
+                                                                    lectureOptions.map((option) => (
+                                                                        <button
+                                                                            key={option._id}
+                                                                            onClick={() => {
+                                                                                setSelectedLectureFilter(option._id);
+                                                                                setIsLectureDropdownOpen(false);
+                                                                            }}
+                                                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${selectedLectureFilter === option._id ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-700'}`}
+                                                                        >
+                                                                            {t(option.title, option.title)}
+                                                                        </button>
+                                                                    ))
                                                                 ) : (
-                                                                    <div className="px-3 py-2 text-sm text-gray-400">No courses found</div>
+                                                                    loading ? (
+                                                                        <div className="flex justify-center p-4">
+                                                                            <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
+                                                                        </div>
+                                                                    ) : (
+                                                                    <div className="px-3 py-2 text-sm text-gray-400">{t('no_courses_found', 'No courses found')}</div>
                                                                 )
                                                             )}
                                                         </div>
@@ -239,7 +245,7 @@ const DashboardPage = () => {
                                                     ))
                                                 ) : (
                                                     <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center">
-                                                        No ongoing lectures found
+                                                        {t('no_ongoing_lectures_found', 'No ongoing lectures found')}
                                                     </div>
                                                 )}
                                             </div>

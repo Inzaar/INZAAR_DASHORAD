@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/Pagination";
 
 const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const genderFilter = (user?.role === 'moderator' && user?.gender) ? user.gender : propGenderFilter;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -136,10 +138,10 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     const pendingCount = students.filter(s => s.status === 'Pending').length;
 
     const stats = [
-        { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}Students`, value: (statsData?.totalRegistered || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
-        { title: "Active Students", value: (statsData?.active || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: "vs last month", type: "Active" },
-        { title: "Inactive Students", value: (statsData?.inactive || 0).toString(), trend: "- 2.4%", trendDirection: "down", trendText: "vs last month", type: "In-active" },
-        { title: `Pending ${genderFilter === 'All' ? '' : genderFilter + ' '}Students`, value: (statsData?.pending || 0).toString(), trend: "+ 1.2%", trendDirection: "up", trendText: "vs last month", isGray: true, type: "Pending" },
+        { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}${t('students', 'Students')}`, value: (statsData?.totalRegistered || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: t("vs_last_month", "vs last month"), type: "" },
+        { title: t("active_students", "Active Students"), value: (statsData?.active || 0).toString(), trend: "+ 2.4%", trendDirection: "up", trendText: t("vs_last_month", "vs last month"), type: "Active" },
+        { title: t("inactive_students", "Inactive Students"), value: (statsData?.inactive || 0).toString(), trend: "- 2.4%", trendDirection: "down", trendText: t("vs_last_month", "vs last month"), type: "In-active" },
+        { title: `Pending ${genderFilter === 'All' ? '' : genderFilter + ' '}${t('students', 'Students')}`, value: (statsData?.pending || 0).toString(), trend: "+ 1.2%", trendDirection: "up", trendText: t("vs_last_month", "vs last month"), isGray: true, type: "Pending" },
     ];
 
     return (
@@ -180,7 +182,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     <div className="flex items-center justify-center">
                                         <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
                                     </div>
-                                    <span className="hidden sm:block">Add New Students</span>
+                                    <span className="hidden sm:block">{t('add_new_students', 'Add New Students')}</span>
                                 </GradiantButton>
                             </div>
 
@@ -204,24 +206,24 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             {/* 2 Chart Stats Grid (Shown only for All Students) */}
                             {genderFilter === 'All' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <ChartStatsCard 
-                                        title="Total Male Students"
+                                    <ChartStatsCard
+                                        title={t("male_students", "Total Male Students")}
                                         total={statsData?.genderBreakdown?.male?.total || 0}
                                         active={statsData?.genderBreakdown?.male?.active || 0}
                                         inactive={statsData?.genderBreakdown?.male?.inactive || 0}
                                         trend="2.4%"
                                         trendDirection="up"
-                                        trendText="vs last month"
+                                        trendText={t("vs_last_month", "vs last month")}
                                         color="#00C896"
                                     />
-                                    <ChartStatsCard 
-                                        title="Total Female Students"
+                                    <ChartStatsCard
+                                        title={t("female_students", "Total Female Students")}
                                         total={statsData?.genderBreakdown?.female?.total || 0}
                                         active={statsData?.genderBreakdown?.female?.active || 0}
                                         inactive={statsData?.genderBreakdown?.female?.inactive || 0}
                                         trend="2.4%"
                                         trendDirection="up"
-                                        trendText="vs last month"
+                                        trendText={t("vs_last_month", "vs last month")}
                                         color="#00C896"
                                     />
                                 </div>
@@ -230,25 +232,25 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
                                 <div className="mb-6 flex justify-between items-center">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Students List</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
                                     <button
                                         onClick={fetchStudentsData}
                                         className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isLoading ? "animate-spin" : ""}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>
-                                        Refresh
+                                        {t("refresh", "Refresh")}
                                     </button>
                                 </div>
 
                                 {/* Filters - Desktop */}
                                 <div className="hidden xl:flex flex-row items-end gap-6 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
-                                        <p className="text-xs text-gray-400 font-bold tracking-wide">ADVANCED SEARCH</p>
+                                        <p className="text-xs text-gray-400 font-bold tracking-wide">{t("advanced_search", "ADVANCED SEARCH")}</p>
                                         <div className="flex items-center bg-white border border-gray-200 rounded-md p-1 transition-all duration-200 group focus-within:ring-1 focus-within:ring-blue-500/50 focus-within:border-blue-500 h-[42px]">
                                             <Search className="text-gray-400 w-[18px] h-[18px] ml-2 mr-2 shrink-0" />
                                             <input
                                                 type="text"
-                                                placeholder="Search by name"
+                                                placeholder={t("search_by_name", "Search by name")}
                                                 className="flex-1 bg-transparent text-[13px] text-gray-700 placeholder:text-gray-400 focus:outline-none min-w-0"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
@@ -286,7 +288,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">From</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("from", "From")}</span>
                                         <input
                                             type="date"
                                             className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
@@ -296,7 +298,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">To</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("to", "To")}</span>
                                         <input
                                             type="date"
                                             className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
@@ -306,18 +308,18 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Status</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("status", "Status")}</span>
                                         <div className="relative w-[150px]">
                                             <select
                                                 value={statusFilter}
                                                 onChange={(e) => setStatusFilter(e.target.value)}
                                                 className="w-full px-3 h-[42px] bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
                                             >
-                                                <option value="">All Statuses</option>
-                                                <option value="Active">Active</option>
-                                                <option value="In-active">In-active</option>
-                                                <option value="Pending">Pending</option>
-                                                <option value="Deleted">Deleted</option>
+                                                <option value="">{t("all_statuses", "All Statuses")}</option>
+                                                <option value="Active">{t("active", "Active")}</option>
+                                                <option value="In-active">{t("in_active", "In-active")}</option>
+                                                <option value="Pending">{t("pending", "Pending")}</option>
+                                                <option value="Deleted">{t("deleted", "Deleted")}</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
@@ -334,14 +336,14 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                         className="flex items-center gap-2 px-4 h-[42px] bg-[#E2E4E9] text-[#6A6F78] font-bold text-[13px] rounded-md hover:bg-gray-300 transition-colors whitespace-nowrap ml-auto"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
+                                        {t("clear_filter", "Clear Filter")}
                                     </button>
                                 </div>
 
                                 {/* Filters - Responsive (Mobile Only) */}
                                 <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
                                     <div className='flex flex-col gap-4'>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("advanced_search", "ADVANCED SEARCH")}</p>
                                         <div className="flex items-center justify-end gap-3">
                                             <button
                                                 onClick={() => {
@@ -354,7 +356,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
-                                                Clear Filter
+                                                {t("clear_filter", "Clear Filter")}
                                             </button>
                                             <div className="relative">
                                                 <button
@@ -368,24 +370,24 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                     <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
                                                         <div className="space-y-5">
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("status", "Status")}</label>
                                                                 <div className="relative">
                                                                     <select
                                                                         value={statusFilter}
                                                                         onChange={(e) => setStatusFilter(e.target.value)}
                                                                         className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                                                                     >
-                                                                        <option value="">All Statuses</option>
-                                                                        <option value="Active">Active</option>
-                                                                        <option value="In-active">Inactive</option>
-                                                                        <option value="Pending">Pending</option>
-                                                                        <option value="Deleted">Deleted</option>
+                                                                        <option value="">{t("all_statuses", "All Statuses")}</option>
+                                                                        <option value="Active">{t("active", "Active")}</option>
+                                                                        <option value="In-active">{t("inactive", "Inactive")}</option>
+                                                                        <option value="Pending">{t("pending", "Pending")}</option>
+                                                                        <option value="Deleted">{t("deleted", "Deleted")}</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("from", "From")}</label>
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
@@ -394,7 +396,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("to", "To")}</label>
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
@@ -416,7 +418,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={`Search by ${searchType.toLowerCase()}`}
+                                                    placeholder={searchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={searchText}
                                                     onChange={(e) => handleSearchChange(e.target.value)}
@@ -465,13 +467,13 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                                         <thead>
                                             <tr>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Name</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Contact</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Enrollments</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Progress</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Last Login</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Status</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Action</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("name", "Name")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("contact", "Contact")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("enrollments", "Enrollments")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("progress", "Progress")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("last_login", "Last Login")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("status", "Status")}</th>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("action", "Action")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -481,12 +483,12 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                         <td colSpan="7" className="py-20 text-center bg-[#F8F9FA] rounded-xl">
                                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                                 <Search size={48} className="opacity-20" />
-                                                                <p className="font-medium text-[16px]">No students found matching your criteria</p>
+                                                                <p className="font-medium text-[16px]">{t("no_students_matching", "No students found matching your criteria")}</p>
                                                                 <button
                                                                     onClick={() => { setSearchText(""); setStatusFilter(""); fetchStudentsData(); }}
                                                                     className="text-blue-500 text-sm font-bold hover:underline"
                                                                 >
-                                                                    Clear all filters
+                                                                    {t("clear_all_filters", "Clear all filters")}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -496,7 +498,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 students.map((student) => (
                                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                                         <td className="py-4 rounded-l-xl text-center">
-                                                            <span className="text-[14px] text-gray-800">{student.name}</span>
+                                                            <span className="text-[14px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
                                                         </td>
                                                         <td className="py-4 text-center">
                                                             <div className="flex flex-col items-center justify-center">
@@ -511,7 +513,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 ) : (
                                                                     student.enrollments.map((course, idx) => (
                                                                         <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                            {course.title || course.name || course}
+                                                                            {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
                                                                         </span>
                                                                     ))
                                                                 )}

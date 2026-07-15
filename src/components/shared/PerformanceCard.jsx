@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+// from 'react';
 import { cn } from "@/lib/utils";
 import { TrendingUp } from "lucide-react";
 
@@ -9,6 +11,7 @@ const PerformanceCard = ({
     percentageOverride,
     trendOverride,
 }) => {
+    const { t } = useTranslation();
 
     const percentageInfo = {
         percentage: percentageOverride ?? userCourses?.stats?.overallProgress ?? 0,
@@ -27,7 +30,7 @@ const PerformanceCard = ({
             "w-full min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
             className
         )}>
-            <h3 className="text-[18px] font-bold text-black">{name}</h3>
+            <h3 className="text-[18px] font-bold text-black leading-normal pb-1">{name}</h3>
 
             <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
                 <svg width={size} height={size} className="transform -rotate-90">
@@ -60,14 +63,14 @@ const PerformanceCard = ({
 
                 <div className="absolute flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold text-black">{percentageInfo.percentage}%</span>
-                    <span className="text-xs text-gray-500">Performance</span>
+                    <span className="text-xs text-gray-500 whitespace-nowrap">{t("performance_label", "Performance")}</span>
                 </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-1 text-[11px] sm:text-sm font-medium text-center">
-                <span>Trending up by</span>
+                <span>{t("trending_up_by", "Trending up by")}</span>
                 <span className="text-[#3758EE]">{percentageInfo.trend}%</span>
-                <span>this Week</span>
+                <span>{t("this_week", "this Week")}</span>
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black ml-1" />
             </div>
         </div>

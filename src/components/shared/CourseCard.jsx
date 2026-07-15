@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Link } from 'react-router-dom';
 import img from '@/assets/images/course.png';
+import { useTranslation } from 'react-i18next';
 
 const CourseCard = ({
     title = "Course Title",
@@ -11,6 +12,7 @@ const CourseCard = ({
     className,
     id
 }) => {
+    const { t } = useTranslation();
     const progressPercentage = total > 0 ? (completed / total) * 100 : 0;
 
     return (
@@ -29,15 +31,15 @@ const CourseCard = ({
 
             {/* Content Section */}
             <div className="flex flex-col gap-2">
-                <h3 className="font-bold text-md text-black leading-tight">
-                    {title}
+                <h3 className="font-bold text-md text-black leading-normal pb-1">
+                    {t(title?.trim(), title)}
                 </h3>
 
                 {/* Progress Section */}
                 <div className="flex flex-col gap-1.5 mt-1">
                     <div className="text-right">
                         <span className="text-[#3758EE] font-medium text-sm">{completed}</span>
-                        <span className="text-gray-400 text-sm">/{total} Lectures</span>
+                        <span className="text-gray-400 text-sm">/{total} {t('lectures', 'Lectures')}</span>
                     </div>
 
                     {/* Progress Bar */}

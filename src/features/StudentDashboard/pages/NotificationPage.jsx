@@ -4,6 +4,7 @@ import React from 'react';
 // Verify if you are using Vite/React (react-router-dom) or Next.js (next/navigation)
 import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
+import { useTranslation } from 'react-i18next';
 
 import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
 import { Loader, BellOff } from 'lucide-react';
@@ -13,16 +14,42 @@ const NotificationPage = () => {
     const [notifications, setNotifications] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const translateMessage = (msg) => {
+        if (!msg) return "";
+        const cleanMsg = msg.trim().replace(/\s+/g, ' ');
+        
+        const courseMatch = cleanMsg.match(/^A new course "(.*?)" has been launched, check out now!$/i);
+        if (courseMatch) return t("course_launched_msg", { courseName: t(courseMatch[1], courseMatch[1]), defaultValue: cleanMsg });
+        
+        const eventMatch = cleanMsg.match(/^There is a new event "(.*?)" happening, check it out!$/i);
+        if (eventMatch) return t("event_happening_msg", { eventName: t(eventMatch[1], eventMatch[1]), defaultValue: cleanMsg });
+
+        const haltDateMatch = cleanMsg.match(/^The event "(.*?)" scheduled on (.*?) has been put on halt$/i);
+        if (haltDateMatch) return t("event_halted_date", { eventName: t(haltDateMatch[1], haltDateMatch[1]), date: haltDateMatch[2], defaultValue: cleanMsg });
+
+        const renameMatch = cleanMsg.match(/^The event "(.*?)" has been renamed to "(.*?)"$/i);
+        if (renameMatch) return t("event_renamed", { oldName: t(renameMatch[1], renameMatch[1]), newName: t(renameMatch[2], renameMatch[2]), defaultValue: cleanMsg });
+
+        const modMatch = cleanMsg.match(/^"(.*?)" has been renamed\/shifted to (.*?) \/ modified!$/i);
+        if (modMatch) return t("event_modified", { eventName: t(modMatch[1], modMatch[1]), date: modMatch[2], defaultValue: cleanMsg });
+
+        const cancelMatch = cleanMsg.match(/^"(.*?)" has been canceled!$/i);
+        if (cancelMatch) return t("event_canceled", { eventName: t(cancelMatch[1], cancelMatch[1]), defaultValue: cleanMsg });
+        
+        return t(cleanMsg, msg);
+    };
 
     const handleNotificationClick = async (notification) => {
         try {
             // Mark as read in backend
             await markSingleAsRead(notification.id);
-            
+
             // Update local state for immediate feedback
-            setNotifications(prev => prev.map(n => 
+            setNotifications(prev => prev.map(n =>
                 n.id === notification.id ? { ...n, isUnread: false } : n
             ));
 
@@ -84,11 +111,11 @@ const NotificationPage = () => {
                     {/* The Main Scrollable Area */}
                     <main className="flex-1 overflow-y-auto no-scrollbar bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                         <div className="mb-8">
-                            <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">
-                                Notifications
+                            <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">
+                                {t('notifications', 'Notifications')}
                             </h2>
-                            <p className="text-gray-400 text-sm md:text-base">
-                                Notifications List
+                            <p className="text-gray-400 text-sm md:text-base leading-[1.8]">
+                                {t('notifications_list', 'Notifications List')}
                             </p>
                         </div>
 
@@ -102,7 +129,7 @@ const NotificationPage = () => {
                                     <Notification
                                         key={notification.id}
                                         isUnread={notification.isUnread}
-                                        message={notification.message}
+                                        message={translateMessage(notification.message)}
                                         time={notification.time}
                                         onClick={() => handleNotificationClick(notification)}
                                         className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
@@ -113,7 +140,7 @@ const NotificationPage = () => {
                                     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                                         <BellOff className="w-8 h-8 text-gray-300" />
                                     </div>
-                                    <p className="text-gray-400 font-medium">No notifications yet</p>
+                                    <p className="text-gray-400 font-medium">{t('no_notifications', 'No notifications yet')}</p>
                                 </div>
                             )}
                         </div>

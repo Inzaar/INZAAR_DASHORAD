@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import SessionActivity from "@/components/shared/SessionActivity";
 import ModeratorRoll from "./ModeratorRoll";
 import AssignBatches from "./AssignBatches";
@@ -22,6 +23,8 @@ function ModeratorBatchesComponent({ profileData, onEditClick }) {
     const currentBatches = assignedBatches.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     const goToPage = (page) => {
+    const { t } = useTranslation();
+
         if (page >= 1 && page <= totalPages) setCurrentPage(page);
     };
 
@@ -136,8 +139,8 @@ function ModeratorBatchesComponent({ profileData, onEditClick }) {
                             disabled={currentPage === totalPages}
                             className={`flex items-center gap-1 text-sm font-medium transition ${currentPage === totalPages ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-900"}`}
                         >
-                            Next
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                            {t("next", "Next")}
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                         </button>
                     </div>
                 )}

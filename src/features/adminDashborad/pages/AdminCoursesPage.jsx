@@ -9,8 +9,10 @@ import { Plus, ChevronDown, Loader, ChevronLeft, ChevronRight } from 'lucide-rea
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
+import { useTranslation } from 'react-i18next';
 
 const AdminCoursesPage = () => {
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [searchParams] = useSearchParams();
     const courseIdParam = searchParams.get('courseId');
@@ -128,10 +130,10 @@ const AdminCoursesPage = () => {
     const draftCount = courses.filter(c => c.status === 'Draft').length;
 
     const stats = [
-        { title: "Total Registered Courses", value: courses.length.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Active Courses", value: activeCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
-        { title: "Inactive Courses", value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month" },
-        { title: "Draft Courses", value: draftCount.toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month" },
+        { title: t('total_registered_courses', 'Total Registered Courses'), value: courses.length.toString(), trend: "2.4%", trendDirection: "up", trendText: t('vs_last_month', 'vs last month') },
+        { title: t('active_courses', 'Active Courses'), value: activeCount.toString(), trend: "2.4%", trendDirection: "up", trendText: t('vs_last_month', 'vs last month') },
+        { title: t('inactive_courses', 'Inactive Courses'), value: inactiveCount.toString(), trend: "2.4%", trendDirection: "down", trendText: t('vs_last_month', 'vs last month') },
+        { title: t('draft_courses', 'Draft Courses'), value: draftCount.toString(), trend: "2.4%", trendDirection: "up", trendText: t('vs_last_month', 'vs last month') },
     ];
 
     const filteredCourses = activeTab === 'All'
@@ -171,8 +173,8 @@ const AdminCoursesPage = () => {
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">Courses</h2>
-                                    <p className="text-gray-500 text-[16px]">Manage All Your Courses</p>
+                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{t('courses', 'Courses')}</h2>
+                                    <p className="text-gray-500 text-[16px]">{t('manage_all_your_courses', 'Manage All Your Courses')}</p>
                                 </div>
                                 <button
                                     onClick={() => navigate('/admin-add-course')}
@@ -181,7 +183,7 @@ const AdminCoursesPage = () => {
                                     <div className="flex items-center justify-center bg-white rounded-full p-0.5">
                                         <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
                                     </div>
-                                    <span className="hidden sm:block text-[14px]">Add New Course</span>
+                                    <span className="hidden sm:block text-[14px]">{t('add_new_course', 'Add New Course')}</span>
                                 </button>
                             </div>
 
@@ -213,11 +215,11 @@ const AdminCoursesPage = () => {
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mt-8">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900">All Courses</h3>
+                                    <h3 className="text-lg font-bold text-gray-900">{t('all_courses', 'All Courses')}</h3>
 
                                     <div className="relative">
                                         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                                            Sort
+                                            {t('sort', 'Sort')}
                                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M2.5 4.5L6 8L9.5 4.5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
@@ -240,7 +242,7 @@ const AdminCoursesPage = () => {
                                                 : 'text-gray-500 hover:text-gray-900'
                                                 }`}
                                         >
-                                            {tab === 'All' ? 'All Registered Courses' : tab}
+                                            {tab === 'All' ? t('all_registered_courses', 'All Registered Courses') : t(tab.toLowerCase().replace(' ', '_'), tab)}
                                         </button>
                                     ))}
                                 </div>
@@ -257,10 +259,10 @@ const AdminCoursesPage = () => {
                                             }}
                                             className="w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none appearance-none cursor-pointer shadow-sm"
                                         >
-                                            <option value="All">All Registered Courses</option>
-                                            <option value="Active Courses">Active Courses</option>
-                                            <option value="Inactive Courses">Inactive Courses</option>
-                                            <option value="Draft Courses">Draft Courses</option>
+                                            <option value="All">{t('all_registered_courses', 'All Registered Courses')}</option>
+                                            <option value="Active Courses">{t('active_courses', 'Active Courses')}</option>
+                                            <option value="Inactive Courses">{t('inactive_courses', 'Inactive Courses')}</option>
+                                            <option value="Draft Courses">{t('draft_courses', 'Draft Courses')}</option>
                                         </select>
                                         <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                     </div>
@@ -273,7 +275,7 @@ const AdminCoursesPage = () => {
                                     </div>
                                 ) : filteredCourses.length === 0 ? (
                                     <div className="w-full py-16 flex items-center justify-center text-gray-500 font-medium text-lg">
-                                        There is no any course registered for now
+                                        {t('no_course_registered', 'There is no any course registered for now')}
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 items-start justify-items-center">
@@ -338,7 +340,7 @@ const AdminCoursesPage = () => {
                                                 : 'text-gray-500 hover:text-[#7C3AED]'
                                                 }`}
                                         >
-                                            <span className="hidden sm:inline">Next</span>
+                                            <span className="hidden sm:inline">{t("next", "Next")}</span>
                                             <ChevronRight size={18} />
                                         </button>
                                     </div>

@@ -7,12 +7,14 @@ import Analytics from '../components/Analytics';
 import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '@/api/dashboards';
+import { useTranslation } from 'react-i18next';
 
 const EnrolledCourses = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [userCourses, setUserCourses] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
+    const { t } = useTranslation();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -61,11 +63,15 @@ const EnrolledCourses = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1">Aslam Alaikum {userCourses?.user?.firstname || "Student"} 👋</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1 leading-[1.8] pt-4 pb-2">
+                                        {t('aslam_o_alaikum', 'Aslam o Alaikum')} {t(userCourses?.user?.firstname || 'Student')} 👋
+                                    </h2>
+                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px] leading-[1.8]">
+                                        {t('learn_something_new', "Let's learn something new today!")}
+                                    </p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    Enrolled New Course
+                                    {t('enrolled_new_course', 'Enrolled New Course')}
                                 </GradiantButton>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
                                     +
@@ -78,7 +84,9 @@ const EnrolledCourses = () => {
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-4">Enrolled Courses</h3>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">
+                                                {t('enrolled_courses', 'Enrolled Courses')}
+                                            </h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses || []} loading={loading} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div

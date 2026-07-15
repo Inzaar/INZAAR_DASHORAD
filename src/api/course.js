@@ -76,10 +76,10 @@ export const createCourseWithLectures = async (data) => {
 // lectureId  — the specific lecture being watched
 // watchedPercentage — 0–100
 // lastWatchedTime   — current video playback position in seconds (for resume)
-export const updateLectureProgress = async (courseId, { lectureId, watchedPercentage, lastWatchedTime }) => {
+export const updateLectureProgress = async (courseId, { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta }) => {
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/progress`,
-        { lectureId, watchedPercentage, lastWatchedTime },
+        { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta },
         { withCredentials: true }
     );
     return res.data.data;

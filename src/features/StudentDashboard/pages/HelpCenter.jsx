@@ -8,10 +8,12 @@ import { getAllCourses, getCourseDetails } from '@/api/course';
 import { useAuth } from '@/context/AuthContext';
 import { submitSupportIssue } from '@/api/support';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const HelpCenter = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('contact');
     const [openFaqIndex, setOpenFaqIndex] = useState(0);
@@ -129,20 +131,16 @@ const HelpCenter = () => {
 
     const faqs = [
         {
-            question: "Why is the next lecture locked?",
-            answer: "The next lecture unlocks only after you watch at least 70% of the current lecture. This helps ensure proper understanding before moving forward."
+            question: t("faq_q1", "Why is the next lecture locked?"),
+            answer: t("faq_a1", "The next lecture unlocks only after you watch at least 70% of the current lecture. This helps ensure proper understanding before moving forward.")
         },
         {
-            question: "When will my course certificate be available?",
-            answer: "Certificates are automatically generated and available for download once you have completed 100% of the course content and passed all required assessments."
+            question: t("faq_q2", "When will my course certificate be available?"),
+            answer: t("faq_a2", "Certificates are automatically generated and available for download once you have completed 100% of the course content and passed all required assessments.")
         },
         {
-            question: "When will my course certificate be available?",
-            answer: "Certificates are automatically generated and available for download once you have completed 100% of the course content and passed all required assessments."
-        },
-        {
-            question: "Can I enroll in more than one course at the same time?",
-            answer: "Yes, you can enroll in multiple courses simultaneously. Your progress for each course is tracked independently."
+            question: t("faq_q3", "Can I enroll in more than one course at the same time?"),
+            answer: t("faq_a3", "Yes, you can enroll in multiple courses simultaneously. Your progress for each course is tracked independently.")
         }
     ];
 
@@ -180,8 +178,8 @@ const HelpCenter = () => {
 
                             {/* Header Section */}
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-800 mb-2">Support Center</h2>
-                                <p className="text-gray-500 text-sm">Find answers, report issues, and get in touch with our team to help you make the most of Inzaar Team.</p>
+                                <h2 className="text-xl font-bold text-gray-800 mb-2 leading-[1.8] pt-2 pb-2">{t('support_center', 'Support Center')}</h2>
+                                <p className="text-gray-500 text-sm leading-[1.8]">{t('support_center_desc', 'Find answers, report issues, and get in touch with our team to help you make the most of Inzaar Team.')}</p>
                             </div>
 
                             {/* Tabs */}
@@ -191,14 +189,14 @@ const HelpCenter = () => {
                                         onClick={() => setActiveTab('contact')}
                                         className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
                                     >
-                                        Contact Support
+                                        {t('contact_support', 'Contact Support')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('contact')}
                                         className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
                                     >
-                                        Contact Support
+                                        {t('contact_support', 'Contact Support')}
                                     </button>
                                 )}
 
@@ -207,14 +205,14 @@ const HelpCenter = () => {
                                         onClick={() => setActiveTab('faq')}
                                         className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
                                     >
-                                        Helps & FAQ
+                                        {t('helps_faq', 'Helps & FAQ')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('faq')}
                                         className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
                                     >
-                                        Helps & FAQ
+                                        {t('helps_faq', 'Helps & FAQ')}
                                     </button>
                                 )}
                             </div>
@@ -226,31 +224,31 @@ const HelpCenter = () => {
 
                                     <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
                                         <div className="mb-8">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">Contact Support</h3>
-                                            <p className="text-gray-500 text-sm">Fill out the form below to get in touch with our support team.</p>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('contact_support', 'Contact Support')}</h3>
+                                            <p className="text-gray-500 text-sm leading-[1.8]">{t('contact_support_desc', 'Fill out the form below to get in touch with our support team.')}</p>
                                         </div>
 
                                         <form onSubmit={handleSubmit} className="space-y-6">
                                             <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">Name</label>
+                                                <label className="text-sm font-semibold text-gray-700">{t('name', 'Name')}</label>
                                                 <input
                                                     type="text"
                                                     value={name}
                                                     onChange={(e) => setName(e.target.value)}
                                                     required
-                                                    placeholder="Your name"
+                                                    placeholder={t('your_name', 'Your name')}
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
                                             <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">Email</label>
+                                                <label className="text-sm font-semibold text-gray-700">{t('email', 'Email')}</label>
                                                 <input
                                                     type="email"
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     required
-                                                    placeholder="Your email address"
+                                                    placeholder={t('your_email_address', 'Your email address')}
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
@@ -377,12 +375,12 @@ const HelpCenter = () => {
                                             )} */}
 
                                             <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">Issue / Question</label>
+                                                <label className="text-sm font-semibold text-gray-700">{t('issue_question', 'Issue / Question')}</label>
                                                 <textarea
                                                     required
                                                     value={issue}
                                                     onChange={(e) => setIssue(e.target.value)}
-                                                    placeholder="Discuss your issue or question here..."
+                                                    placeholder={t('discuss_issue_placeholder', 'Discuss your issue or question here...')}
                                                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 min-h-[160px] resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
@@ -396,10 +394,10 @@ const HelpCenter = () => {
                                                     {submitting ? (
                                                         <>
                                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                                            Submitting...
+                                                            {t('submitting', 'Submitting...')}
                                                         </>
                                                     ) : (
-                                                        "Submit"
+                                                        t('submit', 'Submit')
                                                     )}
                                                 </GradiantButton>
                                             </div>
@@ -410,12 +408,12 @@ const HelpCenter = () => {
 
                             {activeTab === 'faq' && (
                                 <div className="animate-in fade-in duration-300">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Helps & FAQs</h3>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3>
 
                                     <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
                                         <div className="mb-6">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1">Helps & FAQs</h3>
-                                            <p className="text-gray-500 text-sm">Find answers to common questions and helpful tips to get started quickly.</p>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3>
+                                            <p className="text-gray-500 text-sm leading-[1.8]">{t('helps_faq_desc', 'Find answers to common questions and helpful tips to get started quickly.')}</p>
                                         </div>
 
                                         <div className="flex flex-col gap-4">
