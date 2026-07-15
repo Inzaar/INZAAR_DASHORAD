@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Monitor, MessageCircleQuestion, X } from 'lucide-react';
+import { BookOpen, FileQuestion, ClipboardList, X } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
 const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
@@ -12,19 +12,25 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
             id: 'Lecture',
             title: 'Lecture',
             description: 'Add video content, text materials, or downloadable resources for students to learn from.',
-            icon: Monitor,
+            icon: BookOpen,
         },
         {
-            id: 'QA',
-            title: 'Q&A',
-            description: 'Add a Q&A session as a video lecture. Students can watch and attempt it the same way as a regular lecture.',
-            icon: MessageCircleQuestion,
+            id: 'Quiz',
+            title: 'Quiz',
+            description: 'Add an assessment between lectures with multiple questions, options, scoring, and completion settings.',
+            icon: FileQuestion,
+        },
+        {
+            id: 'Assignment',
+            title: 'Assignment',
+            description: 'Add a task students must submit a file for. Required before the next lecture unlocks.',
+            icon: ClipboardList,
         },
     ];
 
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans">
-            <div className="bg-white w-full max-w-[830px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative animate-in fade-in zoom-in duration-300">
+            <div className="bg-white w-full max-w-[1050px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden relative animate-in fade-in zoom-in duration-300">
 
                 {/* Close Button */}
                 <button
@@ -40,7 +46,7 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
                         <p className="text-[#64748b] text-[13px] md:text-[15px] font-medium leading-relaxed">Choose what you want to add inside this course structure.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                         {options.map((option) => (
                             <div
                                 key={option.id}
