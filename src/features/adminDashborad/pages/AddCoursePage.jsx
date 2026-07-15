@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil } from 'lucide-react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -9,89 +9,186 @@ import { useAuth } from '@/context/AuthContext';
 import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
 import CreateQuiz from '../components/CreateQuiz';
+import CreateAssignment from '../components/CreateAssignment';
 
 /* ─────────────────────────────────────── helpers ── */
 const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
-const LectureCard = ({ item, onEdit, onDelete }) => (
-    <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
-        <div>
-            <div className="relative aspect-[16/10] bg-gray-900 group">
-                <img
-                    src="https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"
-                    alt="Course Preview"
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
-                />
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
-                        <img src="https://ui-avatars.com/api/?name=Abu+Yahya&background=random" alt="User" />
-                    </div>
-                    <span className="text-white text-[12px] font-bold shadow-sm">Instructor</span>
-                </div>
-                <div className="absolute bottom-3 left-3 text-white text-[12px] font-bold">
-                    Lecture-{String(item.lectureNo || item.number || 1).padStart(2, '0')}
-                </div>
-                <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
-            </div>
-            <div className="p-4 space-y-4">
-                <div className="flex justify-between items-start">
-                    <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
-                    <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
-                </div>
-                {item.videoUrl && (
-                    <div className="space-y-1">
-                        <span className="text-[11px] text-[#64748b] font-bold">Video</span>
-                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.videoUrl}</span>
+const LectureCard = ({ item, onEdit, onDelete }) => {
+    if (item.type === 'Assignment') {
+        return (
+            <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+                <div>
+                    <div className="relative aspect-[16/10] bg-[#fff7ed] flex items-center justify-center">
+                        <div className="w-12 h-12 bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.05)] flex items-center justify-center">
+                            <FileText className="text-orange-500" size={24} />
                         </div>
+                    </div>
+                    <div className="p-5 space-y-2">
+                        <div className="text-[10px] font-bold text-orange-500 uppercase tracking-wider">
+                            ASSIGNMENT - {String(item.lectureNo || item.number || 1).padStart(2, '0')}
+                        </div>
+                        <h4 className="text-[16px] font-bold text-[#0f172a] leading-tight truncate">{item.title || 'Untitled Assignment'}</h4>
+                        <p className="text-[12px] text-gray-400 font-medium leading-snug">
+                            {item.acceptedTypes ? item.acceptedTypes.join(', ') : 'PDF, DOC / DOCX, Image (JPG/PNG)'} · {item.setDueDate ? (item.maxDays || '1-Day') : 'No due date'}
+                        </p>
+                    </div>
+                </div>
+                {(onEdit || onDelete) && (
+                    <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
+                        {onEdit && (
+                            <button
+                                type="button"
+                                onClick={onEdit}
+                                className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                            >
+                                <Pencil size={12} />
+                                Edit
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                            >
+                                <Trash2 size={12} />
+                                Delete
+                            </button>
+                        )}
                     </div>
                 )}
-                {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
-                    <div key={idx} className="space-y-1">
-                        <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
-                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
-                        </div>
-                    </div>
-                ))}
-                {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
-                    <div key={idx} className="space-y-1">
-                        <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
-                        <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                            <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
-                        </div>
-                    </div>
-                ))}
             </div>
+        );
+    }
+
+    if (item.type === 'Quiz') {
+        return (
+            <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+                <div>
+                    <div className="relative aspect-[16/10] bg-[#ecfdf5] flex items-center justify-center">
+                        <div className="w-12 h-12 bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.05)] flex items-center justify-center">
+                            <HelpCircle className="text-emerald-500" size={24} />
+                        </div>
+                    </div>
+                    <div className="p-5 space-y-2">
+                        <div className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+                            QUIZ - {String(item.lectureNo || item.number || 1).padStart(2, '0')}
+                        </div>
+                        <h4 className="text-[16px] font-bold text-[#0f172a] leading-tight truncate">{item.title || 'Untitled Quiz'}</h4>
+                        <p className="text-[12px] text-gray-400 font-medium leading-snug">
+                            {item.questions?.length || 3} questions · {item.timeLimitInMinutes || 15} min
+                        </p>
+                    </div>
+                </div>
+                {(onEdit || onDelete) && (
+                    <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
+                        {onEdit && (
+                            <button
+                                type="button"
+                                onClick={onEdit}
+                                className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                            >
+                                <Pencil size={12} />
+                                Edit
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                            >
+                                <Trash2 size={12} />
+                                Delete
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+            <div>
+                <div className="relative aspect-[16/10] bg-gray-900 group">
+                    <img
+                        src="https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"
+                        alt="Course Preview"
+                        className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                    />
+                    <div className="absolute top-3 left-3 flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
+                            <img src="https://ui-avatars.com/api/?name=Abu+Yahya&background=random" alt="User" />
+                        </div>
+                        <span className="text-white text-[12px] font-bold shadow-sm">Instructor</span>
+                    </div>
+                    <div className="absolute bottom-3 left-3 text-white text-[12px] font-bold">
+                        {item.type || 'Lecture'}-{String(item.lectureNo || item.number || 1).padStart(2, '0')}
+                    </div>
+                    <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
+                </div>
+                <div className="p-4 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
+                        <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
+                    </div>
+                    {item.videoUrl && (
+                        <div className="space-y-1">
+                            <span className="text-[11px] text-[#64748b] font-bold">Video</span>
+                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.videoUrl}</span>
+                            </div>
+                        </div>
+                    )}
+                    {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
+                        <div key={idx} className="space-y-1">
+                            <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
+                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
+                            </div>
+                        </div>
+                    ))}
+                    {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
+                        <div key={idx} className="space-y-1">
+                            <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
+                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
+                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {(onEdit || onDelete) && (
+                <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
+                    {onEdit && (
+                        <button
+                            type="button"
+                            onClick={onEdit}
+                            className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                        >
+                            <Pencil size={12} />
+                            Edit
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                        >
+                            <Trash2 size={12} />
+                            Delete
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
-        {(onEdit || onDelete) && (
-            <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
-                {onEdit && (
-                    <button
-                        type="button"
-                        onClick={onEdit}
-                        className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
-                    >
-                        <Pencil size={12} />
-                        Edit
-                    </button>
-                )}
-                {onDelete && (
-                    <button
-                        type="button"
-                        onClick={onDelete}
-                        className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
-                    >
-                        <Trash2 size={12} />
-                        Delete
-                    </button>
-                )}
-            </div>
-        )}
-    </div>
-);
+    );
+};
 
 /* ─────────────────────────────────────── main page ── */
 const AddCoursePage = () => {
@@ -108,6 +205,7 @@ const AddCoursePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalStep, setModalStep] = useState('select-type'); // 'select-type' | 'item-form'
     const [showQuizFlow, setShowQuizFlow] = useState(false);
+    const [showAssignmentFlow, setShowAssignmentFlow] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -418,9 +516,17 @@ const AddCoursePage = () => {
     };
 
     const handleContentTypeContinue = (type) => {
-        // QA and Lecture both open the video-form flow
-        setNewItem(prev => ({ ...prev, type }));
-        setModalStep('item-form');
+        if (type === 'Quiz') {
+            setIsModalOpen(false);
+            setShowQuizFlow(true);
+        } else if (type === 'Assignment') {
+            setIsModalOpen(false);
+            setShowAssignmentFlow(true);
+        } else {
+            // Lecture opens the video/document form flow
+            setNewItem({ type, title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+            setModalStep('item-form');
+        }
     };
 
     const handleQuizComplete = ({ _id, title }) => {
@@ -435,6 +541,18 @@ const AddCoursePage = () => {
             }
         ]);
         setShowQuizFlow(false);
+    };
+
+    const handleAssignmentComplete = (assignmentItem) => {
+        setCourseItems(prev => [
+            ...prev,
+            {
+                ...assignmentItem,
+                id: Date.now(),
+                lectureNo: prev.length + 1,
+            }
+        ]);
+        setShowAssignmentFlow(false);
     };
 
     // Auto-save course as draft to get a real courseId before quiz creation, or update existing course details
@@ -578,7 +696,18 @@ const AddCoursePage = () => {
                     <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
                         <main className="flex-1 overflow-y-auto no-scrollbar pb-0 relative">
                             <div className="py-4">
-                            {showQuizFlow ? (
+                            {showAssignmentFlow ? (
+                                <CreateAssignment
+                                    courseId={courseId}
+                                    nextAssignmentNumber={courseItems.length + 1}
+                                    onBackToSelection={() => {
+                                        setShowAssignmentFlow(false);
+                                        setModalStep('select-type');
+                                        setIsModalOpen(true);
+                                    }}
+                                    onComplete={handleAssignmentComplete}
+                                />
+                            ) : showQuizFlow ? (
                             <CreateQuiz
                                 courseId={courseId}
                                 onBackToSelection={() => {
@@ -963,7 +1092,7 @@ const AddCoursePage = () => {
                     </main>
 
                     {/* Footer Actions */}
-                    {!showQuizFlow && (
+                    {!showQuizFlow && !showAssignmentFlow && (
                         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
                             <button
                                 onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
@@ -1022,7 +1151,7 @@ const AddCoursePage = () => {
                                     </div>
                                     <div>
                                         <h2 className="text-[20px] font-bold text-gray-800 tracking-tight">
-                                            {editingIndex !== null ? 'Edit' : 'Add New'} Course Item
+                                            {editingIndex !== null ? 'Edit' : 'Add New'} {newItem.type === 'Assignment' ? 'Assignment' : 'Course Item'}
                                         </h2>
                                         <p className="text-gray-400 text-[13px] font-medium leading-relaxed">
                                             Select the type of content you want to add and upload the required files.
@@ -1036,7 +1165,7 @@ const AddCoursePage = () => {
                                     {/* Row 1: Lecture name and Lecture Number */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture name</label>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">{newItem.type === 'Assignment' ? 'Assignment Name' : 'Lecture name'}</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter title"
@@ -1046,7 +1175,7 @@ const AddCoursePage = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture Number<span className="text-gray-400 font-normal text-[11px]">(Auto-Generated)</span></label>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">{newItem.type === 'Assignment' ? 'Assignment Number' : 'Lecture Number'}<span className="text-gray-400 font-normal text-[11px]">(Auto-Generated)</span></label>
                                             <input
                                                 type="text"
                                                 readOnly
@@ -1058,7 +1187,7 @@ const AddCoursePage = () => {
 
                                     {/* Upload Video Lecture Section */}
                                     <div>
-                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Video Lecture</label>
+                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
                                         <input
                                             ref={videoInputRef}
                                             type="file"
@@ -1125,7 +1254,7 @@ const AddCoursePage = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         {/* Optional Audio Upload */}
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Optional Audio Upload</label>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment Audio Instructions' : 'Optional Audio Upload'}</label>
                                             <input
                                                 ref={audioInputRef}
                                                 type="file"
@@ -1207,7 +1336,7 @@ const AddCoursePage = () => {
 
                                         {/* Optional PDF/Resource Upload */}
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Optional PDF Upload</label>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment PDF Instructions' : 'Optional PDF Upload'}</label>
                                             <input
                                                 ref={pdfInputRef}
                                                 type="file"
