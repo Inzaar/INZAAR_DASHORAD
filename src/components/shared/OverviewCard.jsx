@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
+import { useTranslation } from 'react-i18next';
 
 const OverviewCard = ({
     className,
@@ -7,6 +8,7 @@ const OverviewCard = ({
     statsOverride,  // optional: { col1, col2, col3 } each { value, label, color }
     showCircles = false, // Add this prop
 }) => {
+    const { t } = useTranslation();
 
     const formatTimeSpent = (minutes) => {
         if (!minutes) return "0h 0m";
@@ -19,9 +21,9 @@ const OverviewCard = ({
 
     // Default dashboard view
     const defaultStats = {
-        col1: { value: userCourses?.stats?.completed || 0, label: "Completed", color: "#22C55E" },
-        col2: { value: userCourses?.stats?.inProgress || 0, label: "In Progress", color: "#3758EE" },
-        col3: { value: formatTimeSpent(userCourses?.stats?.timeSpent), label: "Time Spent Last week", color: "#B666E7" },
+        col1: { value: userCourses?.stats?.completed || 0, label: t("completed", "Completed"), color: "#22C55E" },
+        col2: { value: userCourses?.stats?.inProgress || 0, label: t("in_progress", "In Progress"), color: "#3758EE" },
+        col3: { value: formatTimeSpent(userCourses?.stats?.timeSpent), label: t("time_spent_last_week", "Time Spent Last week"), color: "#B666E7" },
     };
 
     const stats = statsOverride || defaultStats;
@@ -43,11 +45,11 @@ const OverviewCard = ({
                     />
                 )}
             </div>
-            <div className="flex flex-col gap-1">
-                <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-none">{col.value}</span>
+            <div className="flex flex-col gap-2.5 pt-1 pb-1">
+                <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-normal">{col.value}</span>
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }}></div>
-                    <span className="text-[12px] [1270px]:text-sm font-medium" style={{ color: col.color }}>{col.label}</span>
+                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                    <span className="text-[12px] [1270px]:text-sm font-medium leading-[1.8] pt-0.5 pb-0.5" style={{ color: col.color }}>{col.label}</span>
                 </div>
             </div>
         </div>
@@ -59,7 +61,7 @@ const OverviewCard = ({
             className
         )}>
             {/* Title */}
-            <h3 className="text-sm text-gray-500 font-normal">Overview</h3>
+            <h3 className="text-sm text-gray-500 font-normal leading-normal pb-1">{t("overview", "Overview")}</h3>
 
             {/* Stats Row */}
             <div className="flex flex-col sm:flex-row gap-6 sm:gap-2 items-start sm:items-center justify-between w-full">

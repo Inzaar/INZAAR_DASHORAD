@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { Loader } from 'lucide-react';
@@ -14,6 +15,7 @@ const SharedStudentTable = ({
     showTitle = true
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     // Format date for display
     const formatDate = (dateStr) => {
@@ -49,7 +51,7 @@ const SharedStudentTable = ({
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
                     {showDropdown && (
                         <select className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none cursor-pointer">
-                            <option value="student_table">Student Table</option>
+                            <option value="student_table">{t("student_table", "Student Table")}</option>
                         </select>
                     )}
                 </div>
@@ -61,7 +63,7 @@ const SharedStudentTable = ({
                 </div>
             ) : students.length === 0 ? (
                 <div className="flex items-center justify-center py-16">
-                    <span className="text-gray-400 text-sm">No students found</span>
+                    <span className="text-gray-400 text-sm">{t("no_students_found", "No students found")}</span>
                 </div>
             ) : (
                 <>
@@ -69,20 +71,20 @@ const SharedStudentTable = ({
                         <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                             <thead>
                                 <tr>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Name</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Contact</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Enrollments</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Progress</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Last Login</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Status</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Action</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("name", "Name")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("contact", "Contact")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("enrollments", "Enrollments")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("progress_avg", "Progress")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("last_login", "Last Login")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("status", "Status")}</th>
+                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("action", "Action")}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.map((student) => (
                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                         <td className="py-4 rounded-l-xl text-center">
-                                            <span className="text-[14px] text-gray-800">{student.name}</span>
+                                            <span className="text-[14px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
                                         </td>
                                         <td className="py-4 text-center">
                                             <div className="flex flex-col items-center justify-center">
@@ -96,17 +98,17 @@ const SharedStudentTable = ({
                                                     <>
                                                         {student.enrollments.slice(0, 3).map((course, idx) => (
                                                             <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                {course.title || course.name || course}
+                                                                {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
                                                             </span>
                                                         ))}
                                                         {student.enrollments.length > 3 && (
                                                             <span className="text-[11px] text-gray-400 font-medium mt-0.5">
-                                                                + {student.enrollments.length - 3} more
+                                                                {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
                                                             </span>
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <span className="text-gray-400 text-[13px]">Not Enrolled</span>
+                                                    <span className="text-gray-400 text-[13px]">{t("not_enrolled", "Not Enrolled")}</span>
                                                 )}
                                             </div>
                                         </td>
@@ -118,7 +120,7 @@ const SharedStudentTable = ({
                                         </td>
                                         <td className="py-4 text-center">
                                             <span className={`text-[14px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                                                {student.status === 'In-active' ? 'In-active' : student.status}
+                                                {t(student.status.toLowerCase(), student.status)}
                                             </span>
                                         </td>
                                         <td className="py-4 text-center rounded-r-xl">
@@ -126,7 +128,7 @@ const SharedStudentTable = ({
                                                 className="text-[13px] px-4 py-2 font-medium rounded-md hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7]"
                                                 onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                             >
-                                                View Profile
+                                                {t("view_profile", "View Profile")}
                                             </GradiantButton>
                                         </td>
                                     </tr>
@@ -142,7 +144,7 @@ const SharedStudentTable = ({
                             onClick={() => onPageChange(pagination.page - 1)}
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                            <span className="hidden sm:inline">Previous</span>
+                            <span className="hidden sm:inline">{t("previous", "Previous")}</span>
                         </button>
                         <div className="flex items-center gap-1">
                             {getPageNumbers().map((p, idx) => (
@@ -167,7 +169,7 @@ const SharedStudentTable = ({
                             disabled={pagination.page >= pagination.totalPages}
                             onClick={() => onPageChange(pagination.page + 1)}
                         >
-                            <span className="hidden sm:inline">Next</span>
+                            <span className="hidden sm:inline">{t("next", "Next")}</span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                         </button>
                     </div>

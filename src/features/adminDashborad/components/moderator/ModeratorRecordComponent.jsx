@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import MetricCard from '@/components/shared/MetricCard';
 import OverviewCard from '@/components/shared/OverviewCard';
@@ -7,6 +8,8 @@ import { getModeratorStudents } from '@/api/user';
 import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ModeratorRecordComponent({ profileData, onEditClick }) {
+    const { t } = useTranslation();
+
     const { id } = useParams();
     const navigate = useNavigate();
     const user = profileData?.user || {};
@@ -158,7 +161,7 @@ export default function ModeratorRecordComponent({ profileData, onEditClick }) {
 
             {/* Student Table Section */}
             <div className="w-full">
-                <h3 className="text-[17px] font-semibold text-gray-800 mb-4 px-2">Student Table</h3>
+                <h3 className="text-[17px] font-semibold text-gray-800 mb-4 px-2">{t("student_table", "Student Table")}</h3>
 
                 <div className="bg-white rounded-[12px] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] w-full overflow-hidden relative">
                     {loadingStudents && (
@@ -170,12 +173,12 @@ export default function ModeratorRecordComponent({ profileData, onEditClick }) {
                         <table className="w-full min-w-[800px] text-left border-separate border-spacing-y-3">
                             <thead>
                                 <tr>
-                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="pb-2 px-6 text-[13px] font-bold w-[25%] text-gray-500 uppercase tracking-wider">Contact</th>
-                                    <th className="pb-2 px-6 text-[13px] font-bold text-center w-[15%] text-gray-500 uppercase tracking-wider">Progress</th>
-                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">Last Login</th>
-                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="pb-2 px-6 text-[13px] font-bold text-center w-[15%] text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">{t("name", "Name")}</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold w-[25%] text-gray-500 uppercase tracking-wider">{t("contact", "Contact")}</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold text-center w-[15%] text-gray-500 uppercase tracking-wider">{t("progress", "Progress")}</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">{t("last_login", "Last Login")}</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">{t("status", "Status")}</th>
+                                    <th className="pb-2 px-6 text-[13px] font-bold text-center w-[15%] text-gray-500 uppercase tracking-wider">{t("action", "Action")}</th>
                                 </tr>
                             </thead>
                             <tbody className="before:block before:h-2">
@@ -246,8 +249,8 @@ export default function ModeratorRecordComponent({ profileData, onEditClick }) {
                         disabled={currentPage === totalPages || loadingStudents || totalPages === 0}
                         className={`flex items-center gap-1 text-[13px] font-medium transition-colors ${currentPage === totalPages || totalPages === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
                     >
-                        Next
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        {t("next", "Next")}
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                     </button>
                 </div>
             </div>

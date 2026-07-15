@@ -1,5 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+// from 'react';
 import { cn } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 
@@ -12,12 +14,13 @@ const MetricCard = ({
     trendValue: trendValueProp,
     trendLabel: trendLabelProp,
 }) => {
+    const { t } = useTranslation();
     const metricInfo = {
-        title: titleProp ?? "Progress",
+        title: titleProp ?? t("progress", "Progress"),
         value: valueProp ?? (userCourses?.stats?.totalEnrolled || "0"),
         trend: {
             value: trendValueProp ?? (userCourses?.stats?.improvement || "0"),
-            label: trendLabelProp ?? "Improvement From last Week",
+            label: trendLabelProp ?? t("improvement_from_last_week", "Improvement From last Week"),
             direction: "up"
         },
         data: [70, 150, 120],

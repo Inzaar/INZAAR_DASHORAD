@@ -7,6 +7,7 @@ import {
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 
 function Pagination({
   className,
@@ -63,6 +64,7 @@ function PaginationPrevious({
   className,
   ...props
 }) {
+  const { t } = useTranslation();
   return (
     <PaginationLink
       aria-label="Go to previous page"
@@ -70,7 +72,7 @@ function PaginationPrevious({
       className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
       {...props}>
       <ChevronLeftIcon className="size-4" />
-      <span className="hidden sm:inline font-medium">Previous</span>
+      <span className="hidden sm:inline font-medium">{t('previous', 'Previous')}</span>
     </PaginationLink>
   );
 }
@@ -79,13 +81,14 @@ function PaginationNext({
   className,
   ...props
 }) {
+  const { t } = useTranslation();
   return (
     <PaginationLink
       aria-label="Go to next page"
       size="default"
       className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
       {...props}>
-      <span className="hidden sm:inline font-medium">Next</span>
+      <span className="hidden sm:inline font-medium">{t('next', 'Next')}</span>
       <ChevronRightIcon className="size-4" />
     </PaginationLink>
   );

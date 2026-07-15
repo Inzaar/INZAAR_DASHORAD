@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from "react-router-dom";
 
 const AdminLectureList = ({ lectures, onWatch, id }) => {
+    const { t } = useTranslation();
+
     const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const itemsPerPage = 5;
@@ -60,10 +63,10 @@ const AdminLectureList = ({ lectures, onWatch, id }) => {
                                 <th className="py-4 px-4 w-[10%]">Lecture No</th>
                                 <th className="py-4 px-4 w-[25%]">Title</th>
                                 <th className="py-4 px-4 w-[15%]">Date</th>
-                                <th className="py-4 px-4 text-center w-[15%]">Progress</th>
-                                <th className="py-4 px-4 w-[15%]">Status</th>
+                                <th className="py-4 px-4 text-center w-[15%]">{t("progress", "Progress")}</th>
+                                <th className="py-4 px-4 w-[15%]">{t("status", "Status")}</th>
                                 <th className="py-4 px-4 w-[10%]">Comments</th>
-                                <th className="py-4 px-4 text-center w-[10%]">Action</th>
+                                <th className="py-4 px-4 text-center w-[10%]">{t("action", "Action")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50/50">
@@ -174,7 +177,7 @@ const AdminLectureList = ({ lectures, onWatch, id }) => {
                                 : 'text-gray-500 hover:text-[#7C3AED]'
                                 }`}
                         >
-                            <span className="hidden sm:inline">Next</span> <ChevronRight size={18} />
+                            <span className="hidden sm:inline">{t("next", "Next")}</span> <ChevronRight size={18} />
                         </button>
                     </div>
                 )}

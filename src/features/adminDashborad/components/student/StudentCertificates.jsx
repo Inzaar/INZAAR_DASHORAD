@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useRef } from 'react';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Download, Lock, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,6 +9,8 @@ import axiosInstance from '@/api/axiosInstance';
 import toast from 'react-hot-toast';
 
 const CertificateStatsCard = ({ title, value, trend, description, trendColor = "text-[#00C896]", trendBg = "bg-[#E6F9F4]" }) => {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between w-full h-[140px] overflow-hidden font-sans">
             <h3 className="text-gray-900 text-sm font-bold line-clamp-1">{title}</h3>
@@ -165,9 +168,9 @@ const StudentCertificates = ({ profileData }) => {
                                     <th className="py-4 px-6">Courses</th>
                                     <th className="py-4 px-4 text-center">Title</th>
                                     <th className="py-4 px-4 text-center">Start & End Date</th>
-                                    <th className="py-4 px-4 text-center">Progress</th>
-                                    <th className="py-4 px-4 text-center">Status</th>
-                                    <th className="py-4 px-6 text-center">Action</th>
+                                    <th className="py-4 px-4 text-center">{t("progress", "Progress")}</th>
+                                    <th className="py-4 px-4 text-center">{t("status", "Status")}</th>
+                                    <th className="py-4 px-6 text-center">{t("action", "Action")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50/50">

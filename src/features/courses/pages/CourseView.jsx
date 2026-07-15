@@ -20,6 +20,7 @@ import QuizStartOverlay from "../components/QuizStartOverlay";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
+import { useTranslation } from "react-i18next";
 
 // Hoisted Helper Functions
 const formatTime = (seconds) => {
@@ -42,6 +43,7 @@ const extractYouTubeId = (url) => {
 const CourseView = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     // Consolidate All State at the Top
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -115,6 +117,7 @@ const CourseView = () => {
     const playerRef = useRef(null);
     const containerRef = useRef(null);
     const lastReportedRef = useRef(0);
+    const prevPlaybackTimeRef = useRef(0);
     const completedIdsRef = useRef(new Set());
     const adminMenuRef = useRef(null);
     const audioInputRef = useRef(null);
@@ -318,17 +321,26 @@ const CourseView = () => {
                     setProgress(percent);
                     const now = Date.now();
                     const lectureId = currentLecture?.id || currentLecture?._id;
-                    
+
                     // Allow anyone to record progress (if they aren't enrolled, the backend will just reject it). This allows admins to test unlocking.
                     if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
                         lastReportedRef.current = now;
                         let finalPercent = Math.min(Math.round(percent), 100);
                         if (finalPercent >= 95) finalPercent = 100; // Auto-complete near the end
-                        
+
+                        let timeSpentDelta = 0;
+                        const diff = cur - prevPlaybackTimeRef.current;
+                        // Only record if positive and realistic (e.g., less than 5 seconds jump for normal playback)
+                        if (diff > 0 && diff <= 3) {
+                            timeSpentDelta = Math.round(diff);
+                        }
+                        prevPlaybackTimeRef.current = cur;
+
                         updateLectureProgress(courseId, {
                             lectureId,
                             watchedPercentage: finalPercent,
                             lastWatchedTime: Math.floor(cur),
+                            timeSpentDelta
                         }).then(async (data) => {
                             const unlockPercent = courseData?.unlockCriteria || 100;
                             if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
@@ -661,8 +673,8 @@ const CourseView = () => {
                                             }}
                                             title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
                                             className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${courseData?.assignedModeratorPhone
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
-                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                                ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
+                                                : "bg-gray-200 text-gray-500 cursor-not-allowed"
                                                 }`}
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
@@ -678,8 +690,8 @@ const CourseView = () => {
                                             }}
                                             title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
                                             className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${courseData?.assignedModeratorPhone
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
-                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                                ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
+                                                : "bg-gray-200 text-gray-500 cursor-not-allowed"
                                                 }`}
                                         >
                                             <FaWhatsapp size={20} />
@@ -919,10 +931,10 @@ const CourseView = () => {
                                                                     </h4>
                                                                 </div>
                                                                 <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                    Lecture:{String(lecture.lectureNo).padStart(2, '0')}
+                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
                                                                 </div>
                                                                 <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                    Date: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
                                                                 </div>
                                                             </div>
                                                             {lecture.isLocked ? (
@@ -971,7 +983,7 @@ const CourseView = () => {
                             {/* Lecture Notes Section */}
                             {!isAdminView && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
-                                    <h3 className="text-xl font-bold text-gray-900 mb-4">Lecture Notes</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t('lecture_notes', 'Lecture Notes')}</h3>
                                     <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                                         {notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
                                             notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).map(note => (
@@ -1007,14 +1019,14 @@ const CourseView = () => {
                                                     </div>
                                                 </div>
                                             )) : (
-                                                <p className="text-gray-400 text-sm italic py-4">No notes added yet for this lecture.</p>
+                                                <p className="text-gray-400 text-sm italic py-4">{t('no_notes_added', 'No notes added yet for this lecture.')}</p>
                                             )
                                         }
                                     </div>
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            placeholder="Add a new note at this time..."
+                                            placeholder={t('add_note_placeholder', 'Add a new note at this time...')}
                                             value={newNote}
                                             onChange={(e) => setNewNote(e.target.value)}
                                             onKeyDown={handleAddNote}
@@ -1063,10 +1075,10 @@ const CourseView = () => {
                 isOpen={isDeleteDialogOpen}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={confirmDeleteNote}
-                title="Delete Note"
-                message="Are you sure you want to delete this note? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
+                title={t('delete_note', 'Delete Note')}
+                message={t('delete_note_confirm_msg', 'Are you sure you want to delete this note? This action cannot be undone.')}
+                confirmText={t('delete', 'Delete')}
+                cancelText={t('cancel', 'Cancel')}
                 isLoading={isDeleting}
             />
 

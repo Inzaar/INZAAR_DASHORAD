@@ -9,10 +9,12 @@ import axiosInstance from '@/api/axiosInstance';
 import { Loader } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import CertificateCard from '@/features/courses/components/CertificateCard';
+import { useTranslation } from 'react-i18next';
 
 const Certificates = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -193,10 +195,10 @@ const Certificates = () => {
     };
 
     const metricCards = [
-        { label: 'Total Courses Completed', value: metrics.totalCoursesCompleted.count, sub: 'Courses', change: '', desc: 'All courses you have successfully finished.' },
-        { label: 'Certificates Available', value: metrics.certificatesAvailable.count, sub: 'Certificates', change: '', desc: 'Certificates ready for you to download and share.' },
-        { label: 'Courses In Progress', value: metrics.coursesInProgress.count, sub: 'Courses In Progress', change: '', desc: 'Courses you are currently enrolled in but not yet completed.' },
-        { label: 'Locked Certificates', value: metrics.lockedCertificates.count, sub: 'Locked Certificates', change: '', desc: 'Certificates that will unlock upon 100% completion of their course.' },
+        { label: t('total_courses_completed', 'Total Courses Completed'), value: metrics.totalCoursesCompleted.count, sub: t('courses', 'Courses'), change: '', desc: t('all_courses_completed_desc', 'All courses you have successfully finished.') },
+        { label: t('certificates_available', 'Certificates Available'), value: metrics.certificatesAvailable.count, sub: t('certificates', 'Certificates'), change: '', desc: t('certificates_available_desc', 'Certificates ready for you to download and share.') },
+        { label: t('courses_in_progress_title', 'Courses In Progress'), value: metrics.coursesInProgress.count, sub: t('courses_in_progress', 'Courses In Progress'), change: '', desc: t('courses_in_progress_desc', 'Courses you are currently enrolled in but not yet completed.') },
+        { label: t('locked_certificates_title', 'Locked Certificates'), value: metrics.lockedCertificates.count, sub: t('locked_certificates', 'Locked Certificates'), change: '', desc: t('locked_certificates_desc', 'Certificates that will unlock upon 100% completion of their course.') },
     ];
 
     return (
@@ -259,8 +261,8 @@ const Certificates = () => {
                                     <div className="flex flex-col justify-between mb-6 gap-4">
                                         <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
                                             <div>
-                                                <h2 className="text-xl font-bold text-gray-900">Certificates List</h2>
-                                                <p className="text-gray-500 text-sm">Manage your Certificates</p>
+                                                <h2 className="text-xl font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('certificates_list', 'Certificates List')}</h2>
+                                                <p className="text-gray-500 text-sm leading-[1.8]">{t('manage_certificates', 'Manage your Certificates')}</p>
                                             </div>
                                             <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
                                                 <div className="relative w-full md:w-[300px]">
@@ -269,13 +271,13 @@ const Certificates = () => {
                                                         type="text"
                                                         value={search}
                                                         onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-                                                        placeholder="Search certificate by Course name"
+                                                        placeholder={t('search_by_course', 'Search certificate by Course name')}
                                                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                     />
                                                 </div>
                                                 <GradiantButton className={"py-2 px-4 rounded"}>
                                                     <Search className="h-4 w-4" />
-                                                    Search
+                                                    {t('search', 'Search')}
                                                 </GradiantButton>
                                             </div>
                                         </div>
@@ -284,23 +286,23 @@ const Certificates = () => {
                                     {filtered.length === 0 ? (
                                         <div className="text-center py-16 text-gray-400">
                                             <div className="text-5xl mb-4">🎓</div>
-                                            <p className="font-medium text-gray-600">No certificates yet</p>
-                                            <p className="text-sm mt-1">Complete a course to earn your first certificate!</p>
+                                            <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
+                                            <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
                                             <button onClick={() => navigate('/courses')} className="mt-4 px-6 py-2 bg-[#3758EE] text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                                                Browse Courses
+                                                {t('browse_courses', 'Browse Courses')}
                                             </button>
                                         </div>
                                     ) : (
                                         <div className="w-full overflow-hidden">
                                             <div className="w-full">
                                                 {/* Table Header - Desktop Only */}
-                                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center">
-                                                    <div className="col-span-3 text-left pl-4">Courses</div>
-                                                    <div className="col-span-2">Title</div>
-                                                    <div className="col-span-2">Start & End Date</div>
-                                                    <div className="col-span-2">Progress</div>
-                                                    <div className="col-span-1">Status</div>
-                                                    <div className="col-span-2">Action</div>
+                                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
+                                                    <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
+                                                    <div className="col-span-2">{t('title', 'Title')}</div>
+                                                    <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
+                                                    <div className="col-span-2">{t('progress', 'Progress')}</div>
+                                                    <div className="col-span-1">{t('status', 'Status')}</div>
+                                                    <div className="col-span-2">{t('action', 'Action')}</div>
                                                 </div>
 
                                                 {/* Table Rows / Mobile Cards */}
@@ -320,22 +322,22 @@ const Certificates = () => {
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <span className="block font-bold md:font-medium text-gray-900 md:text-gray-800 truncate text-sm md:text-xs lg:text-sm">
-                                                                            {item.course}
+                                                                            {t(item.course?.trim(), item.course)}
                                                                         </span>
-                                                                        <span className="md:hidden text-xs text-gray-500">Course</span>
+                                                                        <span className="md:hidden text-xs text-gray-500">{t('course', 'Course')}</span>
                                                                     </div>
                                                                 </div>
 
                                                                 {/* Title - Desktop only or as secondary info on mobile */}
                                                                 <div className="md:col-span-2 text-left md:text-center">
-                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-0.5">Title</span>
-                                                                    <span className="text-gray-600 text-sm md:text-xs lg:text-sm truncate block">{item.title}</span>
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-0.5">{t('title', 'Title')}</span>
+                                                                    <span className="text-gray-600 text-sm md:text-xs lg:text-sm truncate block">{t(item.title?.trim(), item.title)}</span>
                                                                 </div>
 
                                                                 {/* Start & End Date */}
                                                                 <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-center gap-2">
                                                                     <div className="md:hidden">
-                                                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">Duration</span>
+                                                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">{t('duration', 'Duration')}</span>
                                                                     </div>
                                                                     <div className="text-right md:text-center text-[11px] md:text-[10px] lg:text-xs text-gray-500">
                                                                         <span className="md:block">{item.startDate}</span>
@@ -348,7 +350,7 @@ const Certificates = () => {
                                                                 <div className="md:col-span-2">
                                                                     <div className="flex flex-row md:flex-col items-center md:justify-center gap-3 md:gap-1">
                                                                         <div className="md:hidden shrink-0">
-                                                                            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">Progress</span>
+                                                                            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('progress', 'Progress')}</span>
                                                                         </div>
                                                                         <div className="flex-1 md:flex-initial flex items-center gap-2 justify-end md:justify-center w-full">
                                                                             <div className="w-full md:w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -361,14 +363,14 @@ const Certificates = () => {
 
                                                                 {/* Status */}
                                                                 <div className="md:col-span-1 flex justify-between md:justify-center items-center">
-                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">Status</span>
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('status', 'Status')}</span>
                                                                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed'
                                                                         ? 'text-blue-600 bg-blue-50'
                                                                         : item.status === 'Active'
                                                                             ? 'text-green-600 bg-green-50'
                                                                             : 'text-gray-500 bg-gray-100'
                                                                         }`}>
-                                                                        {item.status}
+                                                                        {t(item.status.toLowerCase(), item.status)}
                                                                     </span>
                                                                 </div>
 
@@ -381,7 +383,7 @@ const Certificates = () => {
                                                                                 className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200"
                                                                             >
                                                                                 <Download className="w-4 h-4 md:w-3 md:h-3" />
-                                                                                Download
+                                                                                {t('download', 'Download')}
                                                                             </button>
                                                                         ) : (
                                                                             <button
@@ -392,12 +394,12 @@ const Certificates = () => {
                                                                                 {generatingId === item.enrollmentId ? (
                                                                                     <>
                                                                                         <Loader className="w-4 h-4 animate-spin text-blue-500" />
-                                                                                        Generating...
+                                                                                        {t('generating', 'Generating...')}
                                                                                     </>
                                                                                 ) : (
                                                                                     <>
                                                                                         <Lock className="w-4 h-4" />
-                                                                                        Generate Certificate
+                                                                                        {t('generate_certificate', 'Generate Certificate')}
                                                                                     </>
                                                                                 )}
                                                                             </button>
@@ -405,7 +407,7 @@ const Certificates = () => {
                                                                     ) : (
                                                                         <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl md:rounded-lg cursor-not-allowed select-none border border-gray-100">
                                                                             <Lock className="w-4 h-4 md:w-3 md:h-3" />
-                                                                            Progress Pending
+                                                                            {t('progress_pending', 'Progress Pending')}
                                                                         </div>
                                                                     )}
                                                                 </div>

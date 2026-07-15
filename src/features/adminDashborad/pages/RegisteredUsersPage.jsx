@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -10,6 +11,8 @@ import { getAllUsers } from '@/api/user';
 import { getAllEnrollments } from '@/api/enrollment';
 
 const RegisteredUsersPage = () => {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -235,13 +238,13 @@ const RegisteredUsersPage = () => {
                                     <table className="w-full min-w-[1000px]">
                                         <thead>
                                             <tr className="border-b border-gray-50 uppercase text-[12px] font-bold text-gray-800">
-                                                <th className="text-left pb-4 pl-4 font-bold">Name</th>
-                                                <th className="text-left pb-4 font-bold">Contact</th>
-                                                <th className="text-center pb-4 font-bold">Enrollments</th>
-                                                <th className="text-center pb-4 font-bold">Progress</th>
-                                                <th className="text-center pb-4 font-bold">Last Login</th>
-                                                <th className="text-center pb-4 font-bold">Status</th>
-                                                <th className="text-center pb-4 font-bold">Action</th>
+                                                <th className="text-left pb-4 pl-4 font-bold">{t("name", "Name")}</th>
+                                                <th className="text-left pb-4 font-bold">{t("contact", "Contact")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("enrollments", "Enrollments")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("progress", "Progress")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("last_login", "Last Login")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("status", "Status")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("action", "Action")}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50/50">
@@ -307,7 +310,7 @@ const RegisteredUsersPage = () => {
                                     <button className="w-9 h-9 flex items-center justify-center rounded-[12px] text-[13px] font-bold text-gray-400 hover:bg-gray-50 hover:text-[#7C3AED]">3</button>
                                     <span className="text-gray-300 font-bold px-1">...</span>
                                     <button className="flex items-center gap-1 text-[13px] font-bold text-gray-400 hover:text-[#7C3AED] transition-colors">
-                                        <span className="hidden sm:inline">Next</span> <ChevronRight size={16} />
+                                        <span className="hidden sm:inline">{t("next", "Next")}</span> <ChevronRight size={16} />
                                     </button>
                                 </div>
                             </div>

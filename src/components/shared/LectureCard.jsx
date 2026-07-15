@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from "@/lib/utils";
 import img from "../../assets/images/course2.png"
 import pImage from "../../assets/logos/Abu_Yahya.png"
@@ -13,6 +14,7 @@ const LectureCard = ({
     className,
     onClick
 }) => {
+    const { t } = useTranslation();
     return (
         <div
             onClick={onClick}
@@ -38,9 +40,9 @@ const LectureCard = ({
                 <div className="flex justify-between items-start">
                     {/* Text Info */}
                     <div className="flex flex-col text-white">
-                        <h3 className="font-semibold text-base leading-tight mb-1">{title}</h3>
-                        <span className="text-[10px] font-medium opacity-90">Lecture:{lecture}</span>
-                        <span className="text-[10px] font-medium opacity-90">Date:{date}</span>
+                        <h3 className="font-semibold text-base leading-normal pb-1 mb-1">{t(title?.trim(), title)}</h3>
+                        <span className="text-[10px] font-medium opacity-90">{t("lecture", "Lecture")}:{lecture}</span>
+                        <span className="text-[10px] font-medium opacity-90">{t("date", "Date")}:{date}</span>
                     </div>
 
                     {/* Profile Image */}
@@ -55,7 +57,7 @@ const LectureCard = ({
 
                 {/* Bottom Section - Play Button */}
                 <div className="flex justify-center mt-auto">
-                    <GradiantButton className="px-6 py-2 rounded-lg">Play</GradiantButton>
+                    <GradiantButton className="px-6 py-2 rounded-lg">{t("play", "Play")}</GradiantButton>
                 </div>
             </div>
         </div>

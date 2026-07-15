@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'; // Added useEffect
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
-import { useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
 import { logout as apiLogout } from '@/api/auth';
 import LogoutModal from '@/components/shared/LogoutModal';
@@ -15,6 +16,35 @@ function Sidebar({ className, onClose }) {
   const [isModeratorsExpanded, setIsModeratorsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const { t } = useTranslation();
+
+  const tKey = (str) => {
+    const map = {
+      'Dashboard': 'dashboard',
+      'Calendar': 'calendar',
+      'Notification': 'notification',
+      'Moderators': 'moderators',
+      'Student Profiles': 'student_profiles',
+      'Courses Management': 'courses_management',
+      'Reports & Logs': 'reports_logs',
+      'My Courses': 'my_courses',
+      'Certificates': 'certificates',
+      'Profile': 'profile',
+      'Notifications': 'notifications',
+      'Help Center': 'help_center',
+      'All Moderators': 'all_moderators',
+      'Male Moderators': 'male_moderators',
+      'Female Moderators': 'female_moderators',
+      'All Students': 'all_students',
+      'Male Students': 'male_students',
+      'Female Students': 'female_students',
+      'Student Reports': 'student_reports',
+      'Moderator Reports': 'moderator_reports',
+      'Course Reports': 'course_reports',
+      'Logout': 'logout',
+    };
+    return map[str] || str;
+  };
 
   // Define menu items based on role
   const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
@@ -222,7 +252,7 @@ function Sidebar({ className, onClose }) {
             }}
           >
             <div className="flex items-center justify-between w-full pr-2">
-              <span>{item}</span>
+              <span>{t(tKey(item), item)}</span>
               {isReportsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
           </Sideabrbbutton>
@@ -233,21 +263,21 @@ function Sidebar({ className, onClose }) {
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                Student Reports
+                {t('student_reports', 'Student Reports')}
               </button>
               <button 
                 onClick={() => handleItemClick('Moderator Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                Moderator Reports
+                {t('moderator_reports', 'Moderator Reports')}
               </button>
               <button 
                 onClick={() => handleItemClick('Course Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                Course Reports
+                {t('course_reports', 'Course Reports')}
               </button>
             </div>
           )}
@@ -267,7 +297,7 @@ function Sidebar({ className, onClose }) {
             }}
           >
             <div className="flex items-center justify-between w-full pr-2">
-              <span>{item}</span>
+              <span>{t(tKey(item), item)}</span>
               {isModeratorsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
           </Sideabrbbutton>
@@ -280,21 +310,21 @@ function Sidebar({ className, onClose }) {
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                    All Moderators
+                    {t('all_moderators', 'All Moderators')}
                   </button>
                   <button 
                     onClick={() => handleItemClick('Male Moderators')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                    Male Moderators
+                    {t('male_moderators', 'Male Moderators')}
                   </button>
                   <button 
                     onClick={() => handleItemClick('Female Moderators')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                    Female Moderators
+                    {t('female_moderators', 'Female Moderators')}
                   </button>
                 </>
               )}
@@ -316,7 +346,7 @@ function Sidebar({ className, onClose }) {
               handleItemClick('Student Profiles');
             }}
           >
-            Student Profiles
+            {t('student_profiles', 'Student Profiles')}
           </Sideabrbbutton>
         );
       }
@@ -332,7 +362,7 @@ function Sidebar({ className, onClose }) {
             }}
           >
             <div className="flex items-center justify-between w-full pr-2">
-              <span>{item}</span>
+              <span>{t(tKey(item), item)}</span>
               {isStudentsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </div>
           </Sideabrbbutton>
@@ -345,21 +375,21 @@ function Sidebar({ className, onClose }) {
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Students' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                    All Students
+                    {t('all_students', 'All Students')}
                   </button>
                   <button 
                     onClick={() => handleItemClick('Male Students')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Students' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                    Male Students
+                    {t('male_students', 'Male Students')}
                   </button>
                   <button 
                     onClick={() => handleItemClick('Female Students')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Students' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                    Female Students
+                    {t('female_students', 'Female Students')}
                   </button>
                 </>
               )}
@@ -374,7 +404,7 @@ function Sidebar({ className, onClose }) {
         isActive={activeItem === item}
         onClick={() => handleItemClick(item)}
       >
-        {item}
+        {t(tKey(item), item)}
       </Sideabrbbutton>
     );
   };
@@ -383,7 +413,7 @@ function Sidebar({ className, onClose }) {
     <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
-        <div className='text-[#6A6F78] text-[14px] ml-3 font-medium truncate pr-2'>Welcome, {user?.firstname || user?.name || "User"}</div>
+        <div className='text-[#6A6F78] text-[14px] ml-3 font-medium pr-2 pb-1'>{t('welcome_user', 'Welcome, ')} {t(user?.firstname || user?.name || "User")}</div>
         <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
           <X size={20} />
         </button>
@@ -396,7 +426,7 @@ function Sidebar({ className, onClose }) {
 
         {moderatorFeatures.length > 0 && (
           <div className='w-full flex flex-col items-start gap-2 mt-4 pt-4 border-t border-gray-100'>
-            <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>Moderator Features</div>
+            <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>{t('moderator_features', 'Moderator Features')}</div>
             {moderatorFeatures.map(renderMenuItem)}
           </div>
         )}
@@ -408,7 +438,7 @@ function Sidebar({ className, onClose }) {
           isActive={activeItem === 'Logout'}
           onClick={() => handleItemClick('Logout')}
         >
-          Logout
+          {t('logout', 'Logout')}
         </Sideabrbbutton>
       </div>
 

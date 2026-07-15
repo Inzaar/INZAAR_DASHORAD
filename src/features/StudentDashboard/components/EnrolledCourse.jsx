@@ -1,8 +1,10 @@
 import CourseCard from '@/components/shared/CourseCard'
-import React from 'react'
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Loader } from 'lucide-react'
 
 function EnrolledCourse({ userCourses = [], loading }) {
+    const { t } = useTranslation();
     return (
         <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
             {loading ? (
@@ -10,7 +12,7 @@ function EnrolledCourse({ userCourses = [], loading }) {
                     <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                 </div>
             ) : userCourses?.length === 0 ? (
-                <p className="text-gray-500 h-[160px] w-full flex items-center justify-center">No any course enrolled yet</p>
+                <p className="text-gray-500 h-[160px] w-full flex items-center justify-center">{t('no_any_course_enrolled_yet', 'No any course enrolled yet')}</p>
             ) : (
                 userCourses?.map((course) => (
                     <CourseCard key={course._id} id={course._id} title={course.title} completed={course.completedLecturesCount} total={course.totalLectures} className="min-w-[300px] shadow-sm" image={course.thumbnail} />

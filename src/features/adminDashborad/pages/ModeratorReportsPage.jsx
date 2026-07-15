@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -17,6 +18,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 
 const ModeratorReportsPage = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -173,30 +175,30 @@ const ModeratorReportsPage = () => {
                         <div className="py-4 pr-2">
                             {/* Header */}
                             <div className="mb-6">
-                                <h2 className="text-[24px] font-bold text-gray-900 mb-1">Moderators Reports</h2>
-                                <p className="text-gray-500 text-[16px]">Manage All Your Moderators Reports</p>
+                                <h2 className="text-[24px] font-bold text-gray-900 mb-1">{t("moderators_reports", "Moderators Reports")}</h2>
+                                <p className="text-gray-500 text-[16px]">{t("manage_moderators_reports", "Manage All Your Moderators Reports")}</p>
                             </div>
 
                             {/* Top Filters */}
                             <div className="flex flex-wrap items-end justify-between xl:justify-start gap-4 mb-6 relative w-full">
                                 <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">STATUS</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                                            <option value="">All Moderators</option>
-                                            <option value="active">Active Moderators</option>
-                                            <option value="inactive">Inactive Moderators</option>
+                                            <option value="">{t("all_moderators_filter", "All Moderators")}</option>
+                                            <option value="active">{t("active_moderators", "Active Moderators")}</option>
+                                            <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
                                         </select>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">FROM</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
                                             <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">TO</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
                                             <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -224,22 +226,22 @@ const ModeratorReportsPage = () => {
                                         <div className="fixed inset-0 z-40" onClick={() => setIsFilterDropdownOpen(false)} />
                                         <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 w-full">
-                                                <span className="text-xs font-bold text-gray-400 uppercase">STATUS</span>
+                                                <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                                                    <option value="">All Moderators</option>
-                                                    <option value="active">Active Moderators</option>
-                                                    <option value="inactive">Inactive Moderators</option>
+                                                    <option value="">{t("all_moderators_filter", "All Moderators")}</option>
+                                                    <option value="active">{t("active_moderators", "Active Moderators")}</option>
+                                                    <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
                                                 </select>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
-                                                <span className="text-xs font-bold text-gray-400 uppercase">FROM</span>
+                                                <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                                 <div className="relative">
                                                     <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
-                                                <span className="text-xs font-bold text-gray-400 uppercase">TO</span>
+                                                <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                                 <div className="relative">
                                                     <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -256,10 +258,10 @@ const ModeratorReportsPage = () => {
                                 <div className="w-full flex flex-col gap-6 justify-between flex-1 min-w-0">
                                     <div className="w-full">
                                         <MetricCard
-                                            title="Total Moderator"
+                                            title={t("total_moderator", "Total Moderator")}
                                             value={String(totalModerators.count)}
                                             trendValue={totalModerators.trend?.replace('+', '') || "2.7%"}
-                                            trendLabel="Improvement From last Week"
+                                            trendLabel={t("improvement_from_last_week", "Improvement From last Week")}
                                             className="w-full h-[140px]"
                                         />
                                     </div>
@@ -267,16 +269,16 @@ const ModeratorReportsPage = () => {
                                         <OverviewCard
                                             className="w-full max-w-full shadow-sm"
                                             statsOverride={{
-                                                col1: { value: overview.successRate, label: "Success Rate", color: "#22C55E" },
-                                                col2: { value: overview.inProgress, label: "In-progress", color: "#3758EE" },
-                                                col3: { value: overview.activeStatus, label: "Status", color: "#A855F7" },
+                                                col1: { value: overview.successRate, label: t("success_rate", "Success Rate"), color: "#22C55E" },
+                                                col2: { value: overview.inProgress, label: t("in_progress", "In-progress"), color: "#3758EE" },
+                                                col3: { value: overview.activeStatus, label: t("status", "Status"), color: "#A855F7" },
                                             }}
                                         />
                                     </div>
                                 </div>
                                 <PerformanceCard
                                     className="shadow-sm w-full xl:w-[40%] 2xl:w-[35%] min-w-0"
-                                    name="Overall Performance"
+                                    name={t("overall_performance", "Overall Performance")}
                                     percentageOverride={performance.percentage}
                                     trendOverride={performance.trendingUp}
                                 />
@@ -285,7 +287,7 @@ const ModeratorReportsPage = () => {
                             {/* Charts Row 2 */}
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8 w-full">
                                 <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 min-h-[350px] min-w-0">
-                                    <h3 className="text-gray-900 font-medium mb-6">Session Activity</h3>
+                                    <h3 className="text-gray-900 font-medium mb-6">{t("session_activity", "Session Activity")}</h3>
                                     <div className="h-[250px] w-full">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={sessionData}>
@@ -298,24 +300,24 @@ const ModeratorReportsPage = () => {
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
-                                <HoursSpentCard name="Moderator Performance" />
+                                <HoursSpentCard name={t("moderator_performance", "Moderator Performance")} />
                             </div>
 
                             {/* Moderators List Table */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
                                 <div className="mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Moderators List</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{t("moderators_list", "Moderators List")}</h3>
                                 </div>
 
                                 {/* Filters - Desktop */}
                                 <div className="hidden xl:flex flex-row gap-4 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
-                                        <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
+                                        <p className="text-xs text-gray-400 font-medium tracking-wide">{t("advanced_search", "ADVANCED SEARCH")}</p>
                                         <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
-                                                placeholder={`Search by ${tableSearchType.toLowerCase()}`}
+                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
                                                 className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={tableSearch}
                                                 onChange={(e) => setTableSearch(e.target.value)}
@@ -353,7 +355,7 @@ const ModeratorReportsPage = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">From</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("from", "From")}</span>
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
@@ -363,7 +365,7 @@ const ModeratorReportsPage = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">To</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("to", "To")}</span>
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
@@ -373,16 +375,16 @@ const ModeratorReportsPage = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("status", "Status")}</span>
                                         <div className="relative">
                                             <select
                                                 value={tableStatus}
                                                 onChange={(e) => setTableStatus(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
                                             >
-                                                <option value="">Select</option>
-                                                <option value="active">Active</option>
-                                                <option value="inactive">Inactive</option>
+                                                <option value="">{t("select", "Select")}</option>
+                                                <option value="active">{t("active", "Active")}</option>
+                                                <option value="inactive">{t("inactive", "Inactive")}</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
@@ -393,21 +395,21 @@ const ModeratorReportsPage = () => {
                                         className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
-                                        Clear
+                                        {t("clear", "Clear")}
                                     </button>
                                 </div>
 
                                 {/* Filters - Responsive (Mobile Only) */}
                                 <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
                                     <div className='flex flex-col gap-4'>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("advanced_search", "ADVANCED SEARCH")}</p>
                                         <div className="flex items-center justify-end gap-3">
                                             <button
                                                 onClick={handleTableClear}
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
-                                                Clear Filter
+                                                {t("clear_filter", "Clear Filter")}
                                             </button>
                                             <div className="relative">
                                                 <button
@@ -421,22 +423,22 @@ const ModeratorReportsPage = () => {
                                                     <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
                                                         <div className="space-y-5">
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("status", "Status")}</label>
                                                                 <div className="relative">
                                                                     <select
                                                                         value={tableStatus}
                                                                         onChange={(e) => setTableStatus(e.target.value)}
                                                                         className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                                                                     >
-                                                                        <option value="">Select</option>
-                                                                        <option value="active">Active</option>
-                                                                        <option value="inactive">Inactive</option>
+                                                                        <option value="">{t("select", "Select")}</option>
+                                                                        <option value="active">{t("active", "Active")}</option>
+                                                                        <option value="inactive">{t("inactive", "Inactive")}</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("from", "From")}</label>
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
@@ -445,7 +447,7 @@ const ModeratorReportsPage = () => {
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("to", "To")}</label>
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
@@ -467,7 +469,7 @@ const ModeratorReportsPage = () => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={`Search by ${tableSearchType.toLowerCase()}`}
+                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={tableSearch}
                                                     onChange={(e) => setTableSearch(e.target.value)}
@@ -512,7 +514,7 @@ const ModeratorReportsPage = () => {
                                     </div>
                                 ) : moderators.length === 0 ? (
                                     <div className="flex items-center justify-center py-16">
-                                        <span className="text-gray-400 text-sm">No moderators found</span>
+                                        <span className="text-gray-400 text-sm">{t("no_moderators_found", "No moderators found")}</span>
                                     </div>
                                 ) : (
                                     <>
@@ -520,20 +522,20 @@ const ModeratorReportsPage = () => {
                                             <table className="w-full min-w-[1000px]">
                                                 <thead>
                                                     <tr className="border-b border-gray-100">
-                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">Name</th>
-                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">Contact</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[15%]">Manage Batch's</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Progress</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">Last Login</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">Status</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">Action</th>
+                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">{t("name", "Name")}</th>
+                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">{t("contact", "Contact")}</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[15%]">{t("manage_batchs", "Manage Batch's")}</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">{t("progress", "Progress")}</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">{t("last_login", "Last Login")}</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">{t("status", "Status")}</th>
+                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">{t("action", "Action")}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-50">
                                                     {moderators.map((moderator) => (
                                                         <tr key={moderator.id} className="hover:bg-gray-50/50 transition-colors">
                                                             <td className="py-4 pl-4">
-                                                                <span className="text-[14px] font-medium text-gray-700">{moderator.name}</span>
+                                                                <span className="text-[14px] font-medium text-gray-700">{t(moderator.name?.trim(), moderator.name)}</span>
                                                             </td>
                                                             <td className="py-4">
                                                                 <div className="flex flex-col">
@@ -545,12 +547,12 @@ const ModeratorReportsPage = () => {
                                                                 <div className="flex flex-col gap-1 items-center">
                                                                     {(moderator.batches || []).slice(0, 3).map((batch, idx) => (
                                                                         <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                            {batch}
+                                                                            {t(batch?.trim(), batch)}
                                                                         </span>
                                                                     ))}
                                                                     {moderator.batches?.length > 3 && (
                                                                         <span className="text-[11px] text-gray-400 font-medium mt-0.5">
-                                                                            + {moderator.batches.length - 3} more
+                                                                            + {moderator.batches.length - 3} {t("more", "more")}
                                                                         </span>
                                                                     )}
                                                                 </div>
@@ -563,12 +565,12 @@ const ModeratorReportsPage = () => {
                                                             </td>
                                                             <td className="py-4 text-center">
                                                                 <span className={`text-[13px] px-2 py-1 rounded-full ${moderator.status === 'Active' ? 'text-[#00C896]' : 'text-red-500'}`}>
-                                                                    {moderator.status}
+                                                                    {t(moderator.status?.trim().toLowerCase(), moderator.status)}
                                                                 </span>
                                                             </td>
                                                             <td className="py-4 text-center">
                                                                 <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
-                                                                    View Profile
+                                                                    {t("view_profile", "View Profile")}
                                                                 </GradiantButton>
                                                             </td>
                                                         </tr>
@@ -580,7 +582,7 @@ const ModeratorReportsPage = () => {
                                         <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-8">
                                             <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40" disabled={pagination.page <= 1} onClick={() => goToPage(pagination.page - 1)}>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                                Previous
+                                                {t("previous", "Previous")}
                                             </button>
                                             <div className="flex items-center gap-1">
                                                 {getPageNumbers().map((p, idx) => (
@@ -606,7 +608,7 @@ const ModeratorReportsPage = () => {
                                                 ))}
                                             </div>
                                             <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40" disabled={pagination.page >= pagination.totalPages} onClick={() => goToPage(pagination.page + 1)}>
-                                                Next
+                                                {t("next", "Next")}
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                             </button>
                                         </div>

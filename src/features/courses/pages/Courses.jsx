@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
+import { useTranslation } from 'react-i18next';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -20,6 +21,7 @@ const Courses = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [activeTab, setActiveTab] = React.useState('all');
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -101,7 +103,7 @@ const Courses = () => {
     const formatCourseForCard = (courseData) => ({
         id: courseData._id,
         title: courseData.title,
-        time: `${courseData.totalLectures || 0} Lectures (${courseData.duration || 'N/A'})`,
+        time: `${courseData.totalLectures || 0} ${t('lectures', 'Lectures')} (${courseData.duration || 'N/A'})`,
         description: courseData.description || "Course description unavailable",
         thumbnail: courseData.thumbnail || course, // Fallback image if needed
         icon: icon, // Using static icon for now as per design
@@ -208,39 +210,39 @@ const Courses = () => {
                             <div className="flex bg-gray-200 w-full max-w-[500px] rounded-lg p-1 mb-8">
                                 {activeTab === 'all' ? (
                                     <GradiantButton className="w-[50%] px-4 py-3 rounded-lg shadow-sm">
-                                        All Courses
+                                        {t('all_courses', 'All Courses')}
                                     </GradiantButton>
                                 ) : (
                                     <div
                                         onClick={() => handleTabChange('all')}
                                         className="w-[50%] px-4 py-3 rounded-lg flex items-center justify-center cursor-pointer text-gray-500 font-medium hover:text-gray-900 transition-colors"
                                     >
-                                        All Courses
+                                        {t('all_courses', 'All Courses')}
                                     </div>
                                 )}
 
                                 {activeTab === 'new' ? (
                                     <GradiantButton className="w-[50%] px-4 py-3 rounded-lg shadow-sm">
-                                        New Courses
+                                        {t('new_courses', 'New Courses')}
                                     </GradiantButton>
                                 ) : (
                                     <div
                                         onClick={() => handleTabChange('new')}
                                         className="w-[50%] px-4 py-3 rounded-lg flex items-center justify-center cursor-pointer text-gray-500 font-medium hover:text-gray-900 transition-colors"
                                     >
-                                        New Courses
+                                        {t('new_courses', 'New Courses')}
                                     </div>
                                 )}
                             </div>
 
                             <div className="mb-6">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                                    {activeTab === 'new' ? 'New Courses' : 'All Courses'}
+                                    {activeTab === 'new' ? t('new_courses', 'New Courses') : t('all_courses', 'All Courses')}
                                 </h2>
                                 <p className="text-gray-500">
                                     {activeTab === 'new'
-                                        ? 'Check out the latest additions to our curriculum.'
-                                        : 'We know the best things for You. Top picks for You.'}
+                                        ? t('latest_additions_desc', 'Check out the latest additions to our curriculum.')
+                                        : t('top_picks_desc', 'We know the best things for You. Top picks for You.')}
                                 </p>
                             </div>
 

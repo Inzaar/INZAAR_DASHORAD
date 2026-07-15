@@ -6,8 +6,14 @@ import { Calendar } from "@/components/ui/calendar"
 import { getAllEvents } from "@/api/event"
 import { isSameDay, format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { useTranslation } from 'react-i18next';
+import { arSA, enUS } from 'date-fns/locale';
 
 export function Calendar18() {
+    const { t, i18n } = useTranslation();
+    let localeToUse = enUS;
+    if (i18n.language === 'ur') localeToUse = enUS; // date-fns doesn't have ur locale yet
+    if (i18n.language === 'ar') localeToUse = arSA;
     const [date, setDate] = React.useState()
     const [events, setEvents] = React.useState([])
 
@@ -27,6 +33,7 @@ export function Calendar18() {
 
     return (
         <Calendar
+            locale={localeToUse}
             mode="single"
             selected={date}
             onSelect={setDate}
@@ -62,7 +69,7 @@ export function Calendar18() {
                                 )}
                             >
                                 {day.date.getDate()}
-                                
+
                                 {hasMultipleActive && !isToday && (
                                     <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[9px] font-black min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full border-2 border-white shadow-md z-20 animate-pulse transition-all">
                                         {activeEvents.length}
@@ -76,11 +83,11 @@ export function Calendar18() {
                                     )} />
                                 )}
                             </button>
-                            
+
                             {dayEvents.length > 0 && (
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-white text-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-50 shadow-xl border border-gray-100 flex flex-col gap-1.5 items-center min-w-[160px] max-w-[240px] pointer-events-none group-hover:pointer-events-auto after:content-[''] after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:w-9 after:h-2">
                                     <div className="text-[9px] font-bold text-indigo-500 border-b border-gray-100 w-full text-center pb-1 mb-1 uppercase tracking-wider">
-                                        {format(day.date, 'EEEE, MMM do')}
+                                        {format(day.date, 'EEEE, MMM do', { locale: localeToUse })}
                                     </div>
                                     <div className="flex flex-col gap-2 w-full">
                                         {dayEvents.map((ev, idx) => (
@@ -93,10 +100,10 @@ export function Calendar18() {
                                                 </div>
                                                 <div className="flex justify-between w-full pl-3.5 mt-[-2px]">
                                                     <span className="text-[8px] text-gray-500 font-medium">
-                                                        {format(new Date(ev.fromDate), 'h:mm a')}
+                                                        {format(new Date(ev.fromDate), 'h:mm a', { locale: localeToUse })}
                                                     </span>
                                                     {ev.status === 'canceled' && (
-                                                        <span className="text-[8px] text-rose-500 font-bold uppercase">Canceled</span>
+                                                        <span className="text-[8px] text-rose-500 font-bold uppercase">{t('cancelled', 'Canceled')}</span>
                                                     )}
                                                 </div>
                                             </div>

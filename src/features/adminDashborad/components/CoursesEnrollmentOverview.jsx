@@ -3,8 +3,10 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { BiSolidUpArrow } from "react-icons/bi";
 import { BiSolidDownArrow } from "react-icons/bi";
+import { useTranslation } from 'react-i18next';
 
 const CourseStatItem = ({ count, trend, trendDirection, name }) => {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-col items-center justify-center py-4 px-3 border-b border-r border-gray-100 bg-white">
             <div className="flex items-center gap-1 mb-1">
@@ -20,7 +22,7 @@ const CourseStatItem = ({ count, trend, trendDirection, name }) => {
                     )}
                 </span>
             </div>
-            <span className="text-[12px] font-medium text-[#64748b] text-center line-clamp-2 max-w-[140px] leading-tight">{name}</span>
+            <span className="text-[12px] font-medium text-[#64748b] text-center line-clamp-2 max-w-[140px] leading-tight">{t(name, name)}</span>
         </div >
     );
 };
@@ -32,6 +34,7 @@ const CoursesEnrollmentOverview = ({
     showViewMore = false, 
     onViewAllClick 
 }) => {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
     
     // Slices for 2 rows (default 12 for grid-6)
@@ -40,13 +43,13 @@ const CoursesEnrollmentOverview = ({
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans mt-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                <h3 className="text-[14px] font-medium text-[#64748b] truncate pr-2">Courses Enrollment Overview</h3>
+                <h3 className="text-[14px] font-medium text-[#64748b] truncate pr-2">{t('courses_enrollment_overview', 'Courses Enrollment Overview')}</h3>
                 {showViewAll && (
                     <GradiantButton 
                         onClick={onViewAllClick}
                         className="w-fit px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm"
                     >
-                        View All courses
+                        {t('view_all_courses', 'View All courses')}
                     </GradiantButton>
                 )}
             </div>
@@ -67,9 +70,9 @@ const CoursesEnrollmentOverview = ({
                         className="flex items-center gap-2 text-[13px] font-bold text-[#6366F1] hover:text-[#4F46E5] transition-colors"
                     >
                         {isExpanded ? (
-                            <>Show Less <ChevronUp size={16} /></>
+                            <>{t('show_less', 'Show Less')} <ChevronUp size={16} /></>
                         ) : (
-                            <>View More <ChevronDown size={16} /></>
+                            <>{t('view_more', 'View More')} <ChevronDown size={16} /></>
                         )}
                     </button>
                 </div>

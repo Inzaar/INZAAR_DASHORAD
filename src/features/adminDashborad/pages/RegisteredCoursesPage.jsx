@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -9,6 +10,8 @@ import { cn } from '@/lib/utils';
 import { getAllCourses } from '@/api/course';
 
 const RegisteredCoursesPage = () => {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -99,8 +102,8 @@ const RegisteredCoursesPage = () => {
                                                 <th className="text-left pb-4 font-bold">Created Date</th>
                                                 <th className="text-center pb-4 font-bold">Lectures</th>
                                                 <th className="text-center pb-4 font-bold">Duration</th>
-                                                <th className="text-center pb-4 font-bold">Status</th>
-                                                <th className="text-center pb-4 font-bold">Action</th>
+                                                <th className="text-center pb-4 font-bold">{t("status", "Status")}</th>
+                                                <th className="text-center pb-4 font-bold">{t("action", "Action")}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50/50">

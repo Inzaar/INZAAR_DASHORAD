@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+// from "react";
 import StatusRow from "./StatusRow";
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../Pagination";
 import { Loader } from "lucide-react";
 
 function StatusTable({ userCourses, loading }) {
+    const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
@@ -28,6 +31,7 @@ function StatusTable({ userCourses, loading }) {
     const currentData = allLectures.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageChange = (page) => {
+    const { t } = useTranslation();
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
@@ -68,26 +72,26 @@ function StatusTable({ userCourses, loading }) {
     if (loading || allLectures.length === 0) {
         return (
             <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
-                <h3 className="font-bold text-gray-900 mb-6">Current status</h3>
+                <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
                 <div className="overflow-x-auto no-scrollbar">
                     <div className="min-w-[1080px]">
                         <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                            <div className="w-[134px] flex items-center justify-center">Courses</div>
-                            <div className="w-[134px] flex items-center justify-center">Lecture</div>
-                            <div className="w-[134px] flex items-center justify-center">Title</div>
-                            <div className="w-[134px] flex items-center justify-center">Date</div>
-                            <div className="w-[134px] flex items-center justify-center">Progress</div>
-                            <div className="w-[134px] flex items-center justify-center">Next Lecture</div>
-                            <div className="w-[134px] flex items-center justify-center">Contact Moderator</div>
-                            <div className="w-[134px] flex items-center justify-center">Comments</div>
-                            <div className="w-[134px] flex items-center justify-center">Action</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("courses", "Courses")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("lecture", "Lecture")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("title", "Title")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("date", "Date")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("progress", "Progress")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("next_lecture", "Next Lecture")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("contact_moderator", "Contact Moderator")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("comments", "Comments")}</div>
+                            <div className="w-[134px] flex items-center justify-center">{t("action", "Action")}</div>
                         </div>
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-center h-[100px]">
                                 {loading ? (
                                     <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                                 ) : (
-                                    <p className="text-gray-500">You have no enrolled courses yet !</p>
+                                    <p className="text-gray-500">{t("no_enrolled_courses_yet", "You have no enrolled courses yet !")}</p>
                                 )}
                             </div>
                         </div>
@@ -99,19 +103,19 @@ function StatusTable({ userCourses, loading }) {
 
     return (
         <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
-            <h3 className="font-bold text-gray-900 mb-6">Current status</h3>
+            <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
             <div className="overflow-x-auto no-scrollbar">
                 <div className="min-w-[1080px]">
                     <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Courses</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Lecture</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Title</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Date</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Progress</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Next Lecture</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Contact Moderator</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Comments</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">Action</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("courses", "Courses")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("lecture", "Lecture")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("title", "Title")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("date", "Date")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("progress", "Progress")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("next_lecture", "Next Lecture")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("contact_moderator", "Contact Moderator")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("comments", "Comments")}</div>
+                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("action", "Action")}</div>
                     </div>
                     <div className="flex flex-col gap-4">
                         {currentData.map((item) => (

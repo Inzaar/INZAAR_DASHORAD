@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Search, Lock, Unlock, FileText, Volume2, PlayCircle, ChevronLeft, ChevronRight, X, Download, Loader2, ExternalLink, Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const forceDownload = async (url, filename, setDownloadingIdx, idx) => {
     if (setDownloadingIdx) setDownloadingIdx(idx);
@@ -82,6 +83,7 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
     const top = rect.top + window.scrollY + (rect.height / 2) - (popoverHeight / 2);
     const left = rect.left + window.scrollX - popoverWidth - 12;
 
+    const { t } = useTranslation();
     return ReactDOM.createPortal(
         <div 
             ref={popoverRef}
@@ -89,7 +91,7 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
             className="absolute z-[10002] w-48 bg-[#F9F9F8] rounded-[18px] border border-gray-100 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)] animate-in fade-in zoom-in-95 duration-150"
         >
             <span className="text-[10px] font-bold text-gray-400 tracking-wider mb-2.5 block text-left">
-                PDF RESOURCES
+                {t('pdf_resources', 'PDF RESOURCES')}
             </span>
             <div className="space-y-1.5 text-left">
                 {urls.map((url, idx) => {
@@ -107,7 +109,7 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
                                 <FileText size={12} />
                             </div>
                             <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900 truncate">
-                                {resourceName}
+                                {t('resource', 'Resource')} {idx + 1}
                             </span>
                         </div>
                     );
@@ -124,6 +126,7 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
     const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [pdfError, setPdfError] = useState(null);
+    const { t } = useTranslation();
 
     const url = viewingPdf?.url;
     const filename = viewingPdf?.filename;
@@ -208,9 +211,9 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                         </div>
                         <div className="text-left">
                             <h3 className="text-sm font-bold text-gray-900 leading-tight">
-                                Document Resource
+                                {t('document_resource', 'Document Resource')}
                             </h3>
-                            <p className="text-[11px] text-gray-500 font-medium">Viewing lecture materials</p>
+                            <p className="text-[11px] text-gray-500 font-medium">{t('viewing_lecture_materials', 'Viewing lecture materials')}</p>
                         </div>
                     </div>
                     
@@ -225,7 +228,7 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                             ) : (
                                 <Download size={12} />
                             )}
-                            Download
+                            {t('download', 'Download')}
                         </button>
                         
                         <button 
@@ -248,21 +251,21 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                     
                     {pdfError ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#2D2D2D] z-10 text-white px-6 text-center">
-                            <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center">
-                                <FileText size={24} />
-                            </div>
-                            <div className="max-w-md">
-                                <p className="text-sm font-semibold text-gray-200">{pdfError}</p>
-                                <p className="text-xs text-gray-400 mt-1">You can still download the document directly using the button above.</p>
-                            </div>
-                            <button
-                                onClick={handleDownload}
-                                className="flex items-center gap-1.5 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-xs font-semibold text-white transition-colors shadow-sm"
-                            >
-                                <Download size={12} />
-                                Download Document
-                            </button>
-                        </div>
+                             <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center">
+                                 <FileText size={24} />
+                             </div>
+                             <div className="max-w-md">
+                                 <p className="text-sm font-semibold text-gray-200">{pdfError}</p>
+                                 <p className="text-xs text-gray-400 mt-1">{t('download_directly_desc', 'You can still download the document directly using the button above.')}</p>
+                             </div>
+                             <button
+                                 onClick={handleDownload}
+                                 className="flex items-center gap-1.5 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-xs font-semibold text-white transition-colors shadow-sm"
+                             >
+                                 <Download size={12} />
+                                 {t('download_document', 'Download Document')}
+                             </button>
+                         </div>
                     ) : (
                         pdfBlobUrl && (
                             <div 
@@ -322,6 +325,7 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
 
 const ResourcesModal = ({ activeResources, onClose }) => {
     const [downloadingIdx, setDownloadingIdx] = useState(null);
+    const { t } = useTranslation();
 
     if (!activeResources) return null;
 
@@ -349,9 +353,9 @@ const ResourcesModal = ({ activeResources, onClose }) => {
                         </div>
                         <div className="text-left">
                             <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                                {lectureNo} {isPdf ? 'PDF Notes' : 'Audio Resources'}
+                                {lectureNo} {isPdf ? t('pdf_notes', 'PDF Notes') : t('audio_resources', 'Audio Resources')}
                             </h3>
-                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{title}</p>
+                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{t(title, title)}</p>
                         </div>
                     </div>
                     <button 
@@ -373,8 +377,8 @@ const ResourcesModal = ({ activeResources, onClose }) => {
                         }
                         const isDownloading = downloadingIdx === idx;
                         const resourceDisplayName = isPdf 
-                            ? `Handout Note Part ${idx + 1}`
-                            : `Audio Lecture Part ${idx + 1}`;
+                            ? `${t('handout_note_part', 'Handout Note Part')} ${idx + 1}`
+                            : `${t('audio_lecture_part', 'Audio Lecture Part')} ${idx + 1}`;
 
                         return (
                             <div 
@@ -427,6 +431,7 @@ const ResourcesModal = ({ activeResources, onClose }) => {
 
 
 const NotesModal = ({ activeNotes, onClose }) => {
+    const { t } = useTranslation();
     if (!activeNotes) return null;
 
     const { lectureNo, title, notesList } = activeNotes;
@@ -452,9 +457,9 @@ const NotesModal = ({ activeNotes, onClose }) => {
                         </div>
                         <div className="text-left">
                             <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                                {lectureNo} Notes
+                                {lectureNo} {t('notes', 'Notes')}
                             </h3>
-                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{title}</p>
+                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{t(title, title)}</p>
                         </div>
                     </div>
                     <button 
@@ -506,6 +511,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
     const [pdfPopover, setPdfPopover] = useState(null);
     const [viewingPdf, setViewingPdf] = useState(null);
     const [activeNotes, setActiveNotes] = useState(null);
+    const { t } = useTranslation();
     const itemsPerPage = 5;
 
     // Filter lectures based on search term (lecture number)
@@ -537,8 +543,8 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
             {/* Header section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h2 className="text-[22px] font-bold text-gray-900">Lecture List</h2>
-                    <p className="text-gray-400 text-sm">Manage your lecture</p>
+                    <h2 className="text-[22px] font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('lecture_list', 'Lecture List')}</h2>
+                    <p className="text-gray-400 text-sm leading-[1.8]">{t('manage_your_lecture', 'Manage your lecture')}</p>
                 </div>
                 <div className="flex w-full md:w-auto">
                     <div className="relative flex-1 md:w-[320px]">
@@ -547,18 +553,18 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                         </div>
                         <input
                             type="text"
-                            placeholder="Search by lecture no"
+                            placeholder={t('search_by_lecture_no', 'Search by lecture no')}
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm animate-none"
                         />
                     </div>
                     <button className="bg-[#6366F1] text-white px-6 py-2.5 rounded-r-lg flex items-center gap-2 hover:bg-[#5558e6] transition-colors">
                         <Search className="h-4 w-4" />
-                        <span className="text-sm font-medium">Search</span>
+                        <span className="text-sm font-medium">{t('search', 'Search')}</span>
                     </button>
                 </div>
             </div>
@@ -569,13 +575,13 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                     <table className="w-full text-center border-collapse">
                         <thead>
                             <tr className="border-b border-gray-100">
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Lecture No</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Title</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Date</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Progress</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Status</th>
-                                {!isAdminView && <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Comments</th>}
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">Action</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('lecture_no', 'Lecture No')}</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('title', 'Title')}</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('date', 'Date')}</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('progress', 'Progress')}</th>
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('status', 'Status')}</th>
+                                {!isAdminView && <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('comments', 'Comments')}</th>}
+                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('action', 'Action')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -592,7 +598,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                 return (
                                     <tr key={lecture.id} className={`${isCurrent ? 'bg-blue-50/30' : ''} hover:bg-gray-50/50 transition-colors`}>
                                         <td className="py-6 text-[13px] font-medium text-gray-600 whitespace-nowrap">{displayLectureNo}</td>
-                                        <td className="py-6 text-[13px] text-gray-700 whitespace-nowrap">{lecture.title}</td>
+                                        <td className="py-6 text-[13px] text-gray-700 whitespace-nowrap">{t(lecture.title, lecture.title)}</td>
                                         <td className="py-6 text-[13px] text-gray-500 whitespace-nowrap">{formatDate(lecture.date)}</td>
                                         <td className="py-6 text-[13px] text-gray-700 font-medium whitespace-nowrap">{String(progress).padStart(2, '0')}%</td>
                                         <td className="py-6 whitespace-nowrap">
@@ -600,12 +606,12 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                 {lecture.isLocked ? (
                                                     <>
                                                         <Lock className="w-3.5 h-3.5 text-gray-400" />
-                                                        <span className="text-[12px] text-gray-400 font-medium">Locked</span>
+                                                        <span className="text-[12px] text-gray-400 font-medium">{t('locked', 'Locked')}</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <Unlock className="w-3.5 h-3.5 text-yellow-500" />
-                                                        <span className="text-[12px] text-gray-700 font-medium">Unlocked</span>
+                                                        <span className="text-[12px] text-gray-700 font-medium">{t('unlocked', 'Unlocked')}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -622,14 +628,14 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                             })}
                                                             className="px-4 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-xs active:scale-[0.98] cursor-pointer"
                                                         >
-                                                            See Notes
+                                                            {t('see_notes', 'See Notes')}
                                                         </button>
                                                     ) : (
                                                         <button
                                                             disabled
                                                             className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-150 rounded-xl cursor-not-allowed"
                                                         >
-                                                            No Notes
+                                                            {t('no_notes', 'No Notes')}
                                                         </button>
                                                     )}
                                                 </div>
@@ -710,7 +716,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                         }`}
                 >
                     <ChevronLeft className="w-5 h-5" />
-                    <span className="hidden sm:inline">Previous</span>
+                    <span className="hidden sm:inline">{t('previous', 'Previous')}</span>
                 </button>
 
                 <div className="flex items-center gap-1">
@@ -736,7 +742,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                         : 'text-gray-500 hover:text-[#7C3AED]'
                         }`}
                 >
-                    <span className="hidden sm:inline">Next</span>
+                    <span className="hidden sm:inline">{t('next', 'Next')}</span>
                     <ChevronRight className="w-5 h-5" />
                 </button>
             </div>

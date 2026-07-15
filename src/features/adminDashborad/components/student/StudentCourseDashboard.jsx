@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect } from 'react';
 import MetricCard from '@/components/shared/MetricCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
@@ -10,6 +11,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getStudentCourseStats } from '@/api/user';
 
 const StudentCourseDashboard = ({ profileData }) => {
+    const { t } = useTranslation();
+
     const { id: userId } = useParams();
     const navigate = useNavigate();
     const enrolledCourses = profileData?.enrolledCourses || [];
@@ -259,8 +262,8 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     <th className="text-left py-4 px-4">Title</th>
                                     <th className="text-left py-4 px-4 text-center">Progress & Score</th>
                                     <th className="text-left py-4 px-4">Date</th>
-                                    <th className="text-left py-4 px-4">Status</th>
-                                    <th className="text-left py-4 px-4 text-right">Action</th>
+                                    <th className="text-left py-4 px-4">{t("status", "Status")}</th>
+                                    <th className="text-left py-4 px-4 text-right">{t("action", "Action")}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50/50">

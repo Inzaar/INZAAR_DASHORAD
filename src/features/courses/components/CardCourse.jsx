@@ -4,6 +4,7 @@ import Card from "@/components/ui/Card";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import img from "@/assets/images/course.png"
+import { useTranslation } from "react-i18next";
 
 const CardCourse = ({ course, isAdmin = false }) => {
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
@@ -11,6 +12,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const [isEnrolling, setIsEnrolling] = useState(false);
   const image = course.thumbnail ? course.thumbnail : img;
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleEnroll = async () => {
     if (isAdmin) {
@@ -32,10 +34,10 @@ const CardCourse = ({ course, isAdmin = false }) => {
       console.log("Enrollment error:", error);
       if (error.response && (error.response.status === 400 || error.response.status === 409)) {
         setIsAlreadyEnrolled(true);
-        setErrorMessage(error.response.data.message || "You are already enrolled in this course");
+        setErrorMessage(error.response.data.message ? t(error.response.data.message, error.response.data.message) : t("already_enrolled_msg", "You are already enrolled in this course"));
       } else {
         setIsAlreadyEnrolled(true);
-        setErrorMessage(error.response?.data?.message || "Something went wrong. Please try again.");
+        setErrorMessage(error.response?.data?.message ? t(error.response.data.message, error.response.data.message) : t("something_went_wrong_retry", "Something went wrong. Please try again."));
       }
     } finally {
       setIsEnrolling(false);
@@ -57,7 +59,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
           </div>
           {course.isNew && (
             <span className="absolute top-3 left-3 bg-[#FF4F4F] text-white text-[10px] font-bold px-2 py-0.5 rounded-[4px] shadow-sm">
-              New
+              {t("new", "New")}
             </span>
           )}
         </div>
@@ -65,14 +67,14 @@ const CardCourse = ({ course, isAdmin = false }) => {
         {/* Content Section */}
         <div className="flex flex-col gap-2 px-1">
           <div className="flex justify-between items-start gap-3">
-            <h3 className="font-bold text-[16px] leading-[1.3] text-gray-900 line-clamp-2 min-h-[42px]">{course.title}</h3>
+            <h3 className="font-bold text-[16px] leading-[1.3] text-gray-900 line-clamp-2 min-h-[42px]">{t(course.title?.trim(), course.title)}</h3>
             <span className="text-[11px] text-gray-400 whitespace-nowrap pt-1 font-medium">{course.date}</span>
           </div>
           
           <div className="flex flex-col gap-1.5">
-            <p className="text-[12px] text-gray-500 font-medium tracking-tight">{course.time}</p>
+            <p className="text-[12px] text-gray-500 font-medium tracking-tight">{t(course.time, course.time)}</p>
             <p className="text-[12.5px] text-gray-600 line-clamp-2 leading-[1.5] font-normal min-h-[38px]">
-              {course.description}
+              {t(course.description?.trim(), course.description)}
             </p>
           </div>
         </div>
@@ -84,7 +86,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
             onClick={handleEnroll}
             disabled={isEnrolling}
           >
-            {isAdmin ? "View Details" : "Enroll now"}
+            {isAdmin ? t("view_details", "View Details") : t("enroll_now", "Enroll now")}
           </GradiantButton>
         </div>
       </div>
@@ -93,7 +95,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
             <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <h3 className="text-lg font-bold text-gray-900">Enrolling...</h3>
+            <h3 className="text-lg font-bold text-gray-900">{t("enrolling", "Enrolling...")}</h3>
           </div>
         </div>
       )}
@@ -106,14 +108,14 @@ const CardCourse = ({ course, isAdmin = false }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Notice</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{t("notice", "Notice")}</h3>
                 <p className="text-sm text-gray-500">{errorMessage}</p>
               </div>
               <GradiantButton
                 onClick={() => setIsAlreadyEnrolled(false)}
                 className="w-full py-2 rounded-md"
               >
-                Close
+                {t("close", "Close")}
               </GradiantButton>
             </div>
           </div>

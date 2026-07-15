@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import MetricCard from '@/components/shared/MetricCard';
@@ -8,6 +9,8 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import performance from '@/assets/images/performance.png';
 
 const StudentPerformance = ({ profileData }) => {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
     const user = profileData?.user || {};
     const stats = profileData?.stats || {
@@ -153,8 +156,8 @@ const StudentPerformance = ({ profileData }) => {
                                 <th className="px-6 py-4">Start & End Date</th>
                                 <th className="px-6 py-4">Lectures</th>
                                 <th className="px-6 py-4 text-center">Performance</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-center">Action</th>
+                                <th className="px-6 py-4">{t("status", "Status")}</th>
+                                <th className="px-6 py-4 text-center">{t("action", "Action")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
