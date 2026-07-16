@@ -11,20 +11,48 @@ import GoogleLoginButton from '../../../components/ui/buttons/GoogleLoginButton'
 import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
 import AuthText from '../components/AuthText';
+import { checkUsername } from '../../../api/auth';
 
 function RegisterPageP1() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [shouldShake, setShouldShake] = useState(false);
 
+  React.useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (formData.username && formData.username.length > 0) {
+        try {
+          const res = await checkUsername(formData.username);
+          if (!res.data.data.available) {
+            setUsernameError('this username is already exist');
+          } else {
+            setUsernameError('');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        setUsernameError('');
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [formData.username]);
+
   const handleChange = (e) => {
     let { name, value } = e.target;
-    
+
     // Auto-capitalize first letter for First name, Last name, etc.
     if (["First Name", "Last Name", "Nationality", "Permanent Address"].includes(name) && value.length > 0) {
       value = value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    // Prevent spaces in Username and Email
+    if (["Username", "Email"].includes(name)) {
+      value = value.replace(/\s/g, '');
     }
 
     const fieldMap = {
@@ -42,10 +70,20 @@ function RegisterPageP1() {
 
   const handleNext = (e) => {
     e.preventDefault();
-    
+
     // Basic validation for fields (lastname is optional)
     if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
       setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (formData.username.includes(' ')) {
+      setError('Username cannot contain spaces.');
+      return;
+    }
+
+    if (usernameError) {
+      setError('Please resolve the username error.');
       return;
     }
 
@@ -75,15 +113,15 @@ function RegisterPageP1() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <div className='max-w-[500px] w-full flex gap-2'>
-          <Input1 
-            name="First Name" 
-            placeholder="First Name" 
+          <Input1
+            name="First Name"
+            placeholder="First Name"
             value={formData.firstname}
             onChange={handleChange}
           />
-          <Input1 
-            name="Last Name" 
-            placeholder="Second Name" 
+          <Input1
+            name="Last Name"
+            placeholder="Second Name"
             value={formData.lastname}
             onChange={handleChange}
           />
@@ -96,12 +134,13 @@ function RegisterPageP1() {
             value={formData.username}
             onChange={handleChange}
           />
+          {usernameError && <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 
-            name="Email" 
-            placeholder="Email" 
+          <Input1
+            name="Email"
+            placeholder="Email"
             type="email"
             value={formData.email}
             onChange={handleChange}
@@ -109,9 +148,9 @@ function RegisterPageP1() {
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <Input1 
-            name="Password" 
-            placeholder="8 Digit Password" 
+          <Input1
+            name="Password"
+            placeholder="8 Digit Password"
             type="password"
             value={formData.password}
             onChange={handleChange}
@@ -119,7 +158,7 @@ function RegisterPageP1() {
         </div>
 
         <div className='max-w-[500px] w-full'>
-          <PhoneInput 
+          <PhoneInput
             name="phone"
             value={formData.phone}
             onChange={handleChange}

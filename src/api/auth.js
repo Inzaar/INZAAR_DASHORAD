@@ -15,6 +15,11 @@ export const register = (data) => {
     return res;
 }
 
+export const checkUsername = (username) => {
+    const res = axiosInstance.get(`/users/check-username?username=${username}`);
+    return res;
+}
+
 export const logout = () => {
     const res = axiosInstance.post("/users/logout", {}, {
         withCredentials: true,
