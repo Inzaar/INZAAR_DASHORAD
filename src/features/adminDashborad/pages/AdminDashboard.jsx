@@ -120,13 +120,16 @@ const AdminDashboard = () => {
                                 </div>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex gap-2"
+                                    className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                                 >
-                                    <span className='bg-white text-blue-500 rounded-full px-2 pb-0.5 flex items-center justify-center'>+</span> Add New Course
+                                    <div className="flex items-center gap-2">
+                                        <span className='bg-white text-blue-500 rounded-full px-2 pb-0.5 flex items-center justify-center'>+</span>
+                                        <span>Add New Course</span>
+                                    </div>
                                 </GradiantButton>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                                    className="max-[600px]:block hidden text-xl px-3 py-0.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                                 >
                                     +
                                 </GradiantButton>
