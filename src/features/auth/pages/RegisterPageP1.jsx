@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import AuthLeft from '../components/AuthLeft'
 import AuthPage from '../../../components/layouts/AuthPage'
 import AuthRight from '../components/AuthRight'
@@ -27,7 +28,7 @@ function RegisterPageP1() {
         try {
           const res = await checkUsername(formData.username);
           if (!res.data.data.available) {
-            setUsernameError('this username is already exist');
+            setUsernameError('This username already exists.');
           } else {
             setUsernameError('');
           }
@@ -83,7 +84,7 @@ function RegisterPageP1() {
     }
 
     if (usernameError) {
-      setError('Please resolve the username error.');
+      setError('Please choose a unique username.');
       return;
     }
 
@@ -104,7 +105,10 @@ function RegisterPageP1() {
     <AuthPage>
       <AuthLeft />
       <AuthRight className="flex flex-col gap-3">
-        <div className='max-w-[500px] w-full'>
+        <div className='max-w-[500px] w-full flex items-center gap-3'>
+          <button onClick={() => navigate('/login')} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
+            <ArrowLeft size={26} />
+          </button>
           <AuthHeading>
             Create New Account
           </AuthHeading>
