@@ -259,6 +259,25 @@ const CourseView = () => {
         }
     };
 
+    const handleOpenAssignment = (lecture) => {
+        navigate('/assignment', {
+            state: {
+                returnUrl: window.location.pathname + window.location.search,
+                assignment: {
+                    number: String(lecture.lectureNo).padStart(2, '0'),
+                    title: lecture.title,
+                    description: `Submit your assignment for ${lecture.title}.`,
+                    instructions: lecture.instructions || 'Please complete and upload your assignment file.',
+                    dueDate: lecture.dueDate || 'See course details',
+                    status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
+                    acceptedFormats: 'PDF, DOC, DOCX',
+                    attempts: 'Unlimited before due date',
+                    maxFileSizeMB: 25,
+                }
+            }
+        });
+    };
+
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const togglePlay = () => {
@@ -754,7 +773,11 @@ const CourseView = () => {
                                             ) : (
                                                 <div
                                                     className="w-full h-full flex items-center justify-center relative cursor-pointer"
-                                                    onClick={() => { }}
+                                                    onClick={() => {
+                                                        if (currentLecture?.type === 'Assignment') {
+                                                            handleOpenAssignment(currentLecture);
+                                                        }
+                                                    }}
                                                 >
                                                     <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
                                                     <div className="absolute inset-0 bg-black/50"></div>
@@ -903,22 +926,7 @@ const CourseView = () => {
                                                         onClick={() => {
                                                             if (!lecture.isLocked) {
                                                                 if (lecture.type === 'Assignment') {
-                                                                    navigate('/assignment', {
-                                                                        state: {
-                                                                            returnUrl: window.location.pathname + window.location.search,
-                                                                            assignment: {
-                                                                                number: String(lecture.lectureNo).padStart(2, '0'),
-                                                                                title: lecture.title,
-                                                                                description: `Submit your assignment for ${lecture.title}.`,
-                                                                                instructions: lecture.instructions || 'Please complete and upload your assignment file.',
-                                                                                dueDate: lecture.dueDate || 'See course details',
-                                                                                status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
-                                                                                acceptedFormats: 'PDF, DOC, DOCX',
-                                                                                attempts: 'Unlimited before due date',
-                                                                                maxFileSizeMB: 25,
-                                                                            }
-                                                                        }
-                                                                    });
+                                                                    handleOpenAssignment(lecture);
                                                                 } else {
                                                                     setShouldAutoplay(false);
                                                                     setCurrentLecture(lecture);
@@ -1073,22 +1081,7 @@ const CourseView = () => {
                                 onWatch={(lecture) => {
                                     if (lecture.isLocked) return;
                                     if (lecture.type === 'Assignment') {
-                                        navigate('/assignment', {
-                                            state: {
-                                                returnUrl: window.location.pathname + window.location.search,
-                                                assignment: {
-                                                    number: String(lecture.lectureNo).padStart(2, '0'),
-                                                    title: lecture.title,
-                                                    description: `Submit your assignment for ${lecture.title}.`,
-                                                    instructions: lecture.instructions || 'Please complete and upload your assignment file.',
-                                                    dueDate: lecture.dueDate || 'See course details',
-                                                    status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
-                                                    acceptedFormats: 'PDF, DOC, DOCX',
-                                                    attempts: 'Unlimited before due date',
-                                                    maxFileSizeMB: 25,
-                                                }
-                                            }
-                                        });
+                                        handleOpenAssignment(lecture);
                                         return;
                                     }
                                     const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
