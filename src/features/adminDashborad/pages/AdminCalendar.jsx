@@ -282,18 +282,29 @@ const AdminCalendar = () => {
 
     const [selectedColor] = useState('bg-[#8B5CF6]');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [eventSpeaker, setEventSpeaker] = useState('');
+    const [eventDescription, setEventDescription] = useState('');
+    const [eventDuration, setEventDuration] = useState('1 hour');
+    const [eventDay, setEventDay] = useState('5');
+    const [eventMonth, setEventMonth] = useState('August');
+    const [eventYear, setEventYear] = useState('2025');
     const [editingEvent, setEditingEvent] = useState(null);
 
-    const handleAddEvent = async () => {
-        if (!eventTitle.trim()) {
-            toast.error("Event name cannot be empty");
+    const handleAddEventModal = async () => {
+        if (!eventTitle || !eventType || !eventTime) {
+            toast.error("Please fill required fields (Title, Type, Time)");
             return;
         }
-        if (!eventDate) return;
-        setIsSubmitting(true);
 
         try {
-            // Parse time (e.g. 01:30PM -> 13:30)
+            setIsSubmitting(true);
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthIndex = monthNames.indexOf(eventMonth) + 1;
+            const formattedMonth = monthIndex < 10 ? `0${monthIndex}` : `${monthIndex}`;
+            const formattedDay = parseInt(eventDay) < 10 ? `0${eventDay}` : `${eventDay}`;
+            const finalDateString = `${eventYear}-${formattedMonth}-${formattedDay}`;
+
             let timeString = eventTime;
             if (eventTime.includes('AM') || eventTime.includes('PM')) {
                 const match = eventTime.match(/(\d+):(\d+)(AM|PM)/i);
@@ -307,41 +318,48 @@ const AdminCalendar = () => {
                 }
             }
 
-            const fromDateObj = new Date(`${eventDate}T${timeString}`);
+            const fromDateObj = new Date(`${finalDateString}T${timeString}`);
             const toDateObj = new Date(fromDateObj);
             
-            // Add duration of 1 hour by default since duration field was removed
-            toDateObj.setHours(toDateObj.getHours() + 1);
+            const durationMatch = eventDuration.match(/(\d+(\.\d+)?)/);
+            if (durationMatch) {
+                const hoursToAdd = parseFloat(durationMatch[1]);
+                toDateObj.setMinutes(toDateObj.getMinutes() + (hoursToAdd * 60));
+            }
 
-            const eventData = {
+            const eventPayload = {
                 title: eventTitle,
-                type: eventType || "Event",
+                type: eventType,
                 fromDate: fromDateObj.toISOString(),
                 toDate: toDateObj.toISOString(),
-                color: selectedColor,
+                color: selectedColor || '#3758EE',
                 status: 'upcoming',
-                canceledBy: null,
             };
 
             if (editingEvent) {
-                await updateEvent(editingEvent.id, eventData);
+                await updateEvent(editingEvent.id, eventPayload);
                 toast.success("Event updated successfully");
                 setEditingEvent(null);
             } else {
-                await createEvent(eventData);
-                toast.success("Event created successfully");
+                await createEvent(eventPayload);
+                toast.success("Event added successfully");
             }
-
-            await fetchEvents();
-            // Reset form
-            setEventTitle('');
-            setEventType('');
-            setEventTime('');
-            setEventDate('');
-            if (view === 'list') setView('calendar');
-        } catch (error) {
-            console.error("Failed to save event:", error);
-            toast.error("Failed to save event");
+            
+            // Reset modal form
+            setEventTitle("");
+            setEventType("");
+            setEventTime("");
+            setEventSpeaker("");
+            setEventDescription("");
+            setIsModalOpen(false);
+            
+            const res = await getAllEvents();
+            if (res.data && res.data.data) {
+                setEvents(res.data.data);
+            }
+        } catch (err) {
+            console.error("Failed to add event from modal", err);
+            toast.error(err.response?.data?.message || "Failed to add event");
         } finally {
             setIsSubmitting(false);
         }
@@ -543,7 +561,7 @@ const AdminCalendar = () => {
 
                     <main className="flex-1 flex flex-col gap-4 overflow-y-visible lg:overflow-y-auto no-scrollbar scrollbar-hide pb-10 lg:pb-0">
                         {/* Toggle Switch */}
-                        <div className="flex mb-6 w-fit bg-[#F8F9FA] rounded-[6px] border border-gray-200 p-1">
+                        <div className="flex w-fit mb-6 bg-[#F8F9FA] rounded-[6px] border border-gray-200 p-1">
                             <button
                                 onClick={() => setView('calendar')}
                                 className={`px-8 py-2 text-[14px] font-medium transition-all rounded-[4px] ${view === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
@@ -614,11 +632,10 @@ const AdminCalendar = () => {
                                 </div>
                                 <div className="md:col-span-2">
                                     <button 
-                                        onClick={handleAddEvent}
-                                        disabled={isSubmitting}
+                                        onClick={() => setIsModalOpen(true)}
                                         className="w-full h-[48px] bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] text-white font-semibold rounded-[8px] hover:opacity-90 transition-opacity flex items-center justify-center"
                                     >
-                                        {isSubmitting ? 'Adding...' : 'Add Event'}
+                                        Add Event
                                     </button>
                                 </div>
                             </div>
@@ -933,7 +950,197 @@ const AdminCalendar = () => {
                     </div>
                 )}
 
+                
+                {/* Modal Overlay */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}>
+                        <div className="bg-white rounded-[24px] w-full max-w-[600px] flex flex-col overflow-hidden shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar" onClick={(e) => e.stopPropagation()}>
+                            
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-[#3758EE] to-[#5B75F0] p-6 text-white relative">
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                </button>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">Add New Event</h2>
+                                        <p className="text-blue-100 text-sm mt-0.5">Fill in the details to schedule your event</p>
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Body */}
+                            <div className="p-6 flex flex-col gap-6">
+                                
+                                {/* Event Type Selection */}
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                                        Event Type
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        {[
+                                            { label: "Jummah Khutbah", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                                            { label: "Lecture", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200" },
+                                            { label: "Live Broadcast", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/><path d="M7.76 16.24a6 6 0 0 1 0-8.48"/><path d="M16.24 7.76a6 6 0 0 1 0 8.48"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                                            { label: "Special Program", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+                                            { label: "Eid Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
+                                            { label: "Community Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200" }
+                                        ].map((type) => (
+                                            <div 
+                                                key={type.label}
+                                                onClick={() => setEventType(type.label)}
+                                                className={`flex items-center gap-2 p-3 rounded-[12px] border cursor-pointer transition-all active:scale-95 ${eventType === type.label ? `${type.bg} ${type.border} ring-2 ring-offset-1 ring-${type.color.split('-')[1]}-400` : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                                            >
+                                                <span className="flex items-center justify-center">{type.icon}</span>
+                                                <span className={`text-[12px] font-semibold ${eventType === type.label ? type.color : 'text-gray-600'}`}>{type.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Event Title */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                        Event Title
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Jummah Khutbah — The Value of Time"
+                                        value={eventTitle}
+                                        onChange={(e) => setEventTitle(e.target.value)}
+                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400"
+                                    />
+                                </div>
+
+                                {/* Speaker / Host */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                                        Speaker / Host <span className="text-gray-400 font-normal">(optional)</span>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Imam Ahmed"
+                                        value={eventSpeaker}
+                                        onChange={(e) => setEventSpeaker(e.target.value)}
+                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400"
+                                    />
+                                </div>
+
+                                {/* Date Selection */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        Date
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <div className="relative w-[100px] shrink-0">
+                                            <select value={eventDay} onChange={e => setEventDay(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                        <div className="relative flex-1">
+                                            <select value={eventMonth} onChange={e => setEventMonth(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => <option key={m} value={m}>{m}</option>)}
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                        <div className="relative w-[120px] shrink-0">
+                                            <select value={eventYear} onChange={e => setEventYear(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {[2024, 2025, 2026, 2027, 2028].map(y => <option key={y} value={y}>{y}</option>)}
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Time & Duration */}
+                                <div className="flex gap-4">
+                                    <div className="flex flex-col gap-2 flex-1">
+                                        <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            Start Time
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="01:30PM"
+                                            value={eventTime}
+                                            onChange={(e) => setEventTime(e.target.value)}
+                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2 flex-1">
+                                        <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            Duration
+                                        </div>
+                                        <div className="relative">
+                                            <select value={eventDuration} onChange={e => setEventDuration(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                <option value="30 minutes">30 minutes</option>
+                                                <option value="1 hour">1 hour</option>
+                                                <option value="1.5 hours">1.5 hours</option>
+                                                <option value="2 hours">2 hours</option>
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                                        Description <span className="text-gray-400 font-normal">(optional)</span>
+                                    </div>
+                                    <textarea 
+                                        placeholder="Brief description of the event..."
+                                        value={eventDescription}
+                                        onChange={(e) => setEventDescription(e.target.value)}
+                                        className="w-full h-[100px] border border-gray-200 rounded-[8px] p-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400 resize-none"
+                                    />
+                                </div>
+
+                            </div>
+
+                            {/* Footer */}
+                            <div className="px-6 py-4 border-t border-gray-100 flex justify-end items-center gap-3 bg-white mt-auto">
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-6 py-2.5 rounded-[8px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors border border-gray-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        // Trigger handleAddEvent logic.
+                                        // Because handleAddEvent expects finalDateString we need to format it or we can just call it
+                                        handleAddEventModal();
+                                    }}
+                                    disabled={isSubmitting}
+                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-[8px] font-semibold text-white bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] hover:opacity-90 transition-opacity shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    + Save Event
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
