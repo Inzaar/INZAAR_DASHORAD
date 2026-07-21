@@ -29,8 +29,14 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
     if (passwordData.password !== passwordData.confirmPassword) {
       return toast.error("Passwords do not match!");
     }
-    if (passwordData.password.length < 6) {
-      return toast.error("Password must be at least 6 characters!");
+    if (passwordData.password.length < 8) {
+      return toast.error("Password must be at least 8 characters long!");
+    }
+    if (!/[A-Z]/.test(passwordData.password)) {
+      return toast.error("Password must contain at least one uppercase letter!");
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.password)) {
+      return toast.error("Password must contain at least one special symbol!");
     }
 
     setIsChangingPass(true);
@@ -57,6 +63,13 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
 
     try {
       const form = new FormData(e.target);
+      const phone = form.get("phone");
+      if (phone && phone.length !== 11) {
+        setIsSaving(false);
+        toast.dismiss(toastId);
+        return toast.error("Phone number must be exactly 11 digits.");
+      }
+
       const payload = {
         firstname: form.get("firstname"),
         email: form.get("email"),
@@ -296,6 +309,10 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
                   name="phone"
                   placeholder="Phone number"
                   defaultValue={user.phone || ""}
+                  maxLength={11}
+                  onInput={(e) => {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                  }}
                   className="outline-none w-full"
                 />
               </div>

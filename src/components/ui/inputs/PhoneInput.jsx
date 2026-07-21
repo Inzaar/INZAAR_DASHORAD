@@ -103,18 +103,17 @@ function PhoneInput({ value, onChange, name }) {
   };
 
   const handlePhoneChange = (e) => {
-    const formatter = new AsYouType(selectedCountry.cca2);
-    const formattedValue = formatter.input(e.target.value);
+    const rawValue = e.target.value.replace(/\D/g, '');
+    if (rawValue.length > 11) return;
     
-    setPhoneNumber(formattedValue);
+    setPhoneNumber(rawValue);
     
     let valid = true;
-    if (formattedValue.length > 0) {
-      valid = isValidPhoneNumber(formattedValue, selectedCountry.cca2);
+    if (rawValue.length > 0) {
+      valid = rawValue.length === 11;
     }
     setIsValid(valid);
 
-    const rawValue = formattedValue.replace(/\D/g, '');
     const finalNumber = selectedCountry.code + rawValue;
     onChange({ target: { name, value: finalNumber } });
   };

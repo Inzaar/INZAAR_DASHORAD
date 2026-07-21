@@ -22,6 +22,26 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
 
     const handleStep1Submit = (e) => {
         e.preventDefault();
+        setFormError('');
+
+        if (newModerator.phone.length !== 11) {
+            setFormError('Phone number must be exactly 11 digits.');
+            return;
+        }
+
+        if (newModerator.password.length < 8) {
+            setFormError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (!/[A-Z]/.test(newModerator.password)) {
+            setFormError('Password must contain at least one uppercase letter.');
+            return;
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(newModerator.password)) {
+            setFormError('Password must contain at least one special symbol.');
+            return;
+        }
+
         setStep(2);
     };
 
@@ -149,6 +169,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
                                     placeholder="Enter Phone Number"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                     value={newModerator.phone}
+                                    maxLength={11}
                                     onChange={(e) => {
                                         const val = e.target.value.replace(/[^0-9]/g, '');
                                         setNewModerator({ ...newModerator, phone: val });

@@ -81,7 +81,11 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                                 <input
                                     type="tel"
                                     value={userPayload?.phone || ''}
-                                    onChange={(e) => setUserPayload({ ...userPayload, phone: e.target.value })}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        setUserPayload({ ...userPayload, phone: val });
+                                    }}
+                                    maxLength={11}
                                     placeholder={t('phone_number', 'Phone number')}
                                     className="outline-none w-full" />
                             </div>

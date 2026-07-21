@@ -1134,7 +1134,7 @@ const AdminCalendar = () => {
                                     className={`flex items-center gap-2 px-6 py-2.5 rounded-[8px] font-semibold text-white bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] hover:opacity-90 transition-opacity shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    + Save Event
+                                    Save Event
                                 </button>
                             </div>
                         </div>

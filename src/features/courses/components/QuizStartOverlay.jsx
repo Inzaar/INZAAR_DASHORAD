@@ -2,7 +2,7 @@ import React from 'react';
 import { GraduationCap } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
-const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
+const QuizStartOverlay = ({ lecture, courseData, onStart, isAdminView }) => {
     // Determine the instructor image (can be from courseData if available)
     const instructorImage = "https://randomuser.me/api/portraits/men/32.jpg";
 
@@ -56,7 +56,7 @@ const QuizStartOverlay = ({ lecture, courseData, onStart }) => {
                         onClick={onStart}
                         className="w-full max-w-[360px] py-2 md:py-3 bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white font-bold text-sm md:text-base rounded-xl shadow-[0_10px_40px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_50px_rgba(79,70,229,0.5)] transition-all active:scale-[0.98] border-none"
                     >
-                        Start Quiz
+                        {isAdminView ? 'View Quiz' : 'Start Quiz'}
                     </GradiantButton>
                 </div>
             </div>
