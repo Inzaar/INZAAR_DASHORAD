@@ -113,8 +113,27 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
 
     const handleAddStudent = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true);
         setFormError('');
+
+        if (newStudent.phone.length !== 11) {
+            setFormError('Phone number must be exactly 11 digits.');
+            return;
+        }
+
+        if (newStudent.password.length < 8) {
+            setFormError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (!/[A-Z]/.test(newStudent.password)) {
+            setFormError('Password must contain at least one uppercase letter.');
+            return;
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(newStudent.password)) {
+            setFormError('Password must contain at least one special symbol.');
+            return;
+        }
+
+        setIsSubmitting(true);
         try {
             await adminCreateStudent(newStudent);
             setIsAddModalOpen(false);
@@ -697,6 +716,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     placeholder="Enter Phone Number"
                                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                                     value={newStudent.phone}
+                                    maxLength={11}
                                     onChange={(e) => {
                                         const numericValue = e.target.value.replace(/[^0-9]/g, '');
                                         setNewStudent({ ...newStudent, phone: numericValue });

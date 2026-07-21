@@ -21,6 +21,7 @@ import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNot
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
 import { useTranslation } from "react-i18next";
+import CreateQuiz from "@/features/adminDashborad/components/CreateQuiz";
 
 // Hoisted Helper Functions
 const formatTime = (seconds) => {
@@ -68,6 +69,7 @@ const CourseView = () => {
     const [activeAudioUrl, setActiveAudioUrl] = useState(null);
     const [activePdfUrl, setActivePdfUrl] = useState(null);
     const [pdfLoading, setPdfLoading] = useState(true);
+    const [isEditingQuiz, setIsEditingQuiz] = useState(false);
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -478,6 +480,12 @@ const CourseView = () => {
 
     const handleEditLectureClick = async () => {
         if (!currentLecture || !canEdit) return;
+        
+        if (currentLecture.type === 'Quiz') {
+            setIsEditingQuiz(true);
+            return;
+        }
+
         const id = currentLecture?.id || currentLecture?._id;
         if (!id) return;
 
@@ -729,8 +737,20 @@ const CourseView = () => {
                             <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
-                                <div ref={videoSectionRef} className={`w-full lg:w-[70%] flex flex-col gap-4`}>
+                                <div ref={videoSectionRef} className={`w-full ${isEditingQuiz && isAdminView ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
                                     <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
+                                    {isEditingQuiz && isAdminView ? (
+                                        <CreateQuiz
+                                            quizId={currentLecture?.quizId || currentLecture?.id || currentLecture?._id}
+                                            courseId={courseId}
+                                            onBackToSelection={() => setIsEditingQuiz(false)}
+                                            onComplete={() => {
+                                                setIsEditingQuiz(false);
+                                                // Refresh course to get updated quiz details if necessary
+                                                window.location.reload();
+                                            }}
+                                        />
+                                    ) : (
                                     <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
                                         <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
                                             {/* YouTube Iframe or Quiz Assessment */}
@@ -738,18 +758,23 @@ const CourseView = () => {
                                                 <QuizStartOverlay
                                                     lecture={currentLecture}
                                                     courseData={courseData}
+                                                    isAdminView={isAdminView}
                                                     onStart={() => {
-                                                        const cleanParams = new URLSearchParams(window.location.search);
-                                                        cleanParams.delete('returnPath');
-                                                        cleanParams.delete('lectureId');
-                                                        const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
-                                                        const cleanPath = window.location.pathname + cleanSearch;
-                                                        const returnPath = encodeURIComponent(cleanPath);
-                                                        const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
-                                                        if (currentLecture.quizId) {
-                                                            navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+                                                        if (isAdminView) {
+                                                            setIsEditingQuiz(true);
                                                         } else {
-                                                            navigate(`/quiz-take/${currentLecture.id}${query}`);
+                                                            const cleanParams = new URLSearchParams(window.location.search);
+                                                            cleanParams.delete('returnPath');
+                                                            cleanParams.delete('lectureId');
+                                                            const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+                                                            const cleanPath = window.location.pathname + cleanSearch;
+                                                            const returnPath = encodeURIComponent(cleanPath);
+                                                            const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+                                                            if (currentLecture.quizId) {
+                                                                navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+                                                            } else {
+                                                                navigate(`/quiz-take/${currentLecture.id}${query}`);
+                                                            }
                                                         }
                                                     }}
                                                 />
@@ -913,8 +938,10 @@ const CourseView = () => {
                                             )}
                                         </div>
                                     </div>
+                                    )}
                                 </div>
                                 {/* Lectures Playlist Section - Right Side - Only if not quiz */}
+                                {!(isEditingQuiz && isAdminView) && (
                                 <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                     <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                     <div className="flex-1 relative lg:min-h-0">
@@ -1012,6 +1039,7 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                 </div>
+                                )}
                             </div>
 
                             {/* Lecture Notes Section */}

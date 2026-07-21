@@ -1,268 +1,412 @@
-import { useTranslation } from 'react-i18next';
-import React, { useState, useRef } from 'react';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, Download, Lock, Loader } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import CertificateCard from '@/features/courses/components/CertificateCard';
-import { toBlob } from 'html-to-image';
-import { uploadImage } from '@/api/course';
+import React, { useEffect, useState } from 'react';
+import { Search, Download, Lock, Loader } from 'lucide-react';
+import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 import axiosInstance from '@/api/axiosInstance';
-import toast from 'react-hot-toast';
-
-const CertificateStatsCard = ({ title, value, trend, description, trendColor = "text-[#00C896]", trendBg = "bg-[#E6F9F4]" }) => {
-    const { t } = useTranslation();
-
-    return (
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between w-full h-[140px] overflow-hidden font-sans">
-            <h3 className="text-gray-900 text-sm font-bold line-clamp-1">{title}</h3>
-            <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-gray-900 leading-none">{value}</span>
-                {trend && (
-                    <span className={cn("px-2 py-0.5 rounded text-[10px] font-bold flex items-center", trendBg, trendColor)}>
-                        {trend}
-                    </span>
-                )}
-            </div>
-            <p className="text-[11px] text-gray-400 font-medium leading-tight line-clamp-2">
-                {description}
-            </p>
-        </div>
-    );
-};
+import CertificateCard from '@/features/courses/components/CertificateCard';
+import { useTranslation } from 'react-i18next';
 
 const StudentCertificates = ({ profileData }) => {
-    const enrolledCourses = profileData?.enrolledCourses || [];
+    const { t } = useTranslation();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
     const [generatingId, setGeneratingId] = useState(null);
-    const certCardRef = useRef(null);
-    const [certDraft, setCertDraft] = useState(null);
+    const certCardRef = React.useRef(null);
+    const [certData, setCertData] = useState(null);
 
-    // Calculate dynamic stats
-    const totalCompleted = enrolledCourses.filter(c => c.isCompleted).length;
-    const certsAvailable = enrolledCourses.filter(c => c.certificateUrl).length;
-    const inProgress = enrolledCourses.filter(c => !c.isCompleted).length;
-    const lockedCerts = enrolledCourses.filter(c => c.isCompleted && !c.certificateUrl).length;
+    const [metrics, setMetrics] = useState({
+        totalCoursesCompleted: { count: 0 },
+        certificatesAvailable: { count: 0 },
+        coursesInProgress: { count: 0 },
+        lockedCertificates: { count: 0 },
+    });
+    const [allCertificates, setAllCertificates] = useState([]);
 
-    const fmtDate = (d) =>
-        d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+    const itemsPerPage = 10;
+    useEffect(() => {
+        const fetchCertificates = async () => {
+            if (!profileData?.user?._id) return;
+            setLoading(true);
+            try {
+                const res = await axiosInstance.get('/enrollments/my-certificates', { 
+                    params: { userId: profileData.user._id },
+                    withCredentials: true 
+                });
+                const data = res.data.data;
+                setMetrics({
+                    totalCoursesCompleted: data.totalCoursesCompleted,
+                    certificatesAvailable: data.certificatesAvailable,
+                    coursesInProgress: data.coursesInProgress,
+                    lockedCertificates: data.lockedCertificates,
+                });
+                setAllCertificates(data.certificatesList || []);
+            } catch (err) {
+                console.error('Failed to fetch certificates', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchCertificates();
+    }, [profileData]);
 
-    const handleGenerate = async (course) => {
+    const downloadAsPDF = async (imgUrl, courseName) => {
+        try {
+            const { jsPDF } = await import('jspdf');
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = imgUrl;
+            img.onload = () => {
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [1122, 794]
+                });
+                doc.addImage(img, 'PNG', 0, 0, 1122, 794);
+                doc.save(`Certificate_${courseName.replace(/\s+/g, '_')}.pdf`);
+            };
+        } catch (e) {
+            console.error('PDF Download failed:', e);
+            alert("PDF generation failed. Please try again.");
+        }
+    };
+
+
+
+    const handleGenerateCertificate = async (enrollment) => {
         if (generatingId) return;
-        setGeneratingId(course.id);
-        const toastId = toast.loading(`Generating certificate for ${course.title}...`);
+        setGeneratingId(enrollment.enrollmentId);
 
         try {
             const studentName = `${profileData?.user?.firstname || ''} ${profileData?.user?.lastname || ''}`.trim() || 'Student';
 
-            setCertDraft({
+            setCertData({
                 studentName,
-                courseName: course.title,
-                completedAt: course.completedAt || new Date(),
-                templateUrl: course.certificateTemplate
+                courseName: enrollment.course,
+                completedAt: enrollment.endDate !== 'N/A' && enrollment.endDate !== 'In Progress'
+                    ? new Date(enrollment.endDate).toISOString()
+                    : new Date().toISOString(),
+                templateUrl: enrollment.certificateTemplate
             });
 
-            await new Promise(r => setTimeout(r, 150));
+            // wait for the hidden card to render
+            await new Promise(r => setTimeout(r, 100));
 
+            const { toBlob } = await import('html-to-image');
             const blob = await toBlob(certCardRef.current, {
-                pixelRatio: 2,
+                pixelRatio: 1, // Standard resolution to ensure small file size and prevent Network Errors
                 cacheBust: true,
                 style: { transform: 'scale(1)', transformOrigin: 'top left' }
             });
 
-            if (!blob) throw new Error("Capture failed");
+            if (!blob) throw new Error("Failed to generate image blob");
 
-            const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
-            await axiosInstance.patch(`/enrollments/${course.id}`, { certificateUrl: uploaded.url });
+            try {
+                console.log('Generating certificate for enrollment:', enrollment);
+                const { uploadImage, saveCertificate } = await import('@/api/course');
+                const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
+                console.log('Uploaded certificate image:', uploaded.url);
 
-            toast.success("Certificate generated and saved!", { id: toastId });
-            course.certificateUrl = uploaded.url;
+                await saveCertificate(enrollment.courseId, uploaded.url);
 
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to generate certificate", { id: toastId });
-        } finally {
+                // Update UI
+                setAllCertificates(prev => prev.map(c =>
+                    c.enrollmentId === enrollment.enrollmentId
+                        ? { ...c, certificateUrl: uploaded.url }
+                        : c
+                ));
+
+                // Update metrics
+                setMetrics(prev => ({
+                    ...prev,
+                    certificatesAvailable: { count: prev.certificatesAvailable.count + 1 },
+                    lockedCertificates: { count: Math.max(0, prev.lockedCertificates.count - 1) }
+                }));
+
+            } catch (e) {
+                console.error('Upload/Save side failed:', e);
+                alert(`Failed to save certificate: ${e.response?.data?.message || e.message}`);
+            } finally {
+                setGeneratingId(null);
+                setCertData(null);
+            }
+
+        } catch (e) {
+            console.error('Generation failed:', e);
+            alert(`Failed to generate certificate: ${e.message}`);
             setGeneratingId(null);
-            setCertDraft(null);
+            setCertData(null);
         }
     };
 
-    const stats = [
-        {
-            title: "Total Courses Completed",
-            value: `${totalCompleted} Courses`,
-            trend: "+12%",
-            description: "All courses successfully finished by the student."
-        },
-        {
-            title: "Certificates Available",
-            value: `${certsAvailable} Certificates`,
-            trend: "+2%",
-            description: "Certificates generated and ready for retrieval.",
-            trendColor: "text-emerald-500",
-            trendBg: "bg-emerald-50"
-        },
-        {
-            title: "Courses In Progress",
-            value: `${inProgress} Courses`,
-            trend: "+10%",
-            description: "Courses currently active but not yet finalized.",
-            trendColor: "text-emerald-500",
-            trendBg: "bg-emerald-50"
-        },
-        {
-            title: "Locked Certificates",
-            value: `${lockedCerts} Locked`,
-            trend: null,
-            description: "Completed courses awaiting certificate generation."
+    const filtered = [...allCertificates]
+        .sort((a, b) => {
+            // Completed first, then Active, then Not Started
+            const order = { Completed: 0, Active: 1, 'Not Started': 2 };
+            return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+        })
+        .filter(c =>
+            c.course?.toLowerCase().includes(search.toLowerCase())
+        );
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentData = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
+
+    const getPageNumbers = () => {
+        const pages = [];
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1, 2, 3, '...', totalPages);
         }
+        return pages;
+    };
+
+    const metricCards = [
+        { label: t('total_courses_completed', 'Total Courses Completed'), value: metrics.totalCoursesCompleted.count, sub: t('courses', 'Courses'), change: '', desc: t('all_courses_completed_desc', 'All courses you have successfully finished.') },
+        { label: t('certificates_available', 'Certificates Available'), value: metrics.certificatesAvailable.count, sub: t('certificates', 'Certificates'), change: '', desc: t('certificates_available_desc', 'Certificates ready for you to download and share.') },
+        { label: t('courses_in_progress_title', 'Courses In Progress'), value: metrics.coursesInProgress.count, sub: t('courses_in_progress', 'Courses In Progress'), change: '', desc: t('courses_in_progress_desc', 'Courses you are currently enrolled in but not yet completed.') },
+        { label: t('locked_certificates_title', 'Locked Certificates'), value: metrics.lockedCertificates.count, sub: t('locked_certificates', 'Locked Certificates'), change: '', desc: t('locked_certificates_desc', 'Certificates that will unlock upon 100% completion of their course.') },
     ];
 
     return (
-        <div className="flex flex-col gap-8 font-sans py-2 relative">
-            {/* Hidden Generator */}
-            {certDraft && (
-                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1 }}>
+        <div className="w-full font-sans text-slate-800">
+            {/* Hidden Certificate Generator Card */}
+            {certData && (
+                <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, width: '1122px', height: '794px', overflow: 'hidden' }}>
                     <CertificateCard
                         ref={certCardRef}
-                        studentName={certDraft.studentName}
-                        courseName={certDraft.courseName}
-                        completedAt={certDraft.completedAt}
-                        templateUrl={certDraft.templateUrl}
+                        studentName={certData.studentName}
+                        courseName={certData.courseName}
+                        completedAt={certData.completedAt}
+                        templateUrl={certData.templateUrl}
                     />
                 </div>
             )}
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-4">
-                {stats.map((stat, i) => (
-                    <CertificateStatsCard key={i} {...stat} />
-                ))}
-            </div>
-
-            {/* Main Content Area: Certificates List Table */}
-            <div className="bg-white border border-gray-100 rounded-[16px] shadow-sm overflow-hidden">
-                <div className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 leading-tight">Certificates List</h3>
-                            <p className="text-xs text-gray-400 mt-1">Manage student credentials</p>
-                        </div>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="relative flex-grow sm:w-96">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
-                                <input
-                                    type="text"
-                                    placeholder="Search certificate by Course name"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-100 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-gray-300"
-                                />
+            <div className="w-full">
+                        {loading ? (
+                            <div className="flex items-center justify-center h-full">
+                                <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                             </div>
-                            <button className="bg-[#6366F1] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2">
-                                <Search size={16} />
-                                Search
-                            </button>
-                        </div>
-                    </div>
+                        ) : (
+                            <div className="py-4 pr-2 flex flex-col gap-6">
 
-                    <div className="max-h-[500px] overflow-y-auto pr-1 scrollbar-thin custom-scrollbar-thin">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-[#F9FAFB] backdrop-blur-sm sticky top-0 z-10">
-                                <tr className="text-sm text-gray-900 font-bold border-b border-gray-100">
-                                    <th className="py-4 px-6">Courses</th>
-                                    <th className="py-4 px-4 text-center">Title</th>
-                                    <th className="py-4 px-4 text-center">Start & End Date</th>
-                                    <th className="py-4 px-4 text-center">{t("progress", "Progress")}</th>
-                                    <th className="py-4 px-4 text-center">{t("status", "Status")}</th>
-                                    <th className="py-4 px-6 text-center">{t("action", "Action")}</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50/50">
-                                {enrolledCourses.length > 0 ? enrolledCourses.map((cert, i) => (
-                                    <tr key={i} className="hover:bg-gray-50/30 transition-colors text-sm text-gray-600">
-                                        <td className="py-5 px-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
-                                                    <img src={cert.thumbnail || "/placeholder.jpg"} className="w-full h-full object-cover" alt="course" />
+                                {/* ── Metric Cards ── */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {metricCards.map((metric, index) => (
+                                        <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full">
+                                            <div>
+                                                <h3 className="text-gray-900 font-semibold mb-2">{metric.label}</h3>
+                                                <div className="flex items-baseline gap-2 mb-2">
+                                                    <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
+                                                    <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
+                                                    {metric.change && (
+                                                        <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded">{metric.change}</span>
+                                                    )}
                                                 </div>
-                                                <div className="font-bold text-gray-900">{cert.title}</div>
+                                                <p className="text-gray-400 text-[11px] leading-tight">{metric.desc}</p>
                                             </div>
-                                        </td>
-                                        <td className="py-5 px-4 text-center text-gray-500 font-medium whitespace-nowrap">
-                                            {cert.title}
-                                        </td>
-                                        <td className="py-5 px-4 text-center">
-                                            <div className="flex flex-col items-center gap-0.5">
-                                                <span className="text-[12px] font-medium text-gray-400">{fmtDate(cert.createdAt || new Date())}</span>
-                                                <span className="text-[12px] font-medium text-gray-400">
-                                                    {cert.isCompleted ? fmtDate(cert.completedAt || new Date()) : "In Progress"}
-                                                </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* ── Certificates Table ── */}
+                                <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm">
+                                    <div className="flex flex-col justify-between mb-6 gap-4">
+                                        <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
+                                            <div>
+                                                <h2 className="text-xl font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('certificates_list', 'Certificates List')}</h2>
+                                                <p className="text-gray-500 text-sm leading-[1.8]">{t('manage_certificates', 'Manage your Certificates')}</p>
                                             </div>
-                                        </td>
-                                        <td className="py-5 px-4">
-                                            <div className="flex items-center gap-3 justify-center">
-                                                <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-[#00C896] rounded-full transition-all duration-500"
-                                                        style={{ width: `${cert.progress}%` }}
+                                            <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                                <div className="relative w-full md:w-[300px]">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                                    <input
+                                                        type="text"
+                                                        value={search}
+                                                        onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                                                        placeholder={t('search_by_course', 'Search certificate by Course name')}
+                                                        className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                     />
                                                 </div>
-                                                <span className="font-bold text-gray-900 text-xs">{cert.progress}%</span>
+                                                <GradiantButton className={"py-2 px-4 rounded"}>
+                                                    <Search className="h-4 w-4" />
+                                                    {t('search', 'Search')}
+                                                </GradiantButton>
                                             </div>
-                                        </td>
-                                        <td className="py-5 px-4 text-center">
-                                            <span className={cn(
-                                                "text-[12px] font-bold px-4 py-1 rounded-full",
-                                                cert.isCompleted ? 'text-blue-600 bg-blue-50/50' : 'text-gray-400 bg-gray-50'
-                                            )}>
-                                                {cert.isCompleted ? 'Completed' : 'Not Started'}
-                                            </span>
-                                        </td>
-                                        <td className="py-5 px-6 text-center">
-                                            {cert.certificateUrl ? (
-                                                <a
-                                                    href={cert.certificateUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 bg-[#818CF8] hover:bg-[#6366F1] text-white font-bold py-2 px-6 rounded-lg text-xs transition-all shadow-md active:scale-95"
-                                                >
-                                                    <Download size={14} />
-                                                    Download
-                                                </a>
-                                            ) : cert.isCompleted ? (
-                                                <button
-                                                    onClick={() => handleGenerate(cert)}
-                                                    disabled={generatingId === cert.id}
-                                                    className="inline-flex items-center gap-2 bg-[#818CF8] hover:bg-[#6366F1] text-white font-bold py-2 px-4 rounded-lg text-xs transition-all disabled:opacity-50"
-                                                >
-                                                    {generatingId === cert.id ? (
-                                                        <Loader className="animate-spin" size={14} />
-                                                    ) : (
-                                                        <Download size={14} />
-                                                    )}
-                                                    Generate now
-                                                </button>
-                                            ) : (
-                                                <div className="inline-flex items-center gap-2 bg-gray-100/50 text-gray-300 font-bold py-2 px-6 rounded-lg text-xs cursor-not-allowed">
-                                                    <Lock size={14} />
-                                                    Pending
+                                        </div>
+                                    </div>
+
+                                    {filtered.length === 0 ? (
+                                        <div className="text-center py-16 text-gray-400">
+                                            <div className="text-5xl mb-4">🎓</div>
+                                            <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
+                                            <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
+                                            <div className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</div>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full overflow-hidden">
+                                            <div className="w-full">
+                                                {/* Table Header - Desktop Only */}
+                                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
+                                                    <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
+                                                    <div className="col-span-2">{t('title', 'Title')}</div>
+                                                    <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
+                                                    <div className="col-span-2">{t('progress', 'Progress')}</div>
+                                                    <div className="col-span-1">{t('status', 'Status')}</div>
+                                                    <div className="col-span-2">{t('action', 'Action')}</div>
                                                 </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="6" className="py-20 text-center text-gray-400 italic font-medium">No course certificates found for this student.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
+                                                {/* Table Rows / Mobile Cards */}
+                                                <div className="flex flex-col gap-4 md:gap-2">
+                                                    {currentData.map((item) => (
+                                                        <div key={item.enrollmentId} className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4 transition-colors hover:bg-gray-50/50">
+                                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+
+                                                                {/* Course Info */}
+                                                                <div className="md:col-span-3 flex items-center gap-3 min-w-0">
+                                                                    <div className="shrink-0">
+                                                                        {item.thumbnail ? (
+                                                                            <img src={item.thumbnail} alt={item.course} className="w-10 h-10 md:w-8 md:h-8 rounded-lg object-cover" />
+                                                                        ) : (
+                                                                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-[#A892FF] to-[#3758EE]" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        <span className="block font-bold md:font-medium text-gray-900 md:text-gray-800 truncate text-sm md:text-xs lg:text-sm">
+                                                                            {t(item.course?.trim(), item.course)}
+                                                                        </span>
+                                                                        <span className="md:hidden text-xs text-gray-500">{t('course', 'Course')}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Title - Desktop only or as secondary info on mobile */}
+                                                                <div className="md:col-span-2 text-left md:text-center">
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-0.5">{t('title', 'Title')}</span>
+                                                                    <span className="text-gray-600 text-sm md:text-xs lg:text-sm truncate block">{t(item.title?.trim(), item.title)}</span>
+                                                                </div>
+
+                                                                {/* Start & End Date */}
+                                                                <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-center gap-2">
+                                                                    <div className="md:hidden">
+                                                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">{t('duration', 'Duration')}</span>
+                                                                    </div>
+                                                                    <div className="text-right md:text-center text-[11px] md:text-[10px] lg:text-xs text-gray-500">
+                                                                        <span className="md:block">{item.startDate}</span>
+                                                                        <span className="hidden md:block"> - </span>
+                                                                        <span className="md:block">{item.endDate}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Progress */}
+                                                                <div className="md:col-span-2">
+                                                                    <div className="flex flex-row md:flex-col items-center md:justify-center gap-3 md:gap-1">
+                                                                        <div className="md:hidden shrink-0">
+                                                                            <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('progress', 'Progress')}</span>
+                                                                        </div>
+                                                                        <div className="flex-1 md:flex-initial flex items-center gap-2 justify-end md:justify-center w-full">
+                                                                            <div className="w-full md:w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                                                <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.progress}%` }} />
+                                                                            </div>
+                                                                            <span className="text-xs font-bold text-gray-700 min-w-[32px]">{item.progress}%</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Status */}
+                                                                <div className="md:col-span-1 flex justify-between md:justify-center items-center">
+                                                                    <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('status', 'Status')}</span>
+                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed'
+                                                                        ? 'text-blue-600 bg-blue-50'
+                                                                        : item.status === 'Active'
+                                                                            ? 'text-green-600 bg-green-50'
+                                                                            : 'text-gray-500 bg-gray-100'
+                                                                        }`}>
+                                                                        {t(item.status.toLowerCase(), item.status)}
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Action */}
+                                                                <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex justify-center">
+                                                                    {item.status === 'Completed' ? (
+                                                                        item.certificateUrl ? (
+                                                                            <button
+                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course)}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200"
+                                                                            >
+                                                                                <Download className="w-4 h-4 md:w-3 md:h-3" />
+                                                                                {t('download', 'Download')}
+                                                                            </button>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => handleGenerateCertificate(item)}
+                                                                                disabled={generatingId === item.enrollmentId}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-4 py-2.5 md:py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                                                                            >
+                                                                                {generatingId === item.enrollmentId ? (
+                                                                                    <>
+                                                                                        <Loader className="w-4 h-4 animate-spin text-blue-500" />
+                                                                                        {t('generating', 'Generating...')}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Lock className="w-4 h-4" />
+                                                                                        {t('generate_certificate', 'Generate Certificate')}
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                        )
+                                                                    ) : (
+                                                                        <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl md:rounded-lg cursor-not-allowed select-none border border-gray-100">
+                                                                            <Lock className="w-4 h-4 md:w-3 md:h-3" />
+                                                                            {t('progress_pending', 'Progress Pending')}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Pagination */}
+                                    {totalPages > 1 && (
+                                        <PaginationContent className="w-full h-10 mt-6 flex items-center justify-end">
+                                            <PaginationItem>
+                                                <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={`cursor-pointer ${currentPage === 1 ? 'opacity-50 pointer-events-none' : ''}`} />
+                                            </PaginationItem>
+                                            {getPageNumbers().map((page, index) => (
+                                                <PaginationItem key={index}>
+                                                    {page === '...' ? (
+                                                        <PaginationEllipsis />
+                                                    ) : (
+                                                        <PaginationLink
+                                                            onClick={() => handlePageChange(page)}
+                                                            isActive={page === currentPage}
+                                                            className={`cursor-pointer ${page === currentPage ? "bg-linear-to-r from-[#A892FF] to-[#6C5DDC] text-white hover:bg-[#6C5DDC] hover:text-white" : ""}`}
+                                                        >
+                                                            {page}
+                                                        </PaginationLink>
+                                                    )}
+                                                </PaginationItem>
+                                            ))}
+                                            <PaginationItem>
+                                                <PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={`cursor-pointer ${currentPage === totalPages ? 'opacity-50 pointer-events-none' : ''}`} />
+                                            </PaginationItem>
+                                        </PaginationContent>
+                                    )}
+                                </div>
+                            </div>
+                        )}
             </div>
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
-                .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-                .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-                .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-            `}} />
         </div>
     );
 };

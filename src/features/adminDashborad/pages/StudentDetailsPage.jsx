@@ -127,7 +127,7 @@ const StudentDetailsPage = () => {
                                         <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
                                             Send Message <BsChatDotsFill className="text-white/90" size={14} />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 if (profileData?.user?.phone) {
                                                     const phone = profileData.user.phone.replace(/\D/g, '');
@@ -173,7 +173,7 @@ const StudentDetailsPage = () => {
 
                                         <div className="hidden xl:flex items-center gap-4">
                                             {!profileData?.user?.isDeleted ? (
-                                                <button 
+                                                <button
                                                     onClick={() => setIsDeleteModalOpen(true)}
                                                     className="flex items-center gap-2 px-4 py-2 bg-[#B1B1B1] text-white rounded-[4px] text-sm font-medium hover:bg-gray-400 transition-all shadow-sm"
                                                 >
@@ -181,7 +181,7 @@ const StudentDetailsPage = () => {
                                                     Deactivate
                                                 </button>
                                             ) : (
-                                                <button 
+                                                <button
                                                     onClick={() => setIsRestoreModalOpen(true)}
                                                     className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-red-500/30"
                                                 >
@@ -194,9 +194,9 @@ const StudentDetailsPage = () => {
                                                     Switch as Moderator
                                                 </span>
                                                 <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-90`}>
-                                                    <input 
-                                                        type="checkbox" 
-                                                        className="sr-only peer" 
+                                                    <input
+                                                        type="checkbox"
+                                                        className="sr-only peer"
                                                         checked={isModerator}
                                                         disabled={profileData?.user?.isDeleted}
                                                         onChange={(e) => {
@@ -243,14 +243,14 @@ const StudentDetailsPage = () => {
                                                     {/* Actions Section */}
                                                     <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
                                                     {!profileData?.user?.isDeleted ? (
-                                                        <button 
+                                                        <button
                                                             onClick={() => { setIsDeleteModalOpen(true); setOpen(false); }}
                                                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
                                                         >
                                                             Deactivate Profile
                                                         </button>
                                                     ) : (
-                                                        <button 
+                                                        <button
                                                             onClick={() => { setIsRestoreModalOpen(true); setOpen(false); }}
                                                             className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors text-left font-sans"
                                                         >
@@ -260,9 +260,9 @@ const StudentDetailsPage = () => {
                                                     <div className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md transition-colors ${profileData?.user?.isDeleted ? 'text-gray-400 hover:bg-transparent' : 'text-gray-600 hover:bg-gray-50'}`}>
                                                         <span>Switch as Moderator</span>
                                                         <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-[0.8]`}>
-                                                            <input 
-                                                                type="checkbox" 
-                                                                className="sr-only peer" 
+                                                            <input
+                                                                type="checkbox"
+                                                                className="sr-only peer"
                                                                 checked={isModerator}
                                                                 disabled={profileData?.user?.isDeleted}
                                                                 onChange={(e) => {

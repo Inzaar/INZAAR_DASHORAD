@@ -88,6 +88,20 @@ function RegisterPageP1() {
       return;
     }
 
+    // Password Validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter.');
+      return;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      setError('Password must contain at least one special symbol.');
+      return;
+    }
+
     // Validation for terms
     if (!agreedToTerms) {
       setError('Please agree to the Terms of use and Privacy Policy.');
