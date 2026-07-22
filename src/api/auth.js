@@ -20,6 +20,11 @@ export const checkUsername = (username) => {
     return res;
 }
 
+export const checkEmail = (email) => {
+    const res = axiosInstance.get(`/users/check-email?email=${email}`);
+    return res;
+}
+
 export const logout = () => {
     const res = axiosInstance.post("/users/logout", {}, {
         withCredentials: true,

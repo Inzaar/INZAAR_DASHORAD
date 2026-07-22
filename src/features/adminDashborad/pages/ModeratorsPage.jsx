@@ -130,6 +130,26 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
     const handleAddModerator = async (e) => {
         e.preventDefault();
+        setFormError('');
+
+        if (newModerator.phone.length !== 11) {
+            setFormError('Phone number must be exactly 11 digits.');
+            return;
+        }
+
+        if (newModerator.password.length < 8) {
+            setFormError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (!/[A-Z]/.test(newModerator.password)) {
+            setFormError('Password must contain at least one uppercase letter.');
+            return;
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(newModerator.password)) {
+            setFormError('Password must contain at least one special symbol.');
+            return;
+        }
+
         setIsAddModalOpen(false);
         setIsAssignModalOpen(true);
     };
