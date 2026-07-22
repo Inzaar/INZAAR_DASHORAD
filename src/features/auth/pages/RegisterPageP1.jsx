@@ -12,13 +12,14 @@ import GoogleLoginButton from '../../../components/ui/buttons/GoogleLoginButton'
 import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
 import AuthText from '../components/AuthText';
-import { checkUsername } from '../../../api/auth';
+import { checkUsername, checkEmail } from '../../../api/auth';
 
 function RegisterPageP1() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
   const [usernameError, setUsernameError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [shouldShake, setShouldShake] = useState(false);
 
@@ -42,6 +43,27 @@ function RegisterPageP1() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [formData.username]);
+
+  React.useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (formData.email && formData.email.length > 0) {
+        try {
+          const res = await checkEmail(formData.email);
+          if (!res.data.data.available) {
+            setEmailError('This email is already exist.');
+          } else {
+            setEmailError('');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        setEmailError('');
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [formData.email]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -85,6 +107,11 @@ function RegisterPageP1() {
 
     if (usernameError) {
       setError('Please choose a unique username.');
+      return;
+    }
+
+    if (emailError) {
+      setError('Please use a unique email address.');
       return;
     }
 
@@ -163,6 +190,7 @@ function RegisterPageP1() {
             value={formData.email}
             onChange={handleChange}
           />
+          {emailError && <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>

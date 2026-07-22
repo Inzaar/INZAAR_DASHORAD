@@ -29,9 +29,26 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
     const handleSave = async () => {
         try {
-            // The backend sends the hashed password in 'user', which we must strip out before updating
+            if (userPayload.password && userPayload.password.trim() !== '') {
+                if (userPayload.password.length < 8) {
+                    toast.error('Password must be at least 8 characters long.');
+                    return;
+                }
+                if (!/[A-Z]/.test(userPayload.password)) {
+                    toast.error('Password must contain at least one uppercase letter.');
+                    return;
+                }
+                if (!/[!@#$%^&*(),.?":{}|<>]/.test(userPayload.password)) {
+                    toast.error('Password must contain at least one special symbol.');
+                    return;
+                }
+            }
+
+            // The backend sends the hashed password in 'user', which we must strip out before updating if not changed
             const payloadToSend = { ...userPayload };
-            delete payloadToSend.password;
+            if (!payloadToSend.password || payloadToSend.password.trim() === '') {
+                delete payloadToSend.password;
+            }
 
             const res = await updateProfile(payloadToSend);
             toast.success("Profile updated successfully!");

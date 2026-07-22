@@ -66,7 +66,13 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                     <div className="w-full gap-[16px] opacity-[1px] flex flex-col min-[1218px]:flex-row ">
                         <div className="w-full min-[1218px]:w-[50%] h-[76px] opacity-[1px] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('password_required', 'Password*')}</label>
-                            <input type="password" className=" h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border" />
+                            <input 
+                                type="password" 
+                                value={userPayload?.password || ''}
+                                onChange={(e) => setUserPayload({ ...userPayload, password: e.target.value })}
+                                placeholder={t('leave_blank_to_keep', 'Leave blank to keep unchanged')}
+                                className=" h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border" 
+                            />
                         </div>
 
                         {/* whatsapp number */}
