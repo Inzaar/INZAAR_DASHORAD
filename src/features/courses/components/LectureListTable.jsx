@@ -695,7 +695,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                         className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${lecture.isLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#3758EE] text-white hover:bg-[#2a46c7] hover:scale-105 active:scale-95 shadow-sm'}`}
                                                         disabled={lecture.isLocked}
                                                     >
-                                                        📋 {t('start_assignment', 'Start')}
+                                                        📋 {isAdminView ? t('edit_assignment', 'Edit Assignment') : t('start_assignment', 'Start')}
                                                     </button>
                                                 ) : (
                                                     <button

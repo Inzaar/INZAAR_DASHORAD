@@ -1,18 +1,46 @@
-import React, { useState, useRef } from 'react';
-import { ChevronLeft, Upload, Check, Lock, ChevronDown } from 'lucide-react';
-import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, Upload, Check, Lock, ChevronDown, FileText, X, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignmentNumber }) => {
+const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignmentNumber, initialData }) => {
+    const isEditMode = Boolean(initialData);
+
     const [assignmentData, setAssignmentData] = useState({
-        title: '',
-        instructions: '',
-        maxFileSize: '',
-        maxAttempts: '',
-        setDueDate: false,
-        acceptedTypes: ['PDF'] // default selected
+        title: initialData?.title || '',
+        instructions: initialData?.instructions || '',
+        maxFileSize: initialData?.maxFileSize || '25 MB',
+        maxAttempts: initialData?.maxAttempts || '3',
+        setDueDate: initialData?.setDueDate ?? (initialData?.dueDate || initialData?.maxDays ? true : false),
+        maxDays: initialData?.maxDays || '1-Day',
+        acceptedTypes: Array.isArray(initialData?.acceptedTypes) && initialData.acceptedTypes.length > 0
+            ? initialData.acceptedTypes
+            : ['PDF'],
+        referenceFileUrl: initialData?.referenceFileUrl || (Array.isArray(initialData?.pdfUrl) ? initialData.pdfUrl[0] : initialData?.pdfUrl) || '',
+        referenceFileName: '',
     });
 
+    const [uploadingFile, setUploadingFile] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        if (initialData) {
+            const refUrl = initialData.referenceFileUrl || (Array.isArray(initialData.pdfUrl) ? initialData.pdfUrl[0] : initialData.pdfUrl) || '';
+            setAssignmentData({
+                title: initialData.title || '',
+                instructions: initialData.instructions || '',
+                maxFileSize: initialData.maxFileSize || '25 MB',
+                maxAttempts: initialData.maxAttempts || '3',
+                setDueDate: initialData.setDueDate ?? (initialData.dueDate || initialData.maxDays ? true : false),
+                maxDays: initialData.maxDays || '1-Day',
+                acceptedTypes: Array.isArray(initialData.acceptedTypes) && initialData.acceptedTypes.length > 0
+                    ? initialData.acceptedTypes
+                    : ['PDF'],
+                referenceFileUrl: refUrl,
+                referenceFileName: refUrl ? refUrl.split('/').pop() : '',
+            });
+        }
+    }, [initialData]);
 
     const handleInputChange = (field, value) => {
         setAssignmentData(prev => ({ ...prev, [field]: value }));
@@ -28,20 +56,64 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
         });
     };
 
-    const handleContinue = () => {
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingFile(true);
+        try {
+            const { uploadPdf, uploadImage } = await import('@/api/course');
+            let res;
+            if (file.type.includes('pdf')) {
+                res = await uploadPdf(file);
+            } else {
+                res = await uploadImage(file);
+            }
+            if (res?.url) {
+                setAssignmentData(prev => ({
+                    ...prev,
+                    referenceFileUrl: res.url,
+                    referenceFileName: file.name
+                }));
+                toast.success("Reference file uploaded successfully!");
+            }
+        } catch (err) {
+            console.error("Reference file upload failed:", err);
+            toast.error("Failed to upload reference file.");
+        } finally {
+            setUploadingFile(false);
+        }
+    };
+
+    const handleContinue = async () => {
         if (!assignmentData.title.trim()) {
-            return; // Can add toast error here
+            toast.error("Please enter assignment title.");
+            return;
         }
 
-        // Map local data to a course item
         const assignmentItem = {
+            ...(initialData?._id ? { _id: initialData._id, id: initialData._id } : {}),
             title: assignmentData.title,
             instructions: assignmentData.instructions,
+            maxFileSize: assignmentData.maxFileSize,
+            maxAttempts: assignmentData.maxAttempts,
+            setDueDate: assignmentData.setDueDate,
+            maxDays: assignmentData.maxDays,
+            acceptedTypes: assignmentData.acceptedTypes,
             type: 'Assignment',
-            // other properties if backend supports it
+            pdfUrl: assignmentData.referenceFileUrl ? [assignmentData.referenceFileUrl] : (initialData?.pdfUrl || []),
+            referenceFileUrl: assignmentData.referenceFileUrl,
         };
 
-        onComplete(assignmentItem);
+        if (onComplete) {
+            setIsSubmitting(true);
+            try {
+                await onComplete(assignmentItem);
+            } catch (err) {
+                console.error("Error saving assignment:", err);
+            } finally {
+                setIsSubmitting(false);
+            }
+        }
     };
 
     return (
@@ -50,16 +122,20 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                 <div className="max-w-[1200px] mx-auto w-full px-4 md:px-8 pt-6 md:pt-10">
                     
                     {/* Header Area */}
-                    <div className="mb-8 md:mb-10">
+                    <div className="mb-8 md:mb-10 text-center flex flex-col items-center">
                         <button
                             onClick={onBackToSelection}
-                            className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[14px] font-medium mb-4 group"
+                            className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[14px] font-medium mb-4 group cursor-pointer"
                         >
                             <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                             Back to Selection
                         </button>
-                        <h1 className="text-[24px] md:text-[28px] font-bold text-[#0f172a] mb-2 tracking-tight">Add New Assignment</h1>
-                        <p className="text-[#64748b] text-[15px] font-medium leading-relaxed">Set up your Assignment.</p>
+                        <h1 className="text-[24px] md:text-[28px] font-bold text-[#0f172a] mb-2 tracking-tight">
+                            {isEditMode ? 'Edit Assignment' : 'Add New Assignment'}
+                        </h1>
+                        <p className="text-[#64748b] text-[15px] font-medium leading-relaxed">
+                            {isEditMode ? 'Modify assignment configuration and guidelines.' : 'Set up your Assignment.'}
+                        </p>
                     </div>
 
                     {/* Form Container */}
@@ -82,7 +158,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                                 <input
                                     type="text"
                                     readOnly
-                                    value={`Assignment-${String(nextAssignmentNumber).padStart(2, '0')}`}
+                                    value={`Assignment-${String(nextAssignmentNumber || 1).padStart(2, '0')}`}
                                     className="w-full px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl outline-none text-[14px] text-gray-400 font-medium shadow-sm cursor-not-allowed"
                                 />
                             </div>
@@ -102,22 +178,56 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
 
                         {/* Upload Reference File */}
                         <div className="mb-8">
-                            <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Upload Reference File <span className="text-gray-400 font-normal">(optional)</span></label>
-                            <div className="w-full py-12 px-6 border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc]/50 rounded-2xl flex flex-col items-center justify-center transition-all hover:bg-[#f8fafc]">
-                                <div className="w-12 h-12 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                        <polyline points="17 8 12 3 7 8" />
-                                        <line x1="12" y1="3" x2="12" y2="15" />
-                                    </svg>
-                                </div>
-                                <p className="text-[13px] text-gray-500 font-medium mb-3">Drag & drop or</p>
-                                <button
-                                    className="px-6 py-2 bg-white border border-[#8b5cf6] text-[#8b5cf6] text-[13px] font-bold rounded-full hover:bg-purple-50 transition-colors shadow-sm mb-3"
-                                >
-                                    Browse file
-                                </button>
-                                <p className="text-[11px] text-gray-400 font-medium">PDF / DOCX — worksheet or task brief for students</p>
+                            <label className="block text-[13px] font-bold text-[#0f172a] mb-2">
+                                Upload Reference File <span className="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                            <div className="w-full py-10 px-6 border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc]/50 rounded-2xl flex flex-col items-center justify-center transition-all hover:bg-[#f8fafc]">
+                                {uploadingFile ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Loader2 className="w-8 h-8 text-[#8b5cf6] animate-spin" />
+                                        <p className="text-xs font-semibold text-[#8b5cf6]">Uploading reference file...</p>
+                                    </div>
+                                ) : assignmentData.referenceFileUrl ? (
+                                    <div className="flex items-center gap-3 bg-white p-3 px-5 rounded-xl border border-gray-200 shadow-sm">
+                                        <FileText className="text-[#8b5cf6]" size={20} />
+                                        <span className="text-xs font-bold text-gray-700 max-w-[250px] truncate">
+                                            {assignmentData.referenceFileName || assignmentData.referenceFileUrl.split('/').pop()}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAssignmentData(prev => ({ ...prev, referenceFileUrl: '', referenceFileName: '' }))}
+                                            className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-2 cursor-pointer"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="w-12 h-12 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mb-4">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-[13px] text-gray-500 font-medium mb-3">Drag & drop or</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="px-6 py-2 bg-white border border-[#8b5cf6] text-[#8b5cf6] text-[13px] font-bold rounded-full hover:bg-purple-50 transition-colors shadow-sm mb-3 cursor-pointer"
+                                        >
+                                            Browse file
+                                        </button>
+                                        <p className="text-[11px] text-gray-400 font-medium">PDF / DOCX — worksheet or task brief for students</p>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -129,9 +239,10 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                                     const isSelected = assignmentData.acceptedTypes.includes(type);
                                     return (
                                         <button
+                                            type="button"
                                             key={type}
                                             onClick={() => toggleAcceptedType(type)}
-                                            className={`px-4 py-2 rounded-full border flex items-center gap-2 text-[13px] font-bold transition-all
+                                            className={`px-4 py-2 rounded-full border flex items-center gap-2 text-[13px] font-bold transition-all cursor-pointer
                                                 ${isSelected 
                                                     ? 'border-[#8b5cf6] text-[#8b5cf6] bg-purple-50/30' 
                                                     : 'border-gray-200 text-gray-500 hover:border-gray-300 bg-white'}`}
@@ -216,22 +327,34 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
             {/* Bottom Sticky Footer */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
                 <button
+                    type="button"
                     onClick={onBackToSelection}
-                    className="w-full sm:w-auto px-6 md:px-10 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm text-[14px]"
+                    className="w-full sm:w-auto px-6 md:px-10 py-3 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all active:scale-95 shadow-sm text-[14px] cursor-pointer"
                 >
                     Back
                 </button>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <button
-                        className="w-full sm:w-auto px-6 md:px-10 py-3 bg-[#f8fafc] text-gray-500 font-bold rounded-xl hover:bg-gray-100 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[14px]"
+                        type="button"
+                        onClick={onBackToSelection}
+                        className="w-full sm:w-auto px-6 md:px-10 py-3 bg-[#f8fafc] text-gray-500 font-bold rounded-xl hover:bg-gray-100 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[14px] cursor-pointer"
                     >
-                        Save as draft
+                        Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={handleContinue}
-                        className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#8b5cf6] text-white font-bold rounded-xl hover:bg-[#7c3aed] transition-all active:scale-95 shadow-lg shadow-purple-500/20 text-[14px]"
+                        disabled={isSubmitting}
+                        className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#8b5cf6] text-white font-bold rounded-xl hover:bg-[#7c3aed] transition-all active:scale-95 shadow-lg shadow-purple-500/20 text-[14px] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                     >
-                        Continue
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            isEditMode ? 'Save Changes' : 'Continue'
+                        )}
                     </button>
                 </div>
             </div>

@@ -433,10 +433,10 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
             </svg>
 
             {/* Header Area */}
-            <div className="mb-6 md:mb-8 px-4 md:px-0">
+            <div className="mb-6 md:mb-8 px-4 md:px-0 max-w-[1000px] mx-auto text-center flex flex-col items-center">
                 <button
                     onClick={onBackToSelection}
-                    className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 group"
+                    className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 group cursor-pointer"
                 >
                     <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Selection
