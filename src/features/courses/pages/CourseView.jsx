@@ -17,11 +17,13 @@ import AdminLectureList from "../components/AdminLectureList";
 import LectureListTable from "../components/LectureListTable";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
 import QuizStartOverlay from "../components/QuizStartOverlay";
+import AssignmentStartOverlay from "../components/AssignmentStartOverlay";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
 import { useTranslation } from "react-i18next";
 import CreateQuiz from "@/features/adminDashborad/components/CreateQuiz";
+import CreateAssignment from "@/features/adminDashborad/components/CreateAssignment";
 
 // Hoisted Helper Functions
 const formatTime = (seconds) => {
@@ -70,6 +72,7 @@ const CourseView = () => {
     const [activePdfUrl, setActivePdfUrl] = useState(null);
     const [pdfLoading, setPdfLoading] = useState(true);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
+    const [isEditingAssignment, setIsEditingAssignment] = useState(false);
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -132,7 +135,9 @@ const CourseView = () => {
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
     const userId = new URLSearchParams(window.location.search).get("userId");
     const isQuizView = currentLecture?.type === 'Quiz';
+    const isNonVideoView = currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment';
     const canEdit = (user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)))) && isAdminView;
+    const hideSidebarAndCards = (isEditingAssignment || isEditingQuiz) && isAdminView;
 
     // Effects
     useEffect(() => {
@@ -262,6 +267,11 @@ const CourseView = () => {
     };
 
     const handleOpenAssignment = (lecture) => {
+        if (isAdminView) {
+            setCurrentLecture(lecture);
+            setIsEditingAssignment(true);
+            return;
+        }
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
@@ -486,6 +496,11 @@ const CourseView = () => {
             return;
         }
 
+        if (currentLecture.type === 'Assignment') {
+            setIsEditingAssignment(true);
+            return;
+        }
+
         const id = currentLecture?.id || currentLecture?._id;
         if (!id) return;
 
@@ -598,25 +613,29 @@ const CourseView = () => {
                 </div>
             )}
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
-                <Navbar onMenuClick={toggleSidebar} />
-                <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
+                <Navbar onMenuClick={toggleSidebar} hideMenu={hideSidebarAndCards} title={courseData?.title || "Course View"} />
+                <div className={`flex flex-col ${!hideSidebarAndCards ? 'lg:flex-row' : ''} px-4 gap-4 flex-1 overflow-hidden relative pb-4`}>
 
-                    {isSidebarOpen && (
-                        <div
-                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
-                            onClick={() => setIsSidebarOpen(false)}
-                        />
+                    {!hideSidebarAndCards && (
+                        <>
+                            {isSidebarOpen && (
+                                <div
+                                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                                    onClick={() => setIsSidebarOpen(false)}
+                                />
+                            )}
+
+                            <Sidebar
+                                onClose={() => setIsSidebarOpen(false)}
+                                className={`
+                                    transition-transform duration-300 ease-in-out z-40
+                                    lg:translate-x-0 lg:static lg:block
+                                    fixed left-0 top-0 shadow-2xl
+                                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                                `}
+                            />
+                        </>
                     )}
-
-                    <Sidebar
-                        onClose={() => setIsSidebarOpen(false)}
-                        className={`
-                            transition-transform duration-300 ease-in-out z-40
-                            lg:translate-x-0 lg:static lg:block
-                            fixed left-0 top-0 shadow-2xl
-                            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                        `}
-                    />
 
                     <main className={`flex-1 overflow-y-auto no-scrollbar scrollbar-hide`} style={{
                         msOverflowStyle: 'none',
@@ -734,12 +753,56 @@ const CourseView = () => {
                                 )}
                             </div>
 
-                            <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
+                            {!hideSidebarAndCards && (
+                                <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
+                            )}
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
-                                <div ref={videoSectionRef} className={`w-full ${isEditingQuiz && isAdminView ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
-                                    <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>
-                                    {isEditingQuiz && isAdminView ? (
+                                <div ref={videoSectionRef} className={`w-full ${(isEditingQuiz || isEditingAssignment) && isAdminView ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
+                                    {!hideSidebarAndCards && <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>}
+                                    {isEditingAssignment && isAdminView ? (
+                                        <CreateAssignment
+                                            courseId={courseId}
+                                            initialData={currentLecture}
+                                            nextAssignmentNumber={currentLecture?.lectureNo || 1}
+                                            onBackToSelection={() => setIsEditingAssignment(false)}
+                                            onComplete={async (updatedAssignment) => {
+                                                try {
+                                                    const id = currentLecture?.id || currentLecture?._id;
+                                                    if (id) {
+                                                        const res = await updateLecture(id, {
+                                                            title: updatedAssignment.title,
+                                                            instructions: updatedAssignment.instructions,
+                                                            pdfUrl: updatedAssignment.pdfUrl,
+                                                            type: 'Assignment'
+                                                        });
+                                                        const updated = res.data.data;
+                                                        toast.success("Assignment updated successfully!");
+
+                                                        setCourseData(prev => {
+                                                            if (!prev) return prev;
+                                                            const field = prev.lecturePlaylist ? 'lecturePlaylist' : 'lectures';
+                                                            return {
+                                                                ...prev,
+                                                                [field]: prev[field].map(l => (l._id === id || l.id === id) ? { ...l, ...updated, ...updatedAssignment } : l)
+                                                            };
+                                                        });
+
+                                                        setCurrentLecture(prev => ({
+                                                            ...prev,
+                                                            ...updated,
+                                                            ...updatedAssignment
+                                                        }));
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Failed to update assignment:", err);
+                                                    toast.error("Failed to update assignment");
+                                                } finally {
+                                                    setIsEditingAssignment(false);
+                                                }
+                                            }}
+                                        />
+                                    ) : isEditingQuiz && isAdminView ? (
                                         <CreateQuiz
                                             quizId={currentLecture?.quizId || currentLecture?.id || currentLecture?._id}
                                             courseId={courseId}
@@ -751,9 +814,9 @@ const CourseView = () => {
                                             }}
                                         />
                                     ) : (
-                                    <div className={`${currentLecture?.type === 'Quiz' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
+                                    <div className={`${currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
                                         <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
-                                            {/* YouTube Iframe or Quiz Assessment */}
+                                            {/* YouTube Iframe, Quiz Assessment, or Assignment Overlay */}
                                             {currentLecture?.type === 'Quiz' ? (
                                                 <QuizStartOverlay
                                                     lecture={currentLecture}
@@ -775,6 +838,19 @@ const CourseView = () => {
                                                             } else {
                                                                 navigate(`/quiz-take/${currentLecture.id}${query}`);
                                                             }
+                                                        }
+                                                    }}
+                                                />
+                                            ) : currentLecture?.type === 'Assignment' ? (
+                                                <AssignmentStartOverlay
+                                                    lecture={currentLecture}
+                                                    courseData={courseData}
+                                                    isAdminView={isAdminView}
+                                                    onStart={() => {
+                                                        if (isAdminView) {
+                                                            setIsEditingAssignment(true);
+                                                        } else {
+                                                            handleOpenAssignment(currentLecture);
                                                         }
                                                     }}
                                                 />
@@ -813,10 +889,10 @@ const CourseView = () => {
                                             )}
 
                                             {/* Gradient Overlay for Text Visibility */}
-                                            {!isQuizView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
+                                            {!isNonVideoView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
 
                                             {/* Progress Bar */}
-                                            {!isQuizView && user?.role !== 'admin' && (
+                                            {!isNonVideoView && user?.role !== 'admin' && (
                                                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
                                                     <div
                                                         className="h-full bg-blue-500 transition-all duration-300 ease-linear"
@@ -826,7 +902,7 @@ const CourseView = () => {
                                             )}
 
                                             {/* Lecture Info Overlay (Top Left) */}
-                                            {!isQuizView && (
+                                            {!isNonVideoView && (
                                                 <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
                                                     <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
                                                     <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
@@ -846,7 +922,7 @@ const CourseView = () => {
                                             )}
 
                                             {/* Right Side Action Buttons Overlay */}
-                                            {!isQuizView && (
+                                            {!isNonVideoView && (
                                                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
                                                     <img
                                                         src="https://randomuser.me/api/portraits/men/32.jpg"
@@ -940,8 +1016,8 @@ const CourseView = () => {
                                     </div>
                                     )}
                                 </div>
-                                {/* Lectures Playlist Section - Right Side - Only if not quiz */}
-                                {!(isEditingQuiz && isAdminView) && (
+                                {/* Lectures Playlist Section - Right Side - Only if not quiz or editing assignment */}
+                                {!((isEditingQuiz || isEditingAssignment) && isAdminView) && (
                                 <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                     <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                     <div className="flex-1 relative lg:min-h-0">
@@ -1043,7 +1119,7 @@ const CourseView = () => {
                             </div>
 
                             {/* Lecture Notes Section */}
-                            {!isAdminView && (
+                            {!hideSidebarAndCards && !isAdminView && (
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-8 mb-8 text-left w-full">
                                     <h3 className="text-xl font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t('lecture_notes', 'Lecture Notes')}</h3>
                                     <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
@@ -1102,26 +1178,28 @@ const CourseView = () => {
                             )}
 
                             {/* Lecture List Table Section */}
-                            <LectureListTable
-                                lectures={lectures}
-                                notes={notes}
-                                isAdminView={isAdminView}
-                                onWatch={(lecture) => {
-                                    if (lecture.isLocked) return;
-                                    if (lecture.type === 'Assignment') {
-                                        handleOpenAssignment(lecture);
-                                        return;
-                                    }
-                                    const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
-                                    setShouldAutoplay(true);
-                                    setCurrentLecture(lecture);
-                                    if (isSameVideo && playerRef.current) {
-                                        playerRef.current.playVideo();
-                                    }
-                                    videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }}
-                                currentLectureId={currentLecture?.id || currentLecture?._id}
-                            />
+                            {!hideSidebarAndCards && (
+                                <LectureListTable
+                                    lectures={lectures}
+                                    notes={notes}
+                                    isAdminView={isAdminView}
+                                    onWatch={(lecture) => {
+                                        if (lecture.isLocked) return;
+                                        if (lecture.type === 'Assignment') {
+                                            handleOpenAssignment(lecture);
+                                            return;
+                                        }
+                                        const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);
+                                        setShouldAutoplay(true);
+                                        setCurrentLecture(lecture);
+                                        if (isSameVideo && playerRef.current) {
+                                            playerRef.current.playVideo();
+                                        }
+                                        videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }}
+                                    currentLectureId={currentLecture?.id || currentLecture?._id}
+                                />
+                            )}
                         </div>
                     </main>
                 </div>
