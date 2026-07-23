@@ -101,14 +101,14 @@ const DashboardPage = () => {
     // }
 
     return (
-        <div className="h-screen w-full flex items-center justify-center overflow-hidden">
+        <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col md:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
 
                     {isSidebarOpen && (
                         <div
-                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
                             onClick={() => setIsSidebarOpen(false)}
                         />
                     )}
@@ -116,13 +116,13 @@ const DashboardPage = () => {
                     <Sidebar
                         onClose={() => setIsSidebarOpen(false)}
                         className={`
-                        transition-transform duration-300 ease-in-out z-40 shrink-0
-                        md:translate-x-0 md:static md:block
+                        transition-transform duration-300 ease-in-out z-40
+                        lg:translate-x-0 lg:static lg:block
                         fixed left-0 top-0 shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
@@ -148,8 +148,8 @@ const DashboardPage = () => {
                                 <div className=" flex flex-col gap-6">
                                     <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} />
 
-                                    <div className='flex flex-col min-[680px]:flex-row w-full gap-6'>
-                                        <div className="flex-1 min-w-0 p-4 bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
+                                    <div className='flex w-full gap-6'>
+                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t("enrolled_courses", "Enrolled Courses")}</h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
                                             <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
@@ -159,20 +159,20 @@ const DashboardPage = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="hidden min-[680px]:flex w-[300px] min-[1250px]:w-[340px] shrink-0 flex-col">
+                                        <div className="hidden min-[680px]:flex min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%] flex-col">
                                             <Calendar18 className="w-full h-full flex-1" />
                                         </div>
                                     </div>
 
                                     <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[50%] min-[1250px]:w-[55%] shrink-0" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
+                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
 
                                         {/* Mobile Calendar - Visible only below 680px */}
                                         <div className="min-[680px]:hidden w-full bg-white rounded-lg p-4 shadow-sm">
                                             <Calendar18 className="w-full h-[350px]" />
                                         </div>
 
-                                        <div className="w-full flex-1 min-w-0 flex flex-col gap-6 bg-white rounded-lg p-4">
+                                        <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
                                                 <div className="relative z-20">

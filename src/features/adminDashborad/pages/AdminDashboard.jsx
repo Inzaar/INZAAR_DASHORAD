@@ -87,14 +87,14 @@ const AdminDashboard = () => {
     }, []);
 
     return (
-        <div className="h-screen w-full flex items-center justify-center overflow-hidden">
+        <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col md:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
 
                     {isSidebarOpen && (
                         <div
-                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
                             onClick={() => setIsSidebarOpen(false)}
                         />
                     )}
@@ -102,13 +102,13 @@ const AdminDashboard = () => {
                     <Sidebar
                         onClose={() => setIsSidebarOpen(false)}
                         className={`
-                        transition-transform duration-300 ease-in-out z-40 shrink-0
-                        md:translate-x-0 md:static md:block
+                        transition-transform duration-300 ease-in-out z-40
+                        lg:translate-x-0 lg:static lg:block
                         fixed left-0 top-0 shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
