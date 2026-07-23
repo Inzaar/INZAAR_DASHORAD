@@ -410,16 +410,16 @@ function Sidebar({ className, onClose }) {
   };
 
   return (
-    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
+    <div className={`w-[260px] bg-white border-r-[3px] md:border-[3px] border-[#6984E6] flex flex-col z-40 md:rounded shadow-sm h-screen md:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
         <div className='text-[#6A6F78] text-[14px] ml-3 font-medium pr-2 pb-1'>{t('welcome_user', 'Welcome, ')} {t(user?.firstname || user?.name || "User")}</div>
-        <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
+        <button onClick={onClose} className="md:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
           <X size={20} />
         </button>
       </div>
 
-      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] lg:max-h-[70vh]'>
+      <div className='w-full md:w-[192px] mx-auto px-4 md:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] md:max-h-[70vh]'>
         <div className='w-full flex flex-col items-start gap-2'>
           {menuItems.map(renderMenuItem)}
         </div>
@@ -433,7 +433,7 @@ function Sidebar({ className, onClose }) {
       </div>
       
       {/* Footer (Logout) fixed to bottom */}
-      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-2 shrink-0 pb-10'>
+      <div className='w-full md:w-[192px] mx-auto px-4 md:px-0 flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-2 shrink-0 pb-10'>
         <Sideabrbbutton
           isActive={activeItem === 'Logout'}
           onClick={() => handleItemClick('Logout')}

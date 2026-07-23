@@ -490,7 +490,7 @@ const CourseView = () => {
 
     const handleEditLectureClick = async () => {
         if (!currentLecture || !canEdit) return;
-        
+
         if (currentLecture.type === 'Quiz') {
             setIsEditingQuiz(true);
             return;
@@ -814,195 +814,195 @@ const CourseView = () => {
                                             }}
                                         />
                                     ) : (
-                                    <div className={`${currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
-                                        <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
-                                            {/* YouTube Iframe, Quiz Assessment, or Assignment Overlay */}
-                                            {currentLecture?.type === 'Quiz' ? (
-                                                <QuizStartOverlay
-                                                    lecture={currentLecture}
-                                                    courseData={courseData}
-                                                    isAdminView={isAdminView}
-                                                    onStart={() => {
-                                                        if (isAdminView) {
-                                                            setIsEditingQuiz(true);
-                                                        } else {
-                                                            const cleanParams = new URLSearchParams(window.location.search);
-                                                            cleanParams.delete('returnPath');
-                                                            cleanParams.delete('lectureId');
-                                                            const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
-                                                            const cleanPath = window.location.pathname + cleanSearch;
-                                                            const returnPath = encodeURIComponent(cleanPath);
-                                                            const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
-                                                            if (currentLecture.quizId) {
-                                                                navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+                                        <div className={`${currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment' ? 'bg-transparent' : 'bg-white rounded-2xl p-2 shadow-sm border border-gray-100'} h-fit`}>
+                                            <div className={`relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-black group`}>
+                                                {/* YouTube Iframe, Quiz Assessment, or Assignment Overlay */}
+                                                {currentLecture?.type === 'Quiz' ? (
+                                                    <QuizStartOverlay
+                                                        lecture={currentLecture}
+                                                        courseData={courseData}
+                                                        isAdminView={isAdminView}
+                                                        onStart={() => {
+                                                            if (isAdminView) {
+                                                                setIsEditingQuiz(true);
                                                             } else {
-                                                                navigate(`/quiz-take/${currentLecture.id}${query}`);
+                                                                const cleanParams = new URLSearchParams(window.location.search);
+                                                                cleanParams.delete('returnPath');
+                                                                cleanParams.delete('lectureId');
+                                                                const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+                                                                const cleanPath = window.location.pathname + cleanSearch;
+                                                                const returnPath = encodeURIComponent(cleanPath);
+                                                                const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+                                                                if (currentLecture.quizId) {
+                                                                    navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+                                                                } else {
+                                                                    navigate(`/quiz-take/${currentLecture.id}${query}`);
+                                                                }
                                                             }
-                                                        }
-                                                    }}
-                                                />
-                                            ) : currentLecture?.type === 'Assignment' ? (
-                                                <AssignmentStartOverlay
-                                                    lecture={currentLecture}
-                                                    courseData={courseData}
-                                                    isAdminView={isAdminView}
-                                                    onStart={() => {
-                                                        if (isAdminView) {
-                                                            setIsEditingAssignment(true);
-                                                        } else {
-                                                            handleOpenAssignment(currentLecture);
-                                                        }
-                                                    }}
-                                                />
-                                            ) : currentLecture?.videoId ? (
-                                                <YouTube
-                                                    videoId={currentLecture.videoId}
-                                                    onReady={onPlayerReady}
-                                                    opts={{
-                                                        height: '100%',
-                                                        width: '100%',
-                                                        playerVars: {
-                                                            autoplay: shouldAutoplay ? 1 : 0,
-                                                            rel: 0,
-                                                            start: currentLecture?.lastWatchedTime || 0,
-                                                            startSeconds: currentLecture?.lastWatchedTime || 0,
-                                                        },
-                                                    }}
-                                                    className="w-full h-full"
-                                                    iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
-                                                />
-                                            ) : (
-                                                <div
-                                                    className="w-full h-full flex items-center justify-center relative cursor-pointer"
-                                                    onClick={() => {
-                                                        if (currentLecture?.type === 'Assignment') {
-                                                            handleOpenAssignment(currentLecture);
-                                                        }
-                                                    }}
-                                                >
-                                                    <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
-                                                    <div className="absolute inset-0 bg-black/50"></div>
-                                                    <div className="relative z-10 w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md cursor-pointer hover:scale-110 transition-transform">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Gradient Overlay for Text Visibility */}
-                                            {!isNonVideoView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
-
-                                            {/* Progress Bar */}
-                                            {!isNonVideoView && user?.role !== 'admin' && (
-                                                <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
-                                                    <div
-                                                        className="h-full bg-blue-500 transition-all duration-300 ease-linear"
-                                                        style={{ width: `${progress}%` }}
+                                                        }}
                                                     />
-                                                </div>
-                                            )}
+                                                ) : currentLecture?.type === 'Assignment' ? (
+                                                    <AssignmentStartOverlay
+                                                        lecture={currentLecture}
+                                                        courseData={courseData}
+                                                        isAdminView={isAdminView}
+                                                        onStart={() => {
+                                                            if (isAdminView) {
+                                                                setIsEditingAssignment(true);
+                                                            } else {
+                                                                handleOpenAssignment(currentLecture);
+                                                            }
+                                                        }}
+                                                    />
+                                                ) : currentLecture?.videoId ? (
+                                                    <YouTube
+                                                        videoId={currentLecture.videoId}
+                                                        onReady={onPlayerReady}
+                                                        opts={{
+                                                            height: '100%',
+                                                            width: '100%',
+                                                            playerVars: {
+                                                                autoplay: shouldAutoplay ? 1 : 0,
+                                                                rel: 0,
+                                                                start: currentLecture?.lastWatchedTime || 0,
+                                                                startSeconds: currentLecture?.lastWatchedTime || 0,
+                                                            },
+                                                        }}
+                                                        className="w-full h-full"
+                                                        iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className="w-full h-full flex items-center justify-center relative cursor-pointer"
+                                                        onClick={() => {
+                                                            if (currentLecture?.type === 'Assignment') {
+                                                                handleOpenAssignment(currentLecture);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <img src={courseData?.thumbnail || fallbackImg} alt="Fallback" className="absolute inset-0 w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-black/50"></div>
+                                                        <div className="relative z-10 w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md cursor-pointer hover:scale-110 transition-transform">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                        </div>
+                                                    </div>
+                                                )}
 
-                                            {/* Lecture Info Overlay (Top Left) */}
-                                            {!isNonVideoView && (
-                                                <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
-                                                    <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
-                                                    <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                        <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
-                                                        <br className="sm:hidden" />
-                                                        <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
-                                                        <br />
-                                                        {user?.role !== 'admin' && (
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
-                                                                    {Math.round(progress)}% Watched
-                                                                </span>
+                                                {/* Gradient Overlay for Text Visibility */}
+                                                {!isNonVideoView && <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent pointer-events-none" />}
+
+                                                {/* Progress Bar */}
+                                                {!isNonVideoView && user?.role !== 'admin' && (
+                                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-700/50 z-20">
+                                                        <div
+                                                            className="h-full bg-blue-500 transition-all duration-300 ease-linear"
+                                                            style={{ width: `${progress}%` }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {/* Lecture Info Overlay (Top Left) */}
+                                                {!isNonVideoView && (
+                                                    <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
+                                                        <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
+                                                        <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
+                                                            <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
+                                                            <br className="sm:hidden" />
+                                                            <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
+                                                            <br />
+                                                            {user?.role !== 'admin' && (
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
+                                                                        {Math.round(progress)}% Watched
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Right Side Action Buttons Overlay */}
+                                                {!isNonVideoView && (
+                                                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
+                                                        <img
+                                                            src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                            alt="Instructor"
+                                                            className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
+                                                        />
+
+                                                        {/* PDF Resource Button & Menu */}
+                                                        {currentLecture?.pdfUrl && currentLecture.pdfUrl.length > 0 && (
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (!currentLecture?.pdfUrl || currentLecture.pdfUrl.length === 0) {
+                                                                            toast.error("No additional PDF resources");
+                                                                            return;
+                                                                        }
+                                                                        setShowPdfMenu(!showPdfMenu);
+                                                                        setShowAudioMenu(false);
+                                                                    }}
+                                                                    className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
+                                                                </button>
+                                                                {showPdfMenu && currentLecture?.pdfUrl?.length > 0 && (
+                                                                    <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                        <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
+                                                                        </div>
+                                                                        {currentLecture.pdfUrl.map((url, i) => (
+                                                                            <button
+                                                                                key={i}
+                                                                                onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
+                                                                                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
+                                                                            >
+                                                                                <FileText size={14} className="text-red-400" />
+                                                                                <span className="truncate">Resource {i + 1}</span>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
-                                                    </div>
-                                                </div>
-                                            )}
 
-                                            {/* Right Side Action Buttons Overlay */}
-                                            {!isNonVideoView && (
-                                                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
-                                                    <img
-                                                        src="https://randomuser.me/api/portraits/men/32.jpg"
-                                                        alt="Instructor"
-                                                        className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
-                                                    />
-
-                                                    {/* PDF Resource Button & Menu */}
-                                                    {currentLecture?.pdfUrl && currentLecture.pdfUrl.length > 0 && (
-                                                        <div className="relative">
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (!currentLecture?.pdfUrl || currentLecture.pdfUrl.length === 0) {
-                                                                        toast.error("No additional PDF resources");
-                                                                        return;
-                                                                    }
-                                                                    setShowPdfMenu(!showPdfMenu);
-                                                                    setShowAudioMenu(false);
-                                                                }}
-                                                                className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showPdfMenu ? 'bg-red-500 text-white' : 'bg-white text-red-500 hover:bg-red-50'}`}
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" /></svg>
-                                                            </button>
-                                                            {showPdfMenu && currentLecture?.pdfUrl?.length > 0 && (
-                                                                <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
-                                                                    <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PDF Resources</span>
+                                                        {/* Audio Resource Button & Menu */}
+                                                        {currentLecture?.audioUrl && currentLecture.audioUrl.length > 0 && (
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (!currentLecture?.audioUrl || currentLecture.audioUrl.length === 0) {
+                                                                            toast.error("No additional audio files");
+                                                                            return;
+                                                                        }
+                                                                        setShowAudioMenu(!showAudioMenu);
+                                                                        setShowPdfMenu(false);
+                                                                    }}
+                                                                    className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
+                                                                </button>
+                                                                {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
+                                                                    <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
+                                                                        <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
+                                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
+                                                                        </div>
+                                                                        {currentLecture.audioUrl.map((url, i) => (
+                                                                            <button
+                                                                                key={i}
+                                                                                onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
+                                                                                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
+                                                                            >
+                                                                                <Volume2 size={14} className="text-blue-400" />
+                                                                                <span className="truncate">Audio {i + 1}</span>
+                                                                            </button>
+                                                                        ))}
                                                                     </div>
-                                                                    {currentLecture.pdfUrl.map((url, i) => (
-                                                                        <button
-                                                                            key={i}
-                                                                            onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
-                                                                        >
-                                                                            <FileText size={14} className="text-red-400" />
-                                                                            <span className="truncate">Resource {i + 1}</span>
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                                                )}
+                                                            </div>
+                                                        )}
 
-                                                    {/* Audio Resource Button & Menu */}
-                                                    {currentLecture?.audioUrl && currentLecture.audioUrl.length > 0 && (
-                                                        <div className="relative">
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (!currentLecture?.audioUrl || currentLecture.audioUrl.length === 0) {
-                                                                        toast.error("No additional audio files");
-                                                                        return;
-                                                                    }
-                                                                    setShowAudioMenu(!showAudioMenu);
-                                                                    setShowPdfMenu(false);
-                                                                }}
-                                                                className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full transition-all shadow-lg group/btn ${showAudioMenu ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 hover:bg-blue-50'}`}
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
-                                                            </button>
-                                                            {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
-                                                                <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
-                                                                    <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
-                                                                    </div>
-                                                                    {currentLecture.audioUrl.map((url, i) => (
-                                                                        <button
-                                                                            key={i}
-                                                                            onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
-                                                                        >
-                                                                            <Volume2 size={14} className="text-blue-400" />
-                                                                            <span className="truncate">Audio {i + 1}</span>
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                    {/* {canEdit && (
+                                                        {/* {canEdit && (
                                                         <button
                                                             onClick={handleEditLectureClick}
                                                             className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 bg-white text-yellow-500 rounded-full hover:bg-yellow-50 transition-colors shadow-lg group/btn"
@@ -1010,111 +1010,111 @@ const CourseView = () => {
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 group-hover/btn:scale-110 transition-transform"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                                                         </button>
                                                     )} */}
-                                                </div>
-                                            )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
                                     )}
                                 </div>
                                 {/* Lectures Playlist Section - Right Side - Only if not quiz or editing assignment */}
                                 {!((isEditingQuiz || isEditingAssignment) && isAdminView) && (
-                                <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
-                                    <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
-                                    <div className="flex-1 relative lg:min-h-0">
-                                        <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth snap-x lg:snap-y">
-                                            <div className="flex flex-row lg:flex-col gap-3 min-w-max lg:min-w-0">
-                                                {lectures.map((lecture, index) => (
-                                                    <div
-                                                        key={lecture.id}
-                                                        onClick={() => {
-                                                            if (!lecture.isLocked) {
-                                                                if (lecture.type === 'Assignment') {
-                                                                    handleOpenAssignment(lecture);
-                                                                } else {
-                                                                    setShouldAutoplay(false);
-                                                                    setCurrentLecture(lecture);
+                                    <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
+                                        <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
+                                        <div className="flex-1 relative lg:min-h-0">
+                                            <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth snap-x lg:snap-y">
+                                                <div className="flex flex-row lg:flex-col gap-3 min-w-max lg:min-w-0">
+                                                    {lectures.map((lecture, index) => (
+                                                        <div
+                                                            key={lecture.id}
+                                                            onClick={() => {
+                                                                if (!lecture.isLocked) {
+                                                                    if (lecture.type === 'Assignment') {
+                                                                        handleOpenAssignment(lecture);
+                                                                    } else {
+                                                                        setShouldAutoplay(false);
+                                                                        setCurrentLecture(lecture);
+                                                                    }
                                                                 }
-                                                            }
-                                                        }}
-                                                        className={`
+                                                            }}
+                                                            className={`
                                                         relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
                                                         w-[260px] sm:w-[280px] lg:w-full
                                                         ${currentLecture?.id === lecture.id
-                                                                ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
-                                                                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                                                            }
+                                                                    ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
+                                                                    : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                                }
                                                         ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
                                                         ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
                                                         ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
                                                     `}
-                                                    >
-                                                        <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
-                                                            <img
-                                                                src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
-                                                                alt={lecture.title}
-                                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                            />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
-                                                                <div className="flex justify-between items-start">
-                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
-                                                                        {lecture.title}
-                                                                    </h4>
+                                                        >
+                                                            <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
+                                                                <img
+                                                                    src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
+                                                                    alt={lecture.title}
+                                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                                />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+                                                                <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                                                    <div className="flex justify-between items-start">
+                                                                        <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                                                            {lecture.title}
+                                                                        </h4>
+                                                                    </div>
+                                                                    <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                                                        {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
+                                                                    </div>
+                                                                    <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                                                        {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                    </div>
                                                                 </div>
-                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
-                                                                </div>
-                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                {lecture.isLocked ? (
+                                                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                                        <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : lecture.type === 'Assignment' ? (
+                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                        <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                            <span className="text-white text-lg">📋</span>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : lecture.type === 'Quiz' ? (
+                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                        <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                            <GraduationCap className="text-white w-5 h-5" />
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                        <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                <div className="absolute top-2 right-2 z-20">
+                                                                    <img
+                                                                        src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                                        alt="Instructor"
+                                                                        className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                                                    />
                                                                 </div>
                                                             </div>
-                                                            {lecture.isLocked ? (
-                                                                <div className="absolute inset-0 flex items-center justify-center z-10">
-                                                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                    </div>
-                                                                </div>
-                                                            ) : lecture.type === 'Assignment' ? (
-                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                        <span className="text-white text-lg">📋</span>
-                                                                    </div>
-                                                                </div>
-                                                            ) : lecture.type === 'Quiz' ? (
-                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                        <GraduationCap className="text-white w-5 h-5" />
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                                                                    </div>
+                                                            {currentLecture?.id === lecture.id && (
+                                                                <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
+                                                            )}
+                                                            {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                                                                <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
                                                                 </div>
                                                             )}
-                                                            <div className="absolute top-2 right-2 z-20">
-                                                                <img
-                                                                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                                                                    alt="Instructor"
-                                                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
-                                                                />
-                                                            </div>
                                                         </div>
-                                                        {currentLecture?.id === lecture.id && (
-                                                            <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
-                                                        )}
-                                                        {lecture.isCompleted && currentLecture?.id !== lecture.id && (
-                                                            <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                                 )}
                             </div>
 

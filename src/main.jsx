@@ -5,7 +5,6 @@ import './i18n'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const queryClient = new QueryClient({
@@ -26,7 +25,6 @@ createRoot(document.getElementById('root')).render(
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <QueryClientProvider client={queryClient}>
           <App />
-          <ReactQueryDevtools initialIsOpen={true} />
         </QueryClientProvider>
       </GoogleOAuthProvider>
       </BrowserRouter>
