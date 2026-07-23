@@ -99,6 +99,17 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
         fetchModeratorsData();
     }, [currentPage, statusFilter, fromDate, toDate]);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentPage !== 1) {
+                setCurrentPage(1);
+            } else {
+                fetchModeratorsData();
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchText, searchType]);
+
     const handleSearchClick = () => {
         setCurrentPage(1);
         fetchModeratorsData();

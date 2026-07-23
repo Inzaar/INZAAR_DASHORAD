@@ -11,10 +11,12 @@ import { login } from '@/api/auth';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
   const [email, setEmail] = useState('student@inzaar.com');
@@ -32,20 +34,20 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email === '' || password === '') {
-      setError('Please fill all fields');
+      setError(t('auth.error_fill_all_fields', 'Please fill all fields'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError(t('auth.error_password_length', 'Password must be at least 8 characters long.'));
       return;
     }
     if (!/[A-Z]/.test(password)) {
-      setError('Password must contain at least one uppercase letter.');
+      setError(t('auth.error_password_uppercase', 'Password must contain at least one uppercase letter.'));
       return;
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      setError('Password must contain at least one special symbol.');
+      setError(t('auth.error_password_special', 'Password must contain at least one special symbol.'));
       return;
     }
 
@@ -84,18 +86,18 @@ const LoginPage = () => {
     } catch (error) {
       console.error("Login error:", error);
       if (error.code === "ERR_NETWORK") {
-        setError("Network error. Please check your internet connection or try again later.");
+        setError(t('auth.error_network', 'Network error. Please check your internet connection or try again later.'));
       } else if (error.response) {
         if (error.response.status === 401) {
-          setError("Invalid email or password. Please try again.");
+          setError(t('auth.error_invalid_credentials', 'Invalid email or password. Please try again.'));
         } else {
           console.log(error.response.data.message);
           setError(error.response.data.message);
         }
       } else if (error.request) {
-        setError("No response from server. Please try again later.");
+        setError(t('auth.error_no_response', 'No response from server. Please try again later.'));
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setError(t('auth.error_unexpected', 'An unexpected error occurred. Please try again.'));
       }
     } finally {
       setLoading(false);
@@ -108,21 +110,21 @@ const LoginPage = () => {
       <RightAuth className="h-[634px] gap-3">
         <div className='max-w-[500px] w-full'>
           <AuthHeading>
-            Welcome to Inzaar.org LMS Portal
+            {t('auth.welcome', 'Welcome to Inzaar.org LMS Portal')}
           </AuthHeading>
-          <p className='text-[#71717A] text-[12px]'>Create your account or sign in.</p>
+          <p className='text-[#71717A] text-[12px]'>{t('auth.create_or_sign_in', 'Create your account or sign in.')}</p>
         </div>
 
         <form className="w-full flex flex-col items-center gap-4">
           <Input1
-            label="Email"
+            label={t('auth.email', 'Email')}
             name="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Input1
-            label="Password"
+            label={t('auth.password', 'Password')}
             name="password"
             type="password"
             value={password}
@@ -133,15 +135,15 @@ const LoginPage = () => {
 
           <div className="w-full max-w-[500px]">
             <GradiantButton onClick={handleSubmit} className="w-full h-[52px] rounded" type="submit">
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('auth.signing_in', 'Signing in...') : t('auth.sign_in', 'Sign in')}
             </GradiantButton>
           </div>
         </form>
 
-        <p className='text-[#636363] text-[16px]'>Or</p>
+        <p className='text-[#636363] text-[16px]'>{t('auth.or', 'Or')}</p>
         <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="mt-5 mb-3 !w-[calc(100%_-_60px)]" />
         <GrayButton className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-2">
-          Continue As A Guest
+          {t('auth.continue_as_guest', 'Continue As A Guest')}
         </GrayButton>
         <AuthText />
       </RightAuth>

@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { LogOut, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     return ReactDOM.createPortal(
@@ -23,9 +25,9 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
                     </div>
                     
                     {/* Text Area */}
-                    <h3 className="text-[19px] sm:text-[22px] font-bold text-[#0f172a] mb-2 font-sans tracking-tight">Confirm Logout</h3>
+                    <h3 className="text-[19px] sm:text-[22px] font-bold text-[#0f172a] mb-2 font-sans tracking-tight">{t('auth.confirm_logout', 'Confirm Logout')}</h3>
                     <p className="text-[#64748b] text-[12px] sm:text-[14px] font-medium leading-relaxed font-sans px-1">
-                        Are you sure you want to logout? You'll need to sign in again to access your dashboard.
+                        {t('auth.logout_confirmation_text', 'Are you sure you want to logout? You\'ll need to sign in again to access your dashboard.')}
                     </p>
                     
                     {/* Actions */}
@@ -34,13 +36,13 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
                             onClick={onClose}
                             className="w-full sm:w-1/2 py-3 sm:py-3.5 bg-gray-50 text-[#64748b] font-bold rounded-xl hover:bg-gray-100 transition-all active:scale-[0.98] font-sans text-[13px] sm:text-[14px]"
                         >
-                            Cancel
+                            {t('auth.cancel', 'Cancel')}
                         </button>
                         <button
                             onClick={onConfirm}
                             className="w-full sm:w-1/2 py-3.5 sm:py-4 bg-gradient-to-r from-[#6366F1] to-[#4f46e5] text-white font-bold rounded-xl shadow-[0_8px_20px_-5px_rgba(99,102,241,0.3)] hover:from-[#4f46e5] hover:to-[#3730a3] hover:shadow-[0_12px_25px_-5px_rgba(99,102,241,0.4)] transition-all active:scale-[0.98] font-sans text-[13px] sm:text-[14px]"
                         >
-                            Logout
+                            {t('auth.logout', 'Logout')}
                         </button>
                     </div>
                 </div>

@@ -28,6 +28,13 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         document.documentElement.dir = lang.dir;
         document.documentElement.lang = lang.code;
         setIsLangOpen(false);
+
+        // Magic: Trigger hidden Google Translate widget
+        const gtSelect = document.querySelector('.goog-te-combo');
+        if (gtSelect) {
+            gtSelect.value = lang.code;
+            gtSelect.dispatchEvent(new Event('change'));
+        }
     };
 
     const today = new Intl.DateTimeFormat(i18n.language || 'en-US', {

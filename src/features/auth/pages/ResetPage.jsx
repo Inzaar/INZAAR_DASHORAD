@@ -7,8 +7,10 @@ import Input1 from '../../../components/ui/inputs/Input1'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
 import AuthText from '../components/AuthText'
 import ErrorAlert from '@/components/ui/alerts/ErrorAlert'
+import { useTranslation } from 'react-i18next'
 
 function ResetPage() {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,24 +20,24 @@ function ResetPage() {
     setError('');
 
     if (!password || !confirmPassword) {
-      setError('Please fill all fields');
+      setError(t('auth.error_fill_all_fields', 'Please fill all fields'));
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError(t('auth.error_password_length', 'Password must be at least 8 characters long.'));
       return;
     }
     if (!/[A-Z]/.test(password)) {
-      setError('Password must contain at least one uppercase letter.');
+      setError(t('auth.error_password_uppercase', 'Password must contain at least one uppercase letter.'));
       return;
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      setError('Password must contain at least one special symbol.');
+      setError(t('auth.error_password_special', 'Password must contain at least one special symbol.'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError(t('auth.error_passwords_not_match', 'Passwords do not match.'));
       return;
     }
 
@@ -48,16 +50,16 @@ function ResetPage() {
         <AuthRight className="flex flex-col gap-3">
                 <div className='max-w-[500px] w-full'>
                     <AuthHeading>
-                        Reset Your Password
+                        {t('auth.reset_your_password', 'Reset Your Password')}
                     </AuthHeading>
                 </div>
 
                 <div className='max-w-[500px] w-full'>
                     <Input1 
-                        label="New Password" 
+                        label={t('auth.new_password', 'New Password')} 
                         name="password"
                         type="password"
-                        placeholder="your new password" 
+                        placeholder={t('auth.your_new_password', 'your new password')} 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
@@ -65,10 +67,10 @@ function ResetPage() {
 
                 <div className='max-w-[500px] w-full'>
                     <Input1 
-                        label="Confirm New Password" 
+                        label={t('auth.confirm_new_password', 'Confirm New Password')} 
                         name="confirmPassword"
                         type="password"
-                        placeholder="new password again" 
+                        placeholder={t('auth.new_password_again', 'new password again')} 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
@@ -77,7 +79,7 @@ function ResetPage() {
                 <ErrorAlert message={error} />
 
                 <GradiantButton onClick={handleSubmit} className="max-w-[500px] w-full h-[52px] rounded mt-[10px]">
-                    Reset Password
+                    {t('auth.reset_password_btn', 'Reset Password')}
                 </GradiantButton>
 
                 <AuthText className="mt-[30px]"/>

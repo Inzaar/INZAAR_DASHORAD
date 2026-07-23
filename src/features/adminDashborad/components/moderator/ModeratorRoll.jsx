@@ -1,6 +1,49 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Profileimg from "@/assets/images/course.png";
 import toast from "react-hot-toast";
+import Cropper from 'react-easy-crop';
+
+// Utility to crop image
+const createImage = (url) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener('load', () => resolve(image));
+    image.addEventListener('error', (error) => reject(error));
+    image.setAttribute('crossOrigin', 'anonymous');
+    image.src = url;
+  });
+
+async function getCroppedImg(imageSrc, pixelCrop) {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        console.error('Canvas is empty');
+        return;
+      }
+      blob.name = 'cropped.jpg';
+      resolve(new File([blob], 'cropped.jpg', { type: 'image/jpeg' }));
+    }, 'image/jpeg');
+  });
+}
 
 function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage }) {
   const user = profileData?.user || {};
@@ -8,6 +51,12 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
   const assignedBatches = profileData?.assignedBatches || [];
   const fileInputRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(Profileimg);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   useEffect(() => {
     // Priority: 
@@ -34,13 +83,35 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
     const file = e.target.files[0];
     if (!file) return;
 
-    // Basic validation
     if (!file.type.startsWith("image/")) {
       return toast.error("Please select an image file");
     }
 
-    // Pass the file to the parent component for later upload on 'Save'
-    setPendingProfileImage(file);
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      setCropImageSrc(reader.result);
+      setShowCropModal(true);
+    });
+    reader.readAsDataURL(file);
+    e.target.value = null; // reset input
+  };
+
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleCropSave = async () => {
+    try {
+      setIsCropping(true);
+      const croppedFile = await getCroppedImg(cropImageSrc, croppedAreaPixels);
+      setPendingProfileImage(croppedFile);
+      setShowCropModal(false);
+    } catch (e) {
+      toast.error("Failed to crop image");
+      console.error(e);
+    } finally {
+      setIsCropping(false);
+    }
   };
 
   return (
@@ -143,6 +214,66 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
 
         </div>
       </div>
+
+      {/* Crop Modal */}
+      {showCropModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-bold text-gray-800">Crop Profile Image</h3>
+              <button onClick={() => setShowCropModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            
+            <div className="relative w-full h-[300px] bg-gray-900">
+              <Cropper
+                image={cropImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+            
+            <div className="p-4 bg-gray-50 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-gray-500">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(e.target.value)}
+                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button 
+                  onClick={() => setShowCropModal(false)}
+                  className="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleCropSave}
+                  disabled={isCropping}
+                  className="px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {isCropping ? "Cropping..." : "Crop & Save"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
