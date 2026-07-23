@@ -472,5 +472,13 @@
   "WAQAR AHMAD": "وقار احمد",
   "Ahmed Bhai": "احمد بھائی",
   "Ali Raza": "علی رضا",
-  "Rashid Doe": "راشد ڈو"
+  "Rashid Doe": "راشد ڈو",
+  "auth": {
+    "phone_number": "فون نمبر",
+    "search_country": "ملک تلاش کریں...",
+    "loading_countries": "ممالک لوڈ ہو رہے ہیں...",
+    "no_countries_found": "کوئی ملک نہیں ملا",
+    "enter_phone_number": "فون نمبر درج کریں",
+    "invalid_phone_number": "غلط فون نمبر برائے"
+  }
 }

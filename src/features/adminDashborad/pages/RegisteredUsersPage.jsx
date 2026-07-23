@@ -21,6 +21,8 @@ const RegisteredUsersPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
     const [searchTerm, setSearchTerm] = useState('');
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -95,6 +97,7 @@ const RegisteredUsersPage = () => {
                         enrollments: enrolledCourseNames.length > 0 ? enrolledCourseNames : ["N/A"],
                         progress: `${totalProgress}%`,
                         lastLogin: new Date(user.updatedAt || user.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
+                        rawDate: new Date(user.updatedAt || user.createdAt),
                         status: dynamicStatus,
                         rawStatus: user.status // preserve original if needed
                     };
@@ -119,6 +122,37 @@ const RegisteredUsersPage = () => {
 
         fetchData();
     }, [userType]);
+
+    const displayedUsers = users.filter(user => {
+        let matchesSearch = true;
+        let matchesDate = true;
+
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            if (searchType === 'NAME') {
+                matchesSearch = String(user.name).toLowerCase().includes(term);
+            } else if (searchType === 'PHONE') {
+                // Remove spaces to make phone matching robust (e.g. "+92 300" matches "+92300")
+                const cleanPhone = String(user.phone).replace(/\s+/g, '').toLowerCase();
+                const cleanTerm = term.replace(/\s+/g, '').toLowerCase();
+                matchesSearch = cleanPhone.includes(cleanTerm);
+            }
+        }
+
+        if (fromDate || toDate) {
+            const userDate = user.rawDate;
+            if (fromDate) {
+                matchesDate = matchesDate && userDate >= new Date(fromDate);
+            }
+            if (toDate) {
+                const end = new Date(toDate);
+                end.setHours(23, 59, 59, 999);
+                matchesDate = matchesDate && userDate <= end;
+            }
+        }
+
+        return matchesSearch && matchesDate;
+    });
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
@@ -180,7 +214,9 @@ const RegisteredUsersPage = () => {
                                                     onClick={() => setSearchType('PHONE')}
                                                     className={cn(
                                                         "px-4 py-1.5 text-[11px] font-bold rounded shadow-sm transition-all",
-                                                        "bg-gradient-to-r from-[#3758EE]/45 via-[#B666E7]/45 to-[#3758EE]/45 text-white border border-blue-200/30 hover:opacity-90"
+                                                        searchType === 'PHONE'
+                                                            ? "shadow-md shadow-blue-500/20"
+                                                            : "opacity-30 grayscale-[0.5]"
                                                     )}
                                                 >
                                                     PHONE#
@@ -206,7 +242,8 @@ const RegisteredUsersPage = () => {
                                         <input
                                             type="date"
                                             className="w-full xl:w-[200px] h-[46px] px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                                            defaultValue="2024-04-12"
+                                            value={fromDate}
+                                            onChange={(e) => setFromDate(e.target.value)}
                                         />
                                     </div>
 
@@ -216,7 +253,8 @@ const RegisteredUsersPage = () => {
                                         <input
                                             type="date"
                                             className="w-full xl:w-[200px] h-[46px] px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                                            defaultValue="2024-04-20"
+                                            value={toDate}
+                                            onChange={(e) => setToDate(e.target.value)}
                                         />
                                     </div>
 
@@ -225,7 +263,8 @@ const RegisteredUsersPage = () => {
                                         className="h-[46px] px-6 flex items-center gap-2 bg-gray-100 text-gray-400 font-bold text-[13px] rounded-lg hover:bg-gray-200 transition-all whitespace-nowrap"
                                         onClick={() => {
                                             setSearchTerm('');
-                                            // Reset other filters if needed
+                                            setFromDate('');
+                                            setToDate('');
                                         }}
                                     >
                                         <BiFilterAlt size={18} />
@@ -252,12 +291,12 @@ const RegisteredUsersPage = () => {
                                                 <tr>
                                                     <td colSpan={7} className="py-20 text-center text-gray-400 font-medium">Loading participants...</td>
                                                 </tr>
-                                            ) : users.length === 0 ? (
+                                            ) : displayedUsers.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={7} className="py-20 text-center text-gray-400 font-medium">No records found.</td>
                                                 </tr>
                                             ) : (
-                                                users.map((user) => (
+                                                displayedUsers.map((user) => (
                                                     <tr key={user.id} className="hover:bg-gray-50/40 transition-colors">
                                                         <td className="py-6 pl-4 font-medium text-gray-800">{user.name}</td>
                                                         <td className="py-6">

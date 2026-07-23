@@ -215,5 +215,13 @@
   "event_renamed": "The event \"{{oldName}}\" has been renamed to \"{{newName}}\"",
   "event_modified": "\"{{eventName}}\" has been renamed/shifted to {{date}} / modified!",
   "event_canceled": "\"{{eventName}}\" has been canceled!",
-  "n/a": "N/A"
+  "n/a": "N/A",
+  "auth": {
+    "phone_number": "Phone number",
+    "search_country": "Search country...",
+    "loading_countries": "Loading countries...",
+    "no_countries_found": "No countries found",
+    "enter_phone_number": "enter phone number",
+    "invalid_phone_number": "Invalid phone number for"
+  }
 }

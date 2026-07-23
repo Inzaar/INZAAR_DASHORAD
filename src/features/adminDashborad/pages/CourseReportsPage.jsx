@@ -86,8 +86,13 @@ const CourseReportsPage = () => {
         }
     }, [tableStatus, tableFrom, tableTo, tableSearch]);
 
-    // Initial load
-    useEffect(() => { fetchReport(1); }, []);
+    // Real-time search effect
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchReport(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [tableSearch, tableStatus, tableFrom, tableTo, fetchReport]);
 
     // Top filter handlers
     const handleTopSearch = () => {

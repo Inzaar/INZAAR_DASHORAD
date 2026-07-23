@@ -11,8 +11,10 @@ import AuthText from '../components/AuthText'
 import { useRegister } from '../context/RegisterContext'
 import { register as registerUser } from '../../../api/auth'
 import { useAuth } from '../../../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 function RegisterPageP2() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const { login } = useAuth();
@@ -47,7 +49,7 @@ function RegisterPageP2() {
     try {
       // Final validation (referralSource is optional)
       if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress) {
-        throw new Error('Please fill in all required fields (Gender, DOB, Nationality, and Address).');
+        throw new Error(t('auth.error_fill_all_required_p2', 'Please fill in all required fields (Gender, DOB, Nationality, and Address).'));
       }
 
       const res = await registerUser(formData);
@@ -71,10 +73,10 @@ function RegisterPageP2() {
           navigate('/dashboard');
         }
       } else {
-        setError(res.data.message || 'Registration failed.');
+        setError(res.data.message || t('auth.registration_failed', 'Registration failed.'));
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Something went wrong.');
+      setError(err.response?.data?.message || err.message || t('auth.something_went_wrong', 'Something went wrong.'));
     } finally {
       setLoading(false);
     }
@@ -87,7 +89,7 @@ function RegisterPageP2() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full items-center">
           <div className='max-w-[500px] w-full'>
             <AuthHeading>
-              Create New Account
+              {t('auth.create_new_account', 'Create New Account')}
             </AuthHeading>
           </div>
 
@@ -97,25 +99,25 @@ function RegisterPageP2() {
 
           <div className='max-w-[500px] w-full flex gap-2'>
             <div className={`h-[76px] w-[50%] flex flex-col items-start justify-between`}>
-              <label className='text-[#18181B] text-[16px]'>Gender</label>
+              <label className='text-[#18181B] text-[16px]'>{t('auth.gender', 'Gender')}</label>
               <select 
                 name="Gender"
                 value={formData.gender}
                 onChange={handleChange}
                 className='w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2'
               >
-                <option value="Choose">Choose</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+                <option value="Choose">{t('auth.choose', 'Choose')}</option>
+                <option value="Male">{t('auth.male', 'Male')}</option>
+                <option value="Female">{t('auth.female', 'Female')}</option>
+                <option value="Other">{t('auth.other', 'Other')}</option>
               </select>
             </div>
             <div className="w-[50%]">
               <Input1 
                 name="DOB" 
-                label="DOB"
+                label={t('auth.dob', 'DOB')}
                 type="date"
-                placeholder="your age" 
+                placeholder={t('auth.your_age', 'your age')}
                 value={formData.dob}
                 onChange={handleChange}
               />
@@ -125,7 +127,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Input1 
               name="Educational Qualification" 
-              placeholder="Your Educational Qualification" 
+              placeholder={t('auth.your_educational_qualification', 'Your Educational Qualification')} 
               value={formData.educationQualification}
               onChange={handleChange}
             />
@@ -134,7 +136,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Input1 
               name="Nationality" 
-              placeholder="your nationality" 
+              placeholder={t('auth.your_nationality', 'your nationality')} 
               value={formData.nationality}
               onChange={handleChange}
             />
@@ -143,7 +145,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Input1 
               name="Permanent Address" 
-              placeholder="your Permanent Address" 
+              placeholder={t('auth.your_permanent_address', 'your Permanent Address')} 
               value={formData.permanentAddress}
               onChange={handleChange}
             />
@@ -152,7 +154,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Textarea1 
               name="Already Attended a Religious Course, give details if any:"
-              placeholder="details"
+              placeholder={t('auth.details', 'details')}
               value={formData.attendedReligiousCourseDetails}
               onChange={handleChange}
             />
@@ -161,7 +163,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Textarea1 
               name="How Did You Come To Know About Inzaar/Course:"
-              placeholder="feedback"
+              placeholder={t('auth.feedback', 'feedback')}
               value={formData.referralSource}
               onChange={handleChange}
             />
@@ -172,7 +174,7 @@ function RegisterPageP2() {
             disabled={loading}
             className="w-full max-w-[500px] h-[52px] rounded"
           >
-            {loading ? 'Creating Account...' : 'Completed'}
+            {loading ? t('auth.creating_account', 'Creating Account...') : t('auth.completed', 'Completed')}
           </GradiantButton>
 
           <AuthText className="mt-[10px]" isRegisterPage={true} />

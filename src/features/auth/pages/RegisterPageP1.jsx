@@ -13,8 +13,10 @@ import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
 import AuthText from '../components/AuthText';
 import { checkUsername, checkEmail } from '../../../api/auth';
+import { useTranslation } from 'react-i18next';
 
 function RegisterPageP1() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
@@ -29,7 +31,7 @@ function RegisterPageP1() {
         try {
           const res = await checkUsername(formData.username);
           if (!res.data.data.available) {
-            setUsernameError('This username already exists.');
+            setUsernameError(t('auth.error_username_exists', 'This username already exists.'));
           } else {
             setUsernameError('');
           }
@@ -50,7 +52,7 @@ function RegisterPageP1() {
         try {
           const res = await checkEmail(formData.email);
           if (!res.data.data.available) {
-            setEmailError('This email is already exist.');
+            setEmailError(t('auth.error_email_exists', 'This email is already exist.'));
           } else {
             setEmailError('');
           }
@@ -96,42 +98,42 @@ function RegisterPageP1() {
 
     // Basic validation for fields (lastname is optional)
     if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
-      setError('Please fill in all required fields.');
+      setError(t('auth.error_fill_required', 'Please fill in all required fields.'));
       return;
     }
 
     if (formData.username.includes(' ')) {
-      setError('Username cannot contain spaces.');
+      setError(t('auth.error_username_spaces', 'Username cannot contain spaces.'));
       return;
     }
 
     if (usernameError) {
-      setError('Please choose a unique username.');
+      setError(t('auth.error_username_unique', 'Please choose a unique username.'));
       return;
     }
 
     if (emailError) {
-      setError('Please use a unique email address.');
+      setError(t('auth.error_email_unique', 'Please use a unique email address.'));
       return;
     }
 
     // Password Validation
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError(t('auth.error_password_length', 'Password must be at least 8 characters long.'));
       return;
     }
     if (!/[A-Z]/.test(formData.password)) {
-      setError('Password must contain at least one uppercase letter.');
+      setError(t('auth.error_password_uppercase', 'Password must contain at least one uppercase letter.'));
       return;
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
-      setError('Password must contain at least one special symbol.');
+      setError(t('auth.error_password_special', 'Password must contain at least one special symbol.'));
       return;
     }
 
     // Validation for terms
     if (!agreedToTerms) {
-      setError('Please agree to the Terms of use and Privacy Policy.');
+      setError(t('auth.error_agree_terms', 'Please agree to the Terms of use and Privacy Policy.'));
       setShouldShake(true);
       // Reset shake after animation completes
       setTimeout(() => setShouldShake(false), 500);
@@ -151,7 +153,7 @@ function RegisterPageP1() {
             <ArrowLeft size={26} />
           </button>
           <AuthHeading>
-            Create New Account
+            {t('auth.create_new_account', 'Create New Account')}
           </AuthHeading>
         </div>
 
@@ -160,13 +162,13 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full flex gap-2'>
           <Input1
             name="First Name"
-            placeholder="First Name"
+            placeholder={t('auth.first_name', 'First Name')}
             value={formData.firstname}
             onChange={handleChange}
           />
           <Input1
             name="Last Name"
-            placeholder="Second Name"
+            placeholder={t('auth.second_name', 'Second Name')}
             value={formData.lastname}
             onChange={handleChange}
           />
@@ -175,7 +177,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <Input1 
             name="Username" 
-            placeholder="Username" 
+            placeholder={t('auth.username', 'Username')} 
             value={formData.username}
             onChange={handleChange}
           />
@@ -185,7 +187,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <Input1
             name="Email"
-            placeholder="Email"
+            placeholder={t('auth.email', 'Email')}
             type="email"
             value={formData.email}
             onChange={handleChange}
@@ -196,7 +198,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <Input1
             name="Password"
-            placeholder="8 Digit Password"
+            placeholder={t('auth.8_digit_password', '8 Digit Password')}
             type="password"
             value={formData.password}
             onChange={handleChange}
@@ -213,12 +215,12 @@ function RegisterPageP1() {
 
         <button onClick={handleNext} className="w-full max-w-[500px]">
           <GradiantButton className="w-full h-[52px] rounded mt-[10px]">
-            Next
+            {t('auth.next', 'Next')}
           </GradiantButton>
         </button>
 
         <div className="w-full max-w-[500px] flex flex-col items-center justify-center mt-6 mb-2">
-          <p className="text-[#636363] text-[16px] mb-4">Or sign up with</p>
+          <p className="text-[#636363] text-[16px] mb-4">{t('auth.or_sign_up_with', 'Or sign up with')}</p>
           <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} />
         </div>
 
@@ -234,7 +236,7 @@ function RegisterPageP1() {
               className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
             <label htmlFor="terms" className='text-[16px] font-[400] text-[#333333CC] cursor-pointer leading-tight select-none'>
-              By creating an account, I agree to our <span className='underline'>Terms of use</span> and <span className='underline'>Privacy Policy</span>
+              {t('auth.terms_agree_p1', 'By creating an account, I agree to our')} <span className='underline'>{t('auth.terms_of_use', 'Terms of use')}</span> {t('auth.and', 'and')} <span className='underline'>{t('auth.privacy_policy', 'Privacy Policy')}</span>
             </label>
           </div>
 
@@ -246,7 +248,7 @@ function RegisterPageP1() {
               className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
             <label htmlFor="newsletter" className='text-[16px] font-[400] text-[#333333CC] cursor-pointer leading-tight select-none'>
-              By creating an account, I am also consenting to receive SMS messages and emails, including product new feature updates, Courses, and marketing promotions.
+              {t('auth.newsletter_agree', 'By creating an account, I am also consenting to receive SMS messages and emails, including product new feature updates, Courses, and marketing promotions.')}
             </label>
           </div>
         </div>
