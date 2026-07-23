@@ -32,14 +32,17 @@
   }
 
   .glowing-scrollbar.is-scrolling::-webkit-scrollbar-thumb {
-    background: #D889FF; /* Brighter purple */
-    border: 3px solid transparent; /* This creates the "bending" / detached from edge effect */
+    background: #D889FF;
+    /* Brighter purple */
+    border: 3px solid transparent;
+    /* This creates the "bending" / detached from edge effect */
     background-clip: padding-box;
     border-radius: 20px;
-    box-shadow: 
+    box-shadow:
       0 0 10px #B666E7,
       0 0 20px #B666E7,
-      0 0 40px #B666E7; /* HYPER GLOW */
+      0 0 40px #B666E7;
+    /* HYPER GLOW */
   }
 }
 
@@ -176,7 +179,8 @@
     @apply bg-background text-foreground;
   }
 
-  [lang="ur"] *, [lang="ar"] * {
+  [lang="ur"] *,
+  [lang="ar"] * {
     font-family: 'Inter', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif !important;
   }
 }

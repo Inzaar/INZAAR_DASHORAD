@@ -57,7 +57,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         {!hideMenu && (
                             <button
                                 onClick={onMenuClick}
-                                className="lg:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
+                                className="md:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
                             >
                                 <Menu size={20} className="sm:w-6 sm:h-6" />
                             </button>
