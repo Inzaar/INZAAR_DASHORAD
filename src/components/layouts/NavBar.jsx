@@ -57,7 +57,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         {!hideMenu && (
                             <button
                                 onClick={onMenuClick}
-                                className="md:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
+                                className="lg:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
                             >
                                 <Menu size={20} className="sm:w-6 sm:h-6" />
                             </button>
@@ -72,9 +72,9 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 sm:gap-4 shrink-0 px-2 sm:px-0">
-                    <div 
+                    <div
                         onClick={() => user?.role === 'admin' ? navigate('/admin-notifications') : navigate('/notifications')}
                         className="relative w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] bg-white/10 flex items-center justify-center rounded-lg shadow-sm border border-white/10 hover:bg-white/20 transition-all cursor-pointer"
                     >
@@ -85,15 +85,15 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                             </span>
                         )}
                     </div>
-                    
+
                     <div className="relative">
                         <div
                             onClick={() => setIsLangOpen(!isLangOpen)}
                             className="bg-white/10 flex items-center justify-center rounded-lg shadow-sm cursor-pointer hover:bg-white/20 transition-all p-1.5 sm:px-3 gap-1.5 sm:gap-2 border border-white/10"
                         >
-                            <img 
-                                src={currentLang.flag} 
-                                alt="" 
+                            <img
+                                src={currentLang.flag}
+                                alt=""
                                 className="w-[16px] sm:w-[18px] h-auto rounded-[2px] shadow-sm"
                             />
                             <span className="text-[#2C2C2C] text-[12px] sm:text-sm font-bold hidden min-[400px]:inline">{currentLang.code.toUpperCase()}</span>
@@ -130,9 +130,9 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         )}
                     </div>
 
-                    <div 
+                    <div
                         onClick={() => user?.role === 'admin' ? navigate('/admin/profile') : navigate('/profile')}
-                        className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-2 border-white/30 shadow-md bg-white/20 flex items-center justify-center cursor-pointer hover:border-white transition-all shrink-0"
+                        className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
                     >
                         {user?.profileImageUrl ? (
                             <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import img from "@/assets/images/course.png"
 import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const CardCourse = ({ course, isAdmin = false }) => {
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
@@ -28,6 +30,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
       const res = await enrollCourse(course.id,);
       console.log(res);
       if (res.data.success === true) {
+        toast.success(t("successfully_enrolled", "You are successfully enrolled"));
         navigate("/course-view?id=" + course.id);
       }
     } catch (error) {
@@ -102,8 +105,15 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
       {isAlreadyEnrolled && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-            <div className="flex flex-col items-center text-center gap-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setIsAlreadyEnrolled(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col items-center text-center gap-4 pt-2">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
               </div>
@@ -112,10 +122,13 @@ const CardCourse = ({ course, isAdmin = false }) => {
                 <p className="text-sm text-gray-500">{errorMessage}</p>
               </div>
               <GradiantButton
-                onClick={() => setIsAlreadyEnrolled(false)}
+                onClick={() => {
+                  setIsAlreadyEnrolled(false);
+                  navigate("/course-view?id=" + course.id);
+                }}
                 className="w-full py-2 rounded-md"
               >
-                {t("close", "Close")}
+                {t("continue", "Continue")}
               </GradiantButton>
             </div>
           </div>

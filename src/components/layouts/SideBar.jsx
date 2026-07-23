@@ -166,7 +166,7 @@ function Sidebar({ className, onClose }) {
       setIsStudentsExpanded(!isStudentsExpanded);
       return;
     }
-    
+
     if (itemName === 'Moderators') {
       setIsModeratorsExpanded(!isModeratorsExpanded);
       return;
@@ -258,21 +258,21 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isReportsExpanded && (
             <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
-              <button 
+              <button
                 onClick={() => handleItemClick('Student Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
                 {t('student_reports', 'Student Reports')}
               </button>
-              <button 
+              <button
                 onClick={() => handleItemClick('Moderator Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
                 {t('moderator_reports', 'Moderator Reports')}
               </button>
-              <button 
+              <button
                 onClick={() => handleItemClick('Course Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
               >
@@ -284,7 +284,7 @@ function Sidebar({ className, onClose }) {
         </div>
       );
     }
-    
+
     if (item === 'Moderators') {
       const isAnyModeratorActive = ['All Moderators', 'Male Moderators', 'Female Moderators', 'Moderators'].includes(activeItem);
       return (
@@ -305,21 +305,21 @@ function Sidebar({ className, onClose }) {
             <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
               {user?.role === 'admin' && (
                 <>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('All Moderators')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
                     {t('all_moderators', 'All Moderators')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('Male Moderators')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
                     {t('male_moderators', 'Male Moderators')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('Female Moderators')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Moderators' ? 'font-bold' : 'font-medium'}`}
                   >
@@ -333,7 +333,7 @@ function Sidebar({ className, onClose }) {
         </div>
       );
     }
-    
+
     if (item === 'Student Profiles') {
       if (user?.role === 'moderator') {
         const isAnyStudentActive = ['All Students', 'Male Students', 'Female Students', 'Student Profiles'].includes(activeItem);
@@ -370,21 +370,21 @@ function Sidebar({ className, onClose }) {
             <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
               {user?.role === 'admin' && (
                 <>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('All Students')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Students' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
                     {t('all_students', 'All Students')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('Male Students')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Students' ? 'font-bold' : 'font-medium'}`}
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
                     {t('male_students', 'Male Students')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleItemClick('Female Students')}
                     className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Students' ? 'font-bold' : 'font-medium'}`}
                   >
@@ -410,16 +410,16 @@ function Sidebar({ className, onClose }) {
   };
 
   return (
-    <div className={`w-[260px] bg-white border-r-[3px] md:border-[3px] border-[#6984E6] flex flex-col z-40 md:rounded shadow-sm h-screen md:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
+    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
         <div className='text-[#6A6F78] text-[14px] ml-3 font-medium pr-2 pb-1'>{t('welcome_user', 'Welcome, ')} {t(user?.firstname || user?.name || "User")}</div>
-        <button onClick={onClose} className="md:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
+        <button onClick={onClose} className="lg:hidden p-1 hover:bg-gray-100 rounded-md text-gray-500 transition-colors">
           <X size={20} />
         </button>
       </div>
 
-      <div className='w-full md:w-[192px] mx-auto px-4 md:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] md:max-h-[70vh]'>
+      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] lg:max-h-[70vh]'>
         <div className='w-full flex flex-col items-start gap-2'>
           {menuItems.map(renderMenuItem)}
         </div>
@@ -431,9 +431,9 @@ function Sidebar({ className, onClose }) {
           </div>
         )}
       </div>
-      
+
       {/* Footer (Logout) fixed to bottom */}
-      <div className='w-full md:w-[192px] mx-auto px-4 md:px-0 flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-2 shrink-0 pb-10'>
+      <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex flex-col items-start gap-2 text-[14px] text-[#6A6F78] font-[500] border-t border-gray-100 pt-2 shrink-0 pb-10'>
         <Sideabrbbutton
           isActive={activeItem === 'Logout'}
           onClick={() => handleItemClick('Logout')}

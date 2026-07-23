@@ -12,7 +12,6 @@ const ProfilePage = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [userPayload, setUserPayload] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const progressPercentage = 40;
 
     console.log("working before the useEffect")
     useEffect(() => {

@@ -22,6 +22,34 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const { t } = useTranslation();
 
 
+    const calculateProfileCompletion = (user) => {
+        if (!user) return 0;
+        const fields = [
+            'firstname',
+            'lastname',
+            'email',
+            'phone',
+            'city',
+            'gender',
+            'dob',
+            'educationQualification',
+            'nationality',
+            'permanentAddress',
+            'attendedReligiousCourseDetails',
+            'profileImageUrl'
+        ];
+        let filledCount = 0;
+        fields.forEach(field => {
+            const val = user[field];
+            if (val !== undefined && val !== null && String(val).trim() !== '' && val !== 'Choose') {
+                filledCount++;
+            }
+        });
+        return Math.round((filledCount / fields.length) * 100);
+    };
+
+    const completionPercentage = calculateProfileCompletion(userPayload || userInfo);
+
     const handleTabClick = (tab) => {
         setActiveTab(tab);
         console.log(tab)
@@ -79,21 +107,34 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             <div className="gap-[22px] flex flex-col min-[800px]:flex-row px-1 min-[600px]:px-10">
                 {/* div left */}
                 <div className="w-[300px]">
-                    <div className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md absolute top-[40px] ltr:left-2 ltr:min-[500px]:left-[30px] rtl:right-2 rtl:min-[500px]:right-[30px] flex items-center justify-center">
-                        {userPayload?.profileImageUrl || userInfo?.profileImageUrl ? (
-                            <img
-                                src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
-                                alt="profile"
-                                className="w-full h-full object-cover bg-white"
-                            />
-                        ) : (
-                            <span className="text-gray-400 text-sm font-medium">{t('no_image', 'No Image')}</span>
-                        )}
+                    {/* Profile Picture with Circular Progress Ring */}
+                    <div
+                        className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full p-[6px] min-[600px]:p-[8px] shadow-xl border border-white absolute top-[40px] ltr:left-2 ltr:min-[500px]:left-[30px] rtl:right-2 rtl:min-[500px]:right-[30px] flex items-center justify-center transition-all"
+                        style={{
+                            background: `conic-gradient(#3758EE ${completionPercentage}%, #E2E8F0 ${completionPercentage}% 100%)`
+                        }}
+                    >
+                        <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
+                            {userPayload?.profileImageUrl || userInfo?.profileImageUrl ? (
+                                <img
+                                    src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
+                                    alt="profile"
+                                    className="w-full h-full object-cover bg-white"
+                                />
+                            ) : (
+                                <span className="text-gray-400 text-sm font-medium">{t('no_image', 'No Image')}</span>
+                            )}
+                        </div>
                     </div>
 
                     <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] ltr:left-2 ltr:min-[500px]:left-[35px] rtl:right-2 rtl:min-[500px]:right-[35px] ltr:text-left rtl:text-right">
                         {/* <h5>Zain</h5> */}
-                        <h4 className="font-bold w-full h-[38px] text-[30px] leading-normal pt-1 pb-1">{t(userInfo?.firstname, userInfo?.firstname) || "[YOUR_NAME]"}</h4>
+                        <div className="flex items-center gap-2.5 flex-wrap pt-1 pb-1">
+                            <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">{t(userInfo?.firstname, userInfo?.firstname) || "[YOUR_NAME]"}</h4>
+                            <span className="bg-[#3758EE]/10 text-[#3758EE] text-xs min-[600px]:text-sm font-extrabold px-2.5 py-0.5 rounded-full border border-[#3758EE]/20 shadow-sm shrink-0">
+                                {completionPercentage}%
+                            </span>
+                        </div>
                         <a href="#" className="w-full h-[24px] text-[16px] underline truncate">{userInfo?.email || "[EMAIL_ADDRESS]"}</a>
                         <h6 className="font-bold text-[16px] leading-[22px] tracking-[-0.7%] text-[#1E293B] leading-[1.8] pt-1">{t('personal_info', 'Personal Info')}</h6>
                         <p className="font-bold text-[14px] leading-[160%] tracking-[0%] text-[#475569] leading-[1.8]">{t('personal_info_desc', 'You can change your personal information settings here.')}</p>
