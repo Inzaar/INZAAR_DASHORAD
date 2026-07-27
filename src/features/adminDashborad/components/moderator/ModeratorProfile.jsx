@@ -5,13 +5,19 @@ import toast from "react-hot-toast";
 import { uploadImage } from "@/api/course";
 import { updateUser } from "@/api/user";
 import axiosInstance from "@/api/axiosInstance";
+import PhoneInput from "@/components/ui/inputs/PhoneInput";
 
 function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage, onEditClick }) {
   const isStudent = type === 'student';
   const user = profileData?.user || {};
   const [isSaving, setIsSaving] = useState(false);
+  const [phone, setPhone] = useState(user.phone || '');
   const [cnicFrontPreview, setCnicFrontPreview] = useState(user.cnicFrontImage || null);
   const [cnicBackPreview, setCnicBackPreview] = useState(user.cnicBackImage || null);
+
+  useEffect(() => {
+    setPhone(user.phone || '');
+  }, [user.phone]);
 
   // Password Modal State
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -29,8 +35,8 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
     if (passwordData.password !== passwordData.confirmPassword) {
       return toast.error("Passwords do not match!");
     }
-    if (passwordData.password.length < 8) {
-      return toast.error("Password must be at least 8 characters long!");
+    if (passwordData.password.length < 6) {
+      return toast.error("Password must be at least 6 characters long!");
     }
     if (!/[A-Z]/.test(passwordData.password)) {
       return toast.error("Password must contain at least one uppercase letter!");
@@ -63,22 +69,20 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
 
     try {
       const form = new FormData(e.target);
-      const phone = form.get("phone");
-      if (phone && phone.length !== 11) {
-        setIsSaving(false);
-        toast.dismiss(toastId);
-        return toast.error("Phone number must be exactly 11 digits.");
-      }
 
       const payload = {
         firstname: form.get("firstname"),
         email: form.get("email"),
-        phone: form.get("phone"),
+        phone: phone,
         gender: form.get("gender"),
         cnic: form.get("cnic"),
         permanentAddress: form.get("permanentAddress"),
         nationality: form.get("nationality"),
+        city: form.get("city"),
         educationQualification: form.get("educationQualification"),
+        attendedReligiousCourseDetails: form.get("attendedReligiousCourseDetails"),
+        dob: form.get("dob"),
+        profileImageUrl: pendingProfileImage ? null : user.profileImageUrl || ""
       };
 
       // 1. Handle Pending Profile Image (from ModeratorRoll component)
@@ -298,24 +302,13 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
             {/* Number */}
             <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-2 lg:order-3">
               <label className="font-medium text-[14px]">Number</label>
-              <div className="flex items-center h-[48px] px-3 gap-2 rounded-md border border-[#E4E4E7]">
-                <select className="outline-none bg-transparent">
-                  <option>🇺🇸 +1</option>
-                  <option>🇵🇰 +92</option>
-                  <option>🇮🇳 +91</option>
-                </select>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone number"
-                  defaultValue={user.phone || ""}
-                  maxLength={11}
-                  onInput={(e) => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                  }}
-                  className="outline-none w-full"
-                />
-              </div>
+              <PhoneInput
+                name="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                label={null}
+                containerClassName="w-full relative"
+              />
             </div>
 
             {/* Gender */}

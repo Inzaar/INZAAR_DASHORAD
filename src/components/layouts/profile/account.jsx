@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ThumbnailCropper from '@/features/adminDashborad/components/ThumbnailCropper';
 import { uploadProfilePic } from '@/api/auth';
+import PhoneInput from '@/components/ui/inputs/PhoneInput';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { MdUploadFile } from "react-icons/md";
@@ -76,25 +77,15 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                         </div>
 
                         {/* whatsapp number */}
-                        <div className="w-full min-[1218px]:w-[50%] h-[78px] opacity-[1px] gap-[8px]">
+                        <div className="w-full min-[1218px]:w-[50%] opacity-[1px] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('whatsapp_number_required', 'WhatsApp number*')}</label>
-                            <div className="flex align-center h-[54px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border">
-                                <select className=" outline-none">
-                                    <option>🇺🇸  +1</option>
-                                    <option>🇵🇰 +92</option>
-                                    <option>🇮🇳 +91</option>
-                                </select>
-                                <input
-                                    type="tel"
-                                    value={userPayload?.phone || ''}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/\D/g, '');
-                                        setUserPayload({ ...userPayload, phone: val });
-                                    }}
-                                    maxLength={11}
-                                    placeholder={t('phone_number', 'Phone number')}
-                                    className="outline-none w-full" />
-                            </div>
+                            <PhoneInput
+                                name="phone"
+                                value={userPayload?.phone || ''}
+                                onChange={(e) => setUserPayload({ ...userPayload, phone: e.target.value })}
+                                label={null}
+                                containerClassName="w-full relative"
+                            />
                         </div>
                     </div>
 
