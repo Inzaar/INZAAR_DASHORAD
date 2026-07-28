@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { adminCreateModerator } from '@/api/user';
+import PhoneInput from '@/components/ui/inputs/PhoneInput';
 import AssignModeratorModal from './student/AssignModeratorModal';
 
 const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
@@ -9,6 +10,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
     const [newModerator, setNewModerator] = useState({
         firstname: '',
         lastname: '',
+        username: '',
         email: '',
         phone: '',
         password: '',
@@ -24,8 +26,13 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
         e.preventDefault();
         setFormError('');
 
-        if (newModerator.phone.length !== 11) {
-            setFormError('Phone number must be exactly 11 digits.');
+        if (newModerator.username && newModerator.username.includes(' ')) {
+            setFormError('Username cannot contain spaces.');
+            return;
+        }
+
+        if (!newModerator.phone) {
+            setFormError('Phone number is required.');
             return;
         }
 
@@ -61,6 +68,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
             setNewModerator({
                 firstname: '',
                 lastname: '',
+                username: '',
                 email: '',
                 phone: '',
                 password: '',
@@ -87,6 +95,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
         setNewModerator({
             firstname: '',
             lastname: '',
+            username: '',
             email: '',
             phone: '',
             password: '',
@@ -150,6 +159,18 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="Enter Username"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newModerator.username}
+                                    onChange={(e) => setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
                                 <input
                                     required
@@ -163,17 +184,12 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
 
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    placeholder="Enter Phone Number"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                <PhoneInput
+                                    name="phone"
                                     value={newModerator.phone}
-                                    maxLength={11}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^0-9]/g, '');
-                                        setNewModerator({ ...newModerator, phone: val });
-                                    }}
+                                    onChange={(e) => setNewModerator({ ...newModerator, phone: e.target.value })}
+                                    label={null}
+                                    containerClassName="w-full relative"
                                 />
                             </div>
 

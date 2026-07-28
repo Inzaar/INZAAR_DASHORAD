@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import PhoneInput from '@/components/ui/inputs/PhoneInput';
 import StatsCard from '../components/StatsCard';
 import UserCard from '../components/UserCard';
 import { Search, Plus, ChevronDown, MoreVertical, X, Loader, Eye, EyeOff, LayoutGrid } from 'lucide-react';
@@ -48,6 +49,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [newModerator, setNewModerator] = useState({
         firstname: '',
         lastname: '',
+        username: '',
         email: '',
         phone: '',
         password: '',
@@ -143,6 +145,11 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
         e.preventDefault();
         setFormError('');
 
+        if (newModerator.username && newModerator.username.includes(' ')) {
+            setFormError('Username cannot contain spaces.');
+            return;
+        }
+
         if (newModerator.phone.length !== 11) {
             setFormError('Phone number must be exactly 11 digits.');
             return;
@@ -180,6 +187,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
             setNewModerator({
                 firstname: '',
                 lastname: '',
+                username: '',
                 email: '',
                 phone: '',
                 password: '',
@@ -659,6 +667,18 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                             </div>
 
                             <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="Enter Username"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    value={newModerator.username}
+                                    onChange={(e) => setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
                                 <input
                                     required
@@ -672,16 +692,12 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    placeholder="Enter Phone Number"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                <PhoneInput
+                                    name="phone"
                                     value={newModerator.phone}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^0-9]/g, '');
-                                        setNewModerator({ ...newModerator, phone: val });
-                                    }}
+                                    onChange={(e) => setNewModerator({ ...newModerator, phone: e.target.value })}
+                                    label={null}
+                                    containerClassName="w-full relative"
                                 />
                             </div>
 

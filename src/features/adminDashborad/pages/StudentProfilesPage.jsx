@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import PhoneInput from '@/components/ui/inputs/PhoneInput';
 import StatsCard from '../components/StatsCard';
 import ChartStatsCard from '../components/ChartStatsCard';
 import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff, Loader } from 'lucide-react';
@@ -721,17 +722,12 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
 
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
-                                <input
-                                    required
-                                    type="tel"
-                                    placeholder="Enter Phone Number"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                <PhoneInput
+                                    name="phone"
                                     value={newStudent.phone}
-                                    maxLength={11}
-                                    onChange={(e) => {
-                                        const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                        setNewStudent({ ...newStudent, phone: numericValue });
-                                    }}
+                                    onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                                    label={null}
+                                    containerClassName="w-full relative"
                                 />
                             </div>
 
