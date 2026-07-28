@@ -101,10 +101,13 @@ const ReportsPage = () => {
         }
     }, [tableStatus, tableFrom, tableTo, tableSearch, tableSearchType]);
 
-    // Initial load
+    // Real-time search effect
     useEffect(() => {
-        fetchReport(1);
-    }, []);
+        const timer = setTimeout(() => {
+            fetchReport(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [tableSearch, tableSearchType, tableStatus, tableFrom, tableTo, fetchReport]);
 
     // Handle top filter search
     const handleTopSearch = () => {

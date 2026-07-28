@@ -96,8 +96,13 @@ const ModeratorReportsPage = () => {
         }
     }, [tableStatus, tableFrom, tableTo, tableSearch, tableSearchType]);
 
-    // Initial load
-    useEffect(() => { fetchReport(1); }, []);
+    // Real-time search effect
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchReport(1);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [tableSearch, tableSearchType, tableStatus, tableFrom, tableTo, fetchReport]);
 
     // Top filter handlers
     const handleTopSearch = () => {

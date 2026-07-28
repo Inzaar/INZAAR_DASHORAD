@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { AsYouType, isValidPhoneNumber } from 'libphonenumber-js';
+import { useTranslation } from 'react-i18next';
 
 const DEFAULT_COUNTRIES = [
   { name: 'Pakistan', flag: 'https://flagcdn.com/w320/pk.png', code: '+92', cca2: 'PK' },
@@ -131,8 +132,8 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
   const containerClasses = containerClassName || 'max-w-[500px] w-full mt-[10px] relative pb-5';
 
   return (
-    <div className={containerClasses}>
-      {label && <label className='text-[16px] text-[#18181B] mb-1 block'>{label}</label>}
+    <div className='max-w-[500px] w-full mt-[10px] relative pb-5'>
+      <label className='text-[16px] text-[#18181B] mb-1 block'>{t('auth.phone_number', 'Phone number')}</label>
       <div className={`flex items-center w-full h-[52px] border rounded transition-all duration-200 focus-within:ring-1 ${
         !isValid && phoneNumber.length > 0 
           ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' 
@@ -156,7 +157,7 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
               <div className='p-2 border-b border-gray-100'>
                 <input 
                   type="text" 
-                  placeholder="Search country..." 
+                  placeholder={t('auth.search_country', 'Search country...')}
                   className='w-full p-2 text-sm border border-gray-200 rounded outline-none focus:border-[#71717A]'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -165,9 +166,9 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
               </div>
               <div className='overflow-y-auto'>
                 {isLoading ? (
-                  <div className='p-3 text-sm text-gray-500 text-center'>Loading countries...</div>
+                  <div className='p-3 text-sm text-gray-500 text-center'>{t('auth.loading_countries', 'Loading countries...')}</div>
                 ) : filteredCountries.length === 0 ? (
-                  <div className='p-3 text-sm text-gray-500 text-center'>No countries found</div>
+                  <div className='p-3 text-sm text-gray-500 text-center'>{t('auth.no_countries_found', 'No countries found')}</div>
                 ) : (
                   filteredCountries.map((country, idx) => (
                     <button
@@ -190,14 +191,14 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
         {/* Number Input */}
         <input 
           type="tel" 
-          placeholder='enter phone number' 
+          placeholder={t('auth.enter_phone_number', 'enter phone number')}
           className='flex-1 h-full outline-none text-[#71717A] text-[14px] px-3 bg-transparent'
           value={phoneNumber}
           onChange={handlePhoneChange}
         />
       </div>
       {!isValid && phoneNumber.length > 0 && (
-        <span className='text-xs text-red-500 absolute bottom-0 left-0'>Invalid phone number for {selectedCountry.name}</span>
+        <span className='text-xs text-red-500 absolute bottom-0 left-0'>{t('auth.invalid_phone_number', 'Invalid phone number for')} {selectedCountry.name}</span>
       )}
     </div>
   )
