@@ -141,7 +141,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         onClick={() => user?.role === 'admin' ? navigate('/admin/profile') : navigate('/profile')}
                         className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
                     >
-                        {user?.profileImageUrl ? (
+                        {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
                             <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
                         ) : (
                             <span className="text-[#2C2C2C] font-black text-xs sm:text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>

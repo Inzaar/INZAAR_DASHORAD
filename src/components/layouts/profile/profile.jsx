@@ -115,7 +115,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                         }}
                     >
                         <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
-                            {userPayload?.profileImageUrl || userInfo?.profileImageUrl ? (
+                            {(userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '') || (userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '') ? (
                                 <img
                                     src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
                                     alt="profile"
@@ -130,7 +130,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                     <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] ltr:left-2 ltr:min-[500px]:left-[35px] rtl:right-2 rtl:min-[500px]:right-[35px] ltr:text-left rtl:text-right">
                         {/* <h5>Zain</h5> */}
                         <div className="flex items-center gap-2.5 flex-wrap pt-1 pb-1">
-                            <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">{t(userInfo?.firstname, userInfo?.firstname) || "[YOUR_NAME]"}</h4>
+                            <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">{userInfo?.firstname || "[YOUR_NAME]"}</h4>
                             <span className="bg-[#3758EE]/10 text-[#3758EE] text-xs min-[600px]:text-sm font-extrabold px-2.5 py-0.5 rounded-full border border-[#3758EE]/20 shadow-sm shrink-0">
                                 {completionPercentage}%
                             </span>

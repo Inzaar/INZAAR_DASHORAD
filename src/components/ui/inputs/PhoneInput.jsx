@@ -30,6 +30,7 @@ const DEFAULT_COUNTRIES = [
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 function PhoneInput({ value, onChange, name, label = "Phone number", containerClassName = "" }) {
+  const { t } = useTranslation();
   const [countries, setCountries] = useState(DEFAULT_COUNTRIES);
   const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRIES.find(c => c.cca2 === 'PK') || DEFAULT_COUNTRIES[0]);
   const [isOpen, setIsOpen] = useState(false);
@@ -132,8 +133,12 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
   const containerClasses = containerClassName || 'max-w-[500px] w-full mt-[10px] relative pb-5';
 
   return (
-    <div className='max-w-[500px] w-full mt-[10px] relative pb-5'>
-      <label className='text-[16px] text-[#18181B] mb-1 block'>{t('auth.phone_number', 'Phone number')}</label>
+    <div className={containerClasses}>
+      {label !== null && label !== false && (
+        <label className='text-[16px] text-[#18181B] mb-1 block'>
+          {label === "Phone number" ? t('auth.phone_number', 'Phone number') : label}
+        </label>
+      )}
       <div className={`flex items-center w-full h-[52px] border rounded transition-all duration-200 focus-within:ring-1 ${
         !isValid && phoneNumber.length > 0 
           ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500' 
@@ -147,8 +152,10 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
             onClick={toggleDropdown}
             className='flex items-center gap-2 h-full px-3 border-r border-[#71717A]/20 hover:bg-gray-50 transition-colors rounded-l'
           >
-            <img src={selectedCountry.flag} alt={selectedCountry.cca2} className='w-6 h-4 object-cover rounded-sm' />
-            <span className='text-[14px] text-[#71717A] font-medium'>{selectedCountry.code}</span>
+            {selectedCountry?.flag && (
+              <img src={selectedCountry.flag} alt={selectedCountry.cca2 || ''} className='w-6 h-4 object-cover rounded-sm' />
+            )}
+            <span className='text-[14px] text-[#71717A] font-medium'>{selectedCountry?.code}</span>
             <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </button>
 
@@ -177,7 +184,9 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
                       onClick={() => handleCountrySelect(country)}
                       className='w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 text-left transition-colors'
                     >
-                      <img src={country.flag} alt={country.cca2} className='w-5 h-3 object-cover rounded-sm' />
+                      {country?.flag && (
+                        <img src={country.flag} alt={country.cca2 || ''} className='w-5 h-3 object-cover rounded-sm' />
+                      )}
                       <span className='text-sm text-gray-700 flex-1'>{country.name}</span>
                       <span className='text-xs text-gray-400'>{country.code}</span>
                     </button>

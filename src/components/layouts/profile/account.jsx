@@ -103,13 +103,13 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                         <div className="w-[80px] h-[80px] rounded-full overflow-hidden bg-gray-200 border border-gray-100 flex items-center justify-center">
                             {isUploading ? (
                                 <Loader2 className="animate-spin text-blue-500 w-8 h-8" />
-                            ) : userPayload?.profileImageUrl ? (
+                            ) : userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '' ? (
                                 <img
                                     src={userPayload.profileImageUrl}
                                     alt="profile"
                                     className="w-full h-full object-cover"
                                 />
-                            ) : userInfo?.profileImageUrl ? (
+                            ) : userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '' ? (
                                 <img
                                     src={userInfo.profileImageUrl}
                                     alt="profile"

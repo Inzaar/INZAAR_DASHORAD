@@ -196,7 +196,7 @@ const AdminCoursesPage = () => {
                                             {...stat}
                                             trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
                                             iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
-                                            onClick={() => navigate(`/registered-users?type=all_students`)}
+                                            onClick={() => navigate(`/registered-courses?type=${stat.type}`)}
                                         />
                                     );
                                 })}

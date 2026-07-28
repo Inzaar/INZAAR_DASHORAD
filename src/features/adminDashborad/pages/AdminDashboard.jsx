@@ -163,7 +163,7 @@ const AdminDashboard = () => {
                                             trend="5%"
                                             trendDirection="down"
                                             trendText="vs last month"
-                                            onClick={() => navigate('/registered-users')}
+                                            onClick={() => navigate('/registered-courses?type=all')}
                                         />
                                         <StatsCard
                                             title="Total Moderator"

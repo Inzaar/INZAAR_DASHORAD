@@ -792,14 +792,15 @@ const AddCoursePage = () => {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Block Strength</label>
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Batch Strength</label>
                                                         <input
-                                                            type="text"
-                                                            readOnly
-                                                            value="10 students per block"
-                                                            className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                            type="number"
+                                                            min="1"
+                                                            placeholder="Enter students per batch (e.g. 10)"
+                                                            value={courseForm.batchStrength}
+                                                            onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
+                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
                                                         />
-                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">If 100 students enroll &rarr; system auto-creates 10 block.</p>
                                                     </div>
                                                     <div>
                                                         <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
