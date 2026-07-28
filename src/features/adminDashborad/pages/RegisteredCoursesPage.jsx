@@ -40,9 +40,9 @@ const RegisteredCoursesPage = () => {
 
                 let filtered = apiCourses;
 
-                if (courseType === 'active') filtered = filtered.filter(c => c.status === 'active' || c.status === 'Active');
-                if (courseType === 'inactive') filtered = filtered.filter(c => c.status === 'inactive' || c.status === 'Inactive');
-                if (courseType === 'draft') filtered = filtered.filter(c => c.status === 'draft' || c.status === 'Draft');
+                if (courseType === 'active') filtered = filtered.filter(c => ['active', 'published'].includes((c.status || '').toLowerCase()));
+                if (courseType === 'inactive') filtered = filtered.filter(c => (c.status || '').toLowerCase() === 'inactive');
+                if (courseType === 'draft') filtered = filtered.filter(c => (c.status || '').toLowerCase() === 'draft');
 
                     const formatted = filtered.map(c => ({
                         id: c._id,
@@ -50,7 +50,8 @@ const RegisteredCoursesPage = () => {
                         date: new Date(c.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
                         lectures: c.totalLectures || 0,
                         duration: c.duration || "N/A",
-                        status: c.status === 'draft' ? 'Draft' : 'Active'
+                        status: (c.status || '').toLowerCase() === 'draft' ? 'Draft' : 
+                                (c.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
                     }));
                     setCourses(formatted);
             } catch (error) {

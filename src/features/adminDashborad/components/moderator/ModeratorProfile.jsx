@@ -70,6 +70,13 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
     try {
       const form = new FormData(e.target);
 
+      const email = form.get("email");
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setIsSaving(false);
+        toast.dismiss(toastId);
+        return toast.error("Please enter a valid email address.");
+      }
+
       const payload = {
         firstname: form.get("firstname"),
         email: form.get("email"),

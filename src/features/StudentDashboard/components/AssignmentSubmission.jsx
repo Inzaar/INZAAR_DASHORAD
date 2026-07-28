@@ -122,9 +122,33 @@ const AssignmentSubmission = () => {
                                 <h3 className="text-base font-semibold text-gray-900 mb-3">
                                     {t('instructions', 'Instructions')}
                                 </h3>
-                                <p className="text-gray-600 text-sm leading-relaxed">
+                                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
                                     {assignment.instructions}
                                 </p>
+                                
+                                {assignment.pdfUrl && (Array.isArray(assignment.pdfUrl) ? assignment.pdfUrl.length > 0 : typeof assignment.pdfUrl === 'string') && (
+                                    <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
+                                        <h4 className="text-sm font-semibold text-gray-800">{t('attached_documents', 'Attached Documents')}</h4>
+                                        {(Array.isArray(assignment.pdfUrl) ? assignment.pdfUrl : [assignment.pdfUrl]).map((url, idx) => (
+                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <FileText className="w-5 h-5 text-[#3758EE] flex-shrink-0" />
+                                                    <span className="text-sm text-gray-700 truncate">
+                                                        {url.split('/').pop() || `Attachment ${idx + 1}`}
+                                                    </span>
+                                                </div>
+                                                <a 
+                                                    href={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}`} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="px-4 py-1.5 bg-blue-100 text-[#3758EE] text-xs font-semibold rounded hover:bg-blue-200 transition-colors"
+                                                >
+                                                    {t('open', 'Open')}
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Upload Card */}

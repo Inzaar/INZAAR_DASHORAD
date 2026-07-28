@@ -63,7 +63,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
         try {
             const { uploadPdf, uploadImage } = await import('@/api/course');
             let res;
-            if (file.type.includes('pdf')) {
+            if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('msword') || file.type.includes('presentation') || file.name.match(/\.(pdf|doc|docx|ppt|pptx)$/i)) {
                 res = await uploadPdf(file);
             } else {
                 res = await uploadImage(file);

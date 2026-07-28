@@ -67,7 +67,8 @@ const AdminCoursesPage = () => {
                     time: course.duration || "N/A",
                     description: course.description || "Learn the concepts step-by-step.",
                     thumbnail: course.thumbnail || null,
-                    status: course.status === "draft" ? "Draft" : "Active"
+                    status: (course.status || '').toLowerCase() === 'draft' ? 'Draft' : 
+                            (course.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
                 }));
                 setCourses(mappedCourses);
 
@@ -196,7 +197,16 @@ const AdminCoursesPage = () => {
                                             {...stat}
                                             trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
                                             iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
+<<<<<<< Updated upstream
                                             onClick={() => navigate(`/registered-courses?type=${stat.type}`)}
+=======
+                                            onClick={() => {
+                                                const types = ['all', 'active', 'inactive', 'draft'];
+                                                if (types[index]) {
+                                                    navigate(`/registered-courses?type=${types[index]}`);
+                                                }
+                                            }}
+>>>>>>> Stashed changes
                                         />
                                     );
                                 })}

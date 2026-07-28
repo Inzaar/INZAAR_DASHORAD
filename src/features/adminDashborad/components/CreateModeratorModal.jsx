@@ -36,6 +36,11 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
             return;
         }
 
+        if (newModerator.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newModerator.email)) {
+            setFormError('Please enter a valid email address.');
+            return;
+        }
+
         if (newModerator.password.length < 8) {
             setFormError('Password must be at least 8 characters long.');
             return;

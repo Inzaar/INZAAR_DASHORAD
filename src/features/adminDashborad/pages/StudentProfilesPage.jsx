@@ -132,6 +132,11 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
             return;
         }
 
+        if (newStudent.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudent.email)) {
+            setFormError('Please enter a valid email address.');
+            return;
+        }
+
         if (newStudent.password.length < 8) {
             setFormError('Password must be at least 8 characters long.');
             return;

@@ -285,6 +285,7 @@ const CourseView = () => {
                     acceptedFormats: 'PDF, DOC, DOCX',
                     attempts: 'Unlimited before due date',
                     maxFileSizeMB: 25,
+                    pdfUrl: lecture.pdfUrl,
                 }
             }
         });
