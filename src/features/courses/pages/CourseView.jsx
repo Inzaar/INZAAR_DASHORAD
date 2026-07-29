@@ -21,6 +21,7 @@ import AssignmentStartOverlay from "../components/AssignmentStartOverlay";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
+import instructorImg from "@/assets/images/instructor.png";
 import { useTranslation } from "react-i18next";
 import CreateQuiz from "@/features/adminDashborad/components/CreateQuiz";
 import CreateAssignment from "@/features/adminDashborad/components/CreateAssignment";
@@ -760,7 +761,33 @@ const CourseView = () => {
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
                                 <div ref={videoSectionRef} className={`w-full ${(isEditingQuiz || isEditingAssignment) && isAdminView ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
-                                    {!hideSidebarAndCards && <h3 className="text-xl font-bold text-gray-900">Ongoing Lecture</h3>}
+                                    {!hideSidebarAndCards && currentLecture && (
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+                                            <div>
+                                                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+                                                    {currentLecture?.title}
+                                                </h2>
+                                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 font-medium mt-1">
+                                                    {currentLecture?.lectureNo !== undefined && currentLecture?.lectureNo !== null && (
+                                                        <span>Lecture: #{currentLecture.lectureNo}</span>
+                                                    )}
+                                                    {currentLecture?.date && (
+                                                        <>
+                                                            <span className="text-gray-300">•</span>
+                                                            <span>Date: {currentLecture.date}</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {user?.role !== 'admin' && typeof progress === 'number' && !isNaN(progress) && (
+                                                <div className="flex items-center gap-2 self-start sm:self-center">
+                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${progress > 75 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}`}>
+                                                        {Math.round(progress)}% Watched
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     {isEditingAssignment && isAdminView ? (
                                         <CreateAssignment
                                             courseId={courseId}
@@ -902,31 +929,13 @@ const CourseView = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Lecture Info Overlay (Top Left) */}
-                                                {!isNonVideoView && (
-                                                    <div className="absolute top-2 left-3 sm:top-4 sm:left-6 text-white z-10 pointer-events-none transition-all duration-300 max-w-[70%]">
-                                                        <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold mb-0.5 sm:mb-1 shadow-black/50 drop-shadow-md truncate">{currentLecture?.title}</h2>
-                                                        <div className="text-[10px] sm:text-xs md:text-sm lg:text-base font-medium opacity-90 shadow-black/50 drop-shadow-md">
-                                                            <span className="whitespace-nowrap">Lecture: {currentLecture?.lectureNo}</span>
-                                                            <br className="sm:hidden" />
-                                                            <span className="sm:inline-block sm:ml-2">Date: {currentLecture?.date}</span>
-                                                            <br />
-                                                            {user?.role !== 'admin' && (
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className={`px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[9px] sm:text-[10px] md:text-xs font-bold ${progress > 75 ? 'bg-green-500/80' : 'bg-blue-600/80'} backdrop-blur-md`}>
-                                                                        {Math.round(progress)}% Watched
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
+
 
                                                 {/* Right Side Action Buttons Overlay */}
                                                 {!isNonVideoView && (
                                                     <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-2 sm:gap-3 z-20 transition-all duration-300">
                                                         <img
-                                                            src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                            src={instructorImg}
                                                             alt="Instructor"
                                                             className="w-8 h-8 sm:w-12 sm:h-12 rounded-full border-2 border-white shadow-lg cursor-pointer transform hover:scale-110 transition-transform"
                                                         />
@@ -1096,7 +1105,7 @@ const CourseView = () => {
                                                                 )}
                                                                 <div className="absolute top-2 right-2 z-20">
                                                                     <img
-                                                                        src="https://randomuser.me/api/portraits/men/32.jpg"
+                                                                        src={instructorImg}
                                                                         alt="Instructor"
                                                                         className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
                                                                     />

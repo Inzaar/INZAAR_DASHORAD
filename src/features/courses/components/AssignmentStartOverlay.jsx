@@ -1,9 +1,10 @@
 import React from 'react';
 import { FileText, Pencil } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import instructorImg from '@/assets/images/instructor.png';
 
 const AssignmentStartOverlay = ({ lecture, courseData, onStart, isAdminView }) => {
-    const instructorImage = "https://randomuser.me/api/portraits/men/32.jpg";
+    const instructorImage = instructorImg;
 
     return (
         <div className="relative w-full h-full bg-[#1A1A1A] overflow-hidden flex flex-col font-sans group select-none">
