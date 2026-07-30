@@ -76,7 +76,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
 
   // Build batch-course pairs from API
   const batchCoursePairs = assignedBatches
-    .filter(b => b.courseId && b.courseId.title)
+    .filter(b => b && b.courseId && b.courseId.title && !b.isDeleted && !b.courseId?.isDeleted)
     .map(b => ({ courseName: b.courseId.title, batchName: b.name || 'N/A' }));
 
   const handleFileChange = (e) => {

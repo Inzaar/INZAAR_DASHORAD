@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, ChevronRight } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronRight, Trash2 } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -12,8 +12,9 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import img from '@/assets/images/course.png';
 import Analytics from '@/features/StudentDashboard/components/Analytics';
-import { getAdminCourseById } from '@/api/course';
+import { getAdminCourseById, deleteCourse } from '@/api/course';
 import toast from 'react-hot-toast';
+import DeleteCourseModal from '../components/DeleteCourseModal';
 
 const AdminCourseDetailPage = () => {
     const { t } = useTranslation();
@@ -25,6 +26,8 @@ const AdminCourseDetailPage = () => {
     const [courseData, setCourseData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const adminMenuRef = useRef(null);
 
     useEffect(() => {
@@ -50,6 +53,21 @@ const AdminCourseDetailPage = () => {
         };
         fetchCourse();
     }, [id]);
+
+    const handleDeleteCourse = async () => {
+        try {
+            setDeleting(true);
+            await deleteCourse(id);
+            toast.success(t('course_deleted_successfully', 'Course deleted successfully'));
+            navigate('/admin-courses');
+        } catch (error) {
+            console.error("Error deleting course:", error);
+            toast.error(error.response?.data?.message || t('failed_to_delete_course', 'Failed to delete course'));
+        } finally {
+            setDeleting(false);
+            setIsDeleteModalOpen(false);
+        }
+    };
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -127,6 +145,13 @@ const AdminCourseDetailPage = () => {
                                     >
                                         Edit
                                     </GradiantButton>
+                                    <button
+                                        onClick={() => setIsDeleteModalOpen(true)}
+                                        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all whitespace-nowrap cursor-pointer"
+                                    >
+                                        <Trash2 size={16} />
+                                        {t('delete', 'Delete')}
+                                    </button>
                                 </div>
 
                                 {/* Mobile Three-Dots */}
@@ -159,6 +184,16 @@ const AdminCourseDetailPage = () => {
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                                                 Edit Course
+                                            </button>
+                                            <button
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                                onClick={() => {
+                                                    setIsAdminMenuOpen(false);
+                                                    setIsDeleteModalOpen(true);
+                                                }}
+                                            >
+                                                <Trash2 size={16} className="text-red-500" />
+                                                Delete Course
                                             </button>
                                         </div>
                                     )}
@@ -355,6 +390,15 @@ const AdminCourseDetailPage = () => {
                     `}} />
                 </div>
             </div>
+
+            <DeleteCourseModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteCourse}
+                courseId={id}
+                courseTitle={courseData?.title || ""}
+                loading={deleting}
+            />
         </div>
     );
 };
