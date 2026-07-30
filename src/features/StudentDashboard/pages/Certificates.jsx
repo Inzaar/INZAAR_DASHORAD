@@ -364,23 +364,27 @@ const Certificates = () => {
                                                                 {/* Status */}
                                                                 <div className="md:col-span-1 flex justify-between md:justify-center items-center">
                                                                     <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('status', 'Status')}</span>
-                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed'
+                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed' || item.isCompleted
                                                                         ? 'text-blue-600 bg-blue-50'
-                                                                        : item.status === 'Active'
-                                                                            ? 'text-green-600 bg-green-50'
-                                                                            : 'text-gray-500 bg-gray-100'
+                                                                        : (item.status === 'Course Incomplete' || item.isCourseDeleted)
+                                                                            ? 'text-red-600 bg-red-50 border border-red-200'
+                                                                            : item.status === 'Active'
+                                                                                ? 'text-green-600 bg-green-50'
+                                                                                : 'text-gray-500 bg-gray-100'
                                                                         }`}>
-                                                                        {t(item.status.toLowerCase(), item.status)}
+                                                                        {(item.isCourseDeleted || item.status === 'Course Incomplete') && !item.isCompleted
+                                                                            ? t('course_incomplete', 'Course Incomplete')
+                                                                            : t(item.status.toLowerCase(), item.status)}
                                                                     </span>
                                                                 </div>
 
                                                                 {/* Action */}
                                                                 <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex justify-center">
-                                                                    {item.status === 'Completed' ? (
+                                                                    {item.status === 'Completed' || item.isCompleted ? (
                                                                         item.certificateUrl ? (
                                                                             <button
                                                                                 onClick={() => downloadAsPDF(item.certificateUrl, item.course)}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200"
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer"
                                                                             >
                                                                                 <Download className="w-4 h-4 md:w-3 md:h-3" />
                                                                                 {t('download', 'Download')}
@@ -389,7 +393,7 @@ const Certificates = () => {
                                                                             <button
                                                                                 onClick={() => handleGenerateCertificate(item)}
                                                                                 disabled={generatingId === item.enrollmentId}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-4 py-2.5 md:py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap"
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-4 py-2.5 md:py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer"
                                                                             >
                                                                                 {generatingId === item.enrollmentId ? (
                                                                                     <>
@@ -404,6 +408,11 @@ const Certificates = () => {
                                                                                 )}
                                                                             </button>
                                                                         )
+                                                                    ) : (item.isCourseDeleted || item.status === 'Course Incomplete') ? (
+                                                                        <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl md:rounded-lg cursor-not-allowed select-none border border-red-200">
+                                                                            <Lock className="w-4 h-4 md:w-3 md:h-3 text-red-500" />
+                                                                            {t('course_incomplete', 'Course Incomplete')}
+                                                                        </div>
                                                                     ) : (
                                                                         <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl md:rounded-lg cursor-not-allowed select-none border border-gray-100">
                                                                             <Lock className="w-4 h-4 md:w-3 md:h-3" />

@@ -144,3 +144,10 @@ export const updateCourse = async (id, data) => {
     });
     return res;
 };
+
+export const deleteCourse = async (id) => {
+    const res = await axiosInstance.delete(`/courses/${id}`, {
+        withCredentials: true,
+    });
+    return res;
+};
