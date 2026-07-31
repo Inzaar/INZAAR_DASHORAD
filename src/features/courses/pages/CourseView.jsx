@@ -205,7 +205,7 @@ const CourseView = () => {
             }
         };
         fetchCourse(courseId);
-    }, [courseId]);
+    }, [courseId, location.key]);
 
     useEffect(() => {
         const fetchAllNotes = async () => {
@@ -277,7 +277,9 @@ const CourseView = () => {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
                 assignment: {
-                    number: String(lecture.lectureNo).padStart(2, '0'),
+                    id: lecture.id || lecture._id,
+                    courseId: courseId || courseData?._id || courseData?.id,
+                    number: String(lecture.lectureNo || 1).padStart(2, '0'),
                     title: lecture.title,
                     description: `Submit your assignment for ${lecture.title}.`,
                     instructions: lecture.instructions || 'Please complete and upload your assignment file.',
@@ -287,6 +289,7 @@ const CourseView = () => {
                     attempts: 'Unlimited before due date',
                     maxFileSizeMB: 25,
                     pdfUrl: lecture.pdfUrl,
+                    isCompleted: lecture.isCompleted || false
                 }
             }
         });
