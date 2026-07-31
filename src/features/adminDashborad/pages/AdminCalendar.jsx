@@ -184,7 +184,7 @@
 // export default AdminCalendar;
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/layouts/SideBar';
@@ -353,10 +353,7 @@ const AdminCalendar = () => {
             setEventDescription("");
             setIsModalOpen(false);
             
-            const res = await getAllEvents();
-            if (res.data && res.data.data) {
-                setEvents(res.data.data);
-            }
+            await fetchEvents();
         } catch (err) {
             console.error("Failed to add event from modal", err);
             toast.error(err.response?.data?.message || "Failed to add event");
@@ -423,17 +420,94 @@ const AdminCalendar = () => {
         }
     };
 
+    const getEventIcon = (event) => {
+        const type = (event.type || '').toLowerCase();
+        const title = (event.title || '').toLowerCase();
+
+        if (title.includes('eid') || type.includes('eid')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            );
+        }
+
+        if (type.includes('khutbah') || title.includes('khutbah') || type.includes('jummah')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            );
+        }
+        if (type.includes('live') || title.includes('live') || type.includes('broadcast')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            );
+        }
+        if (type.includes('special') || title.includes('special')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            );
+        }
+        if (type.includes('talk') || title.includes('talk') || title.includes('youth')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+            );
+        }
+        if (type.includes('podcast') || title.includes('podcast') || type.includes('release')) {
+            return (
+                <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            );
+        }
+
+        return (
+            <svg className="w-[11px] h-[11px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+        );
+    };
+
     // Logic to render content inside each calendar tile
     const renderTileContent = ({ date, view }) => {
         if (view !== 'month') return null;
 
         if (activeTab === 'events') {
-            const dayEvents = events.filter(event =>
-                isWithinInterval(startOfDay(date), {
-                    start: startOfDay(event.startDate),
-                    end: startOfDay(event.endDate)
-                })
-            );
+            const dayEvents = events.filter(event => {
+                const dateRaw = event.startDate || event.fromDate;
+                if (!dateRaw) return false;
+                const evStart = new Date(dateRaw);
+                if (isNaN(evStart.getTime())) return false;
+                const endRaw = event.endDate || event.toDate;
+                const evEnd = endRaw ? new Date(endRaw) : evStart;
+
+                const dY = date.getFullYear();
+                const dM = date.getMonth();
+                const dD = date.getDate();
+
+                const sY = evStart.getFullYear();
+                const sM = evStart.getMonth();
+                const sD = evStart.getDate();
+
+                const eY = evEnd.getFullYear();
+                const eM = evEnd.getMonth();
+                const eD = evEnd.getDate();
+
+                const dateVal = new Date(dY, dM, dD).getTime();
+                const startVal = new Date(sY, sM, sD).getTime();
+                const endVal = new Date(eY, eM, eD).getTime();
+
+                return dateVal >= startVal && dateVal <= endVal;
+            });
+
+            if (dayEvents.length === 0) return null;
 
             return (
                 <div className="flex flex-col gap-1 w-full mt-1 px-1 overflow-visible">
@@ -453,16 +527,15 @@ const AdminCalendar = () => {
                         const colorIndex = (globalIndex >= 0 ? globalIndex : 0) % colors.length;
 
                         const styleClass = colors[colorIndex];
-                        const timeStr = event.startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        const evStart = new Date(event.startDate || event.fromDate);
+                        const timeStr = isNaN(evStart.getTime()) ? '' : evStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
                         return (
                             <div
                                 key={event.id}
                                 className={`flex items-center px-1 py-[2px] rounded-[4px] text-[10px] font-medium truncate ${styleClass} ${event.status === 'canceled' ? 'opacity-40 grayscale-[0.3]' : ''}`}
                             >
-                                <svg className="w-[10px] h-[10px] mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
+                                {getEventIcon(event)}
                                 <span className="truncate max-w-[80px]">{event.title}</span>
                                 <span className="ml-auto text-[9px] opacity-70 ml-1 whitespace-nowrap">{timeStr}</span>
                             </div>
@@ -515,6 +588,18 @@ const AdminCalendar = () => {
 
     // Calendar Navigation Logic
     const [activeStartDate, setActiveStartDate] = useState(new Date());
+    const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+    const monthPickerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (monthPickerRef.current && !monthPickerRef.current.contains(event.target)) {
+                setIsMonthPickerOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleToday = () => setActiveStartDate(new Date());
     const handlePrev = () => setActiveStartDate(prev => {
@@ -579,7 +664,7 @@ const AdminCalendar = () => {
                         
                         {/* Inline Add Event Form */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6 flex-shrink-0">
-                            <h3 className="text-[#1E3A8A] text-[16px] font-bold mb-4">+ Add New Event</h3>
+                            <h3 onClick={() => setIsModalOpen(true)} className="text-[#1E3A8A] text-[16px] font-bold mb-4 cursor-pointer hover:text-blue-600 transition-colors">+ Add New Event</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                 <div className="md:col-span-4">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Event title name</label>
@@ -633,7 +718,7 @@ const AdminCalendar = () => {
                                 <div className="md:col-span-2">
                                     <button 
                                         onClick={() => setIsModalOpen(true)}
-                                        className="w-full h-[48px] bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] text-white font-semibold rounded-[8px] hover:opacity-90 transition-opacity flex items-center justify-center"
+                                        className="w-full h-[48px] bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] text-white font-semibold rounded-[8px] hover:opacity-90 transition-opacity flex items-center justify-center cursor-pointer"
                                     >
                                         Add Event
                                     </button>
@@ -651,9 +736,49 @@ const AdminCalendar = () => {
                                         <div className="flex items-center gap-3 px-2 pt-2">
                                             <button onClick={handlePrev} className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">‹</button>
                                             <button onClick={handleNext} className="w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">›</button>
-                                            <div className="px-4 py-1.5 border border-gray-200 rounded font-medium text-[15px] flex items-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-800">
-                                                {activeStartDate.toLocaleString(i18n.language || 'en-US', { month: 'long', year: 'numeric' })}
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+                                            <div className="relative" ref={monthPickerRef}>
+                                                <button
+                                                    onClick={() => setIsMonthPickerOpen(prev => !prev)}
+                                                    className="px-4 py-1.5 border border-gray-200 rounded font-medium text-[15px] flex items-center gap-2 cursor-pointer hover:bg-gray-50 text-gray-800"
+                                                >
+                                                    {activeStartDate.toLocaleString(i18n.language || 'en-US', { month: 'long', year: 'numeric' })}
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+                                                </button>
+
+                                                {isMonthPickerOpen && (
+                                                    <div className="absolute top-full left-0 mt-1 z-[100] bg-white border border-gray-200 rounded-lg shadow-xl p-3 flex items-center gap-2 min-w-[220px]">
+                                                        <select
+                                                            value={activeStartDate.getMonth()}
+                                                            onChange={(e) => {
+                                                                const newDate = new Date(activeStartDate);
+                                                                newDate.setMonth(parseInt(e.target.value, 10));
+                                                                setActiveStartDate(newDate);
+                                                            }}
+                                                            className="px-2.5 py-1.5 border border-gray-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3758EE] bg-white text-gray-800 flex-1 cursor-pointer"
+                                                        >
+                                                            {Array.from({ length: 12 }, (_, i) => (
+                                                                <option key={i} value={i}>
+                                                                    {new Date(2000, i, 1).toLocaleString(i18n.language || 'en-US', { month: 'long' })}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+
+                                                        <select
+                                                            value={activeStartDate.getFullYear()}
+                                                            onChange={(e) => {
+                                                                const newDate = new Date(activeStartDate);
+                                                                newDate.setFullYear(parseInt(e.target.value, 10));
+                                                                setActiveStartDate(newDate);
+                                                            }}
+                                                            className="px-2.5 py-1.5 border border-gray-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#3758EE] bg-white text-gray-800 cursor-pointer"
+                                                        >
+                                                            {Array.from({ length: 20 }, (_, i) => {
+                                                                const yr = new Date().getFullYear() - 5 + i;
+                                                                return <option key={yr} value={yr}>{yr}</option>;
+                                                            })}
+                                                        </select>
+                                                    </div>
+                                                )}
                                             </div>
                                             <button onClick={handleToday} className="px-5 py-1.5 border border-[#3758EE] text-[#3758EE] rounded font-medium text-[15px] hover:bg-blue-50 transition-colors">
                                                 {t('today', 'Today')}
