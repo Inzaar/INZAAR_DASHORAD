@@ -127,8 +127,9 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
         e.preventDefault();
         setFormError('');
 
-        if (newStudent.phone.length !== 11) {
-            setFormError('Phone number must be exactly 11 digits.');
+        const rawDigits = (newStudent.phone || '').replace(/\D/g, '');
+        if (!newStudent.phone || rawDigits.length < 10) {
+            setFormError('Please enter a valid phone number.');
             return;
         }
 

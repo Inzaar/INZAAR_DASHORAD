@@ -150,8 +150,9 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
             return;
         }
 
-        if (newModerator.phone.length !== 11) {
-            setFormError('Phone number must be exactly 11 digits.');
+        const rawDigits = (newModerator.phone || '').replace(/\D/g, '');
+        if (!newModerator.phone || rawDigits.length < 10) {
+            setFormError('Please enter a valid phone number.');
             return;
         }
 

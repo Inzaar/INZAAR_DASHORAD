@@ -5,7 +5,7 @@ import GrayButton from '@/components/ui/buttons/GrayButton';
 import { Upload, FileText, X, Info, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { uploadPdf } from '@/api/course';
+import { uploadPdf, updateLectureProgress } from '@/api/course';
 import toast from 'react-hot-toast';
 
 const AssignmentSubmission = () => {
@@ -54,18 +54,39 @@ const AssignmentSubmission = () => {
             const result = await uploadPdf(selectedFile);
             const cloudinaryUrl = result.url;
             
+            // Call backend API to mark assignment as completed in user's enrollment
+            const targetCourseId = assignment?.courseId;
+            const targetLectureId = assignment?.id || assignment?._id;
+            if (targetCourseId && targetLectureId) {
+                try {
+                    await updateLectureProgress(targetCourseId, {
+                        lectureId: targetLectureId,
+                        watchedPercentage: 100,
+                        lastWatchedTime: 0
+                    });
+                } catch (progressErr) {
+                    console.error("Failed to update assignment progress in backend:", progressErr);
+                }
+            }
+
             toast.success(t('assignment_uploaded', 'Assignment uploaded successfully!'), { id: 'upload-assignment' });
 
             const now = new Date();
             const submittedAt = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 + ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             
+            const updatedAssignment = {
+                ...assignment,
+                status: 'Submitted',
+                isCompleted: true
+            };
+
             navigate('/assignment-submitted', {
                 state: {
-                    assignment,
+                    assignment: updatedAssignment,
                     fileName: selectedFile.name,
                     fileUrl: cloudinaryUrl,
-                    status: 'Completed',
+                    status: 'Submitted',
                     submittedAt,
                     returnUrl,
                 }
@@ -230,10 +251,9 @@ const AssignmentSubmission = () => {
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('status', 'Status')}</span>
                                         <span className={`text-sm font-semibold ${
-                                                assignment.status === 'Not submitted' ? 'text-orange-500' : 
-                                                assignment.status === 'Submitted' ? 'text-green-500' : 'text-gray-700'
+                                                (assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? 'text-green-500' : 'text-orange-500'
                                             }`}>
-                                            {t(assignment.status.toLowerCase().replace(/ /g, '_'), assignment.status)}
+                                            {(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? t('submitted', 'Submitted') : t(assignment.status ? assignment.status.toLowerCase().replace(/ /g, '_') : 'not_submitted', assignment.status || 'Not submitted')}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
