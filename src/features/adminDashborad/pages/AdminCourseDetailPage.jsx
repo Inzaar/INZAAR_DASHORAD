@@ -330,11 +330,16 @@ const AdminCourseDetailPage = () => {
                                                     </td>
                                                     <td className="py-4 text-center">
                                                         <div className="flex flex-col gap-1 items-center">
-                                                            {student.enrollments.map((course, idx) => (
+                                                            {student.enrollments.slice(0, 3).map((course, idx) => (
                                                                 <span key={idx} className="text-[11px] text-blue-500 underline cursor-pointer hover:text-blue-700">
                                                                     {course}
                                                                 </span>
                                                             ))}
+                                                            {student.enrollments.length > 3 && (
+                                                                <span className="text-[11px] text-gray-400 font-medium mt-0.5">
+                                                                    + {student.enrollments.length - 3} more
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className="py-4 text-center">

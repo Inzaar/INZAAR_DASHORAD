@@ -31,12 +31,9 @@ function StatusTable({ userCourses, loading }) {
     const currentData = allLectures.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageChange = (page) => {
-    const { t } = useTranslation();
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
-
-
         console.log("current data", currentData);
     };
 

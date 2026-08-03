@@ -69,16 +69,17 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('password_required', 'Password*')}</label>
                             <input 
                                 type="password" 
-                                value={userPayload?.password || ''}
+                                value={(userPayload?.password && userPayload.password.length > 40) ? '' : (userPayload?.password || '')}
                                 onChange={(e) => setUserPayload({ ...userPayload, password: e.target.value })}
                                 placeholder={t('leave_blank_to_keep', 'Leave blank to keep unchanged')}
                                 className=" h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border" 
+                                autoComplete="new-password"
                             />
                         </div>
 
                         {/* whatsapp number */}
                         <div className="w-full min-[1218px]:w-[50%] opacity-[1px] gap-[8px] flex flex-col">
-                            <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('whatsapp_number_required', 'WhatsApp number*')}</label>
+                            <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('phone_number', 'Phone number')}</label>
                             <PhoneInput
                                 name="phone"
                                 value={userPayload?.phone || ''}

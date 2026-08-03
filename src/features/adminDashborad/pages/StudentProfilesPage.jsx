@@ -548,11 +548,18 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 {!student.enrollments || student.enrollments.length === 0 ? (
                                                                     <span className="text-gray-400 text-[13px]">Not Enrolled</span>
                                                                 ) : (
-                                                                    student.enrollments.map((course, idx) => (
-                                                                        <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                            {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
-                                                                        </span>
-                                                                    ))
+                                                                    <>
+                                                                        {student.enrollments.slice(0, 3).map((course, idx) => (
+                                                                            <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
+                                                                                {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
+                                                                            </span>
+                                                                        ))}
+                                                                        {student.enrollments.length > 3 && (
+                                                                            <span className="text-[11px] text-gray-400 font-medium mt-0.5">
+                                                                                {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
+                                                                            </span>
+                                                                        )}
+                                                                    </>
                                                                 )}
                                                             </div>
                                                         </td>

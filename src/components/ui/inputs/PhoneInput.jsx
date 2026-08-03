@@ -174,8 +174,8 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
   const containerClasses = containerClassName || 'max-w-[500px] w-full mt-[10px] relative pb-5';
 
   return (
-    <div className='max-w-[500px] w-full mt-[10px] relative pb-5'>
-      <label className='text-[16px] text-[#18181B] mb-1 block'>{t('auth.phone_number', 'Phone number')}</label>
+    <div className={containerClasses}>
+      {label && <label className='text-[16px] text-[#18181B] mb-1 block'>{t('auth.phone_number', label)}</label>}
       <div className={`flex items-center w-full h-[52px] border rounded transition-all duration-200 focus-within:ring-1 ${!isValid && phoneNumber.length > 0
         ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500'
         : 'border-[#71717A]/30 focus-within:border-[#71717A] focus-within:ring-[#71717A]'
