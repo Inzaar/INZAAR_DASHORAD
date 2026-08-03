@@ -147,6 +147,7 @@ const CourseView = () => {
     const playerRef = useRef(null);
     const containerRef = useRef(null);
     const lastReportedRef = useRef(0);
+    const maxWatchedMapRef = useRef({});
     const prevPlaybackTimeRef = useRef(0);
     const completedIdsRef = useRef(new Set());
     const adminMenuRef = useRef(null);
@@ -215,6 +216,7 @@ const CourseView = () => {
                     setCurrentLecture({
                         ...rawStart,
                         id: rawStart.id || rawStart._id,
+                        watchedPercentage: rawStart.watchedPercentage || (typeof rawStart.progress === 'string' ? parseInt(rawStart.progress) : (rawStart.progress || 0)),
                         lastWatchedTime: rawStart.lastWatchedTime || 0,
                         type: rawStart.type || (rawStart.status === 'Quiz' ? 'Quiz' : 'Lecture'),
                         pdfUrl: Array.isArray(rawStart.pdfUrl) ? rawStart.pdfUrl : (rawStart.pdfUrl ? [rawStart.pdfUrl] : []),
@@ -364,8 +366,19 @@ const CourseView = () => {
     };
 
     useEffect(() => {
-        setProgress(0);
+        const lectureId = currentLecture?.id || currentLecture?._id;
+        if (!lectureId) return;
+
+        const lectureInPlaylist = courseData?.lecturePlaylist?.find(l => (l.id === lectureId || l._id === lectureId));
+        const playlistProgress = lectureInPlaylist?.watchedPercentage || 0;
+        const currentProgress = currentLecture?.watchedPercentage || (typeof currentLecture?.progress === 'string' ? parseInt(currentLecture.progress) : (currentLecture?.progress || 0)) || 0;
+        const storedMax = maxWatchedMapRef.current[lectureId] || 0;
+
+        const initialProgress = Math.max(playlistProgress, currentProgress, storedMax);
+        maxWatchedMapRef.current[lectureId] = initialProgress;
+        setProgress(initialProgress);
         lastReportedRef.current = 0;
+
         if (currentLecture?.type === 'Quiz') {
             playerRef.current = null;
             return;
@@ -378,15 +391,20 @@ const CourseView = () => {
                 setDuration(dur);
                 if (dur > 0) {
                     const percent = (cur / dur) * 100;
-                    setProgress(percent);
+                    const prevMax = maxWatchedMapRef.current[lectureId] || 0;
+                    const newMaxPercent = Math.max(prevMax, percent);
+                    maxWatchedMapRef.current[lectureId] = newMaxPercent;
+                    setProgress(newMaxPercent);
                     const now = Date.now();
-                    const lectureId = currentLecture?.id || currentLecture?._id;
 
                     // Allow anyone to record progress (if they aren't enrolled, the backend will just reject it). This allows admins to test unlocking.
                     if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
                         lastReportedRef.current = now;
-                        let finalPercent = Math.min(Math.round(percent), 100);
-                        if (finalPercent >= 95) finalPercent = 100; // Auto-complete near the end
+                        let calculatedPercent = Math.min(Math.round(percent), 100);
+                        if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
+
+                        let finalPercent = Math.max(Math.round(maxWatchedMapRef.current[lectureId] || 0), calculatedPercent);
+                        if (finalPercent >= 95) finalPercent = 100;
 
                         let timeSpentDelta = 0;
                         const diff = cur - prevPlaybackTimeRef.current;
@@ -402,6 +420,16 @@ const CourseView = () => {
                             lastWatchedTime: Math.floor(cur),
                             timeSpentDelta
                         }).then(async (data) => {
+                            maxWatchedMapRef.current[lectureId] = Math.max(maxWatchedMapRef.current[lectureId] || 0, finalPercent);
+
+                            setCurrentLecture(prev => {
+                                if (!prev) return prev;
+                                if (prev.id === lectureId || prev._id === lectureId) {
+                                    return { ...prev, watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent) };
+                                }
+                                return prev;
+                            });
+
                             const unlockPercent = courseData?.unlockCriteria || 100;
                             if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
                                 completedIdsRef.current.add(lectureId);
@@ -412,10 +440,23 @@ const CourseView = () => {
                                         ...prev,
                                         lectureCompleted: (prev.lectureCompleted || 0) + 1,
                                         lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
-                                            if (l._id === lectureId || l.id === lectureId) return { ...l, isCompleted: true };
+                                            if (l._id === lectureId || l.id === lectureId) return { ...l, isCompleted: true, watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent) };
                                             if (i === idx + 1 && l.isLocked) return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
                                             return l;
                                         }),
+                                    };
+                                });
+                            } else {
+                                setCourseData(prev => {
+                                    if (!prev || !prev.lecturePlaylist) return prev;
+                                    return {
+                                        ...prev,
+                                        lecturePlaylist: prev.lecturePlaylist.map(l => {
+                                            if (l._id === lectureId || l.id === lectureId) {
+                                                return { ...l, watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent) };
+                                            }
+                                            return l;
+                                        })
                                     };
                                 });
                             }
