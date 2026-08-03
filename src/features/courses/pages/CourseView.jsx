@@ -44,6 +44,28 @@ const extractYouTubeId = (url) => {
     return match ? match[1] : null;
 };
 
+const getPdfEmbedUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            return `https://drive.google.com/file/d/${match[1]}/preview`;
+        }
+    }
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+};
+
+const getAudioSrc = (url) => {
+    if (!url) return '';
+    if (url.includes('drive.google.com')) {
+        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+    }
+    return url;
+};
+
 const CourseView = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -109,6 +131,8 @@ const CourseView = () => {
     const [isAudioUploading, setIsAudioUploading] = useState(false);
     const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+    const [newAudioLink, setNewAudioLink] = useState("");
+    const [newPdfLink, setNewPdfLink] = useState("");
     const [editLectureData, setEditLectureData] = useState({
         id: "",
         title: "",
@@ -1341,6 +1365,39 @@ const CourseView = () => {
                                             }}
                                         />
                                     </div>
+                                    <div className="mt-2">
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="https://..." 
+                                                value={newAudioLink}
+                                                onChange={e => setNewAudioLink(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        if (newAudioLink.trim()) {
+                                                            setEditLectureData(prev => ({...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()]}));
+                                                            setNewAudioLink('');
+                                                        }
+                                                    }
+                                                }}
+                                                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => {
+                                                    if (newAudioLink.trim()) {
+                                                        setEditLectureData(prev => ({...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()]}));
+                                                        setNewAudioLink('');
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-[#F8F9FA] border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
                                         {editLectureData.audioUrl.map((url, idx) => (
                                             <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
@@ -1402,6 +1459,39 @@ const CourseView = () => {
                                                 }
                                             }}
                                         />
+                                    </div>
+                                    <div className="mt-2">
+                                        <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="https://..." 
+                                                value={newPdfLink}
+                                                onChange={e => setNewPdfLink(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        if (newPdfLink.trim()) {
+                                                            setEditLectureData(prev => ({...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()]}));
+                                                            setNewPdfLink('');
+                                                        }
+                                                    }
+                                                }}
+                                                className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => {
+                                                    if (newPdfLink.trim()) {
+                                                        setEditLectureData(prev => ({...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()]}));
+                                                        setNewPdfLink('');
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-[#F8F9FA] border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
                                         {editLectureData.pdfUrl.map((url, idx) => (
@@ -1484,7 +1574,7 @@ const CourseView = () => {
                                 </div>
                             )}
                             <iframe
-                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(activePdfUrl)}&embedded=true`}
+                                src={getPdfEmbedUrl(activePdfUrl)}
                                 className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                                 title="PDF Viewer"
                                 onLoad={() => setPdfLoading(false)}
@@ -1512,17 +1602,25 @@ const CourseView = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        <audio
-                            src={activeAudioUrl}
-                            controls
-                            autoPlay
-                            onPlay={() => {
-                                if (playerRef.current) {
-                                    playerRef.current.pauseVideo();
-                                }
-                            }}
-                            className="w-full h-10 custom-audio-player"
-                        />
+                        {activeAudioUrl && activeAudioUrl.includes('drive.google.com') ? (
+                            <iframe 
+                                src={`https://drive.google.com/file/d/${activeAudioUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1]}/preview`} 
+                                className="w-full h-16 border-none rounded"
+                                title="Audio Player"
+                            />
+                        ) : (
+                            <audio
+                                src={getAudioSrc(activeAudioUrl)}
+                                controls
+                                autoPlay
+                                onPlay={() => {
+                                    if (playerRef.current) {
+                                        playerRef.current.pauseVideo();
+                                    }
+                                }}
+                                className="w-full h-10 custom-audio-player"
+                            />
+                        )}
                     </div>
                 </div>
             )}
