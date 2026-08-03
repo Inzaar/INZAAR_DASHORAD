@@ -396,8 +396,8 @@ const ModeratorDetails = () => {
                           className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#4E6BFF] to-[#8E6BFF] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-indigo-500/20 hover:opacity-90 transition-all active:scale-95"
                         >
                           Yes, Deactivate
-                        </button>
-                      </div>
+                      </button>
+                    </div>
                     </div>
                   </div>
                 )}

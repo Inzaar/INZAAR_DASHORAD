@@ -378,6 +378,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
             </div>
 
             {/* Front CNIC */}
+            {/* 
             <div className="w-full lg:w-[48%] order-9 lg:order-9">
               <p className="mb-2 text-[14px] font-medium">Front CNIC</p>
               <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
@@ -411,8 +412,10 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
                 </label>
               </div>
             </div>
+            */}
 
             {/* Back CNIC */}
+            {/* 
             <div className="w-full lg:w-[48%] order-10 lg:order-10">
               <p className="mb-2 text-[14px] font-medium">Back CNIC</p>
               <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
@@ -446,6 +449,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
                 </label>
               </div>
             </div>
+            */}
           </div>
         </div>
         <div className="flex justify-end mt-[10px]">
