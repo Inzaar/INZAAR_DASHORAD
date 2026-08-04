@@ -10,6 +10,7 @@ import { Search, Plus, ChevronDown, MoreVertical, X, Loader, Eye, EyeOff, Layout
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getModeratorProfiles, adminCreateModerator, getAllUsers } from '@/api/user';
+import { checkUsername, checkEmail } from '@/api/auth';
 import AssignModeratorModal from '../components/student/AssignModeratorModal';
 import {
     Pagination,
@@ -60,6 +61,52 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newModerator.username || newModerator.username.trim().length === 0) {
+            setUsernameError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkUsername(newModerator.username.trim());
+                if (!res.data?.data?.available) {
+                    setUsernameError('this username is already exist');
+                } else {
+                    setUsernameError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newModerator.username, isAddModalOpen]);
+
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newModerator.email || newModerator.email.trim().length === 0) {
+            setEmailError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkEmail(newModerator.email.trim());
+                if (!res.data?.data?.available) {
+                    setEmailError('this email is already exist');
+                } else {
+                    setEmailError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newModerator.email, isAddModalOpen]);
 
     const availableFeatures = [
         "Calendar",
@@ -146,13 +193,18 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
         setFormError('');
 
         if (newModerator.username && newModerator.username.includes(' ')) {
-            setFormError('Username cannot contain spaces.');
+            setUsernameError('Username cannot contain spaces.');
             return;
         }
 
         const rawDigits = (newModerator.phone || '').replace(/\D/g, '');
         if (!newModerator.phone || rawDigits.length < 10) {
             setFormError('Please enter a valid phone number.');
+            return;
+        }
+
+        if (newModerator.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newModerator.email)) {
+            setEmailError('Please enter a valid email address.');
             return;
         }
 
@@ -166,6 +218,36 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
         }
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(newModerator.password)) {
             setFormError('Password must contain at least one special symbol.');
+            return;
+        }
+
+        let hasError = false;
+
+        // Perform instant API check on Submit
+        try {
+            if (newModerator.username) {
+                const uRes = await checkUsername(newModerator.username.trim());
+                if (!uRes.data?.data?.available) {
+                    setUsernameError('this username is already exist');
+                    hasError = true;
+                } else {
+                    setUsernameError('');
+                }
+            }
+            if (newModerator.email) {
+                const eRes = await checkEmail(newModerator.email.trim());
+                if (!eRes.data?.data?.available) {
+                    setEmailError('this email is already exist');
+                    hasError = true;
+                } else {
+                    setEmailError('');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+
+        if (hasError || usernameError || emailError) {
             return;
         }
 
@@ -196,12 +278,28 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                 role: 'moderator',
                 assignedFeatures: []
             });
+            setUsernameError('');
+            setEmailError('');
             fetchModeratorsData();
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Failed to add moderator';
-            setFormError(errorMsg);
-            toast.error(errorMsg);
-            setIsAddModalOpen(true); // Re-open step 1 if error
+            const lowerMsg = errorMsg.toLowerCase();
+            if (lowerMsg.includes('username')) {
+                setUsernameError('this username is already exist');
+                setFormError('');
+                setIsAssignModalOpen(false);
+                setIsAddModalOpen(true);
+            } else if (lowerMsg.includes('email')) {
+                setEmailError('this email is already exist');
+                setFormError('');
+                setIsAssignModalOpen(false);
+                setIsAddModalOpen(true);
+            } else {
+                setFormError(errorMsg);
+                toast.error(errorMsg);
+                setIsAssignModalOpen(false);
+                setIsAddModalOpen(true);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -673,10 +771,16 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                     required
                                     type="text"
                                     placeholder="Enter Username"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${usernameError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                                     value={newModerator.username}
-                                    onChange={(e) => setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') })}
+                                    onChange={(e) => {
+                                        setUsernameError('');
+                                        setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') });
+                                    }}
                                 />
+                                {usernameError && (
+                                    <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
@@ -685,10 +789,16 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                     required
                                     type="email"
                                     placeholder="Enter Email Address"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                                     value={newModerator.email}
-                                    onChange={(e) => setNewModerator({ ...newModerator, email: e.target.value })}
+                                    onChange={(e) => {
+                                        setEmailError('');
+                                        setNewModerator({ ...newModerator, email: e.target.value });
+                                    }}
                                 />
+                                {emailError && (
+                                    <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
@@ -750,7 +860,8 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                    disabled={Boolean(usernameError || emailError)}
+                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Next
                                 </button>
