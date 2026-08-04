@@ -173,10 +173,7 @@ function RegisterPageP1() {
     <AuthPage>
       <AuthLeft />
       <AuthRight className="flex flex-col gap-3">
-        <div className='max-w-[500px] w-full flex items-center gap-3'>
-          <button onClick={() => navigate('/login')} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
-            <ArrowLeft size={26} />
-          </button>
+        <div className='max-w-[500px] w-full'>
           <AuthHeading>
             {t('auth.create_new_account', 'Create New Account')}
           </AuthHeading>

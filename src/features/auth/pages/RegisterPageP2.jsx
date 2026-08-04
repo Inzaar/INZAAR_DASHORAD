@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import AuthPage from '../../../components/layouts/AuthPage'
 import AuthLeft from '../components/AuthLeft'
 import AuthRight from '../components/AuthRight'
@@ -53,7 +54,7 @@ function RegisterPageP2() {
       }
 
       const res = await registerUser(formData);
-      
+
       if (res.data.success) {
         const { user, token } = res.data.data;
         // Automatically login the user
@@ -87,7 +88,10 @@ function RegisterPageP2() {
       <AuthLeft />
       <AuthRight className="flex flex-col gap-1 py-10">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full items-center">
-          <div className='max-w-[500px] w-full'>
+          <div className='max-w-[500px] w-full flex items-center gap-3'>
+            <button type="button" onClick={() => navigate('/register')} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
+              <ArrowLeft size={26} />
+            </button>
             <AuthHeading>
               {t('auth.create_new_account', 'Create New Account')}
             </AuthHeading>
@@ -100,7 +104,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full flex gap-2'>
             <div className={`h-[76px] w-[50%] flex flex-col items-start justify-between`}>
               <label className='text-[#18181B] text-[16px]'>{t('auth.gender', 'Gender')}</label>
-              <select 
+              <select
                 name="Gender"
                 value={formData.gender}
                 onChange={handleChange}
@@ -113,8 +117,8 @@ function RegisterPageP2() {
               </select>
             </div>
             <div className="w-[50%]">
-              <Input1 
-                name="DOB" 
+              <Input1
+                name="DOB"
                 label={t('auth.dob', 'DOB')}
                 type="date"
                 placeholder={t('auth.your_age', 'your age')}
@@ -125,34 +129,34 @@ function RegisterPageP2() {
           </div>
 
           <div className='max-w-[500px] w-full'>
-            <Input1 
-              name="Educational Qualification" 
-              placeholder={t('auth.your_educational_qualification', 'Your Educational Qualification')} 
+            <Input1
+              name="Educational Qualification"
+              placeholder={t('auth.your_educational_qualification', 'Your Educational Qualification')}
               value={formData.educationQualification}
               onChange={handleChange}
             />
           </div>
 
           <div className='max-w-[500px] w-full'>
-            <Input1 
-              name="Nationality" 
-              placeholder={t('auth.your_nationality', 'your nationality')} 
+            <Input1
+              name="Nationality"
+              placeholder={t('auth.your_nationality', 'your nationality')}
               value={formData.nationality}
               onChange={handleChange}
             />
           </div>
 
           <div className='max-w-[500px] w-full'>
-            <Input1 
-              name="Permanent Address" 
-              placeholder={t('auth.your_permanent_address', 'your Permanent Address')} 
+            <Input1
+              name="Permanent Address"
+              placeholder={t('auth.your_permanent_address', 'your Permanent Address')}
               value={formData.permanentAddress}
               onChange={handleChange}
             />
           </div>
 
           <div className='max-w-[500px] w-full'>
-            <Textarea1 
+            <Textarea1
               name="Already Attended a Religious Course, give details if any:"
               placeholder={t('auth.details', 'details')}
               value={formData.attendedReligiousCourseDetails}
@@ -161,7 +165,7 @@ function RegisterPageP2() {
           </div>
 
           <div className='max-w-[500px] w-full'>
-            <Textarea1 
+            <Textarea1
               name="How Did You Come To Know About Inzaar/Course:"
               placeholder={t('auth.feedback', 'feedback')}
               value={formData.referralSource}
@@ -169,7 +173,7 @@ function RegisterPageP2() {
             />
           </div>
 
-          <GradiantButton 
+          <GradiantButton
             type="submit"
             disabled={loading}
             className="w-full max-w-[500px] h-[52px] rounded"
