@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import AuthPage from '../../../components/layouts/AuthPage'
@@ -21,6 +21,12 @@ function RegisterPageP2() {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!formData.firstname || !formData.email || !formData.password) {
+      navigate('/register', { replace: true });
+    }
+  }, [formData.firstname, formData.email, formData.password, navigate]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -50,7 +56,7 @@ function RegisterPageP2() {
     try {
       // Final validation (referralSource is optional)
       if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress) {
-        throw new Error(t('auth.error_fill_all_required_p2', 'Please fill in all required fields (Gender, DOB, Nationality, and Address).'));
+        throw new Error(t('auth.error_fill_all_required_p2', 'Kindly fill all the required feilds'));
       }
 
       const res = await registerUser(formData);
@@ -66,6 +72,9 @@ function RegisterPageP2() {
           role: user.role || 'user',
           loggedIn: true
         }, token);
+
+        // Clear the stored form data after successful registration
+        sessionStorage.removeItem('registerFormData');
 
         // Redirect based on role
         if (user.role === 'admin') {
@@ -97,13 +106,13 @@ function RegisterPageP2() {
             </AuthHeading>
           </div>
 
-          <div className='max-w-[500px] w-full'>
+          <div className='max-w-[500px] w-full text-center'>
             {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
           </div>
 
           <div className='max-w-[500px] w-full flex gap-2'>
             <div className={`h-[76px] w-[50%] flex flex-col items-start justify-between`}>
-              <label className='text-[#18181B] text-[16px]'>{t('auth.gender', 'Gender')}</label>
+              <label className='text-[#18181B] text-[16px]'>{t('auth.gender_req', 'Gender*')}</label>
               <select
                 name="Gender"
                 value={formData.gender}
@@ -119,7 +128,7 @@ function RegisterPageP2() {
             <div className="w-[50%]">
               <Input1
                 name="DOB"
-                label={t('auth.dob', 'DOB')}
+                label={t('auth.dob_req', 'DOB*')}
                 type="date"
                 placeholder={t('auth.your_age', 'your age')}
                 value={formData.dob}
@@ -140,6 +149,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Input1
               name="Nationality"
+              label={t('auth.nationality_req', 'Nationality*')}
               placeholder={t('auth.your_nationality', 'your nationality')}
               value={formData.nationality}
               onChange={handleChange}
@@ -149,6 +159,7 @@ function RegisterPageP2() {
           <div className='max-w-[500px] w-full'>
             <Input1
               name="Permanent Address"
+              label={t('auth.permanent_address_req', 'Permanent Address*')}
               placeholder={t('auth.your_permanent_address', 'your Permanent Address')}
               value={formData.permanentAddress}
               onChange={handleChange}

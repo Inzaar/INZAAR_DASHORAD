@@ -112,7 +112,7 @@ function RegisterPageP1() {
 
     // Basic validation for fields (lastname is optional)
     if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
-      setError(t('auth.error_fill_required', 'Please fill in all required fields.'));
+      setError(t('auth.error_fill_required', 'Kindly fill all the required feilds'));
       return;
     }
 
@@ -179,11 +179,12 @@ function RegisterPageP1() {
           </AuthHeading>
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm text-center w-full max-w-[500px]">{error}</p>}
 
         <div className='max-w-[500px] w-full flex gap-2'>
           <Input1
             name="First Name"
+            label={t('auth.first_name_req', 'First Name*')}
             placeholder={t('auth.first_name', 'First Name')}
             value={formData.firstname}
             onChange={handleChange}
@@ -198,7 +199,8 @@ function RegisterPageP1() {
 
         <div className='max-w-[500px] w-full'>
           <Input1 
-            name="Username" 
+            name="Username"
+            label={t('auth.username_req', 'Username*')}
             placeholder={t('auth.username', 'Username')} 
             value={formData.username}
             onChange={handleChange}
@@ -209,6 +211,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <Input1
             name="Email"
+            label={t('auth.email_req', 'Email*')}
             placeholder={t('auth.email', 'Email')}
             type="email"
             value={formData.email}
@@ -220,6 +223,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <Input1
             name="Password"
+            label={t('auth.password_req', 'Password*')}
             placeholder={t('auth.8_digit_password', '8 Digit Password')}
             type="password"
             value={formData.password}
@@ -230,6 +234,7 @@ function RegisterPageP1() {
         <div className='max-w-[500px] w-full'>
           <PhoneInput
             name="phone"
+            label="Phone number*"
             value={formData.phone}
             onChange={handleChange}
           />
