@@ -28,6 +28,10 @@ function RegisterPageP1() {
   React.useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (formData.username && formData.username.length > 0) {
+        if (formData.username.length < 4) {
+          setUsernameError(t('auth.error_username_min_length', 'Username must be at least 4 characters long.'));
+          return;
+        }
         try {
           const res = await checkUsername(formData.username);
           if (!res.data.data.available) {
@@ -49,6 +53,11 @@ function RegisterPageP1() {
   React.useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (formData.email && formData.email.length > 0) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          setEmailError(t('auth.error_invalid_email', 'Please enter a valid email address.'));
+          return;
+        }
         try {
           const res = await checkEmail(formData.email);
           if (!res.data.data.available) {
@@ -80,6 +89,11 @@ function RegisterPageP1() {
       value = value.replace(/\s/g, '');
     }
 
+    // Automatically convert Username to lowercase
+    if (name === "Username") {
+      value = value.toLowerCase();
+    }
+
     const fieldMap = {
       "First Name": "firstname",
       "Last Name": "lastname",
@@ -102,18 +116,29 @@ function RegisterPageP1() {
       return;
     }
 
+    if (formData.username.length < 4) {
+      setError(t('auth.error_username_min_length', 'Username must be at least 4 characters long.'));
+      return;
+    }
+
     if (formData.username.includes(' ')) {
       setError(t('auth.error_username_spaces', 'Username cannot contain spaces.'));
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError(t('auth.error_invalid_email', 'Please enter a valid email address.'));
+      return;
+    }
+
     if (usernameError) {
-      setError(t('auth.error_username_unique', 'Please choose a unique username.'));
+      setError(usernameError);
       return;
     }
 
     if (emailError) {
-      setError(t('auth.error_email_unique', 'Please use a unique email address.'));
+      setError(emailError);
       return;
     }
 
