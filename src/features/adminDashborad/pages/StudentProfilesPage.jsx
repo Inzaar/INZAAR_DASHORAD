@@ -212,15 +212,17 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     <h2 className="text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Students' : `${genderFilter} Students`}</h2>
                                     <p className="text-gray-500 text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Students</p>
                                 </div>
-                                <GradiantButton
-                                    onClick={() => setIsAddModalOpen(true)}
-                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
-                                >
-                                    <div className="flex items-center justify-center">
-                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
-                                    </div>
-                                    <span className="hidden sm:block">{t('add_new_students', 'Add New Students')}</span>
-                                </GradiantButton>
+                                {user?.role !== 'moderator' && (
+                                    <GradiantButton
+                                        onClick={() => setIsAddModalOpen(true)}
+                                        className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    >
+                                        <div className="flex items-center justify-center">
+                                            <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                        </div>
+                                        <span className="hidden sm:block">{t('add_new_students', 'Add New Students')}</span>
+                                    </GradiantButton>
+                                )}
                             </div>
 
                             {/* 4 Basic Stats Grid (Always shown) */}
@@ -243,26 +245,30 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             {/* 2 Chart Stats Grid (Shown only for All Students) */}
                             {genderFilter === 'All' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <ChartStatsCard
-                                        title={t("male_students", "Total Male Students")}
-                                        total={statsData?.genderBreakdown?.male?.total || 0}
-                                        active={statsData?.genderBreakdown?.male?.active || 0}
-                                        inactive={statsData?.genderBreakdown?.male?.inactive || 0}
-                                        trend="2.4%"
-                                        trendDirection="up"
-                                        trendText={t("vs_last_month", "vs last month")}
-                                        color="#00C896"
-                                    />
-                                    <ChartStatsCard
-                                        title={t("female_students", "Total Female Students")}
-                                        total={statsData?.genderBreakdown?.female?.total || 0}
-                                        active={statsData?.genderBreakdown?.female?.active || 0}
-                                        inactive={statsData?.genderBreakdown?.female?.inactive || 0}
-                                        trend="2.4%"
-                                        trendDirection="up"
-                                        trendText={t("vs_last_month", "vs last month")}
-                                        color="#00C896"
-                                    />
+                                    {(user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Male')) && (
+                                        <ChartStatsCard
+                                            title={t("male_students", "Total Male Students")}
+                                            total={statsData?.genderBreakdown?.male?.total || 0}
+                                            active={statsData?.genderBreakdown?.male?.active || 0}
+                                            inactive={statsData?.genderBreakdown?.male?.inactive || 0}
+                                            trend="2.4%"
+                                            trendDirection="up"
+                                            trendText={t("vs_last_month", "vs last month")}
+                                            color="#00C896"
+                                        />
+                                    )}
+                                    {(user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Female')) && (
+                                        <ChartStatsCard
+                                            title={t("female_students", "Total Female Students")}
+                                            total={statsData?.genderBreakdown?.female?.total || 0}
+                                            active={statsData?.genderBreakdown?.female?.active || 0}
+                                            inactive={statsData?.genderBreakdown?.female?.inactive || 0}
+                                            trend="2.4%"
+                                            trendDirection="up"
+                                            trendText={t("vs_last_month", "vs last month")}
+                                            color="#00C896"
+                                        />
+                                    )}
                                 </div>
                             )}
 
@@ -658,7 +664,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
             </div>
 
             {/* Add Student Modal */}
-            {isAddModalOpen && (
+            {user?.role !== 'moderator' && isAddModalOpen && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
