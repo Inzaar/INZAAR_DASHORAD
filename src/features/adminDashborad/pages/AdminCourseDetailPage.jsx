@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, ChevronRight, Trash2 } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronRight, Trash2, ChevronDown } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -12,7 +12,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import img from '@/assets/images/course.png';
 import Analytics from '@/features/StudentDashboard/components/Analytics';
-import { getAdminCourseById, deleteCourse } from '@/api/course';
+import { getAdminCourseById, deleteCourse, updateCourse } from '@/api/course';
 import toast from 'react-hot-toast';
 import DeleteCourseModal from '../components/DeleteCourseModal';
 
@@ -41,18 +41,29 @@ const AdminCourseDetailPage = () => {
     }, []);
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchCourseData = async () => {
             try {
                 const res = await getAdminCourseById(id);
-                setCourseData(res.data.data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching course details:", error);
+                setCourseData(res?.data?.data);
+            } catch (err) {
+                toast.error('Failed to fetch course details');
+            } finally {
                 setLoading(false);
             }
         };
-        fetchCourse();
+        fetchCourseData();
     }, [id]);
+
+    const handleStatusChange = async (newStatus) => {
+        try {
+            await updateCourse(id, { status: newStatus });
+            const displayStatus = newStatus === 'published' ? 'Active' : newStatus;
+            toast.success(`Course status updated to ${displayStatus}`);
+            setCourseData(prev => ({ ...prev, status: newStatus }));
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update status');
+        }
+    };
 
     const handleDeleteCourse = async () => {
         try {
@@ -133,6 +144,23 @@ const AdminCourseDetailPage = () => {
 
                                 {/* Desktop Buttons */}
                                 <div className="hidden md:flex items-center gap-3">
+                                    <div className="relative group">
+                                        <button className="bg-white border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2 capitalize">
+                                            Status: {courseData?.status === 'published' ? 'Active' : (courseData?.status || 'Draft')}
+                                            <ChevronDown size={16} />
+                                        </button>
+                                        <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                                            {['draft', 'published', 'inactive'].map((st) => (
+                                                <button
+                                                    key={st}
+                                                    onClick={() => handleStatusChange(st)}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 capitalize ${courseData?.status === st ? 'text-[#8B5CF6] font-bold bg-blue-50' : 'text-gray-700'}`}
+                                                >
+                                                    {st === 'published' ? 'Active' : st}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                     <GradiantButton 
                                         onClick={() => toast.error('Certificate is not available yet')}
                                         className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
@@ -165,6 +193,20 @@ const AdminCourseDetailPage = () => {
 
                                     {isAdminMenuOpen && (
                                         <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                            <div className="px-4 py-2 border-b border-gray-100 mb-2">
+                                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Change Status</p>
+                                                <div className="flex flex-col gap-1">
+                                                    {['draft', 'published', 'inactive'].map((st) => (
+                                                        <button
+                                                            key={st}
+                                                            onClick={() => { handleStatusChange(st); setIsAdminMenuOpen(false); }}
+                                                            className={`w-full text-left px-3 py-1.5 rounded-lg text-sm capitalize ${courseData?.status === st ? 'bg-blue-50 text-[#8B5CF6] font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                                                        >
+                                                            {st === 'published' ? 'Active' : st}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
                                             <button
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
                                                 onClick={() => {

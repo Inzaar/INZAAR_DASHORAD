@@ -77,7 +77,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
         return toast.error("Please enter a valid email address.");
       }
 
-      const payload = {
+      const rawPayload = {
         firstname: form.get("firstname"),
         email: form.get("email"),
         phone: phone,
@@ -91,6 +91,14 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
         dob: form.get("dob"),
         profileImageUrl: pendingProfileImage ? null : user.profileImageUrl || ""
       };
+
+      // Only send fields that actually exist (are not null) so we don't accidentally blank out backend data
+      const payload = {};
+      Object.keys(rawPayload).forEach(key => {
+        if (rawPayload[key] !== null) {
+          payload[key] = rawPayload[key];
+        }
+      });
 
       // 1. Handle Pending Profile Image (from ModeratorRoll component)
       if (pendingProfileImage) {
