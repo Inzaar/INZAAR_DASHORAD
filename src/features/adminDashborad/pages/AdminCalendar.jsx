@@ -268,6 +268,8 @@ const AdminCalendar = () => {
         return `${year}-${month}-${day}`;
     };
 
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
     const today = new Date();
     const tenDaysLater = new Date(today);
     tenDaysLater.setDate(today.getDate() + 10);
@@ -286,10 +288,57 @@ const AdminCalendar = () => {
     const [eventSpeaker, setEventSpeaker] = useState('');
     const [eventDescription, setEventDescription] = useState('');
     const [eventDuration, setEventDuration] = useState('1 hour');
-    const [eventDay, setEventDay] = useState('5');
-    const [eventMonth, setEventMonth] = useState('August');
-    const [eventYear, setEventYear] = useState('2025');
+    const [eventDay, setEventDay] = useState(String(today.getDate()));
+    const [eventMonth, setEventMonth] = useState(monthNames[today.getMonth()]);
+    const [eventYear, setEventYear] = useState(String(today.getFullYear()));
     const [editingEvent, setEditingEvent] = useState(null);
+
+    const updateModalDateFromDateString = (dateStr) => {
+        if (!dateStr) return;
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            if (!isNaN(d) && d >= 1 && d <= 31) setEventDay(String(d));
+            if (monthNames[m]) setEventMonth(monthNames[m]);
+            if (!isNaN(y)) setEventYear(String(y));
+        }
+    };
+
+    // Sync eventDate with modal date fields
+    useEffect(() => {
+        updateModalDateFromDateString(eventDate);
+    }, [eventDate]);
+
+    const handleOpenModal = () => {
+        updateModalDateFromDateString(eventDate);
+        setIsModalOpen(true);
+    };
+
+    const handleModalDayChange = (newDay) => {
+        setEventDay(newDay);
+        const mIndex = monthNames.indexOf(eventMonth) + 1;
+        const formattedMonth = mIndex < 10 ? `0${mIndex}` : `${mIndex}`;
+        const formattedDay = parseInt(newDay, 10) < 10 ? `0${parseInt(newDay, 10)}` : `${newDay}`;
+        setEventDate(`${eventYear}-${formattedMonth}-${formattedDay}`);
+    };
+
+    const handleModalMonthChange = (newMonth) => {
+        setEventMonth(newMonth);
+        const mIndex = monthNames.indexOf(newMonth) + 1;
+        const formattedMonth = mIndex < 10 ? `0${mIndex}` : `${mIndex}`;
+        const formattedDay = parseInt(eventDay, 10) < 10 ? `0${parseInt(eventDay, 10)}` : `${eventDay}`;
+        setEventDate(`${eventYear}-${formattedMonth}-${formattedDay}`);
+    };
+
+    const handleModalYearChange = (newYear) => {
+        setEventYear(newYear);
+        const mIndex = monthNames.indexOf(eventMonth) + 1;
+        const formattedMonth = mIndex < 10 ? `0${mIndex}` : `${mIndex}`;
+        const formattedDay = parseInt(eventDay, 10) < 10 ? `0${parseInt(eventDay, 10)}` : `${eventDay}`;
+        setEventDate(`${newYear}-${formattedMonth}-${formattedDay}`);
+    };
 
     const handleAddEventModal = async () => {
         if (!eventTitle || !eventType || !eventTime) {
@@ -664,7 +713,7 @@ const AdminCalendar = () => {
                         
                         {/* Inline Add Event Form */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6 flex-shrink-0">
-                            <h3 onClick={() => setIsModalOpen(true)} className="text-[#1E3A8A] text-[16px] font-bold mb-4 cursor-pointer hover:text-blue-600 transition-colors">+ Add New Event</h3>
+                            <h3 onClick={handleOpenModal} className="text-[#1E3A8A] text-[16px] font-bold mb-4 cursor-pointer hover:text-blue-600 transition-colors">+ Add New Event</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                 <div className="md:col-span-4">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Event title name</label>
@@ -712,12 +761,16 @@ const AdminCalendar = () => {
                                         type="date" 
                                         className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500 bg-white" 
                                         value={eventDate} 
-                                        onChange={(e) => setEventDate(e.target.value)} 
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setEventDate(val);
+                                            updateModalDateFromDateString(val);
+                                        }} 
                                     />
                                 </div>
                                 <div className="md:col-span-2">
                                     <button 
-                                        onClick={() => setIsModalOpen(true)}
+                                        onClick={handleOpenModal}
                                         className="w-full h-[48px] bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] text-white font-semibold rounded-[8px] hover:opacity-90 transition-opacity flex items-center justify-center cursor-pointer"
                                     >
                                         Add Event
@@ -811,8 +864,18 @@ const AdminCalendar = () => {
                                     <div className="overflow-x-auto flex-1 w-full custom-scrollbar">
                                         <div className="min-w-[800px] pb-4">
                                             <Calendar
-                                                onChange={() => { }}
-                                                value={null}
+                                                onChange={(val) => {
+                                                    const formatted = getFormattedDate(val);
+                                                    setEventDate(formatted);
+                                                    updateModalDateFromDateString(formatted);
+                                                }}
+                                                onClickDay={(val) => {
+                                                    const formatted = getFormattedDate(val);
+                                                    setEventDate(formatted);
+                                                    updateModalDateFromDateString(formatted);
+                                                    setIsModalOpen(true);
+                                                }}
+                                                value={eventDate ? new Date(eventDate + 'T00:00:00') : activeStartDate}
                                                 activeStartDate={activeStartDate}
                                                 onActiveStartDateChange={({ activeStartDate }) => setActiveStartDate(activeStartDate)}
                                                 tileContent={renderTileContent}
@@ -1173,20 +1236,20 @@ const AdminCalendar = () => {
                                     </div>
                                     <div className="flex gap-3">
                                         <div className="relative w-[100px] shrink-0">
-                                            <select value={eventDay} onChange={e => setEventDay(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
-                                                {Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}
+                                            <select value={String(parseInt(eventDay, 10))} onChange={e => handleModalDayChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={String(d)}>{d}</option>)}
                                             </select>
                                             <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                                         </div>
                                         <div className="relative flex-1">
-                                            <select value={eventMonth} onChange={e => setEventMonth(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
-                                                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => <option key={m} value={m}>{m}</option>)}
+                                            <select value={eventMonth} onChange={e => handleModalMonthChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {monthNames.map(m => <option key={m} value={m}>{m}</option>)}
                                             </select>
                                             <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                                         </div>
                                         <div className="relative w-[120px] shrink-0">
-                                            <select value={eventYear} onChange={e => setEventYear(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
-                                                {[2024, 2025, 2026, 2027, 2028].map(y => <option key={y} value={y}>{y}</option>)}
+                                            <select value={String(eventYear)} onChange={e => handleModalYearChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
+                                                {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={String(y)}>{y}</option>)}
                                             </select>
                                             <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                                         </div>
