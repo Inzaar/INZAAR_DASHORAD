@@ -265,13 +265,15 @@ function Sidebar({ className, onClose }) {
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
                 {t('student_reports', 'Student Reports')}
               </button>
-              <button
-                onClick={() => handleItemClick('Moderator Reports')}
-                className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
-              >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                {t('moderator_reports', 'Moderator Reports')}
-              </button>
+              {user?.role !== 'moderator' && (
+                <button
+                  onClick={() => handleItemClick('Moderator Reports')}
+                  className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
+                >
+                  <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                  {t('moderator_reports', 'Moderator Reports')}
+                </button>
+              )}
               <button
                 onClick={() => handleItemClick('Course Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}

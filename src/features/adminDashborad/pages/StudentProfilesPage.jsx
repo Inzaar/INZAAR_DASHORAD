@@ -243,34 +243,40 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             </div>
 
                             {/* 2 Chart Stats Grid (Shown only for All Students) */}
-                            {genderFilter === 'All' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    {(user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Male')) && (
-                                        <ChartStatsCard
-                                            title={t("male_students", "Total Male Students")}
-                                            total={statsData?.genderBreakdown?.male?.total || 0}
-                                            active={statsData?.genderBreakdown?.male?.active || 0}
-                                            inactive={statsData?.genderBreakdown?.male?.inactive || 0}
-                                            trend="2.4%"
-                                            trendDirection="up"
-                                            trendText={t("vs_last_month", "vs last month")}
-                                            color="#00C896"
-                                        />
-                                    )}
-                                    {(user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Female')) && (
-                                        <ChartStatsCard
-                                            title={t("female_students", "Total Female Students")}
-                                            total={statsData?.genderBreakdown?.female?.total || 0}
-                                            active={statsData?.genderBreakdown?.female?.active || 0}
-                                            inactive={statsData?.genderBreakdown?.female?.inactive || 0}
-                                            trend="2.4%"
-                                            trendDirection="up"
-                                            trendText={t("vs_last_month", "vs last month")}
-                                            color="#00C896"
-                                        />
-                                    )}
-                                </div>
-                            )}
+                            {genderFilter === 'All' && (() => {
+                                const showMale = user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Male');
+                                const showFemale = user?.role !== 'moderator' || statsData?.moderatorBatchGenders?.includes('Female');
+                                if (!showMale && !showFemale) return null;
+                                
+                                return (
+                                    <div className={`grid grid-cols-1 ${showMale && showFemale ? 'md:grid-cols-2' : ''} gap-6 mb-8`}>
+                                        {showMale && (
+                                            <ChartStatsCard
+                                                title={t("male_students", "Total Male Students")}
+                                                total={statsData?.genderBreakdown?.male?.total || 0}
+                                                active={statsData?.genderBreakdown?.male?.active || 0}
+                                                inactive={statsData?.genderBreakdown?.male?.inactive || 0}
+                                                trend="2.4%"
+                                                trendDirection="up"
+                                                trendText={t("vs_last_month", "vs last month")}
+                                                color="#00C896"
+                                            />
+                                        )}
+                                        {showFemale && (
+                                            <ChartStatsCard
+                                                title={t("female_students", "Total Female Students")}
+                                                total={statsData?.genderBreakdown?.female?.total || 0}
+                                                active={statsData?.genderBreakdown?.female?.active || 0}
+                                                inactive={statsData?.genderBreakdown?.female?.inactive || 0}
+                                                trend="2.4%"
+                                                trendDirection="up"
+                                                trendText={t("vs_last_month", "vs last month")}
+                                                color="#00C896"
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Main Content Card */}
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
