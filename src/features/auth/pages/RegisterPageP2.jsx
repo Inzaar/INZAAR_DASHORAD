@@ -62,26 +62,11 @@ function RegisterPageP2() {
       const res = await registerUser(formData);
 
       if (res.data.success) {
-        const { user, token } = res.data.data;
-        // Automatically login the user
-        login({
-          id: user._id,
-          name: `${user.firstname} ${user.lastname || ''}`.trim(),
-          firstname: user.firstname,
-          email: user.email,
-          role: user.role || 'user',
-          loggedIn: true
-        }, token);
-
         // Clear the stored form data after successful registration
         sessionStorage.removeItem('registerFormData');
 
-        // Redirect based on role
-        if (user.role === 'admin') {
-          navigate('/admin-dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        // Redirect to login page
+        navigate('/login');
       } else {
         setError(res.data.message || t('auth.registration_failed', 'Registration failed.'));
       }

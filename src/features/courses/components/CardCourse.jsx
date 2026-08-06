@@ -16,6 +16,8 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+
   const handleEnroll = async () => {
     if (isAdmin) {
       // Navigate to admin course details page (placeholder for now)
@@ -35,12 +37,21 @@ const CardCourse = ({ course, isAdmin = false }) => {
       }
     } catch (error) {
       console.log("Enrollment error:", error);
+      const msg = error.response?.data?.message;
+      
+      // Only navigate to course view if they are actually enrolled
+      if (msg === "You are already enrolled in this course") {
+        setShouldNavigate(true);
+      } else {
+        setShouldNavigate(false);
+      }
+
       if (error.response && (error.response.status === 400 || error.response.status === 409)) {
         setIsAlreadyEnrolled(true);
-        setErrorMessage(error.response.data.message ? t(error.response.data.message, error.response.data.message) : t("already_enrolled_msg", "You are already enrolled in this course"));
+        setErrorMessage(msg ? t(msg, msg) : t("already_enrolled_msg", "You are already enrolled in this course"));
       } else {
         setIsAlreadyEnrolled(true);
-        setErrorMessage(error.response?.data?.message ? t(error.response.data.message, error.response.data.message) : t("something_went_wrong_retry", "Something went wrong. Please try again."));
+        setErrorMessage(msg ? t(msg, msg) : t("something_went_wrong_retry", "Something went wrong. Please try again."));
       }
     } finally {
       setIsEnrolling(false);
@@ -124,7 +135,9 @@ const CardCourse = ({ course, isAdmin = false }) => {
               <GradiantButton
                 onClick={() => {
                   setIsAlreadyEnrolled(false);
-                  navigate("/course-view?id=" + course.id);
+                  if (shouldNavigate) {
+                    navigate("/course-view?id=" + course.id);
+                  }
                 }}
                 className="w-full py-2 rounded-md"
               >

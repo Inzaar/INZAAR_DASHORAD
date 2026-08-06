@@ -5,6 +5,7 @@ import BatchInformation from './BatchInformation';
 import AdjustStudentsTab from './AdjustStudentsTab';
 import { fetchAllModerators, assignBatch, removeModerator } from '../../../api/user';
 import CreateModeratorModal from '../../../features/adminDashborad/components/CreateModeratorModal';
+import { toast } from 'react-hot-toast';
 
 const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign' }) => {
     const navigate = useNavigate();
@@ -16,6 +17,10 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
     const [assignedModId, setAssignedModId] = useState(batchData?.assignedModerator?._id || batchData?.assignedModerator);
     const [isEditMode, setIsEditMode] = useState(!(batchData?.assignedModerator?._id || batchData?.assignedModerator));
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    
+    // Custom error popup state
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     // Sync state with batchData when it opens
     useEffect(() => {
@@ -50,7 +55,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
     const handleAssign = async (moderatorId) => {
         const batchId = batchData?._id || batchData?.id;
         if (!batchId) {
-            alert("No Batch ID found for assignment");
+            toast.error("No Batch ID found for assignment");
             return;
         }
 
@@ -68,7 +73,15 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
             }
         } catch (error) {
             console.error("Failed to assign moderator:", error);
-            alert("Failed to assign moderator");
+            const errMsg = error.response?.data?.message || error.message || "Failed to assign moderator";
+            
+            // Show custom popup for the enrollment conflict
+            if (errMsg.includes("already enrolled as a student")) {
+                setErrorMessage(errMsg);
+                setShowErrorPopup(true);
+            } else {
+                toast.error(errMsg);
+            }
         } finally {
             setAssigningId(null);
         }
@@ -93,7 +106,8 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
             }
         } catch (error) {
             console.error("Failed to remove moderator:", error);
-            alert("Failed to remove moderator");
+            const errorMessage = error.response?.data?.message || error.message || "Failed to remove moderator";
+            toast.error(errorMessage);
         } finally {
             setAssigningId(null);
         }
@@ -374,6 +388,36 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                     }
                 }} 
             />
+
+            {/* Custom Error Popup for Conflict */}
+            {showErrorPopup && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+                        <button
+                            onClick={() => setShowErrorPopup(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <div className="flex flex-col items-center text-center gap-5 pt-2">
+                            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2 border-4 border-red-100">
+                                <Users className="w-7 h-7" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Assignment Conflict</h3>
+                                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">{errorMessage}</p>
+                            </div>
+                            <button
+                                onClick={() => setShowErrorPopup(false)}
+                                className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                Got it
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
