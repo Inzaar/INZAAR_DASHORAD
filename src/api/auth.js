@@ -37,6 +37,11 @@ export const forgotPassword = (data) => {
     return res;
 }
 
+export const verifyOtp = (data) => {
+    const res = axiosInstance.post("/users/verify-otp", data);
+    return res;
+}
+
 export const resetPassword = (data) => {
     const res = axiosInstance.post("/users/reset-password", data);
     return res;

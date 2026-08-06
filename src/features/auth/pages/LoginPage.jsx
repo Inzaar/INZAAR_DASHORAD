@@ -8,7 +8,7 @@ import GrayButton from '@/components/ui/buttons/GrayButton';
 import GoogleLoginButton from '@/components/ui/buttons/GoogleLoginButton';
 import AuthText from '../components/AuthText';
 import { login } from '@/api/auth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -130,6 +130,15 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          <div className="w-full flex justify-end -mt-2">
+            <Link
+              to="/forgot-password"
+              className="text-[14px] text-[#B566E7] hover:text-[#9333EA] hover:underline transition-colors font-medium"
+            >
+              {t('auth.forgot_password_question', 'Forgot Password?')}
+            </Link>
+          </div>
 
           <ErrorAlert message={error} />
 
