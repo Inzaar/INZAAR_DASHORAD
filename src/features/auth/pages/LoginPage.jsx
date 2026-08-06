@@ -18,7 +18,7 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login: authLogin } = useAuth();
+  const { login: authLogin, loginAsGuest } = useAuth();
   const [email, setEmail] = useState('student@inzaar.com');
   const [password, setPassword] = useState('Password123!');
   const [loading, setLoading] = useState(false);
@@ -104,6 +104,11 @@ const LoginPage = () => {
     }
   };
 
+  const handleGuestLogin = () => {
+    loginAsGuest();
+    navigate('/dashboard', { replace: true });
+  };
+
   return (
     <AuthPage>
       <AuthLeft />
@@ -151,7 +156,7 @@ const LoginPage = () => {
 
         <p className='text-[#636363] text-[16px]'>{t('auth.or', 'Or')}</p>
         <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="mt-5 mb-3 !w-[calc(100%_-_60px)]" />
-        <GrayButton className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-2">
+        <GrayButton onClick={handleGuestLogin} className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-2">
           {t('auth.continue_as_guest', 'Continue As A Guest')}
         </GrayButton>
         <AuthText />

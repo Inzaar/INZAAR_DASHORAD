@@ -1,4 +1,5 @@
 // import ProfileDesign from "@/components/ui/profileDesign/ProfileDesign";
+import { createPortal } from 'react-dom';
 import { MdOutlineLogout } from "react-icons/md";
 import toast from 'react-hot-toast';
 import Account from "./account";
@@ -17,7 +18,8 @@ import { useTranslation } from "react-i18next";
 function Profile({ userInfo, setUserPayload, userPayload }) {
     const [activeTab, setActiveTab] = useState("account");
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-    const { logout: contextLogout } = useAuth();
+    const [showGuestModal, setShowGuestModal] = useState(false);
+    const { user, logout: contextLogout } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -56,6 +58,11 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     };
 
     const handleSave = async () => {
+        if (user?.role === 'guest') {
+            setShowGuestModal(true);
+            return;
+        }
+
         try {
             if (userPayload.password && userPayload.password.trim() !== '') {
                 if (userPayload.password.length < 8) {
@@ -184,6 +191,44 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 onClose={() => setIsLogoutModalOpen(false)}
                 onConfirm={handleLogout}
             />
+
+            {/* Guest Profile Save Modal */}
+            {showGuestModal && createPortal(
+                <div className="fixed inset-0 z-[10002] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-150 ease-out animate-in fade-in fill-mode-both" onClick={() => setShowGuestModal(false)} />
+                    <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+                        <button
+                            onClick={() => setShowGuestModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div className="flex flex-col items-center text-center gap-5 pt-2">
+                            <div className="w-16 h-16 rounded-full bg-[#F3E8FF] flex items-center justify-center text-[#B666E7] mb-2 border-4 border-[#F3E8FF]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Account Required</h3>
+                                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
+                                    You are currently browsing as a guest. Please create an account or sign in to complete your profile.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowGuestModal(false);
+                                    contextLogout();
+                                    navigate('/login');
+                                }}
+                                className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                Sign In / Create Account
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     )
 }

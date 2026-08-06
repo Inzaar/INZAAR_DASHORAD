@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Profile from '@/components/layouts/profile/profile';
 import { getUserById } from '@/api/auth';
 import { Loader } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
@@ -12,10 +13,28 @@ const ProfilePage = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [userPayload, setUserPayload] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const { user } = useAuth();
 
     console.log("working before the useEffect")
     useEffect(() => {
         const getUserdata = async () => {
+            if (user?.role === 'guest') {
+                const guestProfile = {
+                    firstname: "Guest",
+                    lastname: "User",
+                    email: "guest@inzaar.org",
+                    role: "guest",
+                    phone: "N/A",
+                    gender: "N/A",
+                    dob: null,
+                    address: "N/A"
+                };
+                setUserInfo(guestProfile);
+                setUserPayload(guestProfile);
+                setIsLoading(false);
+                return;
+            }
+
             try {
                 const res = await getUserById();
                 console.log("useEffect", res.data.data.user);

@@ -8,6 +8,7 @@ import EnrolledCourse from '../components/EnrolledCourse';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '@/api/dashboards';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
 
 const EnrolledCourses = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const EnrolledCourses = () => {
     const [userCourses, setUserCourses] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     const { t } = useTranslation();
+    const { user } = useAuth();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -22,6 +24,11 @@ const EnrolledCourses = () => {
 
     useEffect(() => {
         const fetchUserCourses = async () => {
+            if (user?.role === 'guest') {
+                setUserCourses({ enrolledCourses: [] });
+                setLoading(false);
+                return;
+            }
             try {
                 const res = await getUserProfile();
                 setUserCourses(res.data.data);

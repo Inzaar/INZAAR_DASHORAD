@@ -13,8 +13,23 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
+        const isGuest = localStorage.getItem('isGuest');
+
         if (!token) {
-            setUser(null);
+            if (isGuest === 'true') {
+                setUser({
+                    id: 'guest',
+                    name: 'Guest User',
+                    firstname: 'Guest',
+                    email: 'guest@inzaar.org',
+                    role: 'guest',
+                    profileImageUrl: null,
+                    assignedFeatures: [],
+                    loggedIn: true
+                });
+            } else {
+                setUser(null);
+            }
             setLoading(false);
             return;
         }
@@ -57,12 +72,27 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
     };
 
+    const loginAsGuest = () => {
+        localStorage.setItem('isGuest', 'true');
+        setUser({
+            id: 'guest',
+            name: 'Guest User',
+            firstname: 'Guest',
+            email: 'guest@inzaar.org',
+            role: 'guest',
+            profileImageUrl: null,
+            assignedFeatures: [],
+            loggedIn: true
+        });
+    };
+
     const logout = async () => {
         // Clear frontend state
         setUser(null);
 
-        // Remove JWT token
+        // Remove JWT token and Guest flag
         localStorage.removeItem('token');
+        localStorage.removeItem('isGuest');
         sessionStorage.clear();
 
         // Expire all cookies to guarantee a clean slate
@@ -80,6 +110,7 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         login,
+        loginAsGuest,
         logout,
         checkAuth
     };

@@ -52,6 +52,13 @@ const DashboardPage = () => {
             return;
         }
 
+        if (user.role === 'guest') {
+            setUserCourses({ enrolledCourses: [] });
+            setUserData(user);
+            setLoading(false);
+            return;
+        }
+
         const fetchStudentDashboard = async () => {
             setLoading(true);
             try {

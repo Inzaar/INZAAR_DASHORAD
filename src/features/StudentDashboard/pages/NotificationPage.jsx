@@ -5,14 +5,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
 
 import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
-import { Loader, BellOff } from 'lucide-react';
+import { Loader, BellOff, Lock } from 'lucide-react';
 
 const NotificationPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [notifications, setNotifications] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+    const { user } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -68,6 +70,11 @@ const NotificationPage = () => {
 
     React.useEffect(() => {
         const fetchNotifications = async () => {
+            if (user?.role === 'guest') {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const res = await getMyNotifications();
                 setNotifications(res.data.data.notifications || []);
@@ -123,6 +130,22 @@ const NotificationPage = () => {
                             {loading ? (
                                 <div className="flex items-center justify-center h-[60vh]">
                                     <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
+                                </div>
+                            ) : user?.role === 'guest' ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3 border-2 border-dashed border-gray-100 rounded-2xl">
+                                    <div className="w-16 h-16 bg-[#F3E8FF] rounded-full flex items-center justify-center mb-2 border-4 border-[#F3E8FF]">
+                                        <Lock className="w-8 h-8 text-[#B666E7]" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Feature Locked</h3>
+                                    <p className="text-gray-500 font-medium text-center max-w-sm">
+                                        You are currently browsing as a guest. Please create an account or sign in to unlock notifications.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="mt-4 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-sm shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                                    >
+                                        Sign In / Create Account
+                                    </button>
                                 </div>
                             ) : notifications.length > 0 ? (
                                 notifications.map((notification) => (
