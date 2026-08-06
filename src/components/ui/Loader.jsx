@@ -8,9 +8,8 @@ const Loader = () => {
         <img 
           src={logo} 
           alt="Inzaar Dashorad Logo" 
-          className="w-24 h-24 md:w-32 md:h-32 object-contain mb-4"
+          className="w-24 h-24 md:w-32 md:h-32 object-contain"
         />
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     </div>
   );
