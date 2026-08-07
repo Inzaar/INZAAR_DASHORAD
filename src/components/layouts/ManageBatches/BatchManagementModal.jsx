@@ -75,13 +75,9 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
             console.error("Failed to assign moderator:", error);
             const errMsg = error.response?.data?.message || error.message || "Failed to assign moderator";
             
-            // Show custom popup for the enrollment conflict
-            if (errMsg.includes("already enrolled as a student")) {
-                setErrorMessage(errMsg);
-                setShowErrorPopup(true);
-            } else {
-                toast.error(errMsg);
-            }
+            // Show custom popup for assignment errors / course completion requirement
+            setErrorMessage(errMsg);
+            setShowErrorPopup(true);
         } finally {
             setAssigningId(null);
         }

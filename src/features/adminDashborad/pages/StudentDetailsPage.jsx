@@ -4,7 +4,7 @@ import Navbar from "@/components/layouts/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getUserProfileById, assignUserRole, deleteUser, restoreUser } from "@/api/user";
-import { RiDeleteBin6Fill } from "react-icons/ri";
+import { RiDeleteBin6Fill, RiAlertFill, RiInformationFill } from "react-icons/ri";
 import toast from "react-hot-toast";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import deactivate from "@/assets/images/deactivate.png";
@@ -26,6 +26,7 @@ const StudentDetailsPage = () => {
     const [open, setOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Profile');
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+    const [isIncompleteCourseModalOpen, setIsIncompleteCourseModalOpen] = useState(false);
     const [isModerator, setIsModerator] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
@@ -89,6 +90,29 @@ const StudentDetailsPage = () => {
             toast.error("Failed to restore student");
             console.error(err);
         }
+    };
+
+    const handleSwitchAsModeratorClick = () => {
+        if (profileData?.user?.isDeleted) return;
+
+        if (!isModerator) {
+            const enrolledCourses = profileData?.enrolledCourses || [];
+            const requiredCourse = enrolledCourses.find(c =>
+                c.title && c.title.trim().toLowerCase().replace(/\s+/g, ' ') === "quran ka matlob insaan"
+            );
+
+            const isCourseCompleted = requiredCourse && (
+                requiredCourse.isCompleted ||
+                (requiredCourse.totalLectures > 0 && requiredCourse.completedLecturesCount >= requiredCourse.totalLectures)
+            );
+
+            if (!isCourseCompleted) {
+                setIsIncompleteCourseModalOpen(true);
+                return;
+            }
+        }
+
+        setIsAssignModalOpen(true);
     };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -207,9 +231,7 @@ const StudentDetailsPage = () => {
                                                             checked={isModerator}
                                                             disabled={profileData?.user?.isDeleted}
                                                             onChange={() => {
-                                                                if (!profileData?.user?.isDeleted) {
-                                                                    setIsAssignModalOpen(true);
-                                                                }
+                                                                handleSwitchAsModeratorClick();
                                                             }}
                                                         />
                                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
@@ -272,9 +294,7 @@ const StudentDetailsPage = () => {
                                                                     checked={isModerator}
                                                                     disabled={profileData?.user?.isDeleted}
                                                                     onChange={() => {
-                                                                        if (!profileData?.user?.isDeleted) {
-                                                                            setIsAssignModalOpen(true);
-                                                                        }
+                                                                        handleSwitchAsModeratorClick();
                                                                     }}
                                                                 />
                                                                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
@@ -321,7 +341,7 @@ const StudentDetailsPage = () => {
                                                 setProfileData(res.data);
                                             }
                                         } catch (err) {
-                                            toast.error("Failed to assign moderator");
+                                            toast.error(err?.response?.data?.message || "Failed to assign moderator");
                                             console.error(err);
                                         }
                                     }}
@@ -378,6 +398,39 @@ const StudentDetailsPage = () => {
                                         </div>
                                     </div>
                                 )}
+                                 {/* Incomplete Required Course Warning Modal */}
+                                 {isIncompleteCourseModalOpen && (
+                                     <div className="fixed inset-0 z-[160] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 font-sans text-left">
+                                         <div className="bg-white w-full max-w-[460px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                                             <div className="pt-8 pb-4 px-6 flex flex-col items-center text-center">
+                                                 <div className="w-16 h-16 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-center text-amber-500 mb-4 shadow-sm">
+                                                     <RiAlertFill className="w-8 h-8 text-amber-500" />
+                                                 </div>
+                                                 <h3 className="text-xl font-extrabold text-gray-800 tracking-tight">
+                                                     Course Completion Required
+                                                 </h3>
+                                                 <p className="text-gray-500 text-sm mt-2 leading-relaxed px-2">
+                                                     To switch this student to a Moderator, completing the course <span className="font-bold text-gray-800 bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200/60 inline-block my-1">"Quran ka Matlob Insaan"</span> is mandatory.
+                                                 </p>
+                                                 <div className="mt-4 p-3.5 bg-red-50/80 border border-red-100 rounded-xl text-left w-full flex items-start gap-2.5">
+                                                     <RiInformationFill className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                                     <p className="text-xs text-red-700 font-medium leading-normal">
+                                                         This student has not completed this course yet and cannot be assigned as a moderator.
+                                                     </p>
+                                                 </div>
+                                             </div>
+
+                                             <div className="px-6 pb-6 pt-2 flex items-center justify-center">
+                                                 <button
+                                                     onClick={() => setIsIncompleteCourseModalOpen(false)}
+                                                     className="w-full bg-[#3758EE] hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-blue-500/20 active:scale-[0.98] text-sm"
+                                                 >
+                                                     Understood
+                                                 </button>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 )}
                             </div>
                         </div>
                     </main>
