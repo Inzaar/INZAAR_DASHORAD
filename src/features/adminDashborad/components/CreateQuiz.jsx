@@ -103,6 +103,23 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
         ));
     };
 
+    const handleAddOption = (qId) => {
+        setQuestions(prev => prev.map(q => {
+            if (String(q.id) === String(qId)) {
+                if (q.options.length >= 4) {
+                    toast.error("Maximum 4 options allowed per question.");
+                    return q;
+                }
+                const newOptionId = `opt_${Date.now()}`;
+                return {
+                    ...q,
+                    options: [...q.options, { id: newOptionId, text: '', isCorrect: false }]
+                };
+            }
+            return q;
+        }));
+    };
+
     const addQuestion = () => {
         const newId = `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         setQuestions([...questions, {
@@ -832,18 +849,31 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                                                             </div>
                                                             <span className="sm:hidden text-[13px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
                                                         </div>
-                                                        <div className="flex-1 relative">
-                                                            <span className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 text-[13px] sm:text-[14px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
-                                                            <input
-                                                                type="text"
-                                                                placeholder={`Enter option ${String.fromCharCode(97 + optIndex)}`}
-                                                                value={opt.text || ''}
-                                                                onChange={(e) => handleOptionChange(q.id, opt.id, e.target.value)}
-                                                                className="w-full px-4 sm:px-5 sm:pl-[90px] py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-medium shadow-sm"
-                                                            />
+                                                        <div className="flex-1 relative flex items-center gap-2">
+                                                            <div className="flex-1 relative">
+                                                                <span className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 text-[13px] sm:text-[14px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder={`Enter option ${String.fromCharCode(97 + optIndex)}`}
+                                                                    value={opt.text || ''}
+                                                                    onChange={(e) => handleOptionChange(q.id, opt.id, e.target.value)}
+                                                                    className="w-full px-4 sm:px-5 sm:pl-[90px] py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-medium shadow-sm"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
+                                                
+                                                {q.options.length < 4 && (
+                                                    <div className="pt-2">
+                                                        <button
+                                                            onClick={() => handleAddOption(q.id)}
+                                                            className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-[#64748b] font-bold hover:bg-white hover:border-[#3758EE]/30 hover:text-[#3758EE] transition-all group active:scale-95 text-[14px]"
+                                                        >
+                                                            <PlusCircle size={18} className="group-hover:scale-110 transition-all" /> Add Option
+                                                        </button>
+                                                    </div>
+                                                )}
                                                 <p className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-2 ml-1">Select the circle to mark the correct answer</p>
                                             </div>
 
