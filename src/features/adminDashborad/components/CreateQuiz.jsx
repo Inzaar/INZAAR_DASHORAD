@@ -818,7 +818,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                                             {/* Answer Options */}
                                             <div className="space-y-3 sm:space-y-4">
                                                 <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-1">Answer Options *</label>
-                                                {q.options.map((opt) => (
+                                                {q.options.map((opt, optIndex) => (
                                                     <div key={opt.id} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 group w-full">
                                                         <div className="flex items-center gap-3">
                                                             <div
@@ -830,13 +830,13 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                                                             >
                                                                 {opt.isCorrect && <div className="w-2 h-2 rounded-full bg-white shadow-sm" />}
                                                             </div>
-                                                            <span className="sm:hidden text-[13px] font-bold text-[#64748b]">Option {opt.id}</span>
+                                                            <span className="sm:hidden text-[13px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
                                                         </div>
                                                         <div className="flex-1 relative">
-                                                            <span className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 text-[13px] sm:text-[14px] font-bold text-[#64748b]">Option {opt.id}</span>
+                                                            <span className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 text-[13px] sm:text-[14px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
                                                             <input
                                                                 type="text"
-                                                                placeholder={`Enter option ${opt.id.toLowerCase()}`}
+                                                                placeholder={`Enter option ${String.fromCharCode(97 + optIndex)}`}
                                                                 value={opt.text || ''}
                                                                 onChange={(e) => handleOptionChange(q.id, opt.id, e.target.value)}
                                                                 className="w-full px-4 sm:px-5 sm:pl-[90px] py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-medium shadow-sm"
@@ -967,12 +967,12 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                                                 <h4 className="text-[10px] sm:text-[11px] font-medium text-gray-400 mb-3 uppercase tracking-wider">Question {qIdx + 1} Preview</h4>
                                                 <p className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-3 sm:mb-4">Question {qIdx + 1}</p>
                                                 <div className="space-y-2">
-                                                    {q.options.map((opt) => (
+                                                    {q.options.map((opt, optIndex) => (
                                                         <div key={opt.id} className={`p-3 sm:p-3.5 rounded-xl border transition-all text-[12px] sm:text-[13px] font-bold
                                                         ${opt.isCorrect
                                                                 ? 'bg-green-50 border-green-100 text-green-600'
                                                                 : 'bg-[#f8fafc] border-gray-100 text-[#64748b]'}`}>
-                                                            {opt.id}. {opt.text || `Option ${opt.id}`}
+                                                            {String.fromCharCode(65 + optIndex)}. {opt.text || `Option ${String.fromCharCode(65 + optIndex)}`}
                                                         </div>
                                                     ))}
                                                 </div>
