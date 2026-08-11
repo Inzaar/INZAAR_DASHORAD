@@ -16,7 +16,7 @@ const MetricCard = ({
 }) => {
     const { t } = useTranslation();
     const metricInfo = {
-        title: titleProp ?? t("progress", "Progress"),
+        title: titleProp ?? t("total_enrolled_courses", "Total Enrolled Courses"),
         value: valueProp ?? (userCourses?.stats?.totalEnrolled || "0"),
         trend: {
             value: trendValueProp ?? (userCourses?.stats?.improvement || "0"),
