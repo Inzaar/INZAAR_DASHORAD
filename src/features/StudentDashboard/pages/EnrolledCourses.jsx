@@ -68,7 +68,7 @@ const EnrolledCourses = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="py-4 pr-2">
-                            <div className="flex justify-between items-start mb-8 gap-4 w-full">
+                            {/* <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1 leading-[1.8] pt-4 pb-2">
                                         {t('aslam_o_alaikum', 'Aslam o Alaikum')} {t(userCourses?.user?.firstname || 'Student')} 👋
@@ -83,7 +83,7 @@ const EnrolledCourses = () => {
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
                                     +
                                 </GradiantButton>
-                            </div>
+                            </div> */}
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
