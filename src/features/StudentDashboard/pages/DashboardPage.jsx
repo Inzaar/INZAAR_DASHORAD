@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import { Calendar18 } from '@/components/shared/Calender';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
@@ -18,6 +18,7 @@ const DashboardPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
     const [selectedLectureFilter, setSelectedLectureFilter] = useState("");
+    const lectureDropdownRef = useRef(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     // const userId = localStorage.getItem('userId');
@@ -86,6 +87,19 @@ const DashboardPage = () => {
             setSelectedLectureFilter(lectureOptions[0]._id);
         }
     }, [userCourses]); // Run when userCourses updates
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (lectureDropdownRef.current && !lectureDropdownRef.current.contains(event.target)) {
+                setIsLectureDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Find the selected course data by its unique _id
     const selectedCourseData = userCourses?.enrolledCourses?.find(course =>
@@ -182,7 +196,7 @@ const DashboardPage = () => {
                                         <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
-                                                <div className="relative z-20">
+                                                <div className="relative z-20" ref={lectureDropdownRef}>
                                                     <button
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
                                                         className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[120px] justify-between"
