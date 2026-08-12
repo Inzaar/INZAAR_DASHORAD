@@ -79,7 +79,7 @@ function Account({ setUserPayload, userPayload, userInfo }) {
 
                         {/* whatsapp number */}
                         <div className="w-full min-[1218px]:w-[50%] opacity-[1px] gap-[8px] flex flex-col">
-                            <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('phone_number', 'Phone number')}</label>
+                            <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('whatsapp_number', 'WhatsApp number')}</label>
                             <PhoneInput
                                 name="phone"
                                 value={userPayload?.phone || ''}
