@@ -779,7 +779,7 @@ const CourseView = () => {
 
                                 {!isAdminView && user?.role !== 'admin' && (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <button
+                                        {/* <button
                                             disabled={!courseData?.assignedModeratorPhone}
                                             onClick={() => {
                                                 if (courseData?.assignedModeratorPhone) {
@@ -795,7 +795,7 @@ const CourseView = () => {
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
                                         </button>
-                                        {/* Mobile icon-only WhatsApp button */}
+                                        Mobile icon-only WhatsApp button
                                         <button
                                             disabled={!courseData?.assignedModeratorPhone}
                                             onClick={() => {
@@ -811,7 +811,14 @@ const CourseView = () => {
                                                 }`}
                                         >
                                             <FaWhatsapp size={20} />
-                                        </button>
+                                        </button> */}
+
+                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
+                                            Download Certificate
+                                        </GradiantButton>
+                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                            🎓
+                                        </GradiantButton>
 
                                         <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Enrolled New Course
