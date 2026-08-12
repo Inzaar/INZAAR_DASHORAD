@@ -152,7 +152,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                     <div className="hidden min-[500px]:flex w-full h-[120px] sm:h-[150px] md:h-[200px] items-center justify-end px-6 sm:px-0">
                         <div
                             onClick={() => setIsLogoutModalOpen(true)}
-                            className="flex w-[130px] sm:w-[140px] h-[45px] sm:h-[50px] mt-6 sm:mt-10 rounded-xl justify-center items-center bg-[#f1f5f9] border border-gray-100 text-[#64748b] hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all cursor-pointer font-bold text-[14px] shadow-sm gap-2"
+                            className="flex w-[130px] sm:w-[140px] h-[45px] sm:h-[50px] mt-6 sm:mt-10 rounded-xl justify-center items-center bg-gray-200 border border-gray-300 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer font-bold text-[14px] shadow-sm gap-2"
                         >
                             {t('logout', 'Log Out')} <MdOutlineLogout size={18} />
                         </div>
@@ -206,7 +206,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                         </button>
                         <div className="flex flex-col items-center text-center gap-5 pt-2">
                             <div className="w-16 h-16 rounded-full bg-[#F3E8FF] flex items-center justify-center text-[#B666E7] mb-2 border-4 border-[#F3E8FF]">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" x2="19" y1="8" y2="14" /><line x1="22" x2="16" y1="11" y2="11" /></svg>
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">Account Required</h3>
