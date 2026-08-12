@@ -212,9 +212,9 @@ const StudentCertificates = ({ profileData }) => {
                             <div className="py-4 pr-2 flex flex-col gap-6">
 
                                 {/* ── Metric Cards ── */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
                                     {metricCards.map((metric, index) => (
-                                        <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full">
+                                        <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
                                             <div>
                                                 <h3 className="text-gray-900 font-semibold mb-2">{metric.label}</h3>
                                                 <div className="flex items-baseline gap-2 mb-2">
@@ -401,7 +401,7 @@ const StudentCertificates = ({ profileData }) => {
                                     )}
 
                                     {/* Pagination */}
-                                    <PaginationContent className="w-full h-10 mt-6 flex items-center justify-center md:justify-end">
+                                    <PaginationContent className="w-full h-10 mt-6 flex items-center justify-end">
                                         <PaginationItem>
                                             <PaginationPrevious
                                                 onClick={() => handlePageChange(currentPage - 1)}
