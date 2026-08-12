@@ -10,7 +10,7 @@ import YouTube from "react-youtube";
 import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, Upload, FileText, Volume2 } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, Upload, FileText, Volume2, Download, Plus } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
 import AdminLectureList from "../components/AdminLectureList";
@@ -813,18 +813,18 @@ const CourseView = () => {
                                             <FaWhatsapp size={20} />
                                         </button> */}
 
-                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
+                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Download Certificate
                                         </GradiantButton>
-                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                            🎓
+                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center">
+                                            <Download className="w-5 h-5" />
                                         </GradiantButton>
 
-                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
+                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Enrolled New Course
                                         </GradiantButton>
-                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[400px]:block hidden text-xl px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                            +
+                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center">
+                                            <Plus className="w-5 h-5" />
                                         </GradiantButton>
                                     </div>
                                 )}
