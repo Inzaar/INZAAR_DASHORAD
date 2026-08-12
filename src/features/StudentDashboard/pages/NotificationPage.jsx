@@ -45,6 +45,47 @@ const NotificationPage = () => {
         return t(cleanMsg, msg);
     };
 
+    const groupNotificationsByDate = (notifs) => {
+        const today = [];
+        const yesterday = [];
+        const earlier = [];
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterdayStart = new Date(todayStart);
+        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+        notifs.forEach((item) => {
+            let category = 'earlier';
+
+            if (item.createdAt) {
+                const date = new Date(item.createdAt);
+                if (date >= todayStart) {
+                    category = 'today';
+                } else if (date >= yesterdayStart) {
+                    category = 'yesterday';
+                } else {
+                    category = 'earlier';
+                }
+            } else if (item.time) {
+                const timeLower = item.time.toLowerCase();
+                if (timeLower.includes('just now') || timeLower.includes('minute') || timeLower.includes('hour')) {
+                    category = 'today';
+                } else if (timeLower.includes('1 day') || timeLower.includes('yesterday')) {
+                    category = 'yesterday';
+                } else {
+                    category = 'earlier';
+                }
+            }
+
+            if (category === 'today') today.push(item);
+            else if (category === 'yesterday') yesterday.push(item);
+            else earlier.push(item);
+        });
+
+        return { today, yesterday, earlier };
+    };
+
     const handleNotificationClick = async (notification) => {
         try {
             // Mark as read in backend
@@ -148,16 +189,66 @@ const NotificationPage = () => {
                                     </button>
                                 </div>
                             ) : notifications.length > 0 ? (
-                                notifications.map((notification) => (
-                                    <Notification
-                                        key={notification.id}
-                                        isUnread={notification.isUnread}
-                                        message={translateMessage(notification.message)}
-                                        time={notification.time}
-                                        onClick={() => handleNotificationClick(notification)}
-                                        className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
-                                    />
-                                ))
+                                (() => {
+                                    const { today, yesterday, earlier } = groupNotificationsByDate(notifications);
+                                    return (
+                                        <div className="flex flex-col gap-6">
+                                            {today.length > 0 && (
+                                                <div className="flex flex-col">
+                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                        {t('today', 'Today')}
+                                                    </h3>
+                                                    {today.map((notification) => (
+                                                        <Notification
+                                                            key={notification.id}
+                                                            isUnread={notification.isUnread}
+                                                            message={translateMessage(notification.message)}
+                                                            time={notification.time}
+                                                            onClick={() => handleNotificationClick(notification)}
+                                                            className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {yesterday.length > 0 && (
+                                                <div className="flex flex-col">
+                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                        {t('yesterday', 'Yesterday')}
+                                                    </h3>
+                                                    {yesterday.map((notification) => (
+                                                        <Notification
+                                                            key={notification.id}
+                                                            isUnread={notification.isUnread}
+                                                            message={translateMessage(notification.message)}
+                                                            time={notification.time}
+                                                            onClick={() => handleNotificationClick(notification)}
+                                                            className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {earlier.length > 0 && (
+                                                <div className="flex flex-col">
+                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                        {t('earlier', 'Earlier')}
+                                                    </h3>
+                                                    {earlier.map((notification) => (
+                                                        <Notification
+                                                            key={notification.id}
+                                                            isUnread={notification.isUnread}
+                                                            message={translateMessage(notification.message)}
+                                                            time={notification.time}
+                                                            onClick={() => handleNotificationClick(notification)}
+                                                            className={notification.title !== "Welcome Aboard" && notification.link ? "cursor-pointer" : ""}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-20 gap-3 border-2 border-dashed border-gray-100 rounded-2xl">
                                     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
