@@ -15,7 +15,7 @@ function StatusRow({ data }) {
             <div className="flex-1 min-w-[120px] flex items-center justify-center">
                 {data.status === 'Locked' && '🔒'} {data.status ? t(data.status.toLowerCase(), data.status) : ''}
             </div>
-            <div className="flex-1 min-w-[120px] flex flex-col items-center justify-center text-center gap-1">
+            {/* <div className="flex-1 min-w-[120px] flex flex-col items-center justify-center text-center gap-1">
                 {data.moderatorName !== "N/A" && data.moderatorContact !== "N/A" ? (
                     <>
                         <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">{t(data.moderatorName?.trim(), data.moderatorName)}</span>
@@ -34,7 +34,7 @@ function StatusRow({ data }) {
                 ) : (
                     <span className="text-gray-400 italic text-[11px]">{t("N/A", "N/A")}</span>
                 )}
-            </div>
+            </div> */}
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{t(data.comments, data.comments)}</div>
             <Link 
                 to={`/course-view?id=${data.courseId}&lectureId=${data.lectureId}`} 
