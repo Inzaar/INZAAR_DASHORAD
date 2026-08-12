@@ -23,7 +23,7 @@ const StudentCertificates = ({ profileData }) => {
     });
     const [allCertificates, setAllCertificates] = useState([]);
 
-    const itemsPerPage = 10;
+    const itemsPerPage = 5;
     useEffect(() => {
         const fetchCertificates = async () => {
             if (!profileData?.user?._id) return;
@@ -159,18 +159,32 @@ const StudentCertificates = ({ profileData }) => {
 
     const getPageNumbers = () => {
         const pages = [];
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-        } else {
-            pages.push(1, 2, 3, '...', totalPages);
+        const blockSize = 4;
+        const currentBlock = Math.ceil(currentPage / blockSize);
+        const start = (currentBlock - 1) * blockSize + 1;
+        const end = Math.min(start + blockSize - 1, totalPages);
+
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push('ellipsis-start');
         }
-        return pages;
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) pages.push('ellipsis-end');
+            pages.push(totalPages);
+        }
+
+        return [...new Set(pages)];
     };
 
     const metricCards = [
-        { label: t('total_courses_completed', 'Total Courses Completed'), value: metrics.totalCoursesCompleted.count, sub: t('courses', 'Courses'), change: '', desc: t('all_courses_completed_desc', 'All courses you have successfully finished.') },
-        { label: t('certificates_available', 'Certificates Available'), value: metrics.certificatesAvailable.count, sub: t('certificates', 'Certificates'), change: '', desc: t('certificates_available_desc', 'Certificates ready for you to download and share.') },
-        { label: t('courses_in_progress_title', 'Courses In Progress'), value: metrics.coursesInProgress.count, sub: t('courses_in_progress', 'Courses In Progress'), change: '', desc: t('courses_in_progress_desc', 'Courses you are currently enrolled in but not yet completed.') },
+        { label: t('total_courses_completed', 'Total Courses Completed'), value: metrics.totalCoursesCompleted.count, sub: t('courses', 'Courses'), change: '+12%', desc: t('all_courses_completed_desc', 'All courses you have successfully finished.') },
+        { label: t('certificates_available', 'Certificates Available'), value: metrics.certificatesAvailable.count, sub: t('certificates', 'Certificates'), change: '+2%', desc: t('certificates_available_desc', 'Certificates ready for you to download and share.') },
+        { label: t('courses_in_progress_title', 'Courses In Progress'), value: metrics.coursesInProgress.count, sub: t('courses_in_progress', 'Courses In Progress'), change: '+10%', desc: t('courses_in_progress_desc', 'Courses you are currently enrolled in but not yet completed.') },
         { label: t('locked_certificates_title', 'Locked Certificates'), value: metrics.lockedCertificates.count, sub: t('locked_certificates', 'Locked Certificates'), change: '', desc: t('locked_certificates_desc', 'Certificates that will unlock upon 100% completion of their course.') },
     ];
 
@@ -387,31 +401,46 @@ const StudentCertificates = ({ profileData }) => {
                                     )}
 
                                     {/* Pagination */}
-                                    {totalPages > 1 && (
-                                        <PaginationContent className="w-full h-10 mt-6 flex items-center justify-end">
-                                            <PaginationItem>
-                                                <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={`cursor-pointer ${currentPage === 1 ? 'opacity-50 pointer-events-none' : ''}`} />
+                                    <PaginationContent className="w-full h-10 mt-6 flex items-center justify-center md:justify-end">
+                                        <PaginationItem>
+                                            <PaginationPrevious
+                                                onClick={() => handlePageChange(currentPage - 1)}
+                                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                            />
+                                        </PaginationItem>
+                                        {getPageNumbers().map((page, index) => (
+                                            <PaginationItem key={index}>
+                                                {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                                                    <PaginationEllipsis
+                                                        onClick={() => {
+                                                            const blockSize = 4;
+                                                            const currentBlock = Math.ceil(currentPage / blockSize);
+                                                            if (page === 'ellipsis-start') {
+                                                                handlePageChange((currentBlock - 2) * blockSize + 1);
+                                                            } else {
+                                                                handlePageChange(currentBlock * blockSize + 1);
+                                                            }
+                                                        }}
+                                                        className="cursor-pointer hover:bg-gray-100 rounded-md transition-colors"
+                                                    />
+                                                ) : (
+                                                    <PaginationLink
+                                                        onClick={() => handlePageChange(page)}
+                                                        isActive={page === currentPage}
+                                                        className={page === currentPage ? "bg-linear-to-r from-[#A892FF] to-[#6C5DDC] text-white cursor-pointer border-none" : "cursor-pointer hover:bg-gray-100 border-none"}
+                                                    >
+                                                        {page}
+                                                    </PaginationLink>
+                                                )}
                                             </PaginationItem>
-                                            {getPageNumbers().map((page, index) => (
-                                                <PaginationItem key={index}>
-                                                    {page === '...' ? (
-                                                        <PaginationEllipsis />
-                                                    ) : (
-                                                        <PaginationLink
-                                                            onClick={() => handlePageChange(page)}
-                                                            isActive={page === currentPage}
-                                                            className={`cursor-pointer ${page === currentPage ? "bg-linear-to-r from-[#A892FF] to-[#6C5DDC] text-white hover:bg-[#6C5DDC] hover:text-white" : ""}`}
-                                                        >
-                                                            {page}
-                                                        </PaginationLink>
-                                                    )}
-                                                </PaginationItem>
-                                            ))}
-                                            <PaginationItem>
-                                                <PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={`cursor-pointer ${currentPage === totalPages ? 'opacity-50 pointer-events-none' : ''}`} />
-                                            </PaginationItem>
-                                        </PaginationContent>
-                                    )}
+                                        ))}
+                                        <PaginationItem>
+                                            <PaginationNext
+                                                onClick={() => handlePageChange(currentPage + 1)}
+                                                className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                            />
+                                        </PaginationItem>
+                                    </PaginationContent>
                                 </div>
                             </div>
                         )}

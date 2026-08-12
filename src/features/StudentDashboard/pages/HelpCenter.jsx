@@ -225,7 +225,7 @@ const HelpCenter = () => {
                                     <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
                                         <div className="mb-8">
                                             <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('contact_support', 'Contact Support')}</h3>
-                                            <p className="text-gray-500 text-sm leading-[1.8]">{t('contact_support_desc', 'Fill out the form below to get in touch with our support team.')}</p>
+                                            <p className="text-black text-sm font-normal leading-[1.8]">{t('contact_support_desc', 'Fill out the form below to get in touch with our support team.')}</p>
                                         </div>
 
                                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -237,7 +237,7 @@ const HelpCenter = () => {
                                                     onChange={(e) => setName(e.target.value)}
                                                     required
                                                     placeholder={t('your_name', 'Your name')}
-                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
@@ -249,7 +249,7 @@ const HelpCenter = () => {
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     required
                                                     placeholder={t('your_email_address', 'Your email address')}
-                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
+                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
