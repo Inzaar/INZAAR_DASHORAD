@@ -29,15 +29,15 @@ const OverviewCard = ({
     const stats = statsOverride || defaultStats;
 
     const renderColumn = (col, isLast = false) => (
-        <div className={cn("flex flex-1 items-center gap-4", !isLast && "min-[641px]:pl-8 sm:border-none sm:pl-0")}>
-            <div className="relative flex flex-col items-center">
+        <div className={cn("flex flex-1 items-center gap-2 min-[400px]:gap-3 min-w-0", !isLast && "min-[641px]:pl-8 sm:border-none sm:pl-0")}>
+            <div className="relative flex flex-col items-center shrink-0">
                 {showCircles && (
                     <div 
                         className="w-[6px] h-[6px] rounded-full mb-[-1px] z-10" 
                         style={{ backgroundColor: col.color }} 
                     />
                 )}
-                <div className="w-[2px] h-[48px] rounded-full" style={{ backgroundColor: col.color }}></div>
+                <div className="w-[2px] h-[36px] min-[400px]:h-[48px] rounded-full" style={{ backgroundColor: col.color }}></div>
                 {showCircles && (
                     <div 
                         className="w-[6px] h-[6px] rounded-full mt-[-1px] z-10" 
@@ -45,11 +45,11 @@ const OverviewCard = ({
                     />
                 )}
             </div>
-            <div className="flex flex-col gap-2.5 pt-1 pb-1">
-                <span className="text-[20px] [1270px]:text-2xl font-bold text-black leading-normal">{col.value}</span>
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
-                    <span className="text-[12px] [1270px]:text-sm font-medium leading-[1.8] pt-0.5 pb-0.5" style={{ color: col.color }}>{col.label}</span>
+            <div className="flex flex-col gap-1 min-[400px]:gap-2.5 pt-1 pb-1 min-w-0">
+                <span className="text-[16px] min-[400px]:text-[20px] [1270px]:text-2xl font-bold text-black leading-normal truncate">{col.value}</span>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 min-[400px]:w-2 min-[400px]:h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                    <span className="text-[10px] min-[400px]:text-[12px] [1270px]:text-sm font-medium leading-tight pt-0.5 pb-0.5" style={{ color: col.color }}>{col.label}</span>
                 </div>
             </div>
         </div>
@@ -57,18 +57,16 @@ const OverviewCard = ({
 
     return (
         <div className={cn(
-            "w-full max-w-[705px] bg-white rounded-[8px] border border-[#EAEDF2] px-6 py-[14px] flex flex-col gap-[10px]",
+            "w-full max-w-[705px] bg-white rounded-[8px] border border-[#EAEDF2] px-4 min-[400px]:px-6 py-[14px] flex flex-col gap-[10px]",
             className
         )}>
             {/* Title */}
             <h3 className="text-sm text-gray-500 font-normal leading-normal pb-1">{t("overview", "Overview")}</h3>
 
             {/* Stats Row */}
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-2 items-start sm:items-center justify-between w-full">
-                <div className="flex flex-[2] w-full sm:w-auto items-center justify-between gap-4 sm:gap-0">
-                    {renderColumn(stats.col1)}
-                    {renderColumn(stats.col2)}
-                </div>
+            <div className="flex flex-row items-center justify-between gap-1 min-[400px]:gap-2 sm:gap-4 w-full">
+                {renderColumn(stats.col1)}
+                {renderColumn(stats.col2)}
                 {renderColumn(stats.col3, true)}
             </div>
         </div>

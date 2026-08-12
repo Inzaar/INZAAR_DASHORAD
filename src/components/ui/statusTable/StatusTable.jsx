@@ -121,7 +121,7 @@ function StatusTable({ userCourses, loading }) {
                     </div>
                 </div>
             </div>
-            <PaginationContent className="w-full h-10 mt-4 flex items-center justify-center md:justify-end">
+            <PaginationContent className="w-full h-10 mt-4 flex items-center justify-end">
                 <PaginationItem>
                     <PaginationPrevious
                         onClick={() => handlePageChange(currentPage - 1)}
