@@ -79,7 +79,7 @@ function StatusTable({ userCourses, loading }) {
                             <div className="w-[134px] flex items-center justify-center">{t("date", "Date")}</div>
                             <div className="w-[134px] flex items-center justify-center">{t("progress", "Progress")}</div>
                             <div className="w-[134px] flex items-center justify-center">{t("next_lecture", "Next Lecture")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("contact_moderator", "Contact Moderator")}</div>
+                            {/* <div className="w-[134px] flex items-center justify-center">{t("contact_moderator", "Contact Moderator")}</div> */}
                             <div className="w-[134px] flex items-center justify-center">{t("comments", "Comments")}</div>
                             <div className="w-[134px] flex items-center justify-center">{t("action", "Action")}</div>
                         </div>
@@ -110,7 +110,7 @@ function StatusTable({ userCourses, loading }) {
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("date", "Date")}</div>
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("progress", "Progress")}</div>
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("next_lecture", "Next Lecture")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("contact_moderator", "Contact Moderator")}</div>
+                        {/* <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("contact_moderator", "Contact Moderator")}</div> */}
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("comments", "Comments")}</div>
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("action", "Action")}</div>
                     </div>
