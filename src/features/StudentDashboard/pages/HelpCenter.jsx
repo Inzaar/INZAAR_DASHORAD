@@ -187,14 +187,14 @@ const HelpCenter = () => {
                                 {activeTab === 'contact' ? (
                                     <GradiantButton
                                         onClick={() => setActiveTab('contact')}
-                                        className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
+                                        className="flex-1 py-2.5 text-sm font-medium rounded-md shadow-sm"
                                     >
                                         {t('contact_support', 'Contact Support')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('contact')}
-                                        className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                        className="flex-1 py-2.5 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
                                     >
                                         {t('contact_support', 'Contact Support')}
                                     </button>
@@ -203,14 +203,14 @@ const HelpCenter = () => {
                                 {activeTab === 'faq' ? (
                                     <GradiantButton
                                         onClick={() => setActiveTab('faq')}
-                                        className="flex-1 py-4 text-sm font-medium rounded-md shadow-sm"
+                                        className="flex-1 py-2.5 text-sm font-medium rounded-md shadow-sm"
                                     >
                                         {t('helps_faq', 'Helps & FAQ')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('faq')}
-                                        className="flex-1 py-4 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                        className="flex-1 py-2.5 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
                                     >
                                         {t('helps_faq', 'Helps & FAQ')}
                                     </button>
@@ -408,19 +408,19 @@ const HelpCenter = () => {
 
                             {activeTab === 'faq' && (
                                 <div className="animate-in fade-in duration-300">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3>
+                                    {/* <h3 className="text-lg font-semibold text-gray-800 mb-4 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3> */}
 
                                     <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
                                         <div className="mb-6">
                                             <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3>
-                                            <p className="text-gray-500 text-sm leading-[1.8]">{t('helps_faq_desc', 'Find answers to common questions and helpful tips to get started quickly.')}</p>
+                                            <p className="text-black text-sm font-normal leading-[1.8]">{t('helps_faq_desc', 'Find answers to common questions and helpful tips to get started quickly.')}</p>
                                         </div>
 
                                         <div className="flex flex-col gap-4">
                                             {faqs.map((faq, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`rounded-lg transition-all duration-200 ${openFaqIndex === index ? 'bg-gray-50 p-4' : 'bg-transparent py-3 border-b border-gray-50 last:border-0'
+                                                    className={`rounded-lg p-4 transition-all duration-200 ${openFaqIndex === index ? 'bg-gray-50' : 'bg-transparent border-b border-gray-100 last:border-0'
                                                         }`}
                                                 >
                                                     <button
@@ -432,7 +432,7 @@ const HelpCenter = () => {
                                                         </span>
                                                         <span className={`flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full transition-colors ${openFaqIndex === index ? 'text-[#00C896] bg-[#E6F9F4]' : 'text-gray-400 bg-gray-100'
                                                             }`}>
-                                                            {openFaqIndex === index ? <Plus className="h-4 w-4 rotate-45 transition-transform" /> : <Minus className="h-4 w-4" />}
+                                                            {openFaqIndex === index ? <Plus className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
                                                         </span>
                                                     </button>
 
