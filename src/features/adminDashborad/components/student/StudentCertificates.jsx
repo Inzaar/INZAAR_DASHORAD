@@ -265,15 +265,15 @@ const StudentCertificates = ({ profileData }) => {
                                             <div className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</div>
                                         </div>
                                     ) : (
-                                        <div className="w-full overflow-hidden">
-                                            <div className="w-full">
+                                        <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
+                                            <div className="w-full min-w-[960px]">
                                                 {/* Table Header - Desktop Only */}
                                                 <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
                                                     <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
                                                     <div className="col-span-2">{t('title', 'Title')}</div>
                                                     <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
-                                                    <div className="col-span-2">{t('progress', 'Progress')}</div>
-                                                    <div className="col-span-1">{t('status', 'Status')}</div>
+                                                    <div className="col-span-1">{t('progress', 'Progress')}</div>
+                                                    <div className="col-span-2">{t('status', 'Status')}</div>
                                                     <div className="col-span-2">{t('action', 'Action')}</div>
                                                 </div>
 
@@ -319,7 +319,7 @@ const StudentCertificates = ({ profileData }) => {
                                                                 </div>
 
                                                                 {/* Progress */}
-                                                                <div className="md:col-span-2">
+                                                                <div className="md:col-span-1">
                                                                     <div className="flex flex-row md:flex-col items-center md:justify-center gap-3 md:gap-1">
                                                                         <div className="md:hidden shrink-0">
                                                                             <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('progress', 'Progress')}</span>
@@ -334,9 +334,9 @@ const StudentCertificates = ({ profileData }) => {
                                                                 </div>
 
                                                                 {/* Status */}
-                                                                <div className="md:col-span-1 flex justify-between md:justify-center items-center">
+                                                                <div className="md:col-span-2 flex justify-between md:justify-center items-center">
                                                                     <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('status', 'Status')}</span>
-                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${item.status === 'Completed' || item.isCompleted
+                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${item.status === 'Completed' || item.isCompleted
                                                                         ? 'text-blue-600 bg-blue-50'
                                                                         : (item.status === 'Course Incomplete' || item.isCourseDeleted)
                                                                             ? 'text-red-600 bg-red-50 border border-red-200'
