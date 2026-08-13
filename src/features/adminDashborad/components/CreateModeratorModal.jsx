@@ -208,11 +208,11 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
         <>
             {step === 1 && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+                        <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 shrink-0">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900">Add New Moderator</h3>
-                                <p className="text-sm text-gray-500">Step 1: Basic Information</p>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Add New Moderator</h3>
+                                <p className="text-xs sm:text-sm text-gray-500">Step 1: Basic Information</p>
                             </div>
                             <button
                                 onClick={handleClose}
@@ -222,137 +222,139 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleStep1Submit} className="p-6 space-y-4">
-                            {formError && (
-                                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
-                                    <X size={16} className="bg-red-500 text-white rounded-full p-0.5" />
-                                    {formError}
-                                </div>
-                            )}
+                        <form onSubmit={handleStep1Submit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+                            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+                                {formError && (
+                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
+                                        <X size={16} className="bg-red-500 text-white rounded-full p-0.5" />
+                                        {formError}
+                                    </div>
+                                )}
 
-                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            placeholder="Enter First Name"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                                            value={newModerator.firstname}
+                                            onChange={(e) => setNewModerator({ ...newModerator, firstname: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter Last Name"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                                            value={newModerator.lastname}
+                                            onChange={(e) => setNewModerator({ ...newModerator, lastname: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
                                     <input
                                         required
                                         type="text"
-                                        placeholder="Enter First Name"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                                        value={newModerator.firstname}
-                                        onChange={(e) => setNewModerator({ ...newModerator, firstname: e.target.value })}
+                                        placeholder="Enter Username"
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border ${usernameError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm`}
+                                        value={newModerator.username}
+                                        onChange={(e) => {
+                                            setUsernameError('');
+                                            setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') });
+                                        }}
                                     />
+                                    {usernameError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>
+                                    )}
                                 </div>
+
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter Last Name"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                                        value={newModerator.lastname}
-                                        onChange={(e) => setNewModerator({ ...newModerator, lastname: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
-                                <input
-                                    required
-                                    type="text"
-                                    placeholder="Enter Username"
-                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${usernameError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
-                                    value={newModerator.username}
-                                    onChange={(e) => {
-                                        setUsernameError('');
-                                        setNewModerator({ ...newModerator, username: e.target.value.toLowerCase().replace(/\s+/g, '') });
-                                    }}
-                                />
-                                {usernameError && (
-                                    <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
-                                <input
-                                    required
-                                    type="email"
-                                    placeholder="Enter Email Address"
-                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
-                                    value={newModerator.email}
-                                    onChange={(e) => {
-                                        setEmailError('');
-                                        setNewModerator({ ...newModerator, email: e.target.value });
-                                    }}
-                                />
-                                {emailError && (
-                                    <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
-                                <PhoneInput
-                                    name="phone"
-                                    value={newModerator.phone}
-                                    onChange={(e) => setNewModerator({ ...newModerator, phone: e.target.value })}
-                                    label={null}
-                                    containerClassName="w-full relative"
-                                />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
-                                <div className="relative">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
                                     <input
                                         required
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Enter Password"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
-                                        value={newModerator.password}
-                                        onChange={(e) => setNewModerator({ ...newModerator, password: e.target.value })}
+                                        type="email"
+                                        placeholder="Enter Email Address"
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm`}
+                                        value={newModerator.email}
+                                        onChange={(e) => {
+                                            setEmailError('');
+                                            setNewModerator({ ...newModerator, email: e.target.value });
+                                        }}
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
+                                    {emailError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>
+                                    )}
                                 </div>
-                            </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
-                                <div className="relative">
-                                    <select
-                                        required
-                                        value={newModerator.gender}
-                                        onChange={(e) => setNewModerator({ ...newModerator, gender: e.target.value })}
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer"
-                                    >
-                                        <option value="" disabled>Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
+                                    <PhoneInput
+                                        name="phone"
+                                        value={newModerator.phone}
+                                        onChange={(e) => setNewModerator({ ...newModerator, phone: e.target.value })}
+                                        label={null}
+                                        containerClassName="w-full relative"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter Password"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12 text-sm"
+                                            value={newModerator.password}
+                                            onChange={(e) => setNewModerator({ ...newModerator, password: e.target.value })}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
+                                    <div className="relative">
+                                        <select
+                                            required
+                                            value={newModerator.gender}
+                                            onChange={(e) => setNewModerator({ ...newModerator, gender: e.target.value })}
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-sm"
+                                        >
+                                            <option value="" disabled>Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="pt-4 flex gap-3">
+                            <div className="p-4 sm:p-6 border-t border-gray-100 flex gap-3 shrink-0 bg-white">
                                 <button
                                     type="button"
                                     onClick={handleClose}
-                                    className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                                    className="flex-1 py-2.5 sm:py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm sm:text-base"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={Boolean(usernameError || emailError)}
-                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-[2] py-2.5 sm:py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                                 >
                                     Next
                                 </button>

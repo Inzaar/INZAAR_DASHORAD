@@ -91,7 +91,7 @@ const NewBatchAlert = () => {
                         </p>
                     </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-auto flex-shrink-0">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 w-full xl:w-auto flex-shrink-0">
                     <button
                         onClick={() => handleOpenModal('assign', batchData)}
                         className="w-full sm:w-auto px-6 py-2.5 border-2 border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-xs sm:text-sm hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 shadow-lg shadow-[#5D5FEF]/5 whitespace-nowrap"

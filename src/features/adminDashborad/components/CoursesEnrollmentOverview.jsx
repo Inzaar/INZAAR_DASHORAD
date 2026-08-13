@@ -27,16 +27,16 @@ const CourseStatItem = ({ count, trend, trendDirection, name }) => {
     );
 };
 
-const CoursesEnrollmentOverview = ({ 
-    courseStats = [], 
-    limit = 12, 
-    showViewAll = true, 
-    showViewMore = false, 
-    onViewAllClick 
+const CoursesEnrollmentOverview = ({
+    courseStats = [],
+    limit = 12,
+    showViewAll = true,
+    showViewMore = false,
+    onViewAllClick
 }) => {
     const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
-    
+
     // Slices for 2 rows (default 12 for grid-6)
     const displayedStats = isExpanded ? courseStats : courseStats.slice(0, limit);
 
@@ -45,7 +45,7 @@ const CoursesEnrollmentOverview = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <h3 className="text-[14px] font-medium text-[#64748b] truncate pr-2">{t('courses_enrollment_overview', 'Courses Enrollment Overview')}</h3>
                 {showViewAll && (
-                    <GradiantButton 
+                    <GradiantButton
                         onClick={onViewAllClick}
                         className="w-fit px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm"
                     >
@@ -65,7 +65,7 @@ const CoursesEnrollmentOverview = ({
 
             {showViewMore && courseStats.length > limit && (
                 <div className="mt-8 flex justify-center">
-                    <button 
+                    <button
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="flex items-center gap-2 text-[13px] font-bold text-[#6366F1] hover:text-[#4F46E5] transition-colors"
                     >
