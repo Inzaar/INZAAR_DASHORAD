@@ -19,7 +19,7 @@ const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 const LectureCard = ({ item, onEdit, onDelete }) => {
     if (item.type === 'Assignment') {
         return (
-            <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+            <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
                 <div>
                     <div className="relative aspect-[16/10] bg-[#fff7ed] flex items-center justify-center">
                         <div className="w-12 h-12 bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.05)] flex items-center justify-center">
@@ -66,7 +66,7 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
 
     if (item.type === 'Quiz') {
         return (
-            <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+            <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
                 <div>
                     <div className="relative aspect-[16/10] bg-[#ecfdf5] flex items-center justify-center">
                         <div className="w-12 h-12 bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.05)] flex items-center justify-center">
@@ -112,7 +112,7 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
     }
 
     return (
-        <div className="w-full max-w-[320px] bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between">
+        <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
             <div>
                 <div className="relative aspect-[16/10] bg-gray-900 group">
                     <img
@@ -720,9 +720,9 @@ const AddCoursePage = () => {
                         ) : (
                             <>
                                 {/* Header Row */}
-                                <div className="px-8 py-5 flex flex-col md:flex-row items-center justify-between border-b border-gray-100 gap-4 bg-white">
-                                    <div className="flex items-center gap-3.5">
-                                        <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm">
+                                <div className="px-4 sm:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-4 bg-white">
+                                    <div className="flex items-center gap-3.5 w-full md:w-auto">
+                                        <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
                                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
@@ -735,12 +735,12 @@ const AddCoursePage = () => {
                                     </div>
 
                                     {/* Stepper */}
-                                    <div className="flex items-center w-full md:w-auto max-w-[850px] gap-6 md:ml-auto">
+                                    <div className="flex items-center w-full md:w-auto max-w-[850px] gap-4 sm:gap-6 md:ml-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
                                         {steps.map((step) => {
                                             const isActive = currentStep === step.id;
                                             const isCompleted = currentStep > step.id;
                                             return (
-                                                <div key={step.id} className="flex-1 min-w-[200px] md:min-w-[240px] flex flex-col">
+                                                <div key={step.id} className="flex-1 min-w-[130px] sm:min-w-[180px] md:min-w-[240px] flex flex-col">
                                                     {/* Top Bar Indicator */}
                                                     <div className={`h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
                                                     
@@ -761,11 +761,11 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 1: Course Setup ── */}
                                 {currentStep === 1 && (
-                                    <div className="px-8 md:px-12 py-10 pb-32 flex-1 text-left bg-white">
+                                    <div className="px-4 sm:px-8 md:px-12 py-6 md:py-10 pb-32 flex-1 text-left bg-white">
                                         <div className="max-w-[1300px] mx-auto">
-                                            <div className="mb-10">
-                                                <h3 className="text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
-                                                <p className="text-gray-400 font-medium text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
+                                            <div className="mb-6 md:mb-10">
+                                                <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
+                                                <p className="text-gray-400 font-medium text-[12px] sm:text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
@@ -966,14 +966,14 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 2: Add Course Content ── */}
                                 {currentStep === 2 && (
-                                    <div className="px-4 md:px-10 py-10 pb-32 flex-1">
+                                    <div className="px-4 sm:px-8 md:px-10 py-6 md:py-10 pb-32 flex-1 bg-white">
                                         <div className="max-w-[1400px] w-full mx-auto">
-                                            <div className="mb-10">
-                                                <h3 className="text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
-                                                <p className="text-[#64748b] font-medium text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
+                                            <div className="mb-6 md:mb-10 text-left">
+                                                <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
+                                                <p className="text-[#64748b] font-medium text-[13px] sm:text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
                                             </div>
 
-                                            <div className="flex flex-wrap items-stretch justify-start gap-8 mt-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 mt-4">
                                                 {courseItems.map((item, idx) => (
                                                     <LectureCard
                                                         key={item.id}
@@ -984,7 +984,7 @@ const AddCoursePage = () => {
                                                 ))}
                                                 <div
                                                     onClick={handleAddLecturesClick}
-                                                    className="w-full max-w-[280px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300 min-h-[300px]"
+                                                    className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300"
                                                 >
                                                     <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -1001,30 +1001,30 @@ const AddCoursePage = () => {
 
                                 {/* ── STEP 3: Review & Publish ── */}
                                 {currentStep === 3 && (
-                                    <div className="px-4 md:px-10 py-10 pb-32 flex-1 space-y-12">
-                                        <div className="max-w-[1400px] mx-auto">
+                                    <div className="px-4 sm:px-8 md:px-10 py-6 md:py-10 pb-32 flex-1 space-y-8 md:space-y-12 bg-white">
+                                        <div className="max-w-[1400px] mx-auto text-left">
 
                                             {/* Success / Error Alerts */}
                                             {submitSuccess && (
                                                 <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
-                                                    <CheckCircle size={20} />
-                                                    <span className="font-bold text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
+                                                    <CheckCircle size={20} className="flex-shrink-0" />
+                                                    <span className="font-bold text-[13px] sm:text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
                                                 </div>
                                             )}
                                             {submitError && (
                                                 <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
-                                                    <AlertCircle size={20} />
-                                                    <span className="font-bold text-[14px]">{submitError}</span>
+                                                    <AlertCircle size={20} className="flex-shrink-0" />
+                                                    <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
                                                 </div>
                                             )}
 
                                             {/* Course Setup Review */}
-                                            <div className="bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                <div className="flex items-center justify-between mb-8">
-                                                    <h3 className="text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
-                                                    <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
+                                            <div className="bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                                    <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
+                                                    <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[14px] sm:text-[16px] hover:underline">Edit</button>
                                                 </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-20">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
                                                     {[
                                                         { label: 'Course Title', value: courseForm.title || '—' },
                                                         { label: 'Release Date', value: courseForm.releaseDate || '—' },
@@ -1066,17 +1066,17 @@ const AddCoursePage = () => {
                                             </div>
 
                                             {/* Lectures Review */}
-                                            <div className="mt-10 bg-white rounded-[24px] p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                <div className="flex items-center justify-between mb-8">
-                                                    <h3 className="text-[22px] font-bold text-[#0f172a]">
-                                                        Lectures Content <span className="text-[16px] text-[#64748b] font-medium ml-2">({courseItems.length} lectures)</span>
+                                            <div className="mt-8 sm:mt-10 bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                                    <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] flex flex-col sm:flex-row sm:items-center">
+                                                        Lectures Content <span className="text-[14px] sm:text-[16px] text-[#64748b] font-medium sm:ml-2 mt-1 sm:mt-0">({courseItems.length} lectures)</span>
                                                     </h3>
                                                     <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
                                                 </div>
                                                 {courseItems.length === 0 ? (
                                                     <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
                                                 ) : (
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
                                                         {courseItems.map((item) => (
                                                             <LectureCard key={item.id} item={item} />
                                                         ))}
@@ -1094,21 +1094,22 @@ const AddCoursePage = () => {
 
                     {/* Footer Actions */}
                     {!showQuizFlow && !showAssignmentFlow && (
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
                             <button
                                 onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
-                                className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[14px]"
+                                className="w-auto px-4 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"
                             >
                                 {currentStep === 1 ? 'Cancel' : 'Back'}
                             </button>
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-3 md:gap-4">
                                 {!isEditMode && (
                                     <button
                                         onClick={handleSaveDraftClick}
                                         disabled={isSubmitting}
-                                        className="w-full sm:w-auto px-6 md:px-12 py-3 bg-[#F3F4F6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50 text-[14px]"
+                                        className="w-auto px-3 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50 text-[12px] sm:text-[14px] whitespace-nowrap"
                                     >
-                                        Save as draft
+                                        <span className="sm:hidden">Draft</span>
+                                        <span className="hidden sm:inline">Save as draft</span>
                                     </button>
                                 )}
                                 <GradiantButton
@@ -1118,11 +1119,11 @@ const AddCoursePage = () => {
                                         else handleSubmit('published');
                                     }}
                                     disabled={isSubmitting}
-                                    className="w-full sm:w-auto px-6 md:px-12 py-3 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70 text-[14px]"
+                                    className="w-auto px-6 sm:px-6 md:px-12 py-2.5 sm:py-3 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70 text-[13px] sm:text-[14px]"
                                 >
                                     {isSubmitting
-                                        ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving…</span>
-                                        : currentStep === 3 ? (isEditMode ? 'Edit Course' : 'Save & Publish') : 'Next'
+                                        ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> <span className="hidden sm:inline">Saving…</span></span>
+                                        : currentStep === 3 ? (isEditMode ? 'Edit' : 'Publish') : 'Next'
                                     }
                                 </GradiantButton>
                             </div>
