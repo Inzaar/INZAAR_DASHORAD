@@ -124,12 +124,14 @@ const SharedStudentTable = ({
                                             </span>
                                         </td>
                                         <td className="py-4 text-center rounded-r-xl">
-                                            <GradiantButton
-                                                className="text-[13px] px-4 py-2 font-medium rounded-md hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7]"
-                                                onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                            >
-                                                {t("view_profile", "View Profile")}
-                                            </GradiantButton>
+                                            <div className="flex justify-center items-center">
+                                                <GradiantButton
+                                                    className="text-[13px] px-4 py-2 font-medium rounded-md hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7]"
+                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                >
+                                                    {t("view_profile", "View Profile")}
+                                                </GradiantButton>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
