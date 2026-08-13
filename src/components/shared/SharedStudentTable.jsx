@@ -139,7 +139,7 @@ const SharedStudentTable = ({
                         </table>
                     </div>
                     {/* Pagination */}
-                    <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-8">
+                    <div className="flex justify-end items-center gap-2 mt-8">
                         <button
                             className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-[#7C3AED] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             disabled={pagination.page <= 1}
