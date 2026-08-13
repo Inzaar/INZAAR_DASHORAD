@@ -24,8 +24,8 @@ const ChartStatsCard = ({
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex justify-between h-[125px] overflow-hidden">
             {/* Left side */}
             <div className="flex flex-col justify-between h-full">
-                <h3 className="text-[14px] font-bold text-gray-900">{title}</h3>
-                <div className="text-[28px] font-bold text-[#18181B] leading-none mb-1">
+                <h3 className="text-[15px] font-semibold text-[#18181B]">{title}</h3>
+                <div className="text-[32px] font-normal text-[#18181B] leading-none mb-1">
                     {total}
                 </div>
                 <div className="flex items-center gap-2 text-sm">

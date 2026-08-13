@@ -109,31 +109,31 @@ const NewBatchAlert = () => {
 
             {/* Bottom Section */}
             <div className="px-3 sm:px-4 pb-4 mt-auto">
-                <div className="bg-[#F8F9FA] px-3 sm:px-6 py-4 sm:py-6 rounded-lg grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-y-4 gap-x-4 sm:gap-x-6">
-                    <div className="flex items-center gap-3 sm:gap-4">
+                <div className="bg-[#F8F9FA] px-3 sm:px-6 py-4 sm:py-6 rounded-lg flex sm:grid sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-x-6 gap-y-4 overflow-x-auto pb-3 sm:pb-6 scrollbar-thin sm:overflow-visible">
+                    <div className="flex items-center gap-3 sm:gap-4 shrink-0 sm:shrink min-w-[180px] sm:min-w-0">
                         <div className="bg-[#5D5FEF]/10 p-2 sm:p-2.5 rounded-lg flex-shrink-0">
                             <BookOpen className="text-[#5D5FEF] w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Course</p>
-                            <p className="text-[11px] font-bold text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis max-[400px]:whitespace-normal">{batchData.courseName}</p>
+                            <p className="text-[11px] font-bold text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">{batchData.courseName}</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 shrink-0 sm:shrink min-w-[200px] sm:min-w-0">
                         <div className="bg-[#5D5FEF]/10 p-2.5 rounded-lg flex-shrink-0">
                             <Users className="text-[#5D5FEF] w-4 h-4" />
                         </div>
                         <div className="min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Batch</p>
-                            <p className="text-[13px] font-bold text-gray-700">
+                            <p className="text-[13px] font-bold text-gray-700 whitespace-nowrap">
                                 {batchData.batchId}
                                 {(batchData.genderType === 'Male' || batchData.genderType === 'Female') ? ` (${batchData.genderType})` : ''}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex flex-col justify-center">
+                    <div className="flex flex-col justify-center shrink-0 sm:shrink min-w-[100px] sm:min-w-0">
                         <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Students</p>
                         <p className={`text-[13px] font-bold flex items-center gap-1 ${batchData.isOverCapacity ? 'text-red-500' : 'text-gray-700'}`}>
                             {batchData.studentsCount}
@@ -141,9 +141,9 @@ const NewBatchAlert = () => {
                         </p>
                     </div>
 
-                    <div className="flex flex-col justify-center">
+                    <div className="flex flex-col justify-center shrink-0 sm:shrink min-w-[160px] sm:min-w-0">
                         <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Status</p>
-                        <p className="text-[13px] font-bold text-red-500">{batchData.status}</p>
+                        <p className="text-[13px] font-bold text-red-500 whitespace-nowrap">{batchData.status}</p>
                     </div>
                 </div>
             </div>

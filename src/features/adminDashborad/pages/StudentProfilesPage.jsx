@@ -226,7 +226,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             </div>
 
                             {/* 4 Basic Stats Grid (Always shown) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
                                         key={index}
@@ -587,12 +587,14 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             </span>
                                                         </td>
                                                         <td className="py-4 text-center rounded-r-xl">
-                                                            <button
-                                                                onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
-                                                            >
-                                                                View Profile
-                                                            </button>
+                                                            <div className="flex justify-center items-center">
+                                                                <button
+                                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
+                                                                >
+                                                                    View Profile
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))

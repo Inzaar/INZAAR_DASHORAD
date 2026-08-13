@@ -326,12 +326,14 @@ const RegisteredUsersPage = () => {
                                                             </span>
                                                         </td>
                                                         <td className="py-6 text-center">
-                                                            <GradiantButton
-                                                                onClick={() => navigate(`/admin/student-details/${user.id}`)}
-                                                                className="text-[12px] px-5 py-2 rounded-lg font-bold shadow-lg shadow-blue-200/50"
-                                                            >
-                                                                View Profile
-                                                            </GradiantButton>
+                                                            <div className="flex justify-center items-center">
+                                                                <GradiantButton
+                                                                    onClick={() => navigate(`/admin/student-details/${user.id}`)}
+                                                                    className="text-[12px] px-5 py-2 rounded-lg font-bold shadow-lg shadow-blue-200/50"
+                                                                >
+                                                                    View Profile
+                                                                </GradiantButton>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))

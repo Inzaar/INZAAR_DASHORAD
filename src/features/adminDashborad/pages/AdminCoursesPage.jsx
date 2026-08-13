@@ -189,7 +189,7 @@ const AdminCoursesPage = () => {
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
                                 {stats.map((stat, index) => {
                                     const types = ['all', 'active', 'inactive', 'draft'];
                                     return (
