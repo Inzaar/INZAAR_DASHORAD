@@ -438,7 +438,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
     }
 
     return (
-        <div className="flex-1 flex flex-col w-full h-[80vh] max-h-[850px] min-h-[500px] overflow-hidden font-sans bg-[#f8fafc] lg:rounded-[32px] border-t lg:border border-gray-100 shadow-sm relative">
+        <div className="flex-1 flex flex-col w-full h-[80vh] max-h-[850px] min-h-[500px] overflow-hidden font-sans bg-[#f8fafc] lg:rounded-2xl border-t lg:border border-gray-100 shadow-sm relative">
             {/* SVG Gradient Definition */}
             <svg width="0" height="0" className="absolute">
                 <defs>
@@ -450,7 +450,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
             </svg>
 
             {/* Header Area */}
-            <div className="mb-6 md:mb-8 px-4 md:px-0 max-w-[1000px] mx-auto text-center flex flex-col items-center">
+            <div className="mb-6 md:mb-8 px-6 md:px-10 pt-6 md:pt-8 text-left flex flex-col items-start">
                 <button
                     onClick={onBackToSelection}
                     className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 group cursor-pointer"

@@ -122,7 +122,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                 <div className="max-w-[1200px] mx-auto w-full px-4 md:px-8 pt-6 md:pt-10">
                     
                     {/* Header Area */}
-                    <div className="mb-8 md:mb-10 text-center flex flex-col items-center">
+                    <div className="mb-8 md:mb-10 text-left flex flex-col items-start">
                         <button
                             onClick={onBackToSelection}
                             className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[14px] font-medium mb-4 group cursor-pointer"
@@ -139,7 +139,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                     </div>
 
                     {/* Form Container */}
-                    <div className="bg-white md:rounded-[24px] md:shadow-[0_4px_20px_rgb(0,0,0,0.02)] md:border border-gray-100 p-6 md:p-10 mb-10">
+                    <div className="bg-white md:rounded-2xl md:shadow-[0_4px_20px_rgb(0,0,0,0.02)] md:border border-gray-100 p-6 md:p-10 mb-10">
                         
                         {/* Title and Number */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
