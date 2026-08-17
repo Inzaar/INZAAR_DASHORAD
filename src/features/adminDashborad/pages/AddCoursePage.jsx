@@ -270,7 +270,7 @@ const AddCoursePage = () => {
                         thumbnail: data.thumbnail || '',
                         certificateFile: data.certificateFile || '',
                     });
-                    
+
                     if (data.thumbnail) setThumbnailPreview(data.thumbnail);
                     if (data.certificateFile) setCertificatePreview(data.certificateFile);
 
@@ -382,7 +382,7 @@ const AddCoursePage = () => {
             setCertificateUploading(false);
         }
     };
-    
+
     // Video File Upload
     const handleVideoFileChange = async (e) => {
         const file = e.target.files?.[0];
@@ -402,7 +402,7 @@ const AddCoursePage = () => {
             setIsVideoUploading(false);
         }
     };
-    
+
     // Audio File Upload
     const handleAudioFileChange = async (e) => {
         const file = e.target.files?.[0];
@@ -673,7 +673,7 @@ const AddCoursePage = () => {
             // Always use createCourseWithLectures for both creation and updates 
             // to ensure lectures and their resources (PDF/Audio) are synced correctly.
             await createCourseWithLectures(payload);
-            
+
             setSubmitSuccess(true);
             setTimeout(() => navigate('/admin-courses'), 1500);
         } catch (err) {
@@ -696,441 +696,446 @@ const AddCoursePage = () => {
                     <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
                         <main className="flex-1 overflow-y-auto no-scrollbar pb-0 relative">
                             <div className="py-4">
-                            {showAssignmentFlow ? (
-                                <CreateAssignment
-                                    courseId={courseId}
-                                    nextAssignmentNumber={courseItems.length + 1}
-                                    onBackToSelection={() => {
-                                        setShowAssignmentFlow(false);
-                                        setModalStep('select-type');
-                                        setIsModalOpen(true);
-                                    }}
-                                    onComplete={handleAssignmentComplete}
-                                />
-                            ) : showQuizFlow ? (
-                            <CreateQuiz
-                                courseId={courseId}
-                                onBackToSelection={() => {
-                                    setShowQuizFlow(false);
-                                    setModalStep('select-type');
-                                    setIsModalOpen(true);
-                                }}
-                                onComplete={handleQuizComplete}
-                            />
-                        ) : (
-                            <>
-                                {/* Header Row */}
-                                <div className="px-4 sm:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-4 bg-white">
-                                    <div className="flex items-center gap-3.5 w-full md:w-auto">
-                                        <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
-                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                                                <line x1="12" y1="22.08" x2="12" y2="12" />
-                                            </svg>
-                                        </div>
-                                        <h2 className="text-[18px] font-bold text-gray-800 tracking-tight">
-                                            {isEditMode ? 'Edit Course' : 'Add New Course'}
-                                        </h2>
-                                    </div>
-
-                                    {/* Stepper */}
-                                    <div className="flex items-center w-full md:w-auto max-w-[850px] gap-4 sm:gap-6 md:ml-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
-                                        {steps.map((step) => {
-                                            const isActive = currentStep === step.id;
-                                            const isCompleted = currentStep > step.id;
-                                            return (
-                                                <div key={step.id} className="flex-1 min-w-[130px] sm:min-w-[180px] md:min-w-[240px] flex flex-col">
-                                                    {/* Top Bar Indicator */}
-                                                    <div className={`h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
-                                                    
-                                                    {/* Circle + Label */}
-                                                    <div className="mt-3 flex items-center justify-center gap-2">
-                                                        <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isActive || isCompleted ? 'border-[#3758EE]' : 'border-gray-300'}`}>
-                                                            {(isActive || isCompleted) && <div className="w-2 h-2 bg-[#3758EE] rounded-full" />}
-                                                        </div>
-                                                        <span className={`text-[12px] font-bold tracking-wide whitespace-nowrap transition-all duration-300 ${isActive || isCompleted ? 'text-[#3758EE]' : 'text-gray-400'}`}>
-                                                            {step.label}
-                                                        </span>
-                                                    </div>
+                                {showAssignmentFlow ? (
+                                    <CreateAssignment
+                                        courseId={courseId}
+                                        nextAssignmentNumber={courseItems.length + 1}
+                                        onBackToSelection={() => {
+                                            setShowAssignmentFlow(false);
+                                            setModalStep('select-type');
+                                            setIsModalOpen(true);
+                                        }}
+                                        onComplete={handleAssignmentComplete}
+                                    />
+                                ) : showQuizFlow ? (
+                                    <CreateQuiz
+                                        courseId={courseId}
+                                        onBackToSelection={() => {
+                                            setShowQuizFlow(false);
+                                            setModalStep('select-type');
+                                            setIsModalOpen(true);
+                                        }}
+                                        onComplete={handleQuizComplete}
+                                    />
+                                ) : (
+                                    <>
+                                        {/* Header Row */}
+                                        <div className="px-4 sm:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-4 bg-white">
+                                            <div className="flex items-center gap-3.5 w-full md:w-auto">
+                                                <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
+                                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                                                        <line x1="12" y1="22.08" x2="12" y2="12" />
+                                                    </svg>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* ── STEP 1: Course Setup ── */}
-                                {currentStep === 1 && (
-                                    <div className="px-4 sm:px-8 md:px-12 py-6 md:py-10 pb-32 flex-1 text-left bg-white">
-                                        <div className="max-w-[1300px] mx-auto">
-                                            <div className="mb-6 md:mb-10">
-                                                <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
-                                                <p className="text-gray-400 font-medium text-[12px] sm:text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
+                                                <h2 className="text-[18px] font-bold text-gray-800 tracking-tight">
+                                                    {isEditMode ? 'Edit Course' : 'Add New Course'}
+                                                </h2>
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
-                                                {/* Left Column */}
-                                                <div className="space-y-6">
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Title</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Enter title"
-                                                            value={courseForm.title}
-                                                            onChange={e => handleCourseFormChange('title', e.target.value)}
-                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Enter name"
-                                                            value={courseForm.instructor}
-                                                            onChange={e => handleCourseFormChange('instructor', e.target.value)}
-                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Batch Strength</label>
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            placeholder="Enter students per batch (e.g. 10)"
-                                                            value={courseForm.batchStrength}
-                                                            onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
-                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="Enter"
-                                                            value={courseForm.certificateCriteria}
-                                                            onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
-                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm placeholder:text-gray-300"
-                                                        />
-                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
-                                                        <div className="relative group">
-                                                            <select
-                                                                value={courseForm.duration}
-                                                                onChange={e => handleCourseFormChange('duration', e.target.value)}
-                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                            >
-                                                                <option value="">Select</option>
-                                                                {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                                                            </select>
-                                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                        </div>
-                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
-                                                    </div>
-                                                </div>
+                                            {/* Stepper */}
+                                            <div className="flex items-center w-full md:w-auto max-w-[850px] gap-4 sm:gap-6 md:ml-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
+                                                {steps.map((step) => {
+                                                    const isActive = currentStep === step.id;
+                                                    const isCompleted = currentStep > step.id;
+                                                    return (
+                                                        <div key={step.id} className="flex-1 min-w-[130px] sm:min-w-[180px] md:min-w-[240px] flex flex-col">
+                                                            {/* Top Bar Indicator */}
+                                                            <div className={`h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
 
-                                                {/* Right Column */}
-                                                <div className="space-y-6">
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Release Date</label>
-                                                        <div className="relative group">
-                                                            <input
-                                                                type="date"
-                                                                value={courseForm.releaseDate}
-                                                                onChange={e => handleCourseFormChange('releaseDate', e.target.value)}
-                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm"
-                                                            />
+                                                            {/* Circle + Label */}
+                                                            <div className="mt-3 flex items-center justify-center gap-2">
+                                                                <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isActive || isCompleted ? 'border-[#3758EE]' : 'border-gray-300'}`}>
+                                                                    {(isActive || isCompleted) && <div className="w-2 h-2 bg-[#3758EE] rounded-full" />}
+                                                                </div>
+                                                                <span className={`text-[12px] font-bold tracking-wide whitespace-nowrap transition-all duration-300 ${isActive || isCompleted ? 'text-[#3758EE]' : 'text-gray-400'}`}>
+                                                                    {step.label}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* ── STEP 1: Course Setup ── */}
+                                        {currentStep === 1 && (
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 text-left bg-white">
+                                                <div className="w-full">
+                                                    <div className="mb-6 md:mb-10">
+                                                        <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
+                                                        <p className="text-gray-400 font-medium text-[12px] sm:text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                                                        {/* Left Column */}
+                                                        <div className="space-y-6">
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Title</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter title"
+                                                                    value={courseForm.title}
+                                                                    onChange={e => handleCourseFormChange('title', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Enter name"
+                                                                    value={courseForm.instructor}
+                                                                    onChange={e => handleCourseFormChange('instructor', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Batch Strength</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    placeholder="Enter students per batch (e.g. 10)"
+                                                                    value={courseForm.batchStrength}
+                                                                    onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="Enter"
+                                                                    value={courseForm.certificateCriteria}
+                                                                    onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm placeholder:text-gray-300"
+                                                                />
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
+                                                                <div className="relative group">
+                                                                    <select
+                                                                        value={courseForm.duration}
+                                                                        onChange={e => handleCourseFormChange('duration', e.target.value)}
+                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                                    >
+                                                                        <option value="">Select</option>
+                                                                        {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                                                                    </select>
+                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                                </div>
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Right Column */}
+                                                        <div className="space-y-6">
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Release Date</label>
+                                                                <div className="relative group">
+                                                                    <input
+                                                                        type="date"
+                                                                        value={courseForm.releaseDate}
+                                                                        onChange={e => handleCourseFormChange('releaseDate', e.target.value)}
+                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:left-0 [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::after]:content-none [&::after]:hidden"
+                                                                    />
+                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">
+                                                                    Add by <span className="text-gray-400 font-normal text-[11px]">(read-only)</span>
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    readOnly
+                                                                    placeholder="Select"
+                                                                    value={user?.name || user?.firstname || 'Select'}
+                                                                    className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>
+                                                                <input
+                                                                    type="number"
+                                                                    placeholder="Enter total lectures"
+                                                                    value={courseForm.totalLectures}
+                                                                    onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                                />
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Upload Certificate</label>
+                                                                <input
+                                                                    ref={certificateInputRef}
+                                                                    type="file"
+                                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                                    className="hidden"
+                                                                    onChange={handleCertificateFileChange}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => !certificateUploading && certificateInputRef.current?.click()}
+                                                                    className="w-full flex items-center px-2 py-1.5 border border-gray-200 rounded-lg bg-white transition-all shadow-sm cursor-pointer min-h-[44px]"
+                                                                >
+                                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                                        <span className="px-3.5 py-1.5 bg-[#f4f4f5] text-[#52525b] text-[13px] font-bold rounded-md flex-shrink-0">
+                                                                            Browse file
+                                                                        </span>
+                                                                        {(certificateUploading || courseForm.certificateFile) && (
+                                                                            <span className="text-[13px] text-gray-600 font-medium truncate">
+                                                                                {certificateUploading ? "Uploading..." : (courseForm.certificateFile.split('/').pop() || "certificate.png")}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </button>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Course (%)</label>
+                                                                <div className="relative group">
+                                                                    <select
+                                                                        value={courseForm.unlockCriteria}
+                                                                        onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
+                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                                    >
+                                                                        <option value="">Enter</option>
+                                                                        {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
+                                                                    </select>
+                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                                </div>
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">
-                                                            Add by <span className="text-gray-400 font-normal text-[11px]">(read-only)</span>
-                                                        </label>
+
+                                                    {/* Thumbnail Upload */}
+                                                    <div className="mt-10">
+                                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Course Thumbnail</label>
                                                         <input
-                                                            type="text"
-                                                            readOnly
-                                                            placeholder="Select"
-                                                            value={user?.name || user?.firstname || 'Select'}
-                                                            className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>
-                                                        <input
-                                                            type="number"
-                                                            placeholder="Enter total lectures"
-                                                            value={courseForm.totalLectures}
-                                                            onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
-                                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                        />
-                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Upload Certificate</label>
-                                                        <input
-                                                            ref={certificateInputRef}
+                                                            ref={thumbnailInputRef}
                                                             type="file"
                                                             accept="image/jpg,image/jpeg,image/png,image/webp"
                                                             className="hidden"
-                                                            onChange={handleCertificateFileChange}
+                                                            onChange={handleThumbnailFileChange}
                                                         />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => !certificateUploading && certificateInputRef.current?.click()}
-                                                            className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
-                                                        >
-                                                            <span className="text-[14px] text-gray-400 font-medium truncate max-w-[85%]">
-                                                                {certificateUploading ? "Uploading..." : (courseForm.certificateFile ? (courseForm.certificateFile.split('/').pop() || "certificate.png") : "Browse file")}
-                                                            </span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                                                                <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Course (%)</label>
-                                                        <div className="relative group">
-                                                            <select
-                                                                value={courseForm.unlockCriteria}
-                                                                onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
-                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                            >
-                                                                <option value="">Enter</option>
-                                                                {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
-                                                            </select>
-                                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                        </div>
-                                                        <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Thumbnail Upload */}
-                                            <div className="mt-10">
-                                                <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Course Thumbnail</label>
-                                                <input
-                                                    ref={thumbnailInputRef}
-                                                    type="file"
-                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
-                                                    className="hidden"
-                                                    onChange={handleThumbnailFileChange}
-                                                />
-                                                <div
-                                                    onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
-                                                    onMouseEnter={() => setIsThumbnailHovered(true)}
-                                                    onMouseLeave={() => setIsThumbnailHovered(false)}
-                                                    className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group bg-white
-                                                    ${thumbnailUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
-                                                    style={{
-                                                        backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isThumbnailHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                                                        borderRadius: '12px'
-                                                    }}
-                                                >
-                                                    {thumbnailPreview && !thumbnailUploading ? (
-                                                        <div className="w-full flex flex-col items-center gap-3">
-                                                            <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-xl object-cover shadow-md border border-white" />
-                                                            {courseForm.thumbnail && (
-                                                                <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
-                                                                    <CheckCircle size={12} /> Uploaded Successfully
-                                                                </span>
-                                                            )}
-                                                            <span className="text-[12px] text-indigo-600 font-bold hover:underline">Click to change image</span>
-                                                        </div>
-                                                    ) : thumbnailUploading ? (
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <Loader2 size={24} className="animate-spin text-indigo-600" />
-                                                            <span className="text-[12px] text-gray-500 font-bold">Uploading thumbnail...</span>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-4 transition-transform group-hover:scale-105 duration-300">
-                                                                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                                                                <path d="M12 12v9" />
-                                                                <path d="m16 16-4-4-4 4" />
-                                                            </svg>
-                                                            <button
-                                                                type="button"
-                                                                className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
-                                                            >
-                                                                Browse file
-                                                            </button>
-                                                            <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ── STEP 2: Add Course Content ── */}
-                                {currentStep === 2 && (
-                                    <div className="px-4 sm:px-8 md:px-10 py-6 md:py-10 pb-32 flex-1 bg-white">
-                                        <div className="max-w-[1400px] w-full mx-auto">
-                                            <div className="mb-6 md:mb-10 text-left">
-                                                <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
-                                                <p className="text-[#64748b] font-medium text-[13px] sm:text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 mt-4">
-                                                {courseItems.map((item, idx) => (
-                                                    <LectureCard
-                                                        key={item.id}
-                                                        item={item}
-                                                        onEdit={() => handleEditItemClick(idx)}
-                                                        onDelete={() => handleDeleteItemClick(idx)}
-                                                    />
-                                                ))}
-                                                <div
-                                                    onClick={handleAddLecturesClick}
-                                                    className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300"
-                                                >
-                                                    <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                            <line x1="12" y1="5" x2="12" y2="19" />
-                                                            <line x1="5" y1="12" x2="19" y2="12" />
-                                                        </svg>
-                                                    </div>
-                                                    <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ── STEP 3: Review & Publish ── */}
-                                {currentStep === 3 && (
-                                    <div className="px-4 sm:px-8 md:px-10 py-6 md:py-10 pb-32 flex-1 space-y-8 md:space-y-12 bg-white">
-                                        <div className="max-w-[1400px] mx-auto text-left">
-
-                                            {/* Success / Error Alerts */}
-                                            {submitSuccess && (
-                                                <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
-                                                    <CheckCircle size={20} className="flex-shrink-0" />
-                                                    <span className="font-bold text-[13px] sm:text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
-                                                </div>
-                                            )}
-                                            {submitError && (
-                                                <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
-                                                    <AlertCircle size={20} className="flex-shrink-0" />
-                                                    <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Course Setup Review */}
-                                            <div className="bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                                                    <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
-                                                    <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[14px] sm:text-[16px] hover:underline">Edit</button>
-                                                </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
-                                                    {[
-                                                        { label: 'Course Title', value: courseForm.title || '—' },
-                                                        { label: 'Release Date', value: courseForm.releaseDate || '—' },
-                                                        { label: 'Instructor', value: courseForm.instructor || '—' },
-                                                        { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
-                                                        { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
-                                                        { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
-                                                        { label: 'Course Duration', value: courseForm.duration || '—' },
-                                                        { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
-                                                        { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
-                                                        { label: 'Certificate File', value: courseForm.certificateFile || '—' },
-                                                    ].map((field, idx) => (
-                                                        <div key={idx} className="space-y-2 overflow-hidden">
-                                                            <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
-                                                            {field.label === 'Certificate File' && field.value !== '—' ? (
-                                                                <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
-                                                                    {field.value}
-                                                                </a>
-                                                            ) : (
-                                                                <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                {courseForm.thumbnail && (
-                                                    <div className="mt-10">
-                                                        <span className="text-[12px] text-[#64748b] font-medium block mb-4">Upload Course Thumbnail</span>
                                                         <div
-                                                            className="w-full py-10 flex items-center justify-center bg-white"
+                                                            onClick={() => !thumbnailUploading && thumbnailInputRef.current?.click()}
+                                                            onMouseEnter={() => setIsThumbnailHovered(true)}
+                                                            onMouseLeave={() => setIsThumbnailHovered(false)}
+                                                            className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-10 cursor-pointer group bg-white
+                                                    ${thumbnailUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
                                                             style={{
-                                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239CA3AF' stroke-width='2.5' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                                                                borderRadius: '20px'
+                                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isThumbnailHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                                borderRadius: '12px'
                                                             }}
                                                         >
-                                                            <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
+                                                            {thumbnailPreview && !thumbnailUploading ? (
+                                                                <div className="w-full flex flex-col items-center gap-3">
+                                                                    <img src={thumbnailPreview} alt="Thumbnail preview" className="max-h-52 max-w-[80%] rounded-xl object-cover shadow-md border border-white" />
+                                                                    {courseForm.thumbnail && (
+                                                                        <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
+                                                                            <CheckCircle size={12} /> Uploaded Successfully
+                                                                        </span>
+                                                                    )}
+                                                                    <span className="text-[12px] text-indigo-600 font-bold hover:underline">Click to change image</span>
+                                                                </div>
+                                                            ) : thumbnailUploading ? (
+                                                                <div className="flex flex-col items-center gap-2">
+                                                                    <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                                    <span className="text-[12px] text-gray-500 font-bold">Uploading thumbnail...</span>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-4 transition-transform group-hover:scale-105 duration-300">
+                                                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                                        <path d="M12 12v9" />
+                                                                        <path d="m16 16-4-4-4 4" />
+                                                                    </svg>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                                    >
+                                                                        Browse file
+                                                                    </button>
+                                                                    <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
-
-                                            {/* Lectures Review */}
-                                            <div className="mt-8 sm:mt-10 bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                <div className="flex items-center justify-between mb-6 sm:mb-8">
-                                                    <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] flex flex-col sm:flex-row sm:items-center">
-                                                        Lectures Content <span className="text-[14px] sm:text-[16px] text-[#64748b] font-medium sm:ml-2 mt-1 sm:mt-0">({courseItems.length} lectures)</span>
-                                                    </h3>
-                                                    <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
                                                 </div>
-                                                {courseItems.length === 0 ? (
-                                                    <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
-                                                ) : (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
-                                                        {courseItems.map((item) => (
-                                                            <LectureCard key={item.id} item={item} />
-                                                        ))}
-                                                    </div>
-                                                )}
                                             </div>
-                                        </div>
-                                    </div>
-                                )}
+                                        )}
 
-                            </>
-                        )}
-                        </div>
-                    </main>
+                                        {/* ── STEP 2: Add Course Content ── */}
+                                        {currentStep === 2 && (
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 bg-white">
+                                                <div className="w-full">
+                                                    <div className="mb-6 md:mb-10 text-left">
+                                                        <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
+                                                        <p className="text-[#64748b] font-medium text-[13px] sm:text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
+                                                    </div>
 
-                    {/* Footer Actions */}
-                    {!showQuizFlow && !showAssignmentFlow && (
-                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
-                            <button
-                                onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
-                                className="w-auto px-4 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"
-                            >
-                                {currentStep === 1 ? 'Cancel' : 'Back'}
-                            </button>
-                            <div className="flex gap-2 sm:gap-3 md:gap-4">
-                                {!isEditMode && (
-                                    <button
-                                        onClick={handleSaveDraftClick}
-                                        disabled={isSubmitting}
-                                        className="w-auto px-3 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50 text-[12px] sm:text-[14px] whitespace-nowrap"
-                                    >
-                                        <span className="sm:hidden">Draft</span>
-                                        <span className="hidden sm:inline">Save as draft</span>
-                                    </button>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 mt-4">
+                                                        {courseItems.map((item, idx) => (
+                                                            <LectureCard
+                                                                key={item.id}
+                                                                item={item}
+                                                                onEdit={() => handleEditItemClick(idx)}
+                                                                onDelete={() => handleDeleteItemClick(idx)}
+                                                            />
+                                                        ))}
+                                                        <div
+                                                            onClick={handleAddLecturesClick}
+                                                            className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300"
+                                                        >
+                                                            <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                                </svg>
+                                                            </div>
+                                                            <span className="text-[#3b82f6] text-[18px] font-bold">Add Lectures & Others</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ── STEP 3: Review & Publish ── */}
+                                        {currentStep === 3 && (
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 space-y-8 md:space-y-12 bg-white">
+                                                <div className="w-full text-left">
+
+                                                    {/* Success / Error Alerts */}
+                                                    {submitSuccess && (
+                                                        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
+                                                            <CheckCircle size={20} className="flex-shrink-0" />
+                                                            <span className="font-bold text-[13px] sm:text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
+                                                        </div>
+                                                    )}
+                                                    {submitError && (
+                                                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
+                                                            <AlertCircle size={20} className="flex-shrink-0" />
+                                                            <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Course Setup Review */}
+                                                    <div className="bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                        <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                                            <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
+                                                            <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[14px] sm:text-[16px] hover:underline">Edit</button>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
+                                                            {[
+                                                                { label: 'Course Title', value: courseForm.title || '—' },
+                                                                { label: 'Release Date', value: courseForm.releaseDate || '—' },
+                                                                { label: 'Instructor', value: courseForm.instructor || '—' },
+                                                                { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
+                                                                { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
+                                                                { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
+                                                                { label: 'Course Duration', value: courseForm.duration || '—' },
+                                                                { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
+                                                                { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
+                                                                { label: 'Certificate File', value: courseForm.certificateFile || '—' },
+                                                            ].map((field, idx) => (
+                                                                <div key={idx} className="space-y-2 overflow-hidden">
+                                                                    <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
+                                                                    {field.label === 'Certificate File' && field.value !== '—' ? (
+                                                                        <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
+                                                                            {field.value}
+                                                                        </a>
+                                                                    ) : (
+                                                                        <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        {courseForm.thumbnail && (
+                                                            <div className="mt-10">
+                                                                <span className="text-[12px] text-[#64748b] font-medium block mb-4">Upload Course Thumbnail</span>
+                                                                <div
+                                                                    className="w-full py-10 flex items-center justify-center bg-white"
+                                                                    style={{
+                                                                        backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239CA3AF' stroke-width='2.5' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                                        borderRadius: '20px'
+                                                                    }}
+                                                                >
+                                                                    <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Lectures Review */}
+                                                    <div className="mt-8 sm:mt-10 bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                        <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                                            <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] flex flex-col sm:flex-row sm:items-center">
+                                                                Lectures Content <span className="text-[14px] sm:text-[16px] text-[#64748b] font-medium sm:ml-2 mt-1 sm:mt-0">({courseItems.length} lectures)</span>
+                                                            </h3>
+                                                            <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
+                                                        </div>
+                                                        {courseItems.length === 0 ? (
+                                                            <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
+                                                        ) : (
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+                                                                {courseItems.map((item) => (
+                                                                    <LectureCard key={item.id} item={item} />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    </>
                                 )}
-                                <GradiantButton
-                                    onClick={() => {
-                                        if (currentStep === 1) handleAdvanceToStep2();
-                                        else if (currentStep === 2) setCurrentStep(3);
-                                        else handleSubmit('published');
-                                    }}
-                                    disabled={isSubmitting}
-                                    className="w-auto px-6 sm:px-6 md:px-12 py-2.5 sm:py-3 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70 text-[13px] sm:text-[14px]"
-                                >
-                                    {isSubmitting
-                                        ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> <span className="hidden sm:inline">Saving…</span></span>
-                                        : currentStep === 3 ? (isEditMode ? 'Edit' : 'Publish') : 'Next'
-                                    }
-                                </GradiantButton>
                             </div>
-                        </div>
-                    )}
+                        </main>
+
+                        {/* Footer Actions */}
+                        {!showQuizFlow && !showAssignmentFlow && (
+                            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+                                <button
+                                    onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
+                                    className="w-auto px-4 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"
+                                >
+                                    {currentStep === 1 ? 'Cancel' : 'Back'}
+                                </button>
+                                <div className="flex gap-2 sm:gap-3 md:gap-4">
+                                    {!isEditMode && (
+                                        <button
+                                            onClick={handleSaveDraftClick}
+                                            disabled={isSubmitting}
+                                            className="w-auto px-3 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-[#64748b] font-bold rounded hover:bg-gray-200 hover:text-[#0f172a] transition-all active:scale-95 shadow-sm disabled:opacity-50 text-[12px] sm:text-[14px] whitespace-nowrap"
+                                        >
+                                            <span className="sm:hidden">Draft</span>
+                                            <span className="hidden sm:inline">Save as draft</span>
+                                        </button>
+                                    )}
+                                    <GradiantButton
+                                        onClick={() => {
+                                            if (currentStep === 1) handleAdvanceToStep2();
+                                            else if (currentStep === 2) setCurrentStep(3);
+                                            else handleSubmit('published');
+                                        }}
+                                        disabled={isSubmitting}
+                                        className="w-auto px-6 sm:px-6 md:px-12 py-2.5 sm:py-3 font-bold rounded transition-all active:scale-95 shadow-sm disabled:opacity-70 text-[13px] sm:text-[14px]"
+                                    >
+                                        {isSubmitting
+                                            ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> <span className="hidden sm:inline">Saving…</span></span>
+                                            : currentStep === 3 ? (isEditMode ? 'Edit' : 'Publish') : 'Next'
+                                        }
+                                    </GradiantButton>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
 
                 {/* ── Add Lecture Flow ── */}
                 <SelectContentTypeModal
@@ -1304,10 +1309,10 @@ const AddCoursePage = () => {
                                                     {newItem.audioUrl.map((url, idx) => (
                                                         <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
                                                             <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">Audio {idx + 1}</span>
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    setNewItem({...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx)});
+                                                                    setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
                                                                 }}
                                                                 className="text-red-400 hover:text-red-600 p-1"
                                                             >
@@ -1386,10 +1391,10 @@ const AddCoursePage = () => {
                                                     {newItem.pdfUrl.map((url, idx) => (
                                                         <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
                                                             <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">PDF {idx + 1}</span>
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    setNewItem({...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx)});
+                                                                    setNewItem({ ...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx) });
                                                                 }}
                                                                 className="text-red-400 hover:text-red-600 p-1"
                                                             >
