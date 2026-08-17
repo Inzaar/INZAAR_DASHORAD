@@ -277,6 +277,13 @@ const CourseView = () => {
         quizId: l.quizId || null,
     })) || [];
 
+    const isCourseCompleted = Boolean(
+        courseData?.isCompleted ||
+        (courseData?.progress !== undefined && Number(courseData.progress) >= 100) ||
+        (lectures.length > 0 && lectures.every(l => l.isCompleted)) ||
+        Boolean(certData?.certUrl)
+    );
+
     // Player Handlers
     const onPlayerReady = (event) => {
         playerRef.current = event.target;
@@ -779,44 +786,36 @@ const CourseView = () => {
 
                                 {!isAdminView && user?.role !== 'admin' && (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        {/* <button
-                                            disabled={!courseData?.assignedModeratorPhone}
-                                            onClick={() => {
-                                                if (courseData?.assignedModeratorPhone) {
-                                                    const phone = courseData.assignedModeratorPhone.replace(/\D/g, '');
-                                                    window.open(`https://wa.me/${phone}`, '_blank');
-                                                }
-                                            }}
-                                            title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
-                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${courseData?.assignedModeratorPhone
-                                                ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
-                                                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                }`}
+                                        <button
+                                            disabled={true}
+                                            title="WhatsApp button is disabled"
+                                            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
                                         </button>
-                                        Mobile icon-only WhatsApp button
+                                        {/* Mobile icon-only WhatsApp button */}
                                         <button
-                                            disabled={!courseData?.assignedModeratorPhone}
-                                            onClick={() => {
-                                                if (courseData?.assignedModeratorPhone) {
-                                                    const phone = courseData.assignedModeratorPhone.replace(/\D/g, '');
-                                                    window.open(`https://wa.me/${phone}`, '_blank');
-                                                }
-                                            }}
-                                            title={!courseData?.assignedModeratorPhone ? "No moderator assigned yet" : "Contact your batch moderator"}
-                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${courseData?.assignedModeratorPhone
-                                                ? "bg-[#25D366] hover:bg-[#20bd5a] text-white"
-                                                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                }`}
+                                            disabled={true}
+                                            title="WhatsApp button is disabled"
+                                            className="max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
                                         >
                                             <FaWhatsapp size={20} />
-                                        </button> */}
+                                        </button>
 
-                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
+                                        <GradiantButton
+                                            disabled={!isCourseCompleted}
+                                            onClick={() => isCourseCompleted && (certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates'))}
+                                            title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                            className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base"
+                                        >
                                             Download Certificate
                                         </GradiantButton>
-                                        <GradiantButton onClick={() => certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates')} className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center">
+                                        <GradiantButton
+                                            disabled={!isCourseCompleted}
+                                            onClick={() => isCourseCompleted && (certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates'))}
+                                            title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                            className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
+                                        >
                                             <Download className="w-5 h-5" />
                                         </GradiantButton>
 
