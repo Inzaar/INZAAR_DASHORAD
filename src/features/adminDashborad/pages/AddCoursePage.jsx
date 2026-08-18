@@ -694,8 +694,8 @@ const AddCoursePage = () => {
 
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
                     <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
-                        <main className="flex-1 overflow-y-auto no-scrollbar pb-0 relative">
-                            <div className="py-4">
+                        <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-0 relative">
+                            <div className="py-4 flex-1 flex flex-col min-h-full">
                                 {showAssignmentFlow ? (
                                     <CreateAssignment
                                         courseId={courseId}
@@ -718,7 +718,7 @@ const AddCoursePage = () => {
                                         onComplete={handleQuizComplete}
                                     />
                                 ) : (
-                                    <>
+                                    <div className="flex-1 flex flex-col min-h-full bg-white shadow-sm border border-gray-100/80 overflow-hidden">
                                         {/* Header Row */}
                                         <div className="px-4 sm:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-4 bg-white">
                                             <div className="flex items-center gap-3.5 w-full md:w-auto">
@@ -761,7 +761,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 1: Course Setup ── */}
                                         {currentStep === 1 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 text-left bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full text-left bg-white">
                                                 <div className="w-full">
                                                     <div className="mb-6 md:mb-10">
                                                         <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
@@ -971,7 +971,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 2: Add Course Content ── */}
                                         {currentStep === 2 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full bg-white">
                                                 <div className="w-full">
                                                     <div className="mb-6 md:mb-10 text-left">
                                                         <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
@@ -1006,7 +1006,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 3: Review & Publish ── */}
                                         {currentStep === 3 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 space-y-8 md:space-y-12 bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full space-y-8 md:space-y-12 bg-white">
                                                 <div className="w-full text-left">
 
                                                     {/* Success / Error Alerts */}
@@ -1092,7 +1092,7 @@ const AddCoursePage = () => {
                                             </div>
                                         )}
 
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         </main>
