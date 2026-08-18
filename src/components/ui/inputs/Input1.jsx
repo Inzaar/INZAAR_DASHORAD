@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react';
 
-function Input1({ name, label, type = 'text', placeholder, value, onChange, ...props }) {
+function Input1({ name, label, type = 'text', placeholder, value, onChange, isError, error, ...props }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
+  const hasError = isError || Boolean(error);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -19,7 +20,7 @@ function Input1({ name, label, type = 'text', placeholder, value, onChange, ...p
           placeholder={`Enter ${placeholder || name}`}
           value={value}
           onChange={onChange}
-          className={`w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2 transition-all duration-200 ${isPassword ? 'pr-10' : ''}`}
+          className={`w-full h-[52px] border ${hasError ? 'border-red-500 focus:border-red-500 outline-red-500' : 'border-[#71717A]/30 outline-[#71717A]'} text-[#71717A] text-[14px] rounded px-2 transition-all duration-200 ${isPassword ? 'pr-10' : ''}`}
           {...props}
         />
         {isPassword && (

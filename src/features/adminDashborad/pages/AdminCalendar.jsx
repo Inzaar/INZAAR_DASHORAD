@@ -369,7 +369,7 @@ const AdminCalendar = () => {
 
             const fromDateObj = new Date(`${finalDateString}T${timeString}`);
             const toDateObj = new Date(fromDateObj);
-            
+
             const durationMatch = eventDuration.match(/(\d+(\.\d+)?)/);
             if (durationMatch) {
                 const hoursToAdd = parseFloat(durationMatch[1]);
@@ -393,7 +393,7 @@ const AdminCalendar = () => {
                 await createEvent(eventPayload);
                 toast.success("Event added successfully");
             }
-            
+
             // Reset modal form
             setEventTitle("");
             setEventType("");
@@ -401,7 +401,7 @@ const AdminCalendar = () => {
             setEventSpeaker("");
             setEventDescription("");
             setIsModalOpen(false);
-            
+
             await fetchEvents();
         } catch (err) {
             console.error("Failed to add event from modal", err);
@@ -710,25 +710,25 @@ const AdminCalendar = () => {
                             </button>
                         </div>
 
-                        
+
                         {/* Inline Add Event Form */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6 flex-shrink-0">
                             <h3 onClick={handleOpenModal} className="text-[#1E3A8A] text-[16px] font-bold mb-4 cursor-pointer hover:text-blue-600 transition-colors">+ Add New Event</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                 <div className="md:col-span-4">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Event title name</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="enter title name" 
-                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500" 
-                                        value={eventTitle} 
-                                        onChange={(e) => setEventTitle(e.target.value)} 
+                                    <input
+                                        type="text"
+                                        placeholder="enter title name"
+                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500"
+                                        value={eventTitle}
+                                        onChange={(e) => setEventTitle(e.target.value)}
                                     />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Event Type</label>
                                     <div className="relative">
-                                        <select 
+                                        <select
                                             className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 appearance-none focus:outline-none focus:border-blue-500 bg-white"
                                             value={eventType}
                                             onChange={(e) => setEventType(e.target.value)}
@@ -740,36 +740,36 @@ const AdminCalendar = () => {
                                             <option value="Special Program">Special Program</option>
                                         </select>
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Time</label>
                                     <div className="relative">
-                                        <input 
-                                            type="time" 
-                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500 bg-white" 
-                                            value={eventTime} 
-                                            onChange={(e) => setEventTime(e.target.value)} 
+                                        <input
+                                            type="time"
+                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500 bg-white"
+                                            value={eventTime}
+                                            onChange={(e) => setEventTime(e.target.value)}
                                         />
                                     </div>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block mb-2 text-sm font-semibold text-gray-800">Date</label>
-                                    <input 
-                                        type="date" 
-                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500 bg-white" 
-                                        value={eventDate} 
+                                    <input
+                                        type="date"
+                                        className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 focus:outline-none focus:border-blue-500 bg-white"
+                                        value={eventDate}
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setEventDate(val);
                                             updateModalDateFromDateString(val);
-                                        }} 
+                                        }}
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <button 
+                                    <button
                                         onClick={handleOpenModal}
                                         className="w-full h-[48px] bg-gradient-to-r from-[#4A6BF3] to-[#A855F7] text-white font-semibold rounded-[8px] hover:opacity-90 transition-opacity flex items-center justify-center cursor-pointer"
                                     >
@@ -1138,19 +1138,19 @@ const AdminCalendar = () => {
                     </div>
                 )}
 
-                
+
                 {/* Modal Overlay */}
                 {isModalOpen && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}>
                         <div className="bg-white rounded-[24px] w-full max-w-[600px] flex flex-col overflow-hidden shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar" onClick={(e) => e.stopPropagation()}>
-                            
+
                             {/* Header */}
                             <div className="bg-gradient-to-r from-[#3758EE] to-[#5B75F0] p-6 text-white relative">
-                                <button 
+                                <button
                                     onClick={() => setIsModalOpen(false)}
                                     className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
                                 >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
                                 </button>
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
@@ -1170,7 +1170,7 @@ const AdminCalendar = () => {
 
                             {/* Body */}
                             <div className="p-6 flex flex-col gap-6">
-                                
+
                                 {/* Event Type Selection */}
                                 <div className="flex flex-col gap-3">
                                     <div className="flex items-center gap-2 text-[#4B5563] font-semibold text-[14px]">
@@ -1179,14 +1179,14 @@ const AdminCalendar = () => {
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {[
-                                            { label: "Jummah Khutbah", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-                                            { label: "Lecture", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200" },
-                                            { label: "Live Broadcast", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/><path d="M7.76 16.24a6 6 0 0 1 0-8.48"/><path d="M16.24 7.76a6 6 0 0 1 0 8.48"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-                                            { label: "Special Program", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-                                            { label: "Eid Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
-                                            { label: "Community Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200" }
+                                            { label: "Jummah Khutbah", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></svg>, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                                            { label: "Lecture", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-200" },
+                                            { label: "Live Broadcast", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><circle cx="12" cy="12" r="2" /><path d="M4.93 19.07a10 10 0 0 1 0-14.14" /><path d="M7.76 16.24a6 6 0 0 1 0-8.48" /><path d="M16.24 7.76a6 6 0 0 1 0 8.48" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                                            { label: "Special Program", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+                                            { label: "Eid Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>, color: "text-yellow-600", bg: "bg-yellow-50", border: "border-yellow-200" },
+                                            { label: "Community Event", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200" }
                                         ].map((type) => (
-                                            <div 
+                                            <div
                                                 key={type.label}
                                                 onClick={() => setEventType(type.label)}
                                                 className={`flex items-center gap-2 p-3 rounded-[12px] border cursor-pointer transition-all active:scale-95 ${eventType === type.label ? `${type.bg} ${type.border} ring-2 ring-offset-1 ring-${type.color.split('-')[1]}-400` : 'border-gray-200 hover:border-gray-300 bg-white'}`}
@@ -1204,8 +1204,8 @@ const AdminCalendar = () => {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
                                         Event Title
                                     </div>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="e.g. Jummah Khutbah — The Value of Time"
                                         value={eventTitle}
                                         onChange={(e) => setEventTitle(e.target.value)}
@@ -1219,8 +1219,8 @@ const AdminCalendar = () => {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
                                         Speaker / Host <span className="text-gray-400 font-normal">(optional)</span>
                                     </div>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="e.g. Imam Ahmed"
                                         value={eventSpeaker}
                                         onChange={(e) => setEventSpeaker(e.target.value)}
@@ -1237,21 +1237,21 @@ const AdminCalendar = () => {
                                     <div className="flex gap-3">
                                         <div className="relative w-[100px] shrink-0">
                                             <select value={String(parseInt(eventDay, 10))} onChange={e => handleModalDayChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
-                                                {Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={String(d)}>{d}</option>)}
+                                                {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={String(d)}>{d}</option>)}
                                             </select>
-                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                         <div className="relative flex-1">
                                             <select value={eventMonth} onChange={e => handleModalMonthChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
                                                 {monthNames.map(m => <option key={m} value={m}>{m}</option>)}
                                             </select>
-                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                         <div className="relative w-[120px] shrink-0">
                                             <select value={String(eventYear)} onChange={e => handleModalYearChange(e.target.value)} className="w-full h-[48px] border border-gray-200 rounded-[8px] pl-4 pr-8 text-[14px] outline-none focus:border-[#3758EE] appearance-none bg-white">
                                                 {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={String(y)}>{y}</option>)}
                                             </select>
-                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                     </div>
                                 </div>
@@ -1263,8 +1263,8 @@ const AdminCalendar = () => {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                             Start Time
                                         </div>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             placeholder="01:30PM"
                                             value={eventTime}
                                             onChange={(e) => setEventTime(e.target.value)}
@@ -1283,7 +1283,7 @@ const AdminCalendar = () => {
                                                 <option value="1.5 hours">1.5 hours</option>
                                                 <option value="2 hours">2 hours</option>
                                             </select>
-                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                     </div>
                                 </div>
@@ -1294,7 +1294,7 @@ const AdminCalendar = () => {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6"></line><line x1="15" y1="12" x2="3" y2="12"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
                                         Description <span className="text-gray-400 font-normal">(optional)</span>
                                     </div>
-                                    <textarea 
+                                    <textarea
                                         placeholder="Brief description of the event..."
                                         value={eventDescription}
                                         onChange={(e) => setEventDescription(e.target.value)}
@@ -1306,13 +1306,13 @@ const AdminCalendar = () => {
 
                             {/* Footer */}
                             <div className="px-6 py-4 border-t border-gray-100 flex justify-end items-center gap-3 bg-white mt-auto">
-                                <button 
+                                <button
                                     onClick={() => setIsModalOpen(false)}
                                     className="px-6 py-2.5 rounded-[8px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors border border-gray-200"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => {
                                         // Trigger handleAddEvent logic.
                                         // Because handleAddEvent expects finalDateString we need to format it or we can just call it

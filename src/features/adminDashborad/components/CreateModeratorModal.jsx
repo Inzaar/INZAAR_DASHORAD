@@ -22,6 +22,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
 
@@ -72,6 +73,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
     const handleStep1Submit = async (e) => {
         e.preventDefault();
         setFormError('');
+        setPasswordError('');
 
         if (newModerator.username && newModerator.username.includes(' ')) {
             setUsernameError('Username cannot contain spaces.');
@@ -89,15 +91,15 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
         }
 
         if (newModerator.password.length < 8) {
-            setFormError('Password must be at least 8 characters long.');
+            setPasswordError('Password must be at least 8 characters long.');
             return;
         }
         if (!/[A-Z]/.test(newModerator.password)) {
-            setFormError('Password must contain at least one uppercase letter.');
+            setPasswordError('Password must contain at least one uppercase letter.');
             return;
         }
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(newModerator.password)) {
-            setFormError('Password must contain at least one special symbol.');
+            setPasswordError('Password must contain at least one special symbol.');
             return;
         }
 
@@ -186,6 +188,7 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
     const handleClose = () => {
         setStep(1);
         setFormError('');
+        setPasswordError('');
         setUsernameError('');
         setEmailError('');
         setNewModerator({
@@ -309,9 +312,12 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
                                             required
                                             type={showPassword ? "text" : "password"}
                                             placeholder="Enter Password"
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12 text-sm"
+                                            className={`w-full px-4 py-2.5 bg-gray-50 border ${passwordError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12 text-sm`}
                                             value={newModerator.password}
-                                            onChange={(e) => setNewModerator({ ...newModerator, password: e.target.value })}
+                                            onChange={(e) => {
+                                                setPasswordError('');
+                                                setNewModerator({ ...newModerator, password: e.target.value });
+                                            }}
                                         />
                                         <button
                                             type="button"
@@ -321,6 +327,9 @@ const CreateModeratorModal = ({ isOpen, onClose, onSuccess }) => {
                                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
+                                    {passwordError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{passwordError}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1.5">
