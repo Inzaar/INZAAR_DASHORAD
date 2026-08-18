@@ -20,6 +20,7 @@ function RegisterPageP1() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -79,6 +80,10 @@ function RegisterPageP1() {
   const handleChange = (e) => {
     let { name, value } = e.target;
 
+    if (name === "Password") {
+      setPasswordError('');
+    }
+
     // Auto-capitalize first letter for First name, Last name, etc.
     if (["First Name", "Last Name", "Nationality", "Permanent Address"].includes(name) && value.length > 0) {
       value = value.charAt(0).toUpperCase() + value.slice(1);
@@ -109,6 +114,8 @@ function RegisterPageP1() {
 
   const handleNext = (e) => {
     e.preventDefault();
+    setError('');
+    setPasswordError('');
 
     // Basic validation for fields (lastname is optional)
     if (!formData.firstname || !formData.username || !formData.email || !formData.password || !formData.phone) {
@@ -144,15 +151,15 @@ function RegisterPageP1() {
 
     // Password Validation
     if (formData.password.length < 8) {
-      setError(t('auth.error_password_length', 'Password must be at least 8 characters long.'));
+      setPasswordError(t('auth.error_password_length', 'Password must be at least 8 characters long.'));
       return;
     }
     if (!/[A-Z]/.test(formData.password)) {
-      setError(t('auth.error_password_uppercase', 'Password must contain at least one uppercase letter.'));
+      setPasswordError(t('auth.error_password_uppercase', 'Password must contain at least one uppercase letter.'));
       return;
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
-      setError(t('auth.error_password_special', 'Password must contain at least one special symbol.'));
+      setPasswordError(t('auth.error_password_special', 'Password must contain at least one special symbol.'));
       return;
     }
 
@@ -228,7 +235,9 @@ function RegisterPageP1() {
             type="password"
             value={formData.password}
             onChange={handleChange}
+            isError={!!passwordError}
           />
+          {passwordError && <p className="text-red-500 text-[13px] mt-1 text-left">{passwordError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>

@@ -57,6 +57,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -126,6 +127,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     const handleAddStudent = async (e) => {
         e.preventDefault();
         setFormError('');
+        setPasswordError('');
 
         const rawDigits = (newStudent.phone || '').replace(/\D/g, '');
         if (!newStudent.phone || rawDigits.length < 10) {
@@ -139,15 +141,15 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
         }
 
         if (newStudent.password.length < 8) {
-            setFormError('Password must be at least 8 characters long.');
+            setPasswordError('Password must be at least 8 characters long.');
             return;
         }
         if (!/[A-Z]/.test(newStudent.password)) {
-            setFormError('Password must contain at least one uppercase letter.');
+            setPasswordError('Password must contain at least one uppercase letter.');
             return;
         }
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(newStudent.password)) {
-            setFormError('Password must contain at least one special symbol.');
+            setPasswordError('Password must contain at least one special symbol.');
             return;
         }
 
@@ -765,9 +767,12 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                         required
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Enter Password"
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12"
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border ${passwordError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12`}
                                         value={newStudent.password}
-                                        onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
+                                        onChange={(e) => {
+                                            setPasswordError('');
+                                            setNewStudent({ ...newStudent, password: e.target.value });
+                                        }}
                                     />
                                     <button
                                         type="button"
@@ -777,6 +782,9 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
                                 </div>
+                                {passwordError && (
+                                    <p className="text-red-500 text-[13px] mt-1 text-left">{passwordError}</p>
+                                )}
                             </div>
 
                             <div className="pt-4 flex gap-3">

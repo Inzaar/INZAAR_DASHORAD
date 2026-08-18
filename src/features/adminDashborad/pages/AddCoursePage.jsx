@@ -894,7 +894,7 @@ const AddCoursePage = () => {
                                                                 </button>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Course (%)</label>
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Lecture (%)</label>
                                                                 <div className="relative group">
                                                                     <select
                                                                         value={courseForm.unlockCriteria}

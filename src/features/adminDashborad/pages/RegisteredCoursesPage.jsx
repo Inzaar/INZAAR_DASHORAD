@@ -44,16 +44,16 @@ const RegisteredCoursesPage = () => {
                 if (courseType === 'inactive') filtered = filtered.filter(c => (c.status || '').toLowerCase() === 'inactive');
                 if (courseType === 'draft') filtered = filtered.filter(c => (c.status || '').toLowerCase() === 'draft');
 
-                    const formatted = filtered.map(c => ({
-                        id: c._id,
-                        title: c.title,
-                        date: new Date(c.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
-                        lectures: c.totalLectures || 0,
-                        duration: c.duration || "N/A",
-                        status: (c.status || '').toLowerCase() === 'draft' ? 'Draft' : 
-                                (c.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
-                    }));
-                    setCourses(formatted);
+                const formatted = filtered.map(c => ({
+                    id: c._id,
+                    title: c.title,
+                    date: new Date(c.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }),
+                    lectures: c.totalLectures || 0,
+                    duration: c.duration || "N/A",
+                    status: (c.status || '').toLowerCase() === 'draft' ? 'Draft' :
+                        (c.status || '').toLowerCase() === 'inactive' ? 'Inactive' : 'Active'
+                }));
+                setCourses(formatted);
             } catch (error) {
                 console.error("Failed to fetch courses:", error);
             } finally {
@@ -118,7 +118,7 @@ const RegisteredCoursesPage = () => {
                                                         <span className={cn("text-[13px] font-medium", course.status === 'Active' ? "text-emerald-500" : "text-gray-400")}>{course.status}</span>
                                                     </td>
                                                     <td className="py-6 text-center">
-                                                        <GradiantButton 
+                                                        <GradiantButton
                                                             onClick={() => navigate(`/admin-course-view/${course.id}`)}
                                                             className="px-5 py-2 rounded-lg text-[12px] font-bold shadow-lg shadow-blue-200/50"
                                                         >
