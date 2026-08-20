@@ -19,6 +19,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [activeTab, setActiveTab] = useState("account");
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
+    const [errors, setErrors] = useState({});
     const { user, logout: contextLogout } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -63,22 +64,40 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             return;
         }
 
-        try {
-            if (userPayload.password && userPayload.password.trim() !== '') {
-                if (userPayload.password.length < 8) {
-                    toast.error('Password must be at least 8 characters long.');
-                    return;
-                }
-                if (!/[A-Z]/.test(userPayload.password)) {
-                    toast.error('Password must contain at least one uppercase letter.');
-                    return;
-                }
-                if (!/[!@#$%^&*(),.?":{}|<>]/.test(userPayload.password)) {
-                    toast.error('Password must contain at least one special symbol.');
-                    return;
-                }
-            }
+        const newErrors = {};
 
+        // Validation for required fields
+        if (!userPayload.email || userPayload.email.trim() === '') {
+            newErrors.email = "Email is required.";
+        }
+        if (!userPayload.firstname || userPayload.firstname.trim() === '') {
+            newErrors.firstname = "First name is required.";
+        }
+        if (!userPayload.lastname || userPayload.lastname.trim() === '') {
+            newErrors.lastname = "Last name is required.";
+        }
+
+        if (userPayload.password && userPayload.password.trim() !== '') {
+            if (userPayload.password.length < 8) {
+                newErrors.password = 'Password must be at least 8 characters long.';
+            }
+            else if (!/[A-Z]/.test(userPayload.password)) {
+                newErrors.password = 'Password must contain at least one uppercase letter.';
+            }
+            else if (!/[!@#$%^&*(),.?":{}|<>]/.test(userPayload.password)) {
+                newErrors.password = 'Password must contain at least one special symbol.';
+            }
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error("Please fix the errors in the form.");
+            return;
+        }
+
+        setErrors({});
+
+        try {
             // The backend sends the hashed password in 'user', which we must strip out before updating if not changed
             const payloadToSend = { ...userPayload };
             if (!payloadToSend.password || payloadToSend.password.trim() === '') {
@@ -170,7 +189,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                                 <h6 onClick={() => handleTabClick("other")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "other" ? "text-[#18181B]" : "text-[#71717A]"}`}>{t('other', 'Other')}</h6>
                             </div>
                         </div>
-                        {activeTab === "account" ? <Account className="w-full" setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} /> : <Other setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} />}
+                        {activeTab === "account" ? <Account className="w-full" setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} errors={errors} /> : <Other setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} errors={errors} />}
                     </div>
 
                 </div>

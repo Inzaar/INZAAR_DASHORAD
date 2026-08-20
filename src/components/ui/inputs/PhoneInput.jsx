@@ -243,7 +243,7 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
         />
       </div>
       {!isValid && phoneNumber.length > 0 && (
-        <span className='text-xs text-red-500 absolute bottom-0 left-0'>{t('auth.invalid_phone_number', 'Invalid phone number for')} {selectedCountry.name}</span>
+        <p className='text-xs text-red-500 mt-1'>{t('auth.invalid_phone_number', 'Invalid phone number for')} {selectedCountry.name}</p>
       )}
     </div>
   )

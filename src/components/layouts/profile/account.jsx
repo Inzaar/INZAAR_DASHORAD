@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { MdUploadFile } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 
-function Account({ setUserPayload, userPayload, userInfo }) {
+function Account({ setUserPayload, userPayload, userInfo, errors }) {
     const [showCropper, setShowCropper] = useState(false);
     const [cropSrc, setCropSrc] = useState('');
     const [isUploading, setIsUploading] = useState(false);
@@ -42,39 +42,43 @@ function Account({ setUserPayload, userPayload, userInfo }) {
                 <div className="w-full flex flex-col gap-5 opacity-[1px] ">
                     {/* firstname */}
                     <div className="w-full gap-[16px] opacity-[1px] flex flex-col min-[600px]:flex-row">
-                        <div className="w-full min-[800px]:w-[50%] h-[76px] gap-[8px] flex flex-col">
+                        <div className="w-full min-[800px]:w-[50%] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('first_name', 'First name')}</label>
                             <input
                                 type="text"
                                 value={userPayload?.firstname}
                                 placeholder={t('enter_first_name', 'Enter first name')}
-                                className="w-full h-[52px] rounded-md opacity-100 pt-4 pb-4 px-3 gap-1 border sm:w-full"
+                                className={`w-full h-[52px] rounded-md opacity-100 pt-4 pb-4 px-3 gap-1 border sm:w-full ${errors?.firstname ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`}
                                 onChange={(e) => setUserPayload({ ...userPayload, firstname: e.target.value })}
                             />
+                            {errors?.firstname && <p className="text-red-500 text-xs mt-1">{errors.firstname}</p>}
                         </div>
                         {/* lastname */}
-                        <div className="w-full min-[800px]:w-[50%] h-[76px] gap-[8px] flex flex-col">
+                        <div className="w-full min-[800px]:w-[50%] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('last_name', 'Last name')}</label>
-                            <input type="text" value={userPayload?.lastname || ''} onChange={(e) => setUserPayload({ ...userPayload, lastname: e.target.value })} placeholder={t('enter_last_name', 'Enter last name')} className="w-full h-[52px] rounded-md opacity-100 pt-4 pb-4 px-3 gap-1 border" />
+                            <input type="text" value={userPayload?.lastname || ''} onChange={(e) => setUserPayload({ ...userPayload, lastname: e.target.value })} placeholder={t('enter_last_name', 'Enter last name')} className={`w-full h-[52px] rounded-md opacity-100 pt-4 pb-4 px-3 gap-1 border ${errors?.lastname ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`} />
+                            {errors?.lastname && <p className="text-red-500 text-xs mt-1">{errors.lastname}</p>}
                         </div>
                     </div>
                     {/* email */}
                     <div className="w-full gap-2 opacity-[1px] flex flex-col">
                         <label className="font-medium font-[16px] leading-none tracking-normal text-base text-[#18181B] leading-[1.8]">{t('email_required', 'Email*')}</label>
-                        <input type="email" value={userPayload?.email || ''} onChange={(e) => setUserPayload({ ...userPayload, email: e.target.value })} placeholder={t('enter_email', 'Enter email address')} className="w-full h-[52px] rounded-md rotate-0 opacity-100 pt-4 pb-4 px-3 gap-1 border border-[#E4E4E7]" />
+                        <input type="email" value={userPayload?.email || ''} onChange={(e) => setUserPayload({ ...userPayload, email: e.target.value })} placeholder={t('enter_email', 'Enter email address')} className={`w-full h-[52px] rounded-md rotate-0 opacity-100 pt-4 pb-4 px-3 gap-1 border ${errors?.email ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`} />
+                        {errors?.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
                     {/* password */}
                     <div className="w-full gap-[16px] opacity-[1px] flex flex-col min-[1218px]:flex-row ">
-                        <div className="w-full min-[1218px]:w-[50%] h-[76px] opacity-[1px] gap-[8px] flex flex-col">
+                        <div className="w-full min-[1218px]:w-[50%] opacity-[1px] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('password_required', 'Password*')}</label>
                             <input 
                                 type="password" 
                                 value={(userPayload?.password && userPayload.password.length > 40) ? '' : (userPayload?.password || '')}
                                 onChange={(e) => setUserPayload({ ...userPayload, password: e.target.value })}
                                 placeholder={t('leave_blank_to_keep', 'Leave blank to keep unchanged')}
-                                className=" h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border" 
+                                className={`h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border ${errors?.password ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`} 
                                 autoComplete="new-password"
                             />
+                            {errors?.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                         </div>
 
                         {/* whatsapp number */}

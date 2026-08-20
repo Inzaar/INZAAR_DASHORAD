@@ -4,7 +4,7 @@ import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import Profile from '@/components/layouts/profile/profile';
 import { getUserById } from '@/api/auth';
-import { Loader } from 'lucide-react';
+import { Loader, ServerCrash } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const ProfilePage = () => {
@@ -89,8 +89,22 @@ const ProfilePage = () => {
                             ) : userInfo ? (
                                 <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} />
                             ) : (
-                                <div className="w-full flex justify-center items-center py-20">
-                                    <p className="text-red-500 text-lg font-medium">Failed to load profile details. Are you logged in?</p>
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-in fade-in zoom-in duration-300">
+                                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <ServerCrash className="w-10 h-10 text-red-500" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-slate-800 mb-3">Connection Error</h3>
+                                        <p className="text-slate-600 mb-8 leading-relaxed">
+                                            We're having trouble connecting to the server to load your profile. Please check your connection or try again later.
+                                        </p>
+                                        <button 
+                                            onClick={() => window.location.reload()}
+                                            className="w-full bg-[#3758EE] hover:bg-blue-600 text-white font-semibold py-3.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25"
+                                        >
+                                            Try Again
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>

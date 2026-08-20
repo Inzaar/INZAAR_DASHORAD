@@ -1263,12 +1263,17 @@ const AdminCalendar = () => {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                             Start Time
                                         </div>
+<<<<<<< Updated upstream
                                         <input
                                             type="text"
                                             placeholder="01:30PM"
+=======
+                                        <input 
+                                            type="time" 
+>>>>>>> Stashed changes
                                             value={eventTime}
                                             onChange={(e) => setEventTime(e.target.value)}
-                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400"
+                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] bg-white"
                                         />
                                     </div>
                                     <div className="flex flex-col gap-2 flex-1">
