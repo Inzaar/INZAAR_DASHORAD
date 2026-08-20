@@ -35,6 +35,8 @@ const AdminRoute = () => {
             '/reports': 'Reports & Logs', 
             '/moderator-reports': 'Reports & Logs',
             '/course-reports': 'Reports & Logs',
+            '/export-student-reports': 'Reports & Logs',
+            '/export-moderator-reports': 'Reports & Logs',
             '/admin/student-details': ['Student Profiles', 'Reports & Logs', 'Courses Management', 'Dashboard'],
             '/admin/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
             '/admin/course-details': 'Courses Management',

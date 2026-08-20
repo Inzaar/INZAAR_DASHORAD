@@ -1264,7 +1264,7 @@ const AdminCalendar = () => {
                                             Start Time
                                         </div>
                                         <input 
-                                            type="time" 
+                                            type="time"
                                             value={eventTime}
                                             onChange={(e) => setEventTime(e.target.value)}
                                             className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] bg-white"

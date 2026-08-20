@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'; // Added useEffect
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'; // Added useLocation
@@ -55,6 +55,8 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/reports') ||
     location.pathname.startsWith('/moderator-reports') ||
     location.pathname.startsWith('/course-reports') ||
+    location.pathname.startsWith('/export-student-reports') ||
+    location.pathname.startsWith('/export-moderator-reports') ||
     location.pathname.startsWith('/student-profiles') ||
     location.pathname.startsWith('/moderator-details') ||
     location.pathname.startsWith('/registered-users') ||
@@ -98,6 +100,8 @@ function Sidebar({ className, onClose }) {
     '/reports': 'Student Reports',
     '/moderator-reports': 'Moderator Reports',
     '/course-reports': 'Course Reports',
+    '/export-student-reports': 'Export Student Reports',
+    '/export-moderator-reports': 'Export Moderator Reports',
 
     '/admin/student-details': 'Student Profiles',
     '/admin/moderator-details': 'Moderators',
@@ -127,7 +131,7 @@ function Sidebar({ className, onClose }) {
 
     if (currentName) {
       setActiveItem(currentName);
-      if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(currentName) || currentName === 'Reports & Logs') {
+      if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(currentName) || currentName === 'Reports & Logs') {
         setIsReportsExpanded(true);
       }
       if (['All Students', 'Male Students', 'Female Students'].includes(currentName) || currentName === 'Student Profiles') {
@@ -197,12 +201,14 @@ function Sidebar({ className, onClose }) {
       }
     }
 
-    if (['Student Reports', 'Moderator Reports', 'Course Reports'].includes(itemName)) {
+    if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(itemName)) {
       // It handles the sub-items for reports
       const subRoutes = {
         'Student Reports': '/reports',
         'Moderator Reports': '/moderator-reports',
-        'Course Reports': '/course-reports'
+        'Course Reports': '/course-reports',
+        'Export Student Reports': '/export-student-reports',
+        'Export Moderator Reports': '/export-moderator-reports'
       };
       navigate(subRoutes[itemName]);
       if (onClose) onClose();
@@ -241,7 +247,7 @@ function Sidebar({ className, onClose }) {
 
   const renderMenuItem = (item) => {
     if (item === 'Reports & Logs') {
-      const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports'].includes(activeItem);
+      const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(activeItem);
       return (
         <div key={item} className="w-full flex flex-col gap-1">
           <Sideabrbbutton
@@ -263,23 +269,39 @@ function Sidebar({ className, onClose }) {
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                {t('student_reports', 'Student Reports')}
+                <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
+              </button>
+              <button
+                onClick={() => handleItemClick('Export Student Reports')}
+                className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#4B4F56] hover:text-[#374151] ${activeItem === 'Export Student Reports' ? 'font-bold' : 'font-medium'}`}
+              >
+                <Download size={14} className="shrink-0" />
+                <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
               </button>
               {user?.role !== 'moderator' && (
-                <button
-                  onClick={() => handleItemClick('Moderator Reports')}
-                  className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
-                >
-                  <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                  {t('moderator_reports', 'Moderator Reports')}
-                </button>
+                <>
+                  <button
+                    onClick={() => handleItemClick('Moderator Reports')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                    <span className="truncate whitespace-nowrap text-left">{t('moderator_reports', 'Moderator Reports')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleItemClick('Export Moderator Reports')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#2540B3] hover:text-[#1E3A8A] ${activeItem === 'Export Moderator Reports' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <Download size={14} className="shrink-0" />
+                    <span className="truncate whitespace-nowrap text-left">{t('moderator_reports', 'Moderator Reports')}</span>
+                  </button>
+                </>
               )}
               <button
                 onClick={() => handleItemClick('Course Reports')}
                 className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
               >
                 <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                {t('course_reports', 'Course Reports')}
+                <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
               </button>
             </div>
           )}

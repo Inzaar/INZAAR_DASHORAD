@@ -12,7 +12,17 @@ const SharedStudentTable = ({
     title = "Students List",
     showDropdown = false,
     hasContainer = true,
-    showTitle = true
+    showTitle = true,
+    visibleColumns = {
+        name: true,
+        contact: true,
+        enrollments: true,
+        progress: true,
+        lastLogin: true,
+        status: true,
+        action: true
+    },
+    hidePagination = false
 }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -68,79 +78,97 @@ const SharedStudentTable = ({
             ) : (
                 <>
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
+                        <table className="w-full min-w-[1000px] print:min-w-0 print:w-full border-separate border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
                             <thead>
                                 <tr>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("name", "Name")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("contact", "Contact")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("enrollments", "Enrollments")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("progress_avg", "Progress")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("last_login", "Last Login")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("status", "Status")}</th>
-                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("action", "Action")}</th>
+                                    {visibleColumns.name && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
+                                    {visibleColumns.contact && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("email", "Email")}</th>}
+                                    {visibleColumns.phone && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
+                                    {visibleColumns.enrollments && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
+                                    {visibleColumns.progress && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
+                                    {visibleColumns.lastLogin && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
+                                    {visibleColumns.status && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
+                                    {visibleColumns.action && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("action", "Action")}</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.map((student) => (
                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
-                                        <td className="py-4 rounded-l-xl text-center">
-                                            <span className="text-[14px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <span className="text-[13px] text-gray-800 leading-tight">{student.email}</span>
-                                                <span className="text-[13px] text-gray-800">{student.phone}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <div className="flex flex-col items-center justify-center">
-                                                {(student.enrollments || []).length > 0 ? (
-                                                    <>
-                                                        {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                            <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
-                                                            </span>
-                                                        ))}
-                                                        {student.enrollments.length > 3 && (
-                                                            <span className="text-[11px] text-gray-400 font-medium mt-0.5">
-                                                                {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
-                                                            </span>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <span className="text-gray-400 text-[13px]">{t("not_enrolled", "Not Enrolled")}</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <span className="text-[14px] text-gray-800">{student.progress || '0%'}</span>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <span className="text-[14px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <span className={`text-[14px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                                                {t(student.status.toLowerCase(), student.status)}
-                                            </span>
-                                        </td>
-                                        <td className="py-4 text-center rounded-r-xl">
-                                            <div className="flex justify-center items-center">
-                                                <GradiantButton
-                                                    className="text-[13px] px-4 py-2 font-medium rounded-md hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7]"
-                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                >
-                                                    {t("view_profile", "View Profile")}
-                                                </GradiantButton>
-                                            </div>
-                                        </td>
+                                        {visibleColumns.name && (
+                                            <td className={`py-4 print:py-1 print:border print:border-black ${!visibleColumns.contact && !visibleColumns.enrollments ? 'rounded-l-xl print:rounded-none' : (Object.values(visibleColumns).every(v=>v) ? 'rounded-l-xl print:rounded-none' : '')} text-center`}>
+                                                <span className="text-[14px] print:text-[10px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.contact && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[13px] print:text-[10px] text-gray-800 leading-tight">{student.email}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.phone && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[13px] print:text-[10px] text-gray-800">{student.phone}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.enrollments && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    {(student.enrollments || []).length > 0 ? (
+                                                        <>
+                                                            {student.enrollments.slice(0, 3).map((course, idx) => (
+                                                                <span key={idx} className="text-[13px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
+                                                                    {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
+                                                                </span>
+                                                            ))}
+                                                            {student.enrollments.length > 3 && (
+                                                                <span className="text-[11px] print:text-[9px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
+                                                                    {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-gray-400 print:text-gray-700 text-[13px] print:text-[10px]">{t("not_enrolled", "Not Enrolled")}</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
+                                        {visibleColumns.progress && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[14px] print:text-[10px] text-gray-800">{student.progress || '0%'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.lastLogin && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[14px] print:text-[10px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.status && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className={`text-[14px] print:text-[10px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                                    {t(student.status.toLowerCase(), student.status)}
+                                                </span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.action && (
+                                            <td className={`py-4 print:py-1 print:border print:border-black text-center ${Object.values(visibleColumns).every(v=>v) ? 'rounded-r-xl print:rounded-none' : ''}`}>
+                                                <div className="flex justify-center items-center">
+                                                    <GradiantButton
+                                                        className="text-[13px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
+                                                        onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                    >
+                                                        {t("view_profile", "View Profile")}
+                                                    </GradiantButton>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                     {/* Pagination */}
-                    <div className="flex justify-end items-center gap-2 mt-8">
-                        <button
+                    {!hidePagination && (
+                        <div className="flex justify-end items-center gap-2 mt-8 print:hidden">
+                            <button
                             className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-[#7C3AED] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             disabled={pagination.page <= 1}
                             onClick={() => onPageChange(pagination.page - 1)}
@@ -175,6 +203,7 @@ const SharedStudentTable = ({
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                         </button>
                     </div>
+                    )}
                 </>
             )}
         </>
@@ -185,7 +214,7 @@ const SharedStudentTable = ({
     }
 
     return (
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6 print:rounded-none print:border-none print:shadow-none print:p-0 print:m-0">
             {content}
         </div>
     );
