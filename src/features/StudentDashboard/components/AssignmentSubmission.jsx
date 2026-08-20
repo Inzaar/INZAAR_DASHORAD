@@ -25,7 +25,7 @@ const AssignmentSubmission = () => {
         const queryParams = new URLSearchParams(location.search);
         const courseId = queryParams.get('courseId') || queryParams.get('id') || assignment?.courseId;
         const lectureId = location.state?.lecture?._id || queryParams.get('lectureId') || location.state?.lecture?.id;
-        
+
         if (courseId && lectureId && assignment) {
             navigate(`/admin-add-course?edit=true&id=${courseId}&openAssignmentId=${assignment.id || assignment._id}&lectureId=${lectureId}`);
         } else {
@@ -63,17 +63,17 @@ const AssignmentSubmission = () => {
         try {
             setIsUploading(true);
             toast.loading(t('uploading_assignment', 'Uploading assignment...'), { id: 'upload-assignment' });
-            
+
             // Upload to Cloudinary using existing API
             const result = await uploadPdf(selectedFile);
             const cloudinaryUrl = result.url;
-            
+
             // Call backend API to mark assignment as completed in user's enrollment
             const targetCourseId = assignment?.courseId;
             const targetAssignmentId = assignment?.id || assignment?._id;
             if (targetCourseId && targetAssignmentId) {
                 try {
-                    await submitAssignmentProgress(targetCourseId, targetAssignmentId);
+                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name);
                 } catch (progressErr) {
                     console.error("Failed to update assignment progress in backend:", progressErr);
                 }
@@ -84,7 +84,7 @@ const AssignmentSubmission = () => {
             const now = new Date();
             const submittedAt = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 + ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            
+
             const updatedAssignment = {
                 ...assignment,
                 status: 'Submitted',
@@ -122,13 +122,13 @@ const AssignmentSubmission = () => {
     return (
         <div className="h-screen w-full flex flex-col bg-[#F8F9FA] overflow-hidden">
             <Navbar />
-            
+
             {/* Popup Overlay Background */}
             <div className="flex-1 flex items-center justify-center p-4 sm:p-6 bg-gray-900/30 backdrop-blur-sm overflow-hidden">
-                
+
                 {/* Popup Container */}
                 <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-5xl flex flex-col max-h-full animate-in fade-in zoom-in-95 duration-200">
-                    
+
                     {/* Header */}
                     <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-start bg-white rounded-t-2xl shrink-0">
                         <div>
@@ -156,7 +156,7 @@ const AssignmentSubmission = () => {
                                 <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
                                     {assignment.instructions}
                                 </p>
-                                
+
                                 {assignment.pdfUrl && (Array.isArray(assignment.pdfUrl) ? assignment.pdfUrl.length > 0 : typeof assignment.pdfUrl === 'string') && (
                                     <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
                                         <h4 className="text-sm font-semibold text-gray-800">{t('attached_documents', 'Attached Documents')}</h4>
@@ -168,9 +168,9 @@ const AssignmentSubmission = () => {
                                                         {url.split('/').pop() || `Attachment ${idx + 1}`}
                                                     </span>
                                                 </div>
-                                                <a 
-                                                    href={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}`} 
-                                                    target="_blank" 
+                                                <a
+                                                    href={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}`}
+                                                    target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="px-4 py-1.5 bg-blue-100 text-[#3758EE] text-xs font-semibold rounded hover:bg-blue-200 transition-colors"
                                                 >
@@ -260,8 +260,7 @@ const AssignmentSubmission = () => {
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('status', 'Status')}</span>
-                                        <span className={`text-sm font-semibold ${
-                                                (assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? 'text-green-500' : 'text-orange-500'
+                                        <span className={`text-sm font-semibold ${(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? 'text-green-500' : 'text-orange-500'
                                             }`}>
                                             {(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? t('submitted', 'Submitted') : t(assignment.status ? assignment.status.toLowerCase().replace(/ /g, '_') : 'not_submitted', assignment.status || 'Not submitted')}
                                         </span>

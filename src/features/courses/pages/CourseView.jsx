@@ -312,25 +312,41 @@ const CourseView = () => {
             return;
         }
 
+        const mappedAssignmentObj = {
+            id: assignment.id || assignment._id,
+            courseId: courseId || courseData?._id || courseData?.id,
+            number: String(lecture.lectureNo || 1).padStart(2, '0'),
+            title: assignment.title,
+            description: assignment.instructions || `Submit your assignment for ${assignment.title}.`,
+            instructions: assignment.instructions || 'Please complete and upload your assignment file.',
+            dueDate: assignment.setDueDate ? assignment.maxDays : (assignment.dueDate || 'See course details'),
+            status: assignment.isCompleted ? 'Submitted' : 'Not submitted',
+            acceptedFormats: assignment.acceptedTypes?.join(', ') || 'PDF, DOC, DOCX',
+            attempts: assignment.maxAttempts || 'Unlimited',
+            maxFileSizeMB: parseInt(assignment.maxFileSize) || 25,
+            pdfUrl: assignment.referenceFileUrl ? [assignment.referenceFileUrl] : (assignment.pdfUrl || []),
+            isCompleted: assignment.isCompleted || false
+        };
+
+        if (assignment.isCompleted) {
+            navigate('/assignment-submitted', {
+                state: {
+                    assignment: mappedAssignmentObj,
+                    fileName: assignment.submittedFileName || (assignment.submittedFileUrl ? assignment.submittedFileUrl.split('/').pop() : 'assignment_document.pdf'),
+                    fileUrl: assignment.submittedFileUrl,
+                    status: 'Submitted',
+                    submittedAt: assignment.submittedAt ? new Date(assignment.submittedAt).toLocaleString() : new Date().toLocaleString(),
+                    returnUrl: window.location.pathname + window.location.search
+                }
+            });
+            return;
+        }
+
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
                 isAdminView,
-                assignment: {
-                    id: assignment.id || assignment._id,
-                    courseId: courseId || courseData?._id || courseData?.id,
-                    number: String(lecture.lectureNo || 1).padStart(2, '0'),
-                    title: assignment.title,
-                    description: assignment.instructions || `Submit your assignment for ${assignment.title}.`,
-                    instructions: assignment.instructions || 'Please complete and upload your assignment file.',
-                    dueDate: assignment.setDueDate ? assignment.maxDays : (assignment.dueDate || 'See course details'),
-                    status: assignment.isCompleted ? 'Submitted' : 'Not submitted',
-                    acceptedFormats: assignment.acceptedTypes?.join(', ') || 'PDF, DOC, DOCX',
-                    attempts: assignment.maxAttempts || 'Unlimited',
-                    maxFileSizeMB: parseInt(assignment.maxFileSize) || 25,
-                    pdfUrl: assignment.referenceFileUrl ? [assignment.referenceFileUrl] : (assignment.pdfUrl || []),
-                    isCompleted: assignment.isCompleted || false
-                }
+                assignment: mappedAssignmentObj
             }
         });
     };
@@ -341,24 +357,41 @@ const CourseView = () => {
             setIsEditingAssignment(true);
             return;
         }
+        
+        const mappedAssignmentObj = {
+            id: lecture.id || lecture._id,
+            courseId: courseId || courseData?._id || courseData?.id,
+            number: String(lecture.lectureNo || 1).padStart(2, '0'),
+            title: lecture.title,
+            description: `Submit your assignment for ${lecture.title}.`,
+            instructions: lecture.instructions || 'Please complete and upload your assignment file.',
+            dueDate: lecture.dueDate || 'See course details',
+            status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
+            acceptedFormats: 'PDF, DOC, DOCX',
+            attempts: 'Unlimited before due date',
+            maxFileSizeMB: 25,
+            pdfUrl: lecture.pdfUrl,
+            isCompleted: lecture.isCompleted || false
+        };
+
+        if (lecture.isCompleted) {
+            navigate('/assignment-submitted', {
+                state: {
+                    assignment: mappedAssignmentObj,
+                    fileName: lecture.submittedFileName || (lecture.submittedFileUrl ? lecture.submittedFileUrl.split('/').pop() : 'assignment_document.pdf'),
+                    fileUrl: lecture.submittedFileUrl,
+                    status: 'Submitted',
+                    submittedAt: lecture.submittedAt ? new Date(lecture.submittedAt).toLocaleString() : new Date().toLocaleString(),
+                    returnUrl: window.location.pathname + window.location.search
+                }
+            });
+            return;
+        }
+
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
-                assignment: {
-                    id: lecture.id || lecture._id,
-                    courseId: courseId || courseData?._id || courseData?.id,
-                    number: String(lecture.lectureNo || 1).padStart(2, '0'),
-                    title: lecture.title,
-                    description: `Submit your assignment for ${lecture.title}.`,
-                    instructions: lecture.instructions || 'Please complete and upload your assignment file.',
-                    dueDate: lecture.dueDate || 'See course details',
-                    status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
-                    acceptedFormats: 'PDF, DOC, DOCX',
-                    attempts: 'Unlimited before due date',
-                    maxFileSizeMB: 25,
-                    pdfUrl: lecture.pdfUrl,
-                    isCompleted: lecture.isCompleted || false
-                }
+                assignment: mappedAssignmentObj
             }
         });
     };

@@ -86,10 +86,10 @@ export const updateLectureProgress = async (courseId, { lectureId, watchedPercen
 };
 
 // Submit assignment progress
-export const submitAssignmentProgress = async (courseId, assignmentId) => {
+export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, fileName) => {
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/assignment-progress`,
-        { assignmentId },
+        { assignmentId, fileUrl, fileName },
         { withCredentials: true }
     );
     return res.data.data;
