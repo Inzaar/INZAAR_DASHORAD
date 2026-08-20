@@ -14,6 +14,7 @@ const QuizTakePage = () => {
     const queryParams = new URLSearchParams(location.search);
     const courseId = queryParams.get('courseId') || queryParams.get('id');
     const lectureId = queryParams.get('lectureId');
+    const isAdminView = location.pathname.includes('admin') || queryParams.get('admin') === 'true';
 
     const [quizData, setQuizData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -54,6 +55,14 @@ const QuizTakePage = () => {
             setSelectedOption(selectedAnswers[currentQuestion._id] || null);
         }
     }, [currentQuestionIndex, currentQuestion, selectedAnswers]);
+
+    const handleEditQuiz = () => {
+        if (courseId && lectureId) {
+            navigate(`/admin-add-course?edit=true&id=${courseId}&openQuizId=${quizId}&lectureId=${lectureId}`);
+        } else {
+            console.error("Missing courseId or lectureId in URL params.");
+        }
+    };
 
     const handleNext = async () => {
         if (!currentQuestion) return;
@@ -112,16 +121,7 @@ const QuizTakePage = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#F3F4F6]">
-                <Loader className="w-10 h-10 animate-spin text-[#3758EE] mb-4" />
-                <p className="text-gray-500 font-medium">Loading Quiz...</p>
-            </div>
-        );
-    }
-
-    if (!quizData) {
+    if (!loading && !quizData) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#F3F4F6]">
                 <p className="text-gray-500 font-medium mb-4">Quiz not found.</p>
@@ -142,6 +142,8 @@ const QuizTakePage = () => {
                         <LectureQuizAssessment 
                             quizId={quizId} 
                             onStart={() => setIsStarted(true)} 
+                            isAdminView={isAdminView}
+                            onEdit={handleEditQuiz}
                         />
                     </div>
                 ) : !isCompleted ? (

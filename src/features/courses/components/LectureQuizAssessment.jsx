@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GraduationCap, Loader } from 'lucide-react';
 import { getQuizById } from '@/api/quiz';
 
-const LectureQuizAssessment = ({ quizId, onStart }) => {
+const LectureQuizAssessment = ({ quizId, onStart, isAdminView, onEdit }) => {
     const [quizData, setQuizData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -73,15 +73,15 @@ const LectureQuizAssessment = ({ quizId, onStart }) => {
                     </div>
                 )}
 
-                {/* Start Button */}
+                {/* Start/Edit Button */}
                 <button
-                    onClick={onStart}
-                    disabled={loading || totalQuestions === 0}
+                    onClick={isAdminView ? onEdit : onStart}
+                    disabled={(!isAdminView && loading) || (!isAdminView && totalQuestions === 0)}
                     className={`w-full max-w-[600px] py-4 md:py-5 font-bold text-lg md:text-xl rounded-2xl transition-all shadow-lg mb-6
-                        ${(loading || totalQuestions === 0) ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white hover:opacity-90 active:scale-[0.98] shadow-indigo-100'}
+                        ${((!isAdminView && loading) || (!isAdminView && totalQuestions === 0)) ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white hover:opacity-90 active:scale-[0.98] shadow-indigo-100'}
                     `}
                 >
-                    {totalQuestions === 0 && !loading ? 'No Questions Added' : 'Start Quiz'}
+                    {isAdminView ? 'Edit Quiz' : (totalQuestions === 0 && !loading ? 'No Questions Added' : 'Start Quiz')}
                 </button>
 
                 {/* Footer Text */}

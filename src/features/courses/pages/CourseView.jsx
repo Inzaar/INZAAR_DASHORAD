@@ -303,9 +303,19 @@ const CourseView = () => {
     };
 
     const handleOpenSpecificAssignment = (lecture, assignment) => {
+        if (isAdminView) {
+            const courseIdToUse = courseId || courseData?._id || courseData?.id;
+            const assignmentIdToUse = assignment.id || assignment._id;
+            const lectureIdToUse = lecture.id || lecture._id;
+            const returnPath = encodeURIComponent(window.location.pathname + window.location.search);
+            navigate(`/admin-add-course?edit=true&id=${courseIdToUse}&openAssignmentId=${assignmentIdToUse}&lectureId=${lectureIdToUse}&returnTo=${returnPath}`);
+            return;
+        }
+
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
+                isAdminView,
                 assignment: {
                     id: assignment.id || assignment._id,
                     courseId: courseId || courseData?._id || courseData?.id,
@@ -977,10 +987,11 @@ const CourseView = () => {
                                                                 const cleanPath = window.location.pathname + cleanSearch;
                                                                 const returnPath = encodeURIComponent(cleanPath);
                                                                 const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
+                                                                const adminQuery = isAdminView ? (query ? `${query}&admin=true` : '?admin=true') : query;
                                                                 if (currentLecture.quizId) {
-                                                                    navigate(`/quiz-take/${currentLecture.quizId}${query}`);
+                                                                    navigate(`/quiz-take/${currentLecture.quizId}${adminQuery}`);
                                                                 } else {
-                                                                    navigate(`/quiz-take/${currentLecture.id}${query}`);
+                                                                    navigate(`/quiz-take/${currentLecture.id}${adminQuery}`);
                                                                 }
                                                             }
                                                         }}
@@ -1255,7 +1266,8 @@ const CourseView = () => {
                                                                         toast.error("Please complete the video lecture first to unlock this quiz.");
                                                                         return;
                                                                     }
-                                                                    navigate(`/quiz-take/${quiz._id || quiz.id}${window.location.search}`); 
+                                                                    const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
+                                                                    navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`); 
                                                                 }} 
                                                                 className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
                                                             >

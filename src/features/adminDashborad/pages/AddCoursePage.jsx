@@ -448,7 +448,7 @@ const AddCoursePage = () => {
                     // Map lectures to courseItems
                     if (data.lecturePlaylist || data.lectures) {
                         const lecs = data.lecturePlaylist || data.lectures;
-                        setCourseItems(lecs.map(l => ({
+                        const mappedItems = lecs.map(l => ({
                             id: l._id || l.id || Date.now() + Math.random(),
                             title: l.title,
                             type: l.type || 'Lecture',
@@ -458,7 +458,35 @@ const AddCoursePage = () => {
                             pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
                             quizzes: l.quizzes || [],
                             assignments: l.assignments || [],
-                        })));
+                        }));
+                        setCourseItems(mappedItems);
+
+                        // Parse openQuizId and openAssignmentId
+                        const openQuizId = queryParams.get('openQuizId');
+                        const openAssignmentId = queryParams.get('openAssignmentId');
+                        const lectureId = queryParams.get('lectureId');
+
+                        if (openQuizId && lectureId) {
+                            const targetLecture = mappedItems.find(l => String(l.id) === String(lectureId));
+                            if (targetLecture) {
+                                const targetQuiz = targetLecture.quizzes?.find(q => String(q._id) === String(openQuizId) || String(q.id) === String(openQuizId));
+                                if (targetQuiz) {
+                                    setEditingQuizData({ ...targetQuiz, selectedLecture: targetLecture.id });
+                                    setShowQuizFlow(true);
+                                    setCurrentStep(2);
+                                }
+                            }
+                        } else if (openAssignmentId && lectureId) {
+                            const targetLecture = mappedItems.find(l => String(l.id) === String(lectureId));
+                            if (targetLecture) {
+                                const targetAssignment = targetLecture.assignments?.find(a => String(a._id) === String(openAssignmentId) || String(a.id) === String(openAssignmentId));
+                                if (targetAssignment) {
+                                    setEditingAssignmentData({ ...targetAssignment, selectedLecture: targetLecture.id });
+                                    setShowAssignmentFlow(true);
+                                    setCurrentStep(2);
+                                }
+                            }
+                        }
                     }
                     setCourseId(editId);
                 } catch (err) {
@@ -728,6 +756,14 @@ const AddCoursePage = () => {
         });
         setShowQuizFlow(false);
         setEditingQuizData(null);
+        if (queryParams.get('openQuizId') || queryParams.get('openAssignmentId')) {
+            const returnTo = queryParams.get('returnTo');
+            if (returnTo) {
+                navigate(decodeURIComponent(returnTo));
+            } else {
+                navigate(`/admin-course-view/${courseId || editId}`);
+            }
+        }
     };
 
     const handleAssignmentComplete = (assignmentItem) => {
@@ -748,6 +784,14 @@ const AddCoursePage = () => {
         });
         setShowAssignmentFlow(false);
         setEditingAssignmentData(null);
+        if (queryParams.get('openQuizId') || queryParams.get('openAssignmentId')) {
+            const returnTo = queryParams.get('returnTo');
+            if (returnTo) {
+                navigate(decodeURIComponent(returnTo));
+            } else {
+                navigate(`/admin-course-view/${courseId || editId}`);
+            }
+        }
     };
 
     const handleDeleteQuiz = (lectureId, quizId) => {
@@ -936,6 +980,14 @@ const AddCoursePage = () => {
     };
 
     /* ────────────────────────── render ── */
+    if (isEditMode && isSubmitting && courseItems.length === 0) {
+        return (
+            <div className="min-h-screen w-full bg-[#f8f9fa] flex items-center justify-center font-sans overflow-hidden">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3758EE]"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col items-center justify-center font-sans overflow-hidden font-['Public_Sans']">
             <div className="w-full max-w-[1920px] min-h-screen max-h-[1680px] flex flex-col gap-4">
@@ -953,9 +1005,21 @@ const AddCoursePage = () => {
                                         lectures={courseItems.filter(item => !item.type || item.type === 'Lecture')}
                                         onBackToSelection={() => {
                                             setShowAssignmentFlow(false);
+                                            const wasEditing = !!editingAssignmentData;
                                             setEditingAssignmentData(null);
-                                            setModalStep('select-type');
-                                            setIsModalOpen(true);
+                                            if (queryParams.get('openQuizId') || queryParams.get('openAssignmentId')) {
+                                                const returnTo = queryParams.get('returnTo');
+                                                if (returnTo) {
+                                                    navigate(decodeURIComponent(returnTo));
+                                                } else {
+                                                    navigate(`/admin-course-view/${courseId || editId}`);
+                                                }
+                                                return;
+                                            }
+                                            if (!wasEditing) {
+                                                setModalStep('select-type');
+                                                setIsModalOpen(true);
+                                            }
                                         }}
                                         onComplete={handleAssignmentComplete}
                                     />
@@ -967,9 +1031,21 @@ const AddCoursePage = () => {
                                         lectures={courseItems.filter(item => !item.type || item.type === 'Lecture')}
                                         onBackToSelection={() => {
                                             setShowQuizFlow(false);
+                                            const wasEditing = !!editingQuizData;
                                             setEditingQuizData(null);
-                                            setModalStep('select-type');
-                                            setIsModalOpen(true);
+                                            if (queryParams.get('openQuizId') || queryParams.get('openAssignmentId')) {
+                                                const returnTo = queryParams.get('returnTo');
+                                                if (returnTo) {
+                                                    navigate(decodeURIComponent(returnTo));
+                                                } else {
+                                                    navigate(`/admin-course-view/${courseId || editId}`);
+                                                }
+                                                return;
+                                            }
+                                            if (!wasEditing) {
+                                                setModalStep('select-type');
+                                                setIsModalOpen(true);
+                                            }
                                         }}
                                         onComplete={handleQuizComplete}
                                     />

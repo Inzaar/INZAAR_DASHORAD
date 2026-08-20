@@ -19,6 +19,20 @@ const AssignmentSubmission = () => {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
 
+    const isAdminView = location.pathname.includes('admin') || location.search.includes('admin=true') || location.state?.isAdminView;
+
+    const handleEditAssignment = () => {
+        const queryParams = new URLSearchParams(location.search);
+        const courseId = queryParams.get('courseId') || queryParams.get('id') || assignment?.courseId;
+        const lectureId = location.state?.lecture?._id || queryParams.get('lectureId') || location.state?.lecture?.id;
+        
+        if (courseId && lectureId && assignment) {
+            navigate(`/admin-add-course?edit=true&id=${courseId}&openAssignmentId=${assignment.id || assignment._id}&lectureId=${lectureId}`);
+        } else {
+            console.error("Missing required parameters to edit assignment.", { courseId, lectureId, assignment });
+        }
+    };
+
     const handleDragOver = (e) => {
         e.preventDefault();
         setDragOver(true);
@@ -273,14 +287,23 @@ const AssignmentSubmission = () => {
                         >
                             {t('cancel', 'Cancel')}
                         </GrayButton>
-                        <GradiantButton
-                            onClick={handleSubmit}
-                            disabled={!selectedFile || isUploading}
-                            className={`px-6 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 ${(!selectedFile || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            {isUploading && <Loader2 className="w-4 h-4 animate-spin" />}
-                            {isUploading ? t('submitting', 'Submitting...') : t('submit_assignment', 'Submit Assignment')}
-                        </GradiantButton>
+                        {isAdminView ? (
+                            <GradiantButton
+                                onClick={handleEditAssignment}
+                                className="px-6 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                            >
+                                {t('edit_assignment', 'Edit Assignment')}
+                            </GradiantButton>
+                        ) : (
+                            <GradiantButton
+                                onClick={handleSubmit}
+                                disabled={!selectedFile || isUploading}
+                                className={`px-6 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 ${(!selectedFile || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isUploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                {isUploading ? t('submitting', 'Submitting...') : t('submit_assignment', 'Submit Assignment')}
+                            </GradiantButton>
+                        )}
                     </div>
                 </div>
             </div>
