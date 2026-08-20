@@ -12,7 +12,7 @@ const QuizTakePage = () => {
     
     // Extract query parameters
     const queryParams = new URLSearchParams(location.search);
-    const courseId = queryParams.get('courseId');
+    const courseId = queryParams.get('courseId') || queryParams.get('id');
     const lectureId = queryParams.get('lectureId');
 
     const [quizData, setQuizData] = useState(null);

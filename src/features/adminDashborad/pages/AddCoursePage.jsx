@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle } from 'lucide-react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -16,7 +16,7 @@ const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
-const LectureCard = ({ item, onEdit, onDelete }) => {
+const LectureCard = ({ item, onEdit, onDelete, onDeleteResource, onViewAll }) => {
     if (item.type === 'Assignment') {
         return (
             <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
@@ -110,6 +110,63 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
             </div>
         );
     }
+    const audios = Array.isArray(item.audioUrl) ? item.audioUrl : (item.audioUrl ? [item.audioUrl] : []);
+    const pdfs = Array.isArray(item.pdfUrl) ? item.pdfUrl : (item.pdfUrl ? [item.pdfUrl] : []);
+    const totalResources = audios.length + pdfs.length;
+    const showResourcesViewAll = totalResources > 2;
+
+    const quizzes = item.quizzes || [];
+    const assignments = item.assignments || [];
+    const totalActivities = quizzes.length + assignments.length;
+    const showActivitiesViewAll = totalActivities > 2;
+
+    // Grab first 2 resources total
+    const displayResources = [];
+    let count = 0;
+    const extractName = (urlStr, fallback) => {
+        try {
+            let u = urlStr;
+            if (u.includes('?')) u = u.split('?')[0];
+            if (u.endsWith('/')) u = u.slice(0, -1);
+            const parts = u.split('/');
+            let lastPart = parts[parts.length - 1];
+            if (lastPart === 'view' && parts.length > 2) {
+                lastPart = parts[parts.length - 2]; // Google drive links
+            }
+            if (lastPart && lastPart.length > 0) return decodeURIComponent(lastPart);
+        } catch(e) {}
+        return fallback;
+    };
+    for (let i = 0; i < audios.length && count < 2; i++) {
+        const a = audios[i];
+        const isObj = typeof a === 'object' && a !== null;
+        let title = isObj ? a.title : `Audio ${i + 1}`;
+        let url = isObj ? a.url : a;
+        if (!isObj || title.startsWith('Audio ')) title = extractName(url, title);
+        displayResources.push({ type: 'audio', title, url, idx: i });
+        count++;
+    }
+    for (let i = 0; i < pdfs.length && count < 2; i++) {
+        const p = pdfs[i];
+        const isObj = typeof p === 'object' && p !== null;
+        let title = isObj ? p.title : `PDF ${i + 1}`;
+        let url = isObj ? p.url : p;
+        if (!isObj || title.startsWith('PDF ')) title = extractName(url, title);
+        displayResources.push({ type: 'pdf', title, url, idx: i });
+        count++;
+    }
+
+    // Grab first 2 activities total
+    const displayActivities = [];
+    let actCount = 0;
+    for (let i = 0; i < quizzes.length && actCount < 2; i++) {
+        displayActivities.push({ type: 'quiz', data: quizzes[i], idx: i });
+        actCount++;
+    }
+    for (let i = 0; i < assignments.length && actCount < 2; i++) {
+        displayActivities.push({ type: 'assignment', data: assignments[i], idx: i });
+        actCount++;
+    }
 
     return (
         <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
@@ -131,39 +188,58 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
                     </div>
                     <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
                 </div>
+                
                 <div className="p-4 space-y-4">
                     <div className="flex justify-between items-start">
                         <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
                         <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
                     </div>
+                    
                     {item.videoUrl && (
                         <div className="space-y-1">
                             <span className="text-[11px] text-[#64748b] font-bold">Video</span>
-                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{item.videoUrl}</span>
+                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2 group/item">
+                                <span className="text-[10px] text-[#0f172a] font-medium truncate flex-1">{item.videoUrl}</span>
                             </div>
                         </div>
                     )}
-                    {item.audioUrl && Array.isArray(item.audioUrl) && item.audioUrl.map((url, idx) => (
-                        <div key={idx} className="space-y-1">
-                            <span className="text-[11px] text-[#64748b] font-bold">Audio {idx + 1}</span>
-                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
+                    
+                    {displayResources.length > 0 && (
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-[#64748b] font-bold uppercase tracking-wider">Resources</span>
                             </div>
+                            {displayResources.map((res, i) => (
+                                <div key={i} className="flex flex-col gap-0.5 bg-[#f8fafc] rounded-[10px] px-3 py-2 group/item relative pr-10">
+                                    <span className="text-[11px] font-bold text-gray-700 truncate pr-4">{res.title}</span>
+                                    <span className="text-[10px] text-[#0f172a] font-medium truncate flex-1 opacity-70">
+                                        {res.url}
+                                    </span>
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/item:opacity-100 transition-opacity flex gap-1">
+                                        <button type="button" onClick={() => onDeleteResource && onDeleteResource(item.id || item._id, res.type, res.idx)} className="p-1 text-red-500 hover:bg-red-50 rounded">
+                                            <Trash2 size={12} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                    {item.pdfUrl && Array.isArray(item.pdfUrl) && item.pdfUrl.map((url, idx) => (
-                        <div key={idx} className="space-y-1">
-                            <span className="text-[11px] text-[#64748b] font-bold">PDF Resource {idx + 1}</span>
-                            <div className="flex items-center gap-2 bg-[#f8fafc] rounded-[10px] px-3 py-2">
-                                <span className="text-[10px] text-[#0f172a] font-medium truncate">{url}</span>
-                            </div>
-                        </div>
-                    ))}
+                    )}
                 </div>
             </div>
-            {(onEdit || onDelete) && (
-                <div className="px-4 pb-4 pt-2 border-t border-gray-50 flex gap-2 justify-end">
+
+            {/* Activities moved to LectureActivitiesCard */}
+
+            {(onEdit || onDelete || showResourcesViewAll) && (
+                <div className="px-4 pb-4 pt-3 border-t border-gray-50 flex gap-2 justify-end bg-white items-center">
+                    {showResourcesViewAll && (
+                        <button
+                            type="button"
+                            onClick={() => onViewAll && onViewAll(item, 'resources')}
+                            className="text-[11px] font-bold text-[#4f46e5] hover:underline px-2"
+                        >
+                            + View All {totalResources} Resources
+                        </button>
+                    )}
                     {onEdit && (
                         <button
                             type="button"
@@ -171,7 +247,7 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
                             className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
                         >
                             <Pencil size={12} />
-                            Edit
+                            Edit Lecture
                         </button>
                     )}
                     {onDelete && (
@@ -184,6 +260,98 @@ const LectureCard = ({ item, onEdit, onDelete }) => {
                             Delete
                         </button>
                     )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────── LectureActivitiesCard ── */
+const LectureActivitiesCard = ({ item, onEditQuiz, onDeleteQuiz, onEditAssignment, onDeleteAssignment, onViewAll }) => {
+    const quizzes = item.quizzes || [];
+    const assignments = item.assignments || [];
+    const totalActivities = quizzes.length + assignments.length;
+
+    // Grab exactly 2 activities total (1 of each if both exist, otherwise 2 of same)
+    const displayActivities = [];
+    if (quizzes.length > 0 && assignments.length > 0) {
+        displayActivities.push({ type: 'quiz', data: quizzes[0], idx: 0 });
+        displayActivities.push({ type: 'assignment', data: assignments[0], idx: 0 });
+    } else if (quizzes.length > 0) {
+        for (let i = 0; i < Math.min(2, quizzes.length); i++) {
+            displayActivities.push({ type: 'quiz', data: quizzes[i], idx: i });
+        }
+    } else if (assignments.length > 0) {
+        for (let i = 0; i < Math.min(2, assignments.length); i++) {
+            displayActivities.push({ type: 'assignment', data: assignments[i], idx: i });
+        }
+    }
+
+    const showActivitiesViewAll = totalActivities > displayActivities.length; // Show more if not all fit
+
+    if (displayActivities.length === 0) return null;
+
+    return (
+        <div className="w-full h-full bg-[#f8fafc] rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.02)] border border-indigo-50 overflow-hidden font-sans flex flex-col transition-transform hover:-translate-y-1 hover:shadow-lg">
+            <div className="px-5 py-4 border-b border-indigo-100 flex items-center gap-3 bg-white">
+                <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500">
+                    <HelpCircle size={20} />
+                </div>
+                <div>
+                    <h4 className="text-[15px] font-bold text-[#0f172a] leading-tight">Activities</h4>
+                    <p className="text-[11px] text-[#64748b] font-medium">For: {item.title || 'Lecture'}</p>
+                </div>
+            </div>
+            
+            <div className="p-4 flex-1 flex flex-col gap-3">
+                {displayActivities.map((act, i) => {
+                    if (act.type === 'quiz') {
+                        const quiz = act.data;
+                        return (
+                            <div key={`q-${quiz._id || act.idx}`} className={`bg-white border border-purple-100 text-purple-700 p-3 rounded-xl shadow-sm flex flex-col gap-2 group/item ${displayActivities.length === 1 ? 'h-[50%]' : 'flex-1'}`}>
+                                <div className="flex items-center gap-2">
+                                    <HelpCircle size={16} className="flex-shrink-0" />
+                                    <span className="text-[13px] font-bold">Quiz {(item.startingQuizNo || 1) + act.idx}</span>
+                                </div>
+                                <span className="text-[12px] font-medium text-[#475569] line-clamp-3 break-words">{quiz.title}</span>
+                                <div className="mt-1 flex gap-2 justify-end opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <button type="button" onClick={() => onEditQuiz && onEditQuiz(item.id || item._id, quiz)} className="px-2 py-1 bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors text-[11px] font-bold rounded-md flex items-center gap-1">
+                                        <Pencil size={12} /> Edit
+                                    </button>
+                                    <button type="button" onClick={() => onDeleteQuiz && onDeleteQuiz(item.id || item._id, quiz._id)} className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-[11px] font-bold rounded-md flex items-center gap-1">
+                                        <Trash2 size={12} /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    } else {
+                        const assignment = act.data;
+                        return (
+                            <div key={`a-${assignment.id || act.idx}`} className={`bg-white border border-orange-100 text-orange-700 p-3 rounded-xl shadow-sm flex flex-col gap-2 group/item ${displayActivities.length === 1 ? 'h-[50%]' : 'flex-1'}`}>
+                                <div className="flex items-center gap-2">
+                                    <FileText size={16} className="flex-shrink-0" />
+                                    <span className="text-[13px] font-bold">Assignment {(item.startingAssignmentNo || 1) + act.idx}</span>
+                                </div>
+                                <span className="text-[12px] font-medium text-[#475569] line-clamp-3 break-words">{assignment.title}</span>
+                                <div className="mt-1 flex gap-2 justify-end opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    <button type="button" onClick={() => onEditAssignment && onEditAssignment(item.id || item._id, assignment)} className="px-2 py-1 bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors text-[11px] font-bold rounded-md flex items-center gap-1">
+                                        <Pencil size={12} /> Edit
+                                    </button>
+                                    <button type="button" onClick={() => onDeleteAssignment && onDeleteAssignment(item.id || item._id, assignment.id || assignment._id)} className="px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-[11px] font-bold rounded-md flex items-center gap-1">
+                                        <Trash2 size={12} /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    }
+                })}
+            </div>
+            
+            {showActivitiesViewAll && (
+                <div className="p-4 pt-0 border-t border-transparent">
+                    <button type="button" onClick={() => onViewAll && onViewAll(item, 'activities')} className="w-full py-2 bg-indigo-50 text-indigo-600 text-[12px] font-bold rounded-lg hover:bg-indigo-100 transition-colors">
+                        View All {totalActivities} Activities
+                    </button>
                 </div>
             )}
         </div>
@@ -215,6 +383,9 @@ const AddCoursePage = () => {
     const [showCropper, setShowCropper] = useState(false);
     const [cropSrc, setCropSrc] = useState('');
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
+    const [viewAllModal, setViewAllModal] = useState({ isOpen: false, type: '', item: null });
+    const [editingQuizData, setEditingQuizData] = useState(null);
+    const [editingAssignmentData, setEditingAssignmentData] = useState(null);
     const [isAudioUploading, setIsAudioUploading] = useState(false);
     const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isVideoUploading, setIsVideoUploading] = useState(false);
@@ -280,12 +451,13 @@ const AddCoursePage = () => {
                         setCourseItems(lecs.map(l => ({
                             id: l._id || l.id || Date.now() + Math.random(),
                             title: l.title,
-                            type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+                            type: l.type || 'Lecture',
                             lectureNo: l.lectureNo,
                             videoUrl: l.videoUrl || '',
                             audioUrl: Array.isArray(l.audioUrl) ? l.audioUrl : (l.audioUrl ? [l.audioUrl] : []),
                             pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
-                            quizId: l.quizId || null,
+                            quizzes: l.quizzes || [],
+                            assignments: l.assignments || [],
                         })));
                     }
                     setCourseId(editId);
@@ -415,8 +587,8 @@ const AddCoursePage = () => {
         try {
             const { url } = await uploadAudio(file);
             setNewItem(prev => {
-                if (prev.audioUrl?.includes(url)) return prev;
-                return { ...prev, audioUrl: [...(prev.audioUrl || []), url] };
+                if (prev.audioUrl?.some(a => (typeof a === 'string' ? a : a.url) === url)) return prev;
+                return { ...prev, audioUrl: [...(prev.audioUrl || []), { title: file.name || `Audio ${(prev.audioUrl?.length || 0) + 1}`, url }] };
             });
         } catch (err) {
             console.error('Audio upload failed:', err);
@@ -438,8 +610,8 @@ const AddCoursePage = () => {
         try {
             const { url } = await uploadPdf(file);
             setNewItem(prev => {
-                if (prev.pdfUrl?.includes(url)) return prev;
-                return { ...prev, pdfUrl: [...(prev.pdfUrl || []), url] };
+                if (prev.pdfUrl?.some(p => (typeof p === 'string' ? p : p.url) === url)) return prev;
+                return { ...prev, pdfUrl: [...(prev.pdfUrl || []), { title: file.name || `PDF ${(prev.pdfUrl?.length || 0) + 1}`, url }] };
             });
         } catch (err) {
             console.error('PDF upload failed:', err);
@@ -451,7 +623,13 @@ const AddCoursePage = () => {
 
 
     const handleSaveItem = () => {
-        if (!newItem.title.trim()) return;
+        if (!newItem.title.trim()) {
+            setValidationModal({ 
+                isOpen: true, 
+                message: newItem.type === 'Assignment' ? 'Assignment Name is required.' : 'Lecture Name is required.' 
+            });
+            return;
+        }
 
         if (editingIndex !== null) {
             setCourseItems(prev => prev.map((item, idx) =>
@@ -516,6 +694,10 @@ const AddCoursePage = () => {
     };
 
     const handleContentTypeContinue = (type) => {
+        const hasLectures = courseItems.some(item => !item.type || item.type === 'Lecture');
+        if ((type === 'Quiz' || type === 'Assignment') && !hasLectures) {
+            return;
+        }
         if (type === 'Quiz') {
             setIsModalOpen(false);
             setShowQuizFlow(true);
@@ -529,30 +711,96 @@ const AddCoursePage = () => {
         }
     };
 
-    const handleQuizComplete = ({ _id, title }) => {
-        setCourseItems(prev => [
-            ...prev,
-            {
-                id: Date.now(),
-                title,
-                type: 'Quiz',
-                lectureNo: prev.length + 1,
-                quizId: _id,
-            }
-        ]);
+    const handleQuizComplete = ({ _id, title, selectedLecture }) => {
+        setCourseItems(prev => {
+            // Remove from all lectures first (in case it was moved)
+            let updated = prev.map(l => ({ ...l, quizzes: (l.quizzes || []).filter(q => String(q._id) !== String(_id) && String(q.id) !== String(_id)) }));
+            // Add to selected lecture
+            return updated.map(lecture => {
+                if (String(lecture.id) === String(selectedLecture) || String(lecture._id) === String(selectedLecture)) {
+                    return {
+                        ...lecture,
+                        quizzes: [...(lecture.quizzes || []), { _id, title, type: 'Quiz' }]
+                    };
+                }
+                return lecture;
+            });
+        });
         setShowQuizFlow(false);
+        setEditingQuizData(null);
     };
 
     const handleAssignmentComplete = (assignmentItem) => {
-        setCourseItems(prev => [
-            ...prev,
-            {
-                ...assignmentItem,
-                id: Date.now(),
-                lectureNo: prev.length + 1,
-            }
-        ]);
+        const assignmentId = assignmentItem.id || assignmentItem._id || Date.now();
+        setCourseItems(prev => {
+            // Remove from all lectures first
+            let updated = prev.map(l => ({ ...l, assignments: (l.assignments || []).filter(a => String(a.id) !== String(assignmentId) && String(a._id) !== String(assignmentId)) }));
+            // Add to selected lecture
+            return updated.map(lecture => {
+                if (String(lecture.id) === String(assignmentItem.selectedLecture) || String(lecture._id) === String(assignmentItem.selectedLecture)) {
+                    return {
+                        ...lecture,
+                        assignments: [...(lecture.assignments || []), { ...assignmentItem, id: assignmentId }]
+                    };
+                }
+                return lecture;
+            });
+        });
         setShowAssignmentFlow(false);
+        setEditingAssignmentData(null);
+    };
+
+    const handleDeleteQuiz = (lectureId, quizId) => {
+        setCourseItems(prev => prev.map(lecture => {
+            if (String(lecture.id) === String(lectureId) || String(lecture._id) === String(lectureId)) {
+                return {
+                    ...lecture,
+                    quizzes: (lecture.quizzes || []).filter(q => String(q._id) !== String(quizId))
+                };
+            }
+            return lecture;
+        }));
+    };
+
+    const handleDeleteAssignment = (lectureId, assignmentId) => {
+        setCourseItems(prev => prev.map(lecture => {
+            if (String(lecture.id) === String(lectureId) || String(lecture._id) === String(lectureId)) {
+                return {
+                    ...lecture,
+                    assignments: (lecture.assignments || []).filter(a => String(a.id) !== String(assignmentId) && String(a._id) !== String(assignmentId))
+                };
+            }
+            return lecture;
+        }));
+    };
+
+    const handleDeleteResource = (lectureId, resourceType, idx) => {
+        setCourseItems(prev => prev.map(lecture => {
+            if (String(lecture.id) === String(lectureId) || String(lecture._id) === String(lectureId)) {
+                const updated = { ...lecture };
+                if (resourceType === 'audio' && updated.audioUrl) {
+                    updated.audioUrl = updated.audioUrl.filter((_, i) => i !== idx);
+                } else if (resourceType === 'pdf' && updated.pdfUrl) {
+                    updated.pdfUrl = updated.pdfUrl.filter((_, i) => i !== idx);
+                }
+                return updated;
+            }
+            return lecture;
+        }));
+    };
+
+    const handleEditQuiz = (lectureId, quiz) => {
+        setEditingQuizData({ ...quiz, selectedLecture: lectureId });
+        setShowQuizFlow(true);
+    };
+
+    const handleEditAssignment = (lectureId, assignment) => {
+        setEditingAssignmentData({ ...assignment, selectedLecture: lectureId });
+        setShowAssignmentFlow(true);
+    };
+
+    const handleViewAll = (lecture, type) => {
+        setViewAllModal({ isOpen: true, type, item: lecture });
     };
 
     // Auto-save course as draft to get a real courseId before quiz creation, or update existing course details
@@ -666,7 +914,8 @@ const AddCoursePage = () => {
                     videoUrl: item.videoUrl || '',
                     audioUrl: item.audioUrl || [],
                     pdfUrl: item.pdfUrl || [],
-                    ...(item.quizId && { quizId: item.quizId }),
+                    quizzes: (item.quizzes || []).map(q => q._id || q.quizId),
+                    assignments: item.assignments || [],
                 })),
             };
 
@@ -700,8 +949,11 @@ const AddCoursePage = () => {
                                     <CreateAssignment
                                         courseId={courseId}
                                         nextAssignmentNumber={courseItems.length + 1}
+                                        initialData={editingAssignmentData}
+                                        lectures={courseItems.filter(item => !item.type || item.type === 'Lecture')}
                                         onBackToSelection={() => {
                                             setShowAssignmentFlow(false);
+                                            setEditingAssignmentData(null);
                                             setModalStep('select-type');
                                             setIsModalOpen(true);
                                         }}
@@ -710,8 +962,12 @@ const AddCoursePage = () => {
                                 ) : showQuizFlow ? (
                                     <CreateQuiz
                                         courseId={courseId}
+                                        quizId={editingQuizData?._id}
+                                        initialData={editingQuizData}
+                                        lectures={courseItems.filter(item => !item.type || item.type === 'Lecture')}
                                         onBackToSelection={() => {
                                             setShowQuizFlow(false);
+                                            setEditingQuizData(null);
                                             setModalStep('select-type');
                                             setIsModalOpen(true);
                                         }}
@@ -979,14 +1235,33 @@ const AddCoursePage = () => {
                                                     </div>
 
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 mt-4">
-                                                        {courseItems.map((item, idx) => (
-                                                            <LectureCard
-                                                                key={item.id}
-                                                                item={item}
-                                                                onEdit={() => handleEditItemClick(idx)}
-                                                                onDelete={() => handleDeleteItemClick(idx)}
-                                                            />
-                                                        ))}
+                                                        {courseItems.map((item, idx) => {
+                                                            let globalQuizNo = 0;
+                                                            let globalAssignmentNo = 0;
+                                                            for (let i = 0; i < idx; i++) {
+                                                                globalQuizNo += courseItems[i].quizzes?.length || 0;
+                                                                globalAssignmentNo += courseItems[i].assignments?.length || 0;
+                                                            }
+                                                            return (
+                                                                <React.Fragment key={item.id || idx}>
+                                                                    <LectureCard
+                                                                        item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                        onEdit={() => handleEditItemClick(idx)}
+                                                                        onDelete={() => handleDeleteItemClick(idx)}
+                                                                        onDeleteResource={handleDeleteResource}
+                                                                        onViewAll={handleViewAll}
+                                                                    />
+                                                                    <LectureActivitiesCard
+                                                                        item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                        onEditQuiz={handleEditQuiz}
+                                                                        onDeleteQuiz={handleDeleteQuiz}
+                                                                        onEditAssignment={handleEditAssignment}
+                                                                        onDeleteAssignment={handleDeleteAssignment}
+                                                                        onViewAll={handleViewAll}
+                                                                    />
+                                                                </React.Fragment>
+                                                            );
+                                                        })}
                                                         <div
                                                             onClick={handleAddLecturesClick}
                                                             className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-[#F7F4FF] rounded-[24px] flex flex-col items-center justify-center p-6 sm:p-8 cursor-pointer group hover:shadow-xl hover:shadow-[#4f46e5]/10 border border-transparent hover:border-[#4f46e5]/20 transition-all duration-300"
@@ -1082,9 +1357,31 @@ const AddCoursePage = () => {
                                                             <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
                                                         ) : (
                                                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
-                                                                {courseItems.map((item) => (
-                                                                    <LectureCard key={item.id} item={item} />
-                                                                ))}
+                                                                {courseItems.map((item, idx) => {
+                                                                    let globalQuizNo = 0;
+                                                                    let globalAssignmentNo = 0;
+                                                                    for (let i = 0; i < idx; i++) {
+                                                                        globalQuizNo += courseItems[i].quizzes?.length || 0;
+                                                                        globalAssignmentNo += courseItems[i].assignments?.length || 0;
+                                                                    }
+                                                                    return (
+                                                                        <React.Fragment key={item.id || idx}>
+                                                                            <LectureCard 
+                                                                                item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}} 
+                                                                                onDeleteResource={handleDeleteResource}
+                                                                                onViewAll={handleViewAll}
+                                                                            />
+                                                                            <LectureActivitiesCard
+                                                                                item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                                onEditQuiz={handleEditQuiz}
+                                                                                onDeleteQuiz={handleDeleteQuiz}
+                                                                                onEditAssignment={handleEditAssignment}
+                                                                                onDeleteAssignment={handleDeleteAssignment}
+                                                                                onViewAll={handleViewAll}
+                                                                            />
+                                                                        </React.Fragment>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         )}
                                                     </div>
@@ -1142,6 +1439,7 @@ const AddCoursePage = () => {
                     isOpen={isModalOpen && modalStep === 'select-type'}
                     onClose={() => setIsModalOpen(false)}
                     onContinue={handleContentTypeContinue}
+                    hasLectures={courseItems.some(item => !item.type || item.type === 'Lecture')}
                 />
 
                 {isModalOpen && modalStep === 'item-form' && (
@@ -1305,39 +1603,88 @@ const AddCoursePage = () => {
 
                                             {/* List of Audios */}
                                             {newItem.audioUrl?.length > 0 && (
-                                                <div className="mt-2 space-y-2 max-h-[100px] overflow-y-auto no-scrollbar">
-                                                    {newItem.audioUrl.map((url, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
-                                                            <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">Audio {idx + 1}</span>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
-                                                                }}
-                                                                className="text-red-400 hover:text-red-600 p-1"
-                                                            >
-                                                                <Trash2 size={12} />
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                                <div className="mt-2 space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
+                                                    {newItem.audioUrl.map((item, idx) => {
+                                                        const isObj = typeof item === 'object' && item !== null;
+                                                        const title = isObj ? item.title : `Audio ${idx + 1}`;
+                                                        const url = isObj ? item.url : item;
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
+                                                                <div className="flex items-center justify-between">
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={title} 
+                                                                        onChange={(e) => {
+                                                                            const newAudio = [...newItem.audioUrl];
+                                                                            newAudio[idx] = { title: e.target.value, url };
+                                                                            setNewItem({ ...newItem, audioUrl: newAudio });
+                                                                        }}
+                                                                        className="text-[12px] font-bold text-gray-700 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 bg-transparent flex-1 mr-3 pb-0.5"
+                                                                        placeholder="Audio Title..."
+                                                                    />
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
+                                                                        }}
+                                                                        className="text-red-400 hover:text-red-600 p-1 bg-red-50 rounded"
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                </div>
+                                                                <span className="text-[10px] text-gray-400 truncate">{url}</span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
 
-                                            <div className="mt-3">
-                                                <label className="block text-[12px] font-bold text-gray-500 mb-1.5">Or Upload URL</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="https://youtube.com"
-                                                    value={newItem.audioUrl && newItem.audioUrl.length > 0 && !newItem.audioUrl[0].includes('cloudinary') ? newItem.audioUrl[0] : ''}
-                                                    onChange={e => {
-                                                        const val = e.target.value;
-                                                        setNewItem(prev => ({
-                                                            ...prev,
-                                                            audioUrl: val ? [val] : []
-                                                        }));
-                                                    }}
-                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] placeholder:text-gray-300 shadow-sm"
-                                                />
+                                            <div className="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                                <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Add Audio via URL</label>
+                                                <div className="flex flex-col gap-2">
+                                                    <input
+                                                        id="manualAudioTitle"
+                                                        type="text"
+                                                        placeholder="Audio Title (e.g. Background Track)"
+                                                        className="w-full px-3 py-1.5 border border-gray-200 rounded-md outline-none focus:border-blue-500 text-[12px] shadow-sm bg-white"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            id="manualAudioUrl"
+                                                            type="text"
+                                                            placeholder="https://example.com/audio.mp3"
+                                                            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-md outline-none focus:border-blue-500 text-[12px] shadow-sm bg-white"
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    document.getElementById('addAudioBtn').click();
+                                                                }
+                                                            }}
+                                                        />
+                                                        <button
+                                                            id="addAudioBtn"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const titleInput = document.getElementById('manualAudioTitle');
+                                                                const urlInput = document.getElementById('manualAudioUrl');
+                                                                const val = urlInput.value.trim();
+                                                                if (val) {
+                                                                    let fallbackTitle = val.split('/').pop();
+                                                                    if (fallbackTitle === 'view' || !fallbackTitle) fallbackTitle = val;
+                                                                    setNewItem(prev => ({
+                                                                        ...prev,
+                                                                        audioUrl: [...(prev.audioUrl || []), { title: titleInput.value.trim() || fallbackTitle || `Audio ${(prev.audioUrl?.length || 0) + 1}`, url: val }]
+                                                                    }));
+                                                                    titleInput.value = '';
+                                                                    urlInput.value = '';
+                                                                }
+                                                            }}
+                                                            className="px-3 py-1.5 bg-blue-500 text-white text-[12px] font-bold rounded-md hover:bg-blue-600 transition-colors shadow-sm"
+                                                        >
+                                                            Add
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1387,39 +1734,88 @@ const AddCoursePage = () => {
 
                                             {/* List of PDFs */}
                                             {newItem.pdfUrl?.length > 0 && (
-                                                <div className="mt-2 space-y-2 max-h-[100px] overflow-y-auto no-scrollbar">
-                                                    {newItem.pdfUrl.map((url, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 rounded-lg px-3 py-1.5 shadow-sm">
-                                                            <span className="text-[11px] font-medium text-gray-600 truncate max-w-[80%]">PDF {idx + 1}</span>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setNewItem({ ...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx) });
-                                                                }}
-                                                                className="text-red-400 hover:text-red-600 p-1"
-                                                            >
-                                                                <Trash2 size={12} />
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                                <div className="mt-2 space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
+                                                    {newItem.pdfUrl.map((item, idx) => {
+                                                        const isObj = typeof item === 'object' && item !== null;
+                                                        const title = isObj ? item.title : `PDF ${idx + 1}`;
+                                                        const url = isObj ? item.url : item;
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
+                                                                <div className="flex items-center justify-between">
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={title} 
+                                                                        onChange={(e) => {
+                                                                            const newPdf = [...newItem.pdfUrl];
+                                                                            newPdf[idx] = { title: e.target.value, url };
+                                                                            setNewItem({ ...newItem, pdfUrl: newPdf });
+                                                                        }}
+                                                                        className="text-[12px] font-bold text-gray-700 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 bg-transparent flex-1 mr-3 pb-0.5"
+                                                                        placeholder="PDF Title..."
+                                                                    />
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setNewItem({ ...newItem, pdfUrl: newItem.pdfUrl.filter((_, i) => i !== idx) });
+                                                                        }}
+                                                                        className="text-red-400 hover:text-red-600 p-1 bg-red-50 rounded"
+                                                                    >
+                                                                        <Trash2 size={12} />
+                                                                    </button>
+                                                                </div>
+                                                                <span className="text-[10px] text-gray-400 truncate">{url}</span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
 
-                                            <div className="mt-3">
-                                                <label className="block text-[12px] font-bold text-gray-500 mb-1.5">Or Upload URL</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="https://youtube.com"
-                                                    value={newItem.pdfUrl && newItem.pdfUrl.length > 0 && !newItem.pdfUrl[0].includes('cloudinary') ? newItem.pdfUrl[0] : ''}
-                                                    onChange={e => {
-                                                        const val = e.target.value;
-                                                        setNewItem(prev => ({
-                                                            ...prev,
-                                                            pdfUrl: val ? [val] : []
-                                                        }));
-                                                    }}
-                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] placeholder:text-gray-300 shadow-sm"
-                                                />
+                                            <div className="mt-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                                <label className="block text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">Add PDF via URL</label>
+                                                <div className="flex flex-col gap-2">
+                                                    <input
+                                                        id="manualPdfTitle"
+                                                        type="text"
+                                                        placeholder="PDF Title (e.g. Chapter 1 Notes)"
+                                                        className="w-full px-3 py-1.5 border border-gray-200 rounded-md outline-none focus:border-blue-500 text-[12px] shadow-sm bg-white"
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            id="manualPdfUrl"
+                                                            type="text"
+                                                            placeholder="https://example.com/document.pdf"
+                                                            className="flex-1 px-3 py-1.5 border border-gray-200 rounded-md outline-none focus:border-blue-500 text-[12px] shadow-sm bg-white"
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') {
+                                                                    e.preventDefault();
+                                                                    document.getElementById('addPdfBtn').click();
+                                                                }
+                                                            }}
+                                                        />
+                                                        <button
+                                                            id="addPdfBtn"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const titleInput = document.getElementById('manualPdfTitle');
+                                                                const urlInput = document.getElementById('manualPdfUrl');
+                                                                const val = urlInput.value.trim();
+                                                                if (val) {
+                                                                    let fallbackTitle = val.split('/').pop();
+                                                                    if (fallbackTitle === 'view' || !fallbackTitle) fallbackTitle = val;
+                                                                    setNewItem(prev => ({
+                                                                        ...prev,
+                                                                        pdfUrl: [...(prev.pdfUrl || []), { title: titleInput.value.trim() || fallbackTitle || `PDF ${(prev.pdfUrl?.length || 0) + 1}`, url: val }]
+                                                                    }));
+                                                                    titleInput.value = '';
+                                                                    urlInput.value = '';
+                                                                }
+                                                            }}
+                                                            className="px-3 py-1.5 bg-blue-500 text-white text-[12px] font-bold rounded-md hover:bg-blue-600 transition-colors shadow-sm"
+                                                        >
+                                                            Add
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1472,6 +1868,130 @@ const AddCoursePage = () => {
                                 >
                                     Got it, thanks!
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* View All Modal */}
+                {viewAllModal.isOpen && viewAllModal.item && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans animate-in fade-in duration-200">
+                        <div className="bg-white w-full max-w-[600px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden transform animate-in slide-in-from-bottom-4 duration-300 max-h-[80vh] flex flex-col">
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h3 className="text-[20px] font-bold text-[#0f172a]">
+                                    All {viewAllModal.type === 'resources' ? 'Resources' : 'Activities'} - {viewAllModal.item.title || 'Lecture'}
+                                </h3>
+                                <button onClick={() => setViewAllModal({ isOpen: false, type: '', item: null })} className="p-2 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-3">
+                                {viewAllModal.type === 'resources' && (
+                                    <>
+                                        {viewAllModal.item.audioUrl && Array.isArray(viewAllModal.item.audioUrl) && viewAllModal.item.audioUrl.map((item, idx) => {
+                                            const isObj = typeof item === 'object' && item !== null;
+                                            let title = isObj ? item.title : `Audio ${idx + 1}`;
+                                            let url = isObj ? item.url : item;
+                                            if (!isObj || title.startsWith('Audio ')) {
+                                                try {
+                                                    let u = url;
+                                                    if (u.includes('?')) u = u.split('?')[0];
+                                                    if (u.endsWith('/')) u = u.slice(0, -1);
+                                                    const parts = u.split('/');
+                                                    let lastPart = parts[parts.length - 1];
+                                                    if (lastPart === 'view' && parts.length > 2) lastPart = parts[parts.length - 2];
+                                                    if (lastPart && lastPart.length > 0) title = decodeURIComponent(lastPart);
+                                                } catch(e) {}
+                                            }
+                                            return (
+                                            <div key={`audio-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">A</div>
+                                                <div className="flex flex-col flex-1 min-w-0">
+                                                    <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
+                                                    <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                </div>
+                                                <button onClick={() => {
+                                                    handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'audio', idx);
+                                                    setViewAllModal(prev => ({...prev, item: {...prev.item, audioUrl: prev.item.audioUrl.filter((_, i) => i !== idx)}}));
+                                                }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                            );
+                                        })}
+                                        {viewAllModal.item.pdfUrl && Array.isArray(viewAllModal.item.pdfUrl) && viewAllModal.item.pdfUrl.map((item, idx) => {
+                                            const isObj = typeof item === 'object' && item !== null;
+                                            let title = isObj ? item.title : `PDF ${idx + 1}`;
+                                            let url = isObj ? item.url : item;
+                                            if (!isObj || title.startsWith('PDF ')) {
+                                                try {
+                                                    let u = url;
+                                                    if (u.includes('?')) u = u.split('?')[0];
+                                                    if (u.endsWith('/')) u = u.slice(0, -1);
+                                                    const parts = u.split('/');
+                                                    let lastPart = parts[parts.length - 1];
+                                                    if (lastPart === 'view' && parts.length > 2) lastPart = parts[parts.length - 2];
+                                                    if (lastPart && lastPart.length > 0) title = decodeURIComponent(lastPart);
+                                                } catch(e) {}
+                                            }
+                                            return (
+                                            <div key={`pdf-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">P</div>
+                                                <div className="flex flex-col flex-1 min-w-0">
+                                                    <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
+                                                    <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                </div>
+                                                <button onClick={() => {
+                                                    handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'pdf', idx);
+                                                    setViewAllModal(prev => ({...prev, item: {...prev.item, pdfUrl: prev.item.pdfUrl.filter((_, i) => i !== idx)}}));
+                                                }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                            );
+                                        })}
+                                    </>
+                                )}
+                                {viewAllModal.type === 'activities' && (
+                                    <>
+                                        {viewAllModal.item.quizzes?.map((quiz, qIdx) => (
+                                            <div key={`quiz-${quiz._id || qIdx}`} className="bg-purple-50 border border-purple-100 text-purple-700 px-4 py-3 rounded-xl flex items-center gap-3">
+                                                <HelpCircle size={18} className="flex-shrink-0" />
+                                                <span className="text-[13px] font-bold">Quiz {(viewAllModal.item.startingQuizNo || 1) + qIdx}</span>
+                                                <span className="text-[12px] font-medium ml-2 truncate flex-1 opacity-80">{quiz.title}</span>
+                                                <div className="flex gap-2 flex-shrink-0">
+                                                    <button onClick={() => { setViewAllModal({ isOpen: false, type: '', item: null }); handleEditQuiz(viewAllModal.item.id || viewAllModal.item._id, quiz); }} className="p-1.5 text-purple-600 hover:bg-purple-200 rounded-lg">
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                    <button onClick={() => {
+                                                        handleDeleteQuiz(viewAllModal.item.id || viewAllModal.item._id, quiz._id);
+                                                        setViewAllModal(prev => ({...prev, item: {...prev.item, quizzes: prev.item.quizzes.filter(q => q._id !== quiz._id)}}));
+                                                    }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {viewAllModal.item.assignments?.map((assignment, aIdx) => (
+                                            <div key={`assignment-${assignment.id || aIdx}`} className="bg-orange-50 border border-orange-100 text-orange-700 px-4 py-3 rounded-xl flex items-center gap-3">
+                                                <FileText size={18} className="flex-shrink-0" />
+                                                <span className="text-[13px] font-bold">Assignment {(viewAllModal.item.startingAssignmentNo || 1) + aIdx}</span>
+                                                <span className="text-[12px] font-medium ml-2 truncate flex-1 opacity-80">{assignment.title}</span>
+                                                <div className="flex gap-2 flex-shrink-0">
+                                                    <button onClick={() => { setViewAllModal({ isOpen: false, type: '', item: null }); handleEditAssignment(viewAllModal.item.id || viewAllModal.item._id, assignment); }} className="p-1.5 text-orange-600 hover:bg-orange-200 rounded-lg">
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                    <button onClick={() => {
+                                                        handleDeleteAssignment(viewAllModal.item.id || viewAllModal.item._id, assignment.id || assignment._id);
+                                                        setViewAllModal(prev => ({...prev, item: {...prev.item, assignments: prev.item.assignments.filter(a => a.id !== assignment.id && a._id !== assignment._id)}}));
+                                                    }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

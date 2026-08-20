@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { createQuiz, uploadQuizMedia, getQuizById, updateQuiz } from '@/api/quiz';
 import { AlertCircle } from 'lucide-react';
 
-const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
+const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialData, lectures = [] }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(!!quizId);
@@ -20,9 +20,10 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const [method, setMethod] = useState('manual');
     const [quizData, setQuizData] = useState({
-        title: '',
-        description: '',
-        instructions: ''
+        title: initialData?.title || '',
+        description: initialData?.shortDescription || initialData?.description || '',
+        instructions: initialData?.instructions || '',
+        selectedLecture: initialData?.selectedLecture || ''
     });
 
     const [questions, setQuestions] = useState([
@@ -173,11 +174,12 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                     const res = await getQuizById(quizId);
                     const quiz = res.data;
 
-                    setQuizData({
+                    setQuizData(prev => ({
                         title: quiz.title || '',
                         description: quiz.shortDescription || '',
-                        instructions: quiz.instructions || ''
-                    });
+                        instructions: quiz.instructions || '',
+                        selectedLecture: initialData?.selectedLecture || prev.selectedLecture
+                    }));
 
                     setQuizSettings({
                         passingScore: quiz.passingScorePercentage || 70,
@@ -229,6 +231,13 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
         if (currentStep < totalSteps) {
             // Validation for Step 1
             if (currentStep === 1) {
+                if (!quizData.selectedLecture) {
+                    setValidationModal({
+                        isOpen: true,
+                        message: 'Please select a lecture to attach this quiz to.'
+                    });
+                    return;
+                }
                 if (!quizData.title.trim()) {
                     setValidationModal({
                         isOpen: true,
@@ -331,7 +340,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
 
             const savedQuiz = res?.data;
 
-            onComplete({ _id: savedQuiz?._id || quizId, title: savedQuiz?.title || quizData.title });
+            onComplete({ _id: savedQuiz?._id || quizId, title: savedQuiz?.title || quizData.title, selectedLecture: quizData.selectedLecture });
         } catch (err) {
             console.error('Quiz save error:', err);
             toast.error(err?.response?.data?.message || 'Failed to save quiz.', { id: toastId });
@@ -507,6 +516,31 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId }) => {
                             <h3 className="text-[16px] md:text-[18px] font-bold text-[#0f172a] mb-6 md:mb-8 text-center sm:text-left">Quiz Basic Details</h3>
 
                             <div className="space-y-6 md:space-y-8">
+                                {/* Lectures Field & Dropdown */}
+                                <div>
+                                    <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Lectures *</label>
+                                    <div className="relative">
+                                        <select
+                                            value={quizData.selectedLecture}
+                                            onChange={(e) => handleInputChange('selectedLecture', e.target.value)}
+                                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm appearance-none font-medium text-[#0f172a] cursor-pointer"
+                                        >
+                                            <option value="">Select a lecture</option>
+                                            {lectures.map((lec, idx) => {
+                                                const lId = lec.id || lec._id || idx;
+                                                const lTitle = lec.title || `Lecture ${idx + 1}`;
+                                                const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
+                                                return (
+                                                    <option key={lId} value={lId}>
+                                                        {lNo}{lTitle}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                                    </div>
+                                </div>
+
                                 {/* Quiz Title */}
                                 <div>
                                     <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Quiz Title *</label>

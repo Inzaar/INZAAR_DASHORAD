@@ -5,7 +5,7 @@ import GrayButton from '@/components/ui/buttons/GrayButton';
 import { Upload, FileText, X, Info, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { uploadPdf, updateLectureProgress } from '@/api/course';
+import { uploadPdf, submitAssignmentProgress } from '@/api/course';
 import toast from 'react-hot-toast';
 
 const AssignmentSubmission = () => {
@@ -56,14 +56,10 @@ const AssignmentSubmission = () => {
             
             // Call backend API to mark assignment as completed in user's enrollment
             const targetCourseId = assignment?.courseId;
-            const targetLectureId = assignment?.id || assignment?._id;
-            if (targetCourseId && targetLectureId) {
+            const targetAssignmentId = assignment?.id || assignment?._id;
+            if (targetCourseId && targetAssignmentId) {
                 try {
-                    await updateLectureProgress(targetCourseId, {
-                        lectureId: targetLectureId,
-                        watchedPercentage: 100,
-                        lastWatchedTime: 0
-                    });
+                    await submitAssignmentProgress(targetCourseId, targetAssignmentId);
                 } catch (progressErr) {
                     console.error("Failed to update assignment progress in backend:", progressErr);
                 }
