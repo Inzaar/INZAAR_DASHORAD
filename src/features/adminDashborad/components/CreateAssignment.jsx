@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Upload, Check, Lock, ChevronDown, FileText, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignmentNumber, initialData }) => {
+const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignmentNumber, initialData, lectures = [] }) => {
     const isEditMode = Boolean(initialData);
 
     const [assignmentData, setAssignmentData] = useState({
+        selectedLecture: initialData?.selectedLecture || initialData?.lectureId || '',
         title: initialData?.title || '',
         instructions: initialData?.instructions || '',
         maxFileSize: initialData?.maxFileSize || '25 MB',
@@ -26,7 +27,8 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
     useEffect(() => {
         if (initialData) {
             const refUrl = initialData.referenceFileUrl || (Array.isArray(initialData.pdfUrl) ? initialData.pdfUrl[0] : initialData.pdfUrl) || '';
-            setAssignmentData({
+            setAssignmentData(prev => ({
+                ...prev,
                 title: initialData.title || '',
                 instructions: initialData.instructions || '',
                 maxFileSize: initialData.maxFileSize || '25 MB',
@@ -38,7 +40,8 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                     : ['PDF'],
                 referenceFileUrl: refUrl,
                 referenceFileName: refUrl ? refUrl.split('/').pop() : '',
-            });
+                selectedLecture: initialData.selectedLecture || initialData.lectureId || prev.selectedLecture
+            }));
         }
     }, [initialData]);
 
@@ -85,13 +88,18 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
     };
 
     const handleContinue = async () => {
+        if (!assignmentData.selectedLecture) {
+            toast.error("Please select a lecture to attach this assignment to.");
+            return;
+        }
+
         if (!assignmentData.title.trim()) {
             toast.error("Please enter assignment title.");
             return;
         }
 
         const assignmentItem = {
-            ...(initialData?._id ? { _id: initialData._id, id: initialData._id } : {}),
+            ...(initialData?._id ? { _id: initialData._id, id: initialData._id } : (initialData?.id ? { id: initialData.id } : {})),
             title: assignmentData.title,
             instructions: assignmentData.instructions,
             maxFileSize: assignmentData.maxFileSize,
@@ -102,6 +110,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
             type: 'Assignment',
             pdfUrl: assignmentData.referenceFileUrl ? [assignmentData.referenceFileUrl] : (initialData?.pdfUrl || []),
             referenceFileUrl: assignmentData.referenceFileUrl,
+            selectedLecture: assignmentData.selectedLecture,
         };
 
         if (onComplete) {
@@ -141,10 +150,35 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                     {/* Form Container */}
                     <div className="bg-white md:rounded-2xl md:shadow-[0_4px_20px_rgb(0,0,0,0.02)] md:border border-gray-100 p-6 md:p-10 mb-10">
                         
+                        {/* Lectures Dropdown */}
+                        <div className="mb-8">
+                            <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Lectures *</label>
+                            <div className="relative">
+                                <select
+                                    value={assignmentData.selectedLecture || ''}
+                                    onChange={(e) => handleInputChange('selectedLecture', e.target.value)}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:ring-2 focus:ring-[#3758EE]/20 transition-all text-[14px] shadow-sm font-medium text-[#0f172a] appearance-none cursor-pointer"
+                                >
+                                    <option value="">Select a lecture</option>
+                                    {lectures.map((lec, idx) => {
+                                        const lId = lec.id || lec._id || idx;
+                                        const lTitle = lec.title || `Lecture ${idx + 1}`;
+                                        const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
+                                        return (
+                                            <option key={lId} value={lId}>
+                                                {lNo}{lTitle}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                            </div>
+                        </div>
+
                         {/* Title and Number */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div>
-                                <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Assignment Title</label>
+                                <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Assignment Title *</label>
                                 <input
                                     type="text"
                                     placeholder="Enter title"

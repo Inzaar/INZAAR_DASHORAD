@@ -85,6 +85,16 @@ export const updateLectureProgress = async (courseId, { lectureId, watchedPercen
     return res.data.data;
 };
 
+// Submit assignment progress
+export const submitAssignmentProgress = async (courseId, assignmentId) => {
+    const res = await axiosInstance.patch(
+        `/enrollments/my-courses/${courseId}/assignment-progress`,
+        { assignmentId },
+        { withCredentials: true }
+    );
+    return res.data.data;
+};
+
 // Upload an image to Cloudinary via the backend
 // file: File object from <input type="file">
 // Returns { url, public_id }

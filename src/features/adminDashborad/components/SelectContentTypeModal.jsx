@@ -1,11 +1,46 @@
 import React, { useState } from 'react';
-import { BookOpen, FileQuestion, ClipboardList, X } from 'lucide-react';
+import { BookOpen, FileQuestion, ClipboardList, X, Info } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import toast from 'react-hot-toast';
 
-const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
+const SelectContentTypeModal = ({ isOpen, onClose, onContinue, hasLectures = false }) => {
     const [selectedType, setSelectedType] = useState('Lecture');
 
     if (!isOpen) return null;
+
+    const handleSelectOption = (optionId) => {
+        if (!hasLectures) {
+            if (optionId === 'Quiz' || optionId === 'Assignment') {
+                const message = optionId === 'Quiz'
+                    ? 'No lecture available. You cannot create a quiz until a lecture is created.'
+                    : 'No lecture available. You cannot create an assignment until a lecture is created.';
+
+                toast.custom((t) => (
+                    <div
+                        className={`${
+                            t.visible ? 'animate-in fade-in zoom-in-95' : 'animate-out fade-out zoom-out-95'
+                        } max-w-md w-full bg-white shadow-[0_12px_40px_rgba(15,23,42,0.15)] rounded-2xl pointer-events-auto flex items-center p-4 border border-indigo-100 gap-3.5 transition-all duration-200`}
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center flex-shrink-0">
+                            <Info size={22} className="stroke-[2.5]" />
+                        </div>
+                        <div className="flex-1 text-[14px] font-medium text-[#0f172a] leading-snug">
+                            {message}
+                        </div>
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                ), { id: 'no-lecture-info-toast', duration: 4000 });
+            }
+        }
+        setSelectedType(optionId);
+    };
+
+    const isContinueDisabled = !hasLectures && selectedType !== 'Lecture';
 
     const options = [
         {
@@ -50,7 +85,7 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
                         {options.map((option) => (
                             <div
                                 key={option.id}
-                                onClick={() => setSelectedType(option.id)}
+                                onClick={() => handleSelectOption(option.id)}
                                 className={`
                                     relative p-8 rounded-[20px] border-2 transition-all duration-300 cursor-pointer group flex flex-col items-start
                                     ${selectedType === option.id
@@ -94,6 +129,7 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue }) => {
                         </button>
                         <GradiantButton
                             onClick={() => onContinue(selectedType)}
+                            disabled={isContinueDisabled}
                             className="w-full sm:w-auto px-14 py-3 font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[14px] md:text-[15px] order-1 sm:order-2"
                         >
                             Continue
