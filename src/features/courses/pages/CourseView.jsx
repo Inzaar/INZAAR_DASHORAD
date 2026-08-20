@@ -218,6 +218,7 @@ const CourseView = () => {
                         id: rawStart.id || rawStart._id,
                         watchedPercentage: rawStart.watchedPercentage || (typeof rawStart.progress === 'string' ? parseInt(rawStart.progress) : (rawStart.progress || 0)),
                         lastWatchedTime: rawStart.lastWatchedTime || 0,
+                        videoId: rawStart.videoId || extractYouTubeId(rawStart.videoUrl),
                         type: rawStart.type || (rawStart.status === 'Quiz' ? 'Quiz' : 'Lecture'),
                         pdfUrl: Array.isArray(rawStart.pdfUrl) ? rawStart.pdfUrl : (rawStart.pdfUrl ? [rawStart.pdfUrl] : []),
                         audioUrl: Array.isArray(rawStart.audioUrl) ? rawStart.audioUrl : (rawStart.audioUrl ? [rawStart.audioUrl] : []),
