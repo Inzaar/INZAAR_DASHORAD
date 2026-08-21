@@ -10,7 +10,7 @@ import BatchList from "./BatchList";
 
 const ITEMS_PER_PAGE = 6;
 
-function ModeratorBatchesComponent({ profileData, onEditClick }) {
+function ModeratorBatchesComponent({ profileData, onEditClick, onViewDetails }) {
     const [showBatchModal, setShowBatchModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -93,6 +93,7 @@ function ModeratorBatchesComponent({ profileData, onEditClick }) {
                                             batch={batch.name || "N/A"}
                                             startDate={batch.startDate ? new Date(batch.startDate).toLocaleDateString() : "N/A"}
                                             endDate={batch.endDate ? new Date(batch.endDate).toLocaleDateString() : "N/A"}
+                                            onViewDetails={() => onViewDetails && onViewDetails(batch.courseId?.title)}
                                         />
                                     ))}
                                 </div>

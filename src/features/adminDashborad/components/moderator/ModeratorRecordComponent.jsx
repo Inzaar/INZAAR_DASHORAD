@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { getModeratorStudents } from '@/api/user';
 import { useParams, useNavigate } from 'react-router-dom';
 
-export default function ModeratorRecordComponent({ profileData, onEditClick }) {
+export default function ModeratorRecordComponent({ profileData, onEditClick, initialCourse }) {
     const { t } = useTranslation();
 
     const { id } = useParams();
@@ -22,12 +22,14 @@ export default function ModeratorRecordComponent({ profileData, onEditClick }) {
         return uniqueCoursesArr.length > 0 ? uniqueCoursesArr : ["Stress Management Course", "Imaniyaat Course", "Namaz Course"];
     }, [profileData]);
 
-    const [selectedCourse, setSelectedCourse] = useState(courses[0]);
+    const [selectedCourse, setSelectedCourse] = useState(initialCourse || courses[0]);
     useEffect(() => {
-        if (courses.length > 0 && (!selectedCourse || !courses.includes(selectedCourse))) {
+        if (initialCourse && courses.includes(initialCourse)) {
+            setSelectedCourse(initialCourse);
+        } else if (courses.length > 0 && (!selectedCourse || !courses.includes(selectedCourse))) {
             setSelectedCourse(courses[0]);
         }
-    }, [courses, selectedCourse]);
+    }, [courses, selectedCourse, initialCourse]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 

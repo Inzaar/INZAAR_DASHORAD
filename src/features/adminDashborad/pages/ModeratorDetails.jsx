@@ -33,6 +33,7 @@ const ModeratorDetails = () => {
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+  const [selectedBatchCourse, setSelectedBatchCourse] = useState(null);
   const dropdownRef = useRef(null);
   // ✅ outside click close
   useEffect(() => {
@@ -345,11 +346,16 @@ const ModeratorDetails = () => {
                   <ModeratorBatchesComponent
                     profileData={profileData}
                     onEditClick={() => setIsAssignModalOpen(true)}
+                    onViewDetails={(courseTitle) => {
+                       setSelectedBatchCourse(courseTitle);
+                       setProfileButton("records");
+                    }}
                   />
                 ) : profileButton === "records" ? (
                   <ModeratorRecordComponent
                     profileData={profileData}
                     onEditClick={() => setIsAssignModalOpen(true)}
+                    initialCourse={selectedBatchCourse}
                   />
                 ) : null}
 
