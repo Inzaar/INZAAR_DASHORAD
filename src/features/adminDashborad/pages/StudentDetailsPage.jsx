@@ -155,9 +155,9 @@ const StudentDetailsPage = () => {
                                 <div className="hidden sm:flex sm:flex-row justify-between items-start sm:items-center mb-4">
                                     <h1 className="text-xl font-semibold text-gray-700">Profile</h1>
                                     <div className="flex flex-wrap items-center gap-3">
-                                        <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
+                                        {/* <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
                                             Send Message <BsChatDotsFill className="text-white/90" size={14} />
-                                        </button>
+                                        </button> */}
                                         <button
                                             onClick={() => {
                                                 if (profileData?.user?.phone) {
