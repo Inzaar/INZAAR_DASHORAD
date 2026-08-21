@@ -3,7 +3,7 @@ import { FileText, Pencil } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import instructorImg from '@/assets/images/instructor.png';
 
-const AssignmentStartOverlay = ({ lecture, courseData, onStart, isAdminView }) => {
+const AssignmentStartOverlay = ({ lecture, courseData, onStart, isAdminView, isModeratorViewingStudent }) => {
     const instructorImage = instructorImg;
 
     return (
@@ -62,12 +62,16 @@ const AssignmentStartOverlay = ({ lecture, courseData, onStart, isAdminView }) =
                         onClick={onStart}
                         className="w-full max-w-[360px] py-2.5 md:py-3 rounded-xl shadow-xl hover:shadow-2xl text-white font-bold text-sm md:text-base transition-all active:scale-[0.98]"
                     >
-                        {isAdminView ? (
+                        {isModeratorViewingStudent ? (
+                            lecture?.isCompleted ? 'View Submission' : 'Send Reminder'
+                        ) : isAdminView ? (
                             <span className="flex items-center justify-center gap-2">
                                 <Pencil size={18} />
                                 Edit Assignment
                             </span>
-                        ) : 'Start Assignment'}
+                        ) : (
+                            lecture?.isCompleted ? 'View Submission' : 'Start Assignment'
+                        )}
                     </GradiantButton>
                 </div>
             </div>

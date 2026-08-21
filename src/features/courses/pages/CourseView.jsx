@@ -18,6 +18,7 @@ import LectureListTable from "../components/LectureListTable";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
 import QuizStartOverlay from "../components/QuizStartOverlay";
 import AssignmentStartOverlay from "../components/AssignmentStartOverlay";
+import ReminderModal from "@/components/shared/ReminderModal";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
@@ -96,6 +97,8 @@ const CourseView = () => {
     const [pdfLoading, setPdfLoading] = useState(true);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
+    const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+    const [isSendingReminder, setIsSendingReminder] = useState(false);
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -351,7 +354,7 @@ const CourseView = () => {
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
-                isAdminView,
+                isAdminView: isAdminView && !userId,
                 assignment: mappedAssignmentObj
             }
         });
@@ -402,6 +405,7 @@ const CourseView = () => {
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
+                isAdminView: false,
                 assignment: mappedAssignmentObj
             }
         });
@@ -484,7 +488,8 @@ const CourseView = () => {
                     const now = Date.now();
 
                     // Allow anyone to record progress (if they aren't enrolled, the backend will just reject it). This allows admins to test unlocking.
-                    if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
+                    const isModeratorViewingStudent = isAdminView && userId;
+                    if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000 && !isModeratorViewingStudent) {
                         lastReportedRef.current = now;
                         let calculatedPercent = Math.min(Math.round(percent), 100);
                         if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
@@ -724,6 +729,16 @@ const CourseView = () => {
         } finally {
             setIsSavingLecture(false);
         }
+    };
+
+    const handleSendReminder = () => {
+        setIsSendingReminder(true);
+        // Mock API call for sending reminder
+        setTimeout(() => {
+            setIsSendingReminder(false);
+            setIsReminderModalOpen(false);
+            toast.success("Reminder sent successfully!");
+        }, 1500);
     };
 
     if (loading) {
@@ -1020,8 +1035,13 @@ const CourseView = () => {
                                                         lecture={currentLecture}
                                                         courseData={courseData}
                                                         isAdminView={isAdminView}
+                                                        isModeratorViewingStudent={isAdminView && userId}
                                                         onStart={() => {
-                                                            if (isAdminView) {
+                                                            if (isAdminView && userId && !currentLecture.isCompleted) {
+                                                                setIsReminderModalOpen(true);
+                                                                return;
+                                                            }
+                                                            if (isAdminView && !userId) {
                                                                 setIsEditingQuiz(true);
                                                             } else {
                                                                 const cleanParams = new URLSearchParams(window.location.search);
@@ -1031,7 +1051,7 @@ const CourseView = () => {
                                                                 const cleanPath = window.location.pathname + cleanSearch;
                                                                 const returnPath = encodeURIComponent(cleanPath);
                                                                 const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
-                                                                const adminQuery = isAdminView ? (query ? `${query}&admin=true` : '?admin=true') : query;
+                                                                const adminQuery = (isAdminView && !userId) ? (query ? `${query}&admin=true` : '?admin=true') : query;
                                                                 if (currentLecture.quizId) {
                                                                     navigate(`/quiz-take/${currentLecture.quizId}${adminQuery}`);
                                                                 } else {
@@ -1045,8 +1065,13 @@ const CourseView = () => {
                                                         lecture={currentLecture}
                                                         courseData={courseData}
                                                         isAdminView={isAdminView}
+                                                        isModeratorViewingStudent={isAdminView && userId}
                                                         onStart={() => {
-                                                            if (isAdminView) {
+                                                            if (isAdminView && userId && !currentLecture.isCompleted) {
+                                                                setIsReminderModalOpen(true);
+                                                                return;
+                                                            }
+                                                            if (isAdminView && !userId) {
                                                                 setIsEditingAssignment(true);
                                                             } else {
                                                                 handleOpenAssignment(currentLecture);
@@ -1516,6 +1541,15 @@ const CourseView = () => {
                     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
                 `}} />
             </div>
+
+            <ReminderModal 
+                isOpen={isReminderModalOpen}
+                onClose={() => setIsReminderModalOpen(false)}
+                onConfirm={handleSendReminder}
+                isSending={isSendingReminder}
+                studentName="The student"
+                itemTitle={currentLecture?.title}
+            />
 
             <ConfirmDialog
                 isOpen={isDeleteDialogOpen}

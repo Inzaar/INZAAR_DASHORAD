@@ -281,8 +281,13 @@ const StudentCourseDashboard = ({ profileData }) => {
                                                 {lecture.status}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-4 text-right underline text-[#3758EE] text-[12px] cursor-pointer font-medium whitespace-nowrap">
-                                            {lecture.action}
+                                        <td className="py-4 px-4 text-right whitespace-nowrap">
+                                            <GradiantButton 
+                                                onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id || lecture._id}`)}
+                                                className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-md"
+                                            >
+                                                View Detail
+                                            </GradiantButton>
                                         </td>
                                     </tr>
                                 )) : (
