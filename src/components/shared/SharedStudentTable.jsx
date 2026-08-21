@@ -58,7 +58,7 @@ const SharedStudentTable = ({
         <>
             {showTitle && (
                 <div className="mb-6 flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{title}</h3>
+                    <h3 className="text-[20px] font-bold text-gray-900 mb-1">{title}</h3>
                     {showDropdown && (
                         <select className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none cursor-pointer">
                             <option value="student_table">{t("student_table", "Student Table")}</option>
@@ -81,14 +81,14 @@ const SharedStudentTable = ({
                         <table className="w-full min-w-[1000px] print:min-w-0 print:w-full border-separate border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
                             <thead>
                                 <tr>
-                                    {visibleColumns.name && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
-                                    {visibleColumns.contact && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("email", "Email")}</th>}
-                                    {visibleColumns.phone && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
-                                    {visibleColumns.enrollments && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
-                                    {visibleColumns.progress && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
-                                    {visibleColumns.lastLogin && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
-                                    {visibleColumns.status && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
-                                    {visibleColumns.action && <th className="text-center font-bold text-[14px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("action", "Action")}</th>}
+                                    {visibleColumns.name && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
+                                    {visibleColumns.contact && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("email", "Email")}</th>}
+                                    {visibleColumns.phone && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
+                                    {visibleColumns.enrollments && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
+                                    {visibleColumns.progress && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
+                                    {visibleColumns.lastLogin && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
+                                    {visibleColumns.status && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
+                                    {visibleColumns.action && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("action", "Action")}</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -96,17 +96,17 @@ const SharedStudentTable = ({
                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                         {visibleColumns.name && (
                                             <td className={`py-4 print:py-1 print:border print:border-black ${!visibleColumns.contact && !visibleColumns.enrollments ? 'rounded-l-xl print:rounded-none' : (Object.values(visibleColumns).every(v=>v) ? 'rounded-l-xl print:rounded-none' : '')} text-center`}>
-                                                <span className="text-[14px] print:text-[10px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
+                                                <span className="text-[16px] print:text-[10px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
                                             </td>
                                         )}
                                         {visibleColumns.contact && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                <span className="text-[13px] print:text-[10px] text-gray-800 leading-tight">{student.email}</span>
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 leading-tight">{student.email}</span>
                                             </td>
                                         )}
                                         {visibleColumns.phone && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                <span className="text-[13px] print:text-[10px] text-gray-800">{student.phone}</span>
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.phone}</span>
                                             </td>
                                         )}
                                         {visibleColumns.enrollments && (
@@ -115,35 +115,35 @@ const SharedStudentTable = ({
                                                     {(student.enrollments || []).length > 0 ? (
                                                         <>
                                                             {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                                <span key={idx} className="text-[13px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
+                                                                <span key={idx} className="text-[15px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
                                                                     {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
                                                                 </span>
                                                             ))}
                                                             {student.enrollments.length > 3 && (
-                                                                <span className="text-[11px] print:text-[9px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
+                                                                <span className="text-[13px] print:text-[9px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
                                                                     {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
                                                                 </span>
                                                             )}
                                                         </>
                                                     ) : (
-                                                        <span className="text-gray-400 print:text-gray-700 text-[13px] print:text-[10px]">{t("not_enrolled", "Not Enrolled")}</span>
+                                                        <span className="text-gray-400 print:text-gray-700 text-[15px] print:text-[10px]">{t("not_enrolled", "Not Enrolled")}</span>
                                                     )}
                                                 </div>
                                             </td>
                                         )}
                                         {visibleColumns.progress && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                <span className="text-[14px] print:text-[10px] text-gray-800">{student.progress || '0%'}</span>
+                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.progress || '0%'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.lastLogin && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                <span className="text-[14px] print:text-[10px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
+                                                <span className="text-[16px] print:text-[10px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.status && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                <span className={`text-[14px] print:text-[10px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                                <span className={`text-[16px] print:text-[10px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                                                     {t(student.status.toLowerCase(), student.status)}
                                                 </span>
                                             </td>
@@ -152,7 +152,7 @@ const SharedStudentTable = ({
                                             <td className={`py-4 print:py-1 print:border print:border-black text-center ${Object.values(visibleColumns).every(v=>v) ? 'rounded-r-xl print:rounded-none' : ''}`}>
                                                 <div className="flex justify-center items-center">
                                                     <GradiantButton
-                                                        className="text-[13px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
+                                                        className="text-[15px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
                                                         onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                     >
                                                         {t("view_profile", "View Profile")}

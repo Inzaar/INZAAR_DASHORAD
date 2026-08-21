@@ -239,7 +239,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             setStatusFilter(stat.type);
                                             setCurrentPage(1);
                                         }}
-                                        className={statusFilter === stat.type ? "ring-2 ring-blue-500 ring-offset-2" : ""}
+                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[115px] min-w-[220px] sm:min-w-[240px]" : "h-[115px] min-w-[220px] sm:min-w-[240px]"}
                                     />
                                 ))}
                             </div>

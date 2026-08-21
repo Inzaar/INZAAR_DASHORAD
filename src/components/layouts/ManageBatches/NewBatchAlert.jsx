@@ -91,16 +91,16 @@ const NewBatchAlert = () => {
                         </p>
                     </div>
                 </div>
-                <div className="flex flex-col sm:flex-row justify-end gap-3 w-full xl:w-auto flex-shrink-0">
+                <div className="flex flex-row justify-end gap-2 sm:gap-3 w-full xl:w-auto flex-shrink-0">
                     <button
                         onClick={() => handleOpenModal('assign', batchData)}
-                        className="w-full sm:w-auto px-6 py-2.5 border-2 border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-xs sm:text-sm hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 shadow-lg shadow-[#5D5FEF]/5 whitespace-nowrap"
+                        className="flex-1 sm:flex-none sm:w-auto px-1 sm:px-6 py-2.5 border-2 border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-xs sm:text-sm hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 shadow-lg shadow-[#5D5FEF]/5 whitespace-nowrap text-center"
                     >
                         Assign Moderator
                     </button>
                     <button
                         onClick={() => handleOpenModal('students', batchData)}
-                        className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white rounded-lg font-bold text-xs sm:text-sm hover:shadow-lg transition-all active:scale-95 whitespace-nowrap"
+                        className="flex-1 sm:flex-none sm:w-auto px-1 sm:px-6 py-2.5 bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white rounded-lg font-bold text-xs sm:text-sm hover:shadow-lg transition-all active:scale-95 whitespace-nowrap text-center"
                     >
                         Adjust Students
                     </button>

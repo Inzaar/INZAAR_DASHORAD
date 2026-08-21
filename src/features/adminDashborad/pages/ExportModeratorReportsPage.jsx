@@ -222,33 +222,34 @@ const ExportModeratorReportsPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 flex-wrap">
-                                    <GradiantButton className="h-[42px] px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2" onClick={handleTopSearch}>
-                                        <Search className="w-4 h-4" />
-                                        Search
-                                    </GradiantButton>
-                                    <button className="h-[42px] px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors" onClick={handleTopClear}>
-                                        <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
-                                    </button>
+                                <div className="flex gap-2 items-center w-full justify-between xl:justify-start xl:w-auto">
+                                    <div className="xl:hidden w-[140px] shrink-0">
+                                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-3 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer h-[42px]">
+                                            <option value="">{t("all_moderators_filter", "All Moderators")}</option>
+                                            <option value="active">{t("active_moderators", "Active Moderators")}</option>
+                                            <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <GradiantButton className="h-[42px] px-3 sm:px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shrink-0" onClick={handleTopSearch}>
+                                            <Search className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Search</span>
+                                        </GradiantButton>
+                                        <button className="h-[42px] px-3 sm:px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors shrink-0" onClick={handleTopClear}>
+                                            <BiFilterAlt className="w-4 h-4" />
+                                            <span className="hidden sm:inline">Clear Filter</span>
+                                        </button>
+                                        <button type="button" onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)} className="xl:hidden h-[42px] px-2 flex items-center justify-center border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors shrink-0">
+                                            <MoreVertical className="w-5 h-5 text-gray-600" />
+                                        </button>
+                                    </div>
                                 </div>
-
-                                <button type="button" onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)} className="xl:hidden p-2 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors">
-                                    <MoreVertical className="w-5 h-5 text-gray-600" />
-                                </button>
 
                                 {isFilterDropdownOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsFilterDropdownOpen(false)} />
                                         <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
-                                            <div className="flex flex-col gap-1 w-full">
-                                                <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
-                                                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-                                                    <option value="">{t("all_moderators_filter", "All Moderators")}</option>
-                                                    <option value="active">{t("active_moderators", "Active Moderators")}</option>
-                                                    <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
-                                                </select>
-                                            </div>
+
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                                 <div className="relative">
