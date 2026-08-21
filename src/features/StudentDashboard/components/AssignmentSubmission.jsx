@@ -17,7 +17,51 @@ const AssignmentSubmission = () => {
     const [dragOver, setDragOver] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [showCancelPopup, setShowCancelPopup] = useState(false);
     const fileInputRef = useRef(null);
+    const abortControllerRef = useRef(null);
+
+    React.useEffect(() => {
+        const handlePopState = (e) => {
+            if (isUploading) {
+                // Trap the user on the page without breaking location state
+                window.history.pushState(window.history.state, '', window.location.href);
+                
+                // Abort the upload
+                if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                }
+                setIsUploading(false);
+                toast.dismiss('upload-assignment');
+                setShowCancelPopup(true);
+            }
+        };
+
+        const handleBeforeUnload = (e) => {
+            if (isUploading) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+
+        if (isUploading) {
+            // Push a dummy state so the first back action just pops this state
+            window.history.pushState(window.history.state, '', window.location.href);
+            window.addEventListener('popstate', handlePopState);
+            window.addEventListener('beforeunload', handleBeforeUnload);
+        }
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (isUploading) {
+                if (abortControllerRef.current) {
+                    abortControllerRef.current.abort();
+                }
+                toast.dismiss('upload-assignment');
+            }
+        };
+    }, [isUploading]);
 
     const isAdminView = location.pathname.includes('admin') || location.search.includes('admin=true') || location.state?.isAdminView;
 
@@ -62,10 +106,12 @@ const AssignmentSubmission = () => {
 
         try {
             setIsUploading(true);
+            abortControllerRef.current = new AbortController();
+            const signal = abortControllerRef.current.signal;
             toast.loading(t('uploading_assignment', 'Uploading assignment...'), { id: 'upload-assignment' });
 
             // Upload to Cloudinary using existing API
-            const result = await uploadPdf(selectedFile);
+            const result = await uploadPdf(selectedFile, { signal });
             const cloudinaryUrl = result.url;
 
             // Call backend API to mark assignment as completed in user's enrollment
@@ -73,8 +119,9 @@ const AssignmentSubmission = () => {
             const targetAssignmentId = assignment?.id || assignment?._id;
             if (targetCourseId && targetAssignmentId) {
                 try {
-                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name);
+                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name, { signal });
                 } catch (progressErr) {
+                    if (progressErr.name === 'CanceledError' || progressErr.code === 'ERR_CANCELED') throw progressErr;
                     console.error("Failed to update assignment progress in backend:", progressErr);
                 }
             }
@@ -92,6 +139,7 @@ const AssignmentSubmission = () => {
             };
 
             navigate('/assignment-submitted', {
+                replace: true,
                 state: {
                     assignment: updatedAssignment,
                     fileName: selectedFile.name,
@@ -103,14 +151,30 @@ const AssignmentSubmission = () => {
                 }
             });
         } catch (error) {
-            console.error("Upload error:", error);
-            toast.error(t('upload_failed', 'Failed to upload assignment. Please try again.'), { id: 'upload-assignment' });
+            if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') {
+                console.log("Upload aborted by user.");
+            } else {
+                console.error("Upload error:", error);
+                toast.error(t('upload_failed', 'Failed to upload assignment. Please try again.'), { id: 'upload-assignment' });
+            }
         } finally {
             setIsUploading(false);
         }
     };
 
-    if (!assignment) return null;
+    if (!assignment) {
+        return (
+            <div className="h-screen w-full flex flex-col items-center justify-center bg-[#F8F9FA]">
+                <h1 className="text-2xl font-bold text-gray-700 mb-4">{t('assignment_not_found', 'Assignment not found')}</h1>
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                    {t('go_back', 'Go Back')}
+                </button>
+            </div>
+        );
+    }
 
     const handleClose = () => {
         if (returnUrl) {
@@ -121,7 +185,34 @@ const AssignmentSubmission = () => {
     };
 
     return (
-        <div className="h-screen w-full flex flex-col bg-[#F8F9FA] overflow-hidden">
+        <div className={`h-screen w-full flex flex-col bg-[#F8F9FA] overflow-hidden ${isUploading ? 'select-none' : ''}`}>
+            {isUploading && (
+                <div className="fixed inset-0 z-[9999] cursor-not-allowed" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} />
+            )}
+            
+            {/* Cancel Popup Modal */}
+            {showCancelPopup && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/50 backdrop-blur-sm px-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                                <X size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">{t('upload_cancelled_title', 'Upload Cancelled')}</h3>
+                            <p className="text-gray-500 text-sm mb-6">
+                                {t('upload_cancelled_desc', 'Your assignment submission has been stopped. Please try submitting again.')}
+                            </p>
+                            <button
+                                onClick={() => setShowCancelPopup(false)}
+                                className="w-full bg-[#4E6BFF] hover:bg-[#3f5be0] text-white py-2.5 rounded-lg font-medium transition-colors"
+                            >
+                                {t('ok', 'OK')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <Navbar />
 
             {/* Popup Overlay Background */}
@@ -281,12 +372,14 @@ const AssignmentSubmission = () => {
 
                     {/* Footer Actions */}
                     <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl shrink-0">
-                        <GrayButton
+                        <button
+                            type="button"
                             onClick={handleClose}
-                            className="px-5 py-2 rounded-lg text-sm font-medium text-gray-700 border border-gray-200"
+                            disabled={isUploading}
+                            className={`bg-gray-100 flex items-center justify-center transition-colors px-5 py-2 rounded-lg text-sm font-medium text-gray-700 border border-gray-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-200'}`}
                         >
                             {t('cancel', 'Cancel')}
-                        </GrayButton>
+                        </button>
                         {isAdminView ? (
                             <GradiantButton
                                 onClick={handleEditAssignment}

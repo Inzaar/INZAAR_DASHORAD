@@ -152,7 +152,8 @@ const CourseView = () => {
     const lastReportedRef = useRef(0);
     const maxWatchedMapRef = useRef({});
     const prevPlaybackTimeRef = useRef(0);
-    const completedIdsRef = useRef(new Set());
+    const completedIdsRef = useRef(new Set()); // For unlocking NEXT lecture
+    const fullyCompletedIdsRef = useRef(new Set()); // For unlocking CURRENT lecture's quizzes/assignments/certificate
     const adminMenuRef = useRef(null);
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
@@ -475,6 +476,17 @@ const CourseView = () => {
         }
         const interval = setInterval(() => {
             if (playerRef.current && playerRef.current.getCurrentTime) {
+                // Prevent ghost progress: ensure player is actually playing the current lecture's video
+                let isValidVideo = true;
+                if (playerRef.current.getVideoData) {
+                    const videoData = playerRef.current.getVideoData();
+                    const expectedId = currentLecture?.videoId || (currentLecture?.videoUrl ? extractYouTubeId(currentLecture.videoUrl) : null);
+                    if (videoData && videoData.video_id && expectedId && videoData.video_id !== expectedId) {
+                        isValidVideo = false;
+                    }
+                }
+                if (!isValidVideo) return;
+
                 const cur = playerRef.current.getCurrentTime();
                 const dur = playerRef.current.getDuration();
                 setCurrentTime(cur);
@@ -522,8 +534,33 @@ const CourseView = () => {
                             });
 
                             const unlockPercent = courseData?.unlockCriteria || 100;
+                            // 1. Unlock NEXT lecture if finalPercent >= unlockPercent
                             if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
                                 completedIdsRef.current.add(lectureId);
+                                setCourseData(prev => {
+                                    if (!prev) return prev;
+                                    const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                    return {
+                                        ...prev,
+                                        lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
+                                            if (i === idx + 1 && l.isLocked) {
+                                                const prevLec = prev.lecturePlaylist[idx];
+                                                const allQ = (prevLec.quizzes || []).every(q => q.isCompleted);
+                                                const allA = (prevLec.assignments || []).every(a => a.isCompleted);
+                                                if (allQ && allA) {
+                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                                                }
+                                                return l;
+                                            }
+                                            return l;
+                                        }),
+                                    };
+                                });
+                            }
+
+                            // 2. Unlock CURRENT lecture's quizzes/assignments/certificate ONLY at 99%
+                            if (finalPercent >= 99 && !fullyCompletedIdsRef.current.has(lectureId)) {
+                                fullyCompletedIdsRef.current.add(lectureId);
                                 setCourseData(prev => {
                                     if (!prev) return prev;
                                     const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
@@ -540,20 +577,12 @@ const CourseView = () => {
                                                     assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
                                                 };
                                             }
-                                            if (i === idx + 1 && l.isLocked) {
-                                                const prevLec = prev.lecturePlaylist[idx];
-                                                const allQ = (prevLec.quizzes || []).every(q => q.isCompleted);
-                                                const allA = (prevLec.assignments || []).every(a => a.isCompleted);
-                                                if (allQ && allA) {
-                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
-                                                }
-                                                return l;
-                                            }
                                             return l;
                                         }),
                                     };
                                 });
-                            } else {
+                            } else if (!fullyCompletedIdsRef.current.has(lectureId)) {
+                                // Update watchedPercentage only
                                 setCourseData(prev => {
                                     if (!prev || !prev.lecturePlaylist) return prev;
                                     return {
@@ -567,6 +596,7 @@ const CourseView = () => {
                                     };
                                 });
                             }
+
                             if (data?.certificateGenerated && !generatingCert) {
                                 setGeneratingCert(true);
                                 try {

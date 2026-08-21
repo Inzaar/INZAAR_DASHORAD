@@ -86,11 +86,11 @@ export const updateLectureProgress = async (courseId, { lectureId, watchedPercen
 };
 
 // Submit assignment progress
-export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, fileName) => {
+export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, fileName, config = {}) => {
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/assignment-progress`,
         { assignmentId, fileUrl, fileName },
-        { withCredentials: true }
+        { withCredentials: true, ...config }
     );
     return res.data.data;
 };
@@ -128,12 +128,13 @@ export const uploadVideo = async (file) => {
     return res.data.data; // { url, public_id }
 }
 
-export const uploadPdf = async (file) => {
+export const uploadPdf = async (file, config = {}) => {
     const formData = new FormData();
     formData.append("pdf", file);
     const res = await axiosInstance.post("/upload/pdf", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
+        ...config,
     });
     return res.data.data; // { url, public_id }
 }
