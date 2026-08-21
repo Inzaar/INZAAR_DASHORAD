@@ -341,7 +341,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-10">
+                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
                         <div className="py-2 sm:py-4 px-2 sm:pr-2">
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">
@@ -856,7 +856,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                             <option value="Female">Female</option>
                                         </select>
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                                         </div>
                                     </div>
                                 </div>
