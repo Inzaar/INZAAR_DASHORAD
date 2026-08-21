@@ -341,7 +341,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
+                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-10">
                         <div className="py-2 sm:py-4 px-2 sm:pr-2">
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">

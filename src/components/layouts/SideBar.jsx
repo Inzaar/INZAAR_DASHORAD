@@ -434,7 +434,7 @@ function Sidebar({ className, onClose }) {
   };
 
   return (
-    <div className={`w-[260px] bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
+    <div className={`w-[260px] shrink-0 bg-white border-r-[3px] lg:border-[3px] border-[#6984E6] flex flex-col z-40 lg:rounded shadow-sm h-screen lg:h-[calc(100vh-120px)] overflow-hidden ${className}`}>
       {/* Header */}
       <div className='w-full flex items-center justify-between px-4 pt-6 mb-6 h-[44px] shrink-0'>
         <div className='text-[#6A6F78] text-[14px] ml-3 font-medium pr-2 pb-1'>{t('welcome_user', 'Welcome, ')} {t(user?.firstname || user?.name || "User")}</div>
