@@ -10,19 +10,19 @@ const CourseStatItem = ({ count, trend, trendDirection, name }) => {
     return (
         <div className="flex flex-col items-center justify-center py-4 px-3 border-b border-r border-gray-100 bg-white">
             <div className="flex items-center gap-1 mb-1">
-                <span className="text-[24px] font-bold text-[#0f172a]">{count}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${trendDirection === 'up' ? 'bg-[#E6F9F4] text-[#00C896]' : 'bg-[#FFEAE5] text-[#FF4D4D]'}`}>
+                <span className="text-[28px] font-bold text-[#0f172a]">{count}</span>
+                <span className={`px-1.5 py-0.5 rounded-full text-[12px] font-bold ${trendDirection === 'up' ? 'bg-[#E6F9F4] text-[#00C896]' : 'bg-[#FFEAE5] text-[#FF4D4D]'}`}>
                     {trend}
                 </span>
                 <span>
                     {trendDirection === 'up' ? (
-                        <BiSolidUpArrow className='text-[#00C896] text-[10px]' />
+                        <BiSolidUpArrow className='text-[#00C896] text-[12px]' />
                     ) : (
-                        <BiSolidDownArrow className='text-[#FF4D4D] text-[10px]' />
+                        <BiSolidDownArrow className='text-[#FF4D4D] text-[12px]' />
                     )}
                 </span>
             </div>
-            <span className="text-[12px] font-medium text-[#64748b] text-center line-clamp-2 max-w-[140px] leading-tight">{t(name, name)}</span>
+            <span className="text-[14px] font-medium text-[#64748b] text-center line-clamp-2 max-w-[140px] leading-tight">{t(name, name)}</span>
         </div >
     );
 };
@@ -36,9 +36,18 @@ const CoursesEnrollmentOverview = ({
 }) => {
     const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
-    // Slices for 2 rows (default 12 for grid-6)
-    const displayedStats = isExpanded ? courseStats : courseStats.slice(0, limit);
+    React.useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const effectiveLimit = isMobile ? 4 : limit;
+    const displayedStats = isExpanded ? courseStats : courseStats.slice(0, effectiveLimit);
+    const shouldShowViewMore = (isMobile && courseStats.length > 4) || (showViewMore && courseStats.length > limit);
 
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans mt-4">
@@ -63,7 +72,7 @@ const CoursesEnrollmentOverview = ({
                 ))}
             </div>
 
-            {showViewMore && courseStats.length > limit && (
+            {shouldShowViewMore && (
                 <div className="mt-8 flex justify-center">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}

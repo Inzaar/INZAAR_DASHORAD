@@ -289,9 +289,9 @@ const Certificates = () => {
                                                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                     />
                                                 </div>
-                                                <GradiantButton className={"py-2 px-4 rounded"}>
+                                                <GradiantButton className={"py-2 px-3 md:px-4 rounded"}>
                                                     <Search className="h-4 w-4" />
-                                                    {t('search', 'Search')}
+                                                    <span className="hidden md:inline">{t('search', 'Search')}</span>
                                                 </GradiantButton>
                                             </div>
                                         </div>
