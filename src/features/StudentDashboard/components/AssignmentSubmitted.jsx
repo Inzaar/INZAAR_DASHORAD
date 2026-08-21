@@ -70,16 +70,58 @@ const AssignmentSubmitted = () => {
                     </div>
                 </div>
 
+                {/* Grading Feedback Section */}
+                <div className="w-full max-w-[600px] mt-6">
+                    {location.state?.status === 'Graded' ? (
+                        <div className="bg-white rounded-[16px] shadow-sm p-6 border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4">Grading & Feedback</h3>
+                            
+                            <div className="flex flex-col gap-4">
+                                <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+                                    <span className="text-sm text-gray-500">Score / Marks</span>
+                                    <span className="text-[15px] font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded-md">
+                                        {location.state?.score !== undefined && location.state?.score !== null ? location.state.score : '—'} / {location.state?.totalScore || 100}
+                                    </span>
+                                </div>
+                                
+                                <div>
+                                    <span className="text-sm text-gray-500 block mb-2">Instructions / Feedback</span>
+                                    <div className="bg-[#F8F9FA] rounded-lg p-4 text-[13px] text-gray-700 leading-relaxed min-h-[80px]">
+                                        {location.state?.feedback || 'No additional feedback provided.'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-blue-50/50 rounded-[16px] border border-blue-100 p-6 flex flex-col items-center justify-center text-center">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <h4 className="text-[15px] font-semibold text-gray-900 mb-1">Waiting for review</h4>
+                            <p className="text-[13px] text-gray-500 max-w-[350px]">Your assignment has been submitted successfully. An admin will review it and post your grades here.</p>
+                        </div>
+                    )}
+                </div>
+
             </div>
 
             {/* Footer */}
             <div className="bg-white border-t border-gray-200 px-6 sm:px-12 py-4 flex items-center justify-between mt-auto shrink-0">
-                <GrayButton
-                    onClick={handleResubmit}
-                    className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors bg-white"
-                >
-                    {t('resubmit_before_due_date', 'Resubmit Before Due Date')}
-                </GrayButton>
+                {location.state?.isLate ? (
+                    <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600">
+                            <X size={16} strokeWidth={3} />
+                        </span>
+                        <span className="text-sm font-medium text-red-600">{t('late', 'Late - Past Due Date')}</span>
+                    </div>
+                ) : (
+                    <GrayButton
+                        onClick={handleResubmit}
+                        className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors bg-white"
+                    >
+                        {t('resubmit_before_due_date', 'Resubmit Before Due Date')}
+                    </GrayButton>
+                )}
 
                 <GradiantButton
                     onClick={handleClose}

@@ -326,7 +326,8 @@ const CourseView = () => {
             attempts: assignment.maxAttempts || 'Unlimited',
             maxFileSizeMB: parseInt(assignment.maxFileSize) || 25,
             pdfUrl: assignment.referenceFileUrl ? [assignment.referenceFileUrl] : (assignment.pdfUrl || []),
-            isCompleted: assignment.isCompleted || false
+            isCompleted: assignment.isCompleted || false,
+            isLate: assignment.isLate || false
         };
 
         if (assignment.isCompleted) {
@@ -335,7 +336,11 @@ const CourseView = () => {
                     assignment: mappedAssignmentObj,
                     fileName: assignment.submittedFileName || (assignment.submittedFileUrl ? assignment.submittedFileUrl.split('/').pop() : 'assignment_document.pdf'),
                     fileUrl: assignment.submittedFileUrl,
-                    status: 'Submitted',
+                    status: assignment.submissionStatus || 'Submitted',
+                    score: assignment.score,
+                    totalScore: assignment.totalScore || 100,
+                    feedback: assignment.feedback,
+                    isLate: assignment.isLate || false,
                     submittedAt: assignment.submittedAt ? new Date(assignment.submittedAt).toLocaleString() : new Date().toLocaleString(),
                     returnUrl: window.location.pathname + window.location.search
                 }
@@ -372,7 +377,8 @@ const CourseView = () => {
             attempts: 'Unlimited before due date',
             maxFileSizeMB: 25,
             pdfUrl: lecture.pdfUrl,
-            isCompleted: lecture.isCompleted || false
+            isCompleted: lecture.isCompleted || false,
+            isLate: lecture.isLate || false
         };
 
         if (lecture.isCompleted) {
@@ -381,7 +387,11 @@ const CourseView = () => {
                     assignment: mappedAssignmentObj,
                     fileName: lecture.submittedFileName || (lecture.submittedFileUrl ? lecture.submittedFileUrl.split('/').pop() : 'assignment_document.pdf'),
                     fileUrl: lecture.submittedFileUrl,
-                    status: 'Submitted',
+                    status: lecture.submissionStatus || 'Submitted',
+                    score: lecture.score,
+                    totalScore: lecture.totalScore || 100,
+                    feedback: lecture.feedback,
+                    isLate: lecture.isLate || false,
                     submittedAt: lecture.submittedAt ? new Date(lecture.submittedAt).toLocaleString() : new Date().toLocaleString(),
                     returnUrl: window.location.pathname + window.location.search
                 }
