@@ -211,8 +211,8 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             {/* Header */}
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Students' : `${genderFilter} Students`}</h2>
-                                    <p className="text-gray-500 text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Students</p>
+                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Students' : `${genderFilter} Students`}</h2>
+                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Students</p>
                                 </div>
                                 {user?.role !== 'moderator' && (
                                     <GradiantButton
@@ -228,7 +228,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             </div>
 
                             {/* 4 Basic Stats Grid (Always shown) */}
-                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
+                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
                                         key={index}
@@ -281,7 +281,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             })()}
 
                             {/* Main Content Card */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
+                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 min-h-[600px] relative">
                                 <div className="mb-6 flex justify-between items-center">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
                                     <button
@@ -294,20 +294,20 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                 </div>
 
                                 {/* Filters - Desktop */}
-                                <div className="hidden xl:flex flex-row items-end gap-6 mb-8">
+                                <div className="hidden xl:flex flex-row gap-4 mb-8">
                                     <div className='flex-1 flex gap-2 flex-col'>
-                                        <p className="text-xs text-gray-400 font-bold tracking-wide">{t("advanced_search", "ADVANCED SEARCH")}</p>
-                                        <div className="flex items-center bg-white border border-gray-200 rounded-md p-1 transition-all duration-200 group focus-within:ring-1 focus-within:ring-blue-500/50 focus-within:border-blue-500 h-[42px]">
-                                            <Search className="text-gray-400 w-[18px] h-[18px] ml-2 mr-2 shrink-0" />
+                                        <p className="text-xs text-gray-400 font-medium tracking-wide">{t("advanced_search", "ADVANCED SEARCH")}</p>
+                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
-                                                placeholder={t("search_by_name", "Search by name")}
-                                                className="flex-1 bg-transparent text-[13px] text-gray-700 placeholder:text-gray-400 focus:outline-none min-w-0"
+                                                placeholder={searchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
                                                 onKeyDown={handleSearchKeyDown}
                                             />
-                                            <div className="flex items-center gap-1.5 shrink-0 mr-1">
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
                                                 <button
                                                     onClick={() => {
                                                         if (searchType !== 'PHONE') {
@@ -317,7 +317,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -330,7 +330,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -339,32 +339,32 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("from", "From")}</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("from", "From")}</span>
                                         <input
                                             type="date"
-                                            className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
                                             value={fromDate}
                                             onChange={(e) => setFromDate(e.target.value)}
                                         />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("to", "To")}</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("to", "To")}</span>
                                         <input
                                             type="date"
-                                            className="px-3 bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 w-[150px] h-[42px]"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
                                             value={toDate}
                                             onChange={(e) => setToDate(e.target.value)}
                                         />
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("status", "Status")}</span>
-                                        <div className="relative w-[150px]">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{t("status", "Status")}</span>
+                                        <div className="relative">
                                             <select
                                                 value={statusFilter}
                                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                                className="w-full px-3 h-[42px] bg-white border border-gray-200 rounded-md text-[13px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
+                                                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
                                             >
                                                 <option value="">{t("all_statuses", "All Statuses")}</option>
                                                 <option value="Active">{t("active", "Active")}</option>
@@ -384,7 +384,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             setToDate("");
                                             setCurrentPage(1);
                                         }}
-                                        className="flex items-center gap-2 px-4 h-[42px] bg-[#E2E4E9] text-[#6A6F78] font-bold text-[13px] rounded-md hover:bg-gray-300 transition-colors whitespace-nowrap ml-auto"
+                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
                                         {t("clear_filter", "Clear Filter")}
@@ -486,7 +486,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -499,7 +499,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
                                                 </button>
