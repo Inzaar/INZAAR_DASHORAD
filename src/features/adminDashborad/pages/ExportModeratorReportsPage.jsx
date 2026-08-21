@@ -39,7 +39,7 @@ const ExportModeratorReportsPage = () => {
     const [tableSearch, setTableSearch] = useState('');
     const [tableSearchType, setTableSearchType] = useState('NAME');
     const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
-    
+
     // Column Visibility State
     const [visibleColumns, setVisibleColumns] = useState({
         name: true,
@@ -150,7 +150,7 @@ const ExportModeratorReportsPage = () => {
         }
         return pages;
     };
-    
+
     const toggleColumn = (col) => {
         setVisibleColumns(prev => ({ ...prev, [col]: !prev[col] }));
     };
@@ -494,54 +494,54 @@ const ExportModeratorReportsPage = () => {
                                                 <tbody className="divide-y divide-gray-50">
                                                     {moderators.map((moderator) => (
                                                         <tr key={moderator.id} className="bg-[#F8F9FA] transition-colors group">
-                                                        {visibleColumns.name && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className="text-[14px] print:text-[10px] text-gray-800">{t(moderator.name?.trim(), moderator.name)}</span>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.contact && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className="text-[13px] print:text-[10px] text-gray-800 leading-tight">{moderator.email}</span>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.phone && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className="text-[13px] print:text-[10px] text-gray-800">{moderator.phone}</span>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.manageBatches && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <div className="flex flex-col gap-1 items-center">
-                                                                    {(moderator.batches || []).slice(0, 3).map((batch, idx) => (
-                                                                        <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                            {t(batch?.trim(), batch)}
-                                                                        </span>
-                                                                    ))}
-                                                                    {moderator.batches?.length > 3 && (
-                                                                        <span className="text-[11px] text-gray-400 font-medium mt-0.5">
-                                                                            + {moderator.batches.length - 3} {t("more", "more")}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.progress && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className="text-[14px] print:text-[10px] font-medium text-gray-700">{moderator.progress}</span>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.lastLogin && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className="text-[14px] print:text-[10px] font-medium text-gray-700">{formatDate(moderator.lastLogin)}</span>
-                                                            </td>
-                                                        )}
-                                                        {visibleColumns.status && (
-                                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
-                                                                <span className={`text-[13px] print:text-[10px] px-2 py-1 rounded-full ${moderator.status === 'Active' ? 'text-[#00C896]' : 'text-red-500'}`}>
-                                                                    {t(moderator.status?.trim().toLowerCase(), moderator.status)}
-                                                                </span>
-                                                            </td>
-                                                        )}
+                                                            {visibleColumns.name && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className="text-[14px] print:text-[10px] text-gray-800">{t(moderator.name?.trim(), moderator.name)}</span>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.contact && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className="text-[13px] print:text-[10px] text-gray-800 leading-tight">{moderator.email}</span>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.phone && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className="text-[13px] print:text-[10px] text-gray-800">{moderator.phone}</span>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.manageBatches && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <div className="flex flex-col gap-1 items-center">
+                                                                        {(moderator.batches || []).slice(0, 3).map((batch, idx) => (
+                                                                            <span key={idx} className="text-[12px] text-blue-500 underline cursor-pointer hover:text-blue-700">
+                                                                                {t(batch?.trim(), batch)}
+                                                                            </span>
+                                                                        ))}
+                                                                        {moderator.batches?.length > 3 && (
+                                                                            <span className="text-[11px] text-gray-400 font-medium mt-0.5">
+                                                                                + {moderator.batches.length - 3} {t("more", "more")}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.progress && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className="text-[14px] print:text-[10px] font-medium text-gray-700">{moderator.progress}</span>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.lastLogin && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className="text-[14px] print:text-[10px] font-medium text-gray-700">{formatDate(moderator.lastLogin)}</span>
+                                                                </td>
+                                                            )}
+                                                            {visibleColumns.status && (
+                                                                <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                                    <span className={`text-[13px] print:text-[10px] px-2 py-1 rounded-full ${moderator.status === 'Active' ? 'text-[#00C896]' : 'text-red-500'}`}>
+                                                                        {t(moderator.status?.trim().toLowerCase(), moderator.status)}
+                                                                    </span>
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     ))}
                                                 </tbody>

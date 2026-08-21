@@ -9,7 +9,7 @@ const QuizTakePage = () => {
     const navigate = useNavigate();
     const { id: quizId } = useParams();
     const location = useLocation();
-    
+
     // Extract query parameters
     const queryParams = new URLSearchParams(location.search);
     const courseId = queryParams.get('courseId') || queryParams.get('id');
@@ -22,12 +22,12 @@ const QuizTakePage = () => {
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({}); // { [questionId]: optionId }
-    
-    const [isCompleted, setIsCompleted] = useState(false);
-    const [result, setResult] = useState(null); // Data from submission
-    
+
+    const [isCompleted, setIsCompleted] = useState(location.state?.viewStudent || false);
+    const [result, setResult] = useState(location.state?.result || null); // Data from submission
+
     const [selectedOption, setSelectedOption] = useState(null); // Currently selected option in UI
-    const [isStarted, setIsStarted] = useState(false);
+    const [isStarted, setIsStarted] = useState(location.state?.viewStudent || false);
 
     useEffect(() => {
         const fetchQuiz = async () => {
@@ -139,9 +139,9 @@ const QuizTakePage = () => {
             <main className="flex-1 flex flex-col items-center justify-center py-10 px-4 md:py-16 md:px-8">
                 {!isStarted ? (
                     <div className="w-full max-w-[700px] flex items-center justify-center">
-                        <LectureQuizAssessment 
-                            quizId={quizId} 
-                            onStart={() => setIsStarted(true)} 
+                        <LectureQuizAssessment
+                            quizId={quizId}
+                            onStart={() => setIsStarted(true)}
                             isAdminView={isAdminView}
                             onEdit={handleEditQuiz}
                         />

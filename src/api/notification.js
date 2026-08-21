@@ -11,3 +11,7 @@ export const markNotificationsAsSeen = () => {
 export const markSingleAsRead = (id) => {
     return axiosInstance.post(`/notifications/mark-read/${id}`);
 };
+
+export const createNotification = (data) => {
+    return axiosInstance.post("/notifications", data);
+};

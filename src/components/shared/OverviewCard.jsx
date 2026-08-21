@@ -65,9 +65,9 @@ const OverviewCard = ({
 
             {/* Stats Row */}
             <div className="flex flex-row items-center justify-between gap-1 min-[400px]:gap-2 sm:gap-4 w-full">
-                {renderColumn(stats.col1)}
-                {renderColumn(stats.col2)}
-                {renderColumn(stats.col3, true)}
+                {stats.col1 && renderColumn(stats.col1, !stats.col2 && !stats.col3)}
+                {stats.col2 && renderColumn(stats.col2, !stats.col3)}
+                {stats.col3 && renderColumn(stats.col3, true)}
             </div>
         </div>
     );

@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
 import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
+import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
 import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus } from "lucide-react";
@@ -18,7 +19,6 @@ import LectureListTable from "../components/LectureListTable";
 import LectureQuizAssessment from "../components/LectureQuizAssessment";
 import QuizStartOverlay from "../components/QuizStartOverlay";
 import AssignmentStartOverlay from "../components/AssignmentStartOverlay";
-import ReminderModal from "@/components/shared/ReminderModal";
 import { getLectureNotes, createLectureNote, updateLectureNote, deleteLectureNote } from "@/api/lectureNotes";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import fallbackImg from "@/assets/images/coursespage.jpg";
@@ -97,8 +97,6 @@ const CourseView = () => {
     const [pdfLoading, setPdfLoading] = useState(true);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
-    const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
-    const [isSendingReminder, setIsSendingReminder] = useState(false);
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -124,6 +122,7 @@ const CourseView = () => {
 
     // Delete Confirmation Logic
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [reminderData, setReminderData] = useState(null);
     const [noteToDelete, setNoteToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -168,6 +167,7 @@ const CourseView = () => {
     const isNonVideoView = currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment';
     const canEdit = (user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)))) && isAdminView;
     const hideSidebarAndCards = (isEditingAssignment || isEditingQuiz) && isAdminView;
+    const isModeratorViewingStudent = isAdminView && !!userId;
 
     // Effects
     useEffect(() => {
@@ -205,13 +205,26 @@ const CourseView = () => {
                 setCourseData(data);
 
                 const rawLectures = data.lecturePlaylist || data.lectures || [];
-                const normalizedLecs = rawLectures.map(l => ({
-                    ...l,
-                    id: l.id || l._id,
-                    type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
-                    pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
-                    audioUrl: Array.isArray(l.audioUrl) ? l.audioUrl : (l.audioUrl ? [l.audioUrl] : []),
-                }));
+                const normalizedLecs = rawLectures.reduce((acc, l) => {
+                    acc.push({
+                        ...l,
+                        id: l.id || l._id,
+                        type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+                        pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
+                        audioUrl: Array.isArray(l.audioUrl) ? l.audioUrl : (l.audioUrl ? [l.audioUrl] : []),
+                    });
+                    if (l.quizzes && l.quizzes.length > 0) {
+                        l.quizzes.forEach(q => {
+                            acc.push({ ...q, id: q.id || q._id, type: 'Quiz', quizId: q.id || q._id });
+                        });
+                    }
+                    if (l.assignments && l.assignments.length > 0) {
+                        l.assignments.forEach(a => {
+                            acc.push({ ...a, id: a.id || a._id, type: 'Assignment' });
+                        });
+                    }
+                    return acc;
+                }, []);
                 const videoLecs = normalizedLecs.filter(l => l.type !== 'Quiz');
                 const targetLec = targetLectureId ? normalizedLecs.find(l => l.id === targetLectureId) : null;
                 const rawStart = targetLec || videoLecs[0] || data.ongoingLecture || normalizedLecs[0] || null;
@@ -355,7 +368,7 @@ const CourseView = () => {
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
-                isAdminView: isAdminView && !userId,
+                isAdminView,
                 assignment: mappedAssignmentObj
             }
         });
@@ -363,11 +376,20 @@ const CourseView = () => {
 
     const handleOpenAssignment = (lecture) => {
         if (isAdminView) {
-            setCurrentLecture(lecture);
-            setIsEditingAssignment(true);
-            return;
+            if (userId) {
+                // Moderator viewing a student
+                if (!lecture.isCompleted) {
+                    setReminderData({ type: 'Assignment', title: lecture.title });
+                    return;
+                }
+                // If completed, let it fall through to show the submitted assignment
+            } else {
+                setCurrentLecture(lecture);
+                setIsEditingAssignment(true);
+                return;
+            }
         }
-        
+
         const mappedAssignmentObj = {
             id: lecture.id || lecture._id,
             courseId: courseId || courseData?._id || courseData?.id,
@@ -406,7 +428,6 @@ const CourseView = () => {
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
-                isAdminView: false,
                 assignment: mappedAssignmentObj
             }
         });
@@ -499,10 +520,12 @@ const CourseView = () => {
                     setProgress(newMaxPercent);
                     const now = Date.now();
 
-                    // Allow anyone to record progress (if they aren't enrolled, the backend will just reject it). This allows admins to test unlocking.
-                    const isModeratorViewingStudent = isAdminView && userId;
-                    if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000 && !isModeratorViewingStudent) {
-                        lastReportedRef.current = now;
+                    // Allow anyone to record progress, EXCEPT if admin is viewing a student's progress
+                    if (lectureId && courseId && percent > 0 && now - lastReportedRef.current >= 1000) {
+                        if (isAdminView && userId) {
+                            // Do not record progress when moderator plays video for a student
+                        } else {
+                            lastReportedRef.current = now;
                         let calculatedPercent = Math.min(Math.round(percent), 100);
                         if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
 
@@ -569,9 +592,9 @@ const CourseView = () => {
                                         lectureCompleted: (prev.lectureCompleted || 0) + 1,
                                         lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
                                             if (l._id === lectureId || l.id === lectureId) {
-                                                return { 
-                                                    ...l, 
-                                                    isCompleted: true, 
+                                                return {
+                                                    ...l,
+                                                    isCompleted: true,
                                                     watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
                                                     quizzes: (l.quizzes || []).map(q => ({ ...q, isLocked: false })),
                                                     assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
@@ -624,6 +647,7 @@ const CourseView = () => {
                                 }
                             }
                         }).catch(err => console.warn('Progress update failed:', err));
+                        }
                     }
                 }
             }
@@ -761,16 +785,6 @@ const CourseView = () => {
         }
     };
 
-    const handleSendReminder = () => {
-        setIsSendingReminder(true);
-        // Mock API call for sending reminder
-        setTimeout(() => {
-            setIsSendingReminder(false);
-            setIsReminderModalOpen(false);
-            toast.success("Reminder sent successfully!");
-        }, 1500);
-    };
-
     if (loading) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
@@ -870,16 +884,20 @@ const CourseView = () => {
                                 {/* Desktop Buttons */}
                                 {canEdit && (
                                     <div className="hidden md:flex items-center gap-3">
-                                        <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
-                                            Download Certificate
-                                        </GradiantButton>
-                                        <GradiantButton
-                                            onClick={handleEditLectureClick}
-                                            disabled={loadingLecture}
-                                            className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
-                                        >
-                                            {loadingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Edit"}
-                                        </GradiantButton>
+                                        {!isModeratorViewingStudent && (
+                                            <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                                Download Certificate
+                                            </GradiantButton>
+                                        )}
+                                        {!isModeratorViewingStudent && (
+                                            <GradiantButton
+                                                onClick={handleEditLectureClick}
+                                                disabled={loadingLecture}
+                                                className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                                            >
+                                                {loadingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Edit"}
+                                            </GradiantButton>
+                                        )}
                                     </div>
                                 )}
 
@@ -895,30 +913,34 @@ const CourseView = () => {
 
                                         {isAdminMenuOpen && (
                                             <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
-                                                <button
-                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
-                                                    onClick={() => {
-                                                        setIsAdminMenuOpen(false);
-                                                    }}
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6366F1]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                                                    Download Certificate
-                                                </button>
-                                                <button
-                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
-                                                    onClick={() => {
-                                                        handleEditLectureClick();
-                                                        setIsAdminMenuOpen(false);
-                                                    }}
-                                                    disabled={loadingLecture}
-                                                >
-                                                    {loadingLecture ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin text-[#8B5CF6]" />
-                                                    ) : (
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                                                    )}
-                                                    Edit Lecture
-                                                </button>
+                                                {!isModeratorViewingStudent && (
+                                                    <button
+                                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                        onClick={() => {
+                                                            setIsAdminMenuOpen(false);
+                                                        }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#6366F1]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                                        Download Certificate
+                                                    </button>
+                                                )}
+                                                {!isModeratorViewingStudent && (
+                                                    <button
+                                                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                        onClick={() => {
+                                                            handleEditLectureClick();
+                                                            setIsAdminMenuOpen(false);
+                                                        }}
+                                                        disabled={loadingLecture}
+                                                    >
+                                                        {loadingLecture ? (
+                                                            <Loader2 className="w-4 h-4 animate-spin text-[#8B5CF6]" />
+                                                        ) : (
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                                        )}
+                                                        Edit Lecture
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -970,11 +992,27 @@ const CourseView = () => {
                             </div>
 
                             {!hideSidebarAndCards && (
-                                <Analytics userCourses={userCourses} courseData={courseData} name="Overall Performance" />
+                                <Analytics 
+                                    userCourses={userCourses} 
+                                    courseData={isModeratorViewingStudent ? {
+                                        progress: progress || 0,
+                                        improvementFromLastWeek: 0,
+                                        quizScore: undefined,
+                                        lectureCompleted: (progress || 0) >= 90 ? 1 : 0,
+                                        timeSpentLastWeek: currentLecture?.lastWatchedTime 
+                                            ? `${Math.floor(currentLecture.lastWatchedTime / 3600)}h ${Math.floor((currentLecture.lastWatchedTime % 3600) / 60)}m` 
+                                            : "0h 0m",
+                                        overallPerformance: {
+                                            percentage: progress || 0,
+                                            trendingUp: 0
+                                        }
+                                    } : courseData} 
+                                    name={isModeratorViewingStudent ? "Lecture Performance" : "Overall Performance"} 
+                                />
                             )}
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
-                                <div ref={videoSectionRef} className={`w-full ${(isEditingQuiz || isEditingAssignment) && isAdminView ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
+                                <div ref={videoSectionRef} className={`w-full ${((isEditingQuiz || isEditingAssignment) && isAdminView) || isModeratorViewingStudent ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
                                     {!hideSidebarAndCards && currentLecture && (
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
                                             <div>
@@ -1065,14 +1103,34 @@ const CourseView = () => {
                                                         lecture={currentLecture}
                                                         courseData={courseData}
                                                         isAdminView={isAdminView}
-                                                        isModeratorViewingStudent={isAdminView && userId}
                                                         onStart={() => {
-                                                            if (isAdminView && userId && !currentLecture.isCompleted) {
-                                                                setIsReminderModalOpen(true);
-                                                                return;
-                                                            }
-                                                            if (isAdminView && !userId) {
-                                                                setIsEditingQuiz(true);
+                                                            if (isAdminView) {
+                                                                if (userId) {
+                                                                    if (currentLecture.isCompleted) {
+                                                                        const cleanParams = new URLSearchParams(window.location.search);
+                                                                        cleanParams.delete('returnPath');
+                                                                        cleanParams.delete('lectureId');
+                                                                        const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+                                                                        const cleanPath = window.location.pathname + cleanSearch;
+                                                                        const returnPath = encodeURIComponent(cleanPath);
+                                                                        navigate(`/quiz-take/${currentLecture.quizId || currentLecture.id}?courseId=${courseId}&returnPath=${returnPath}&admin=true&viewStudent=true`, {
+                                                                            state: {
+                                                                                result: {
+                                                                                    score: currentLecture.rawScore || currentLecture.score,
+                                                                                    percentage: currentLecture.percentage || 0,
+                                                                                    totalPossibleScore: currentLecture.totalPossibleScore || 100,
+                                                                                    isPassed: currentLecture.isPassed || false,
+                                                                                    attemptNumber: 1
+                                                                                },
+                                                                                viewStudent: true
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        setReminderData({ type: 'Quiz', title: currentLecture.title });
+                                                                    }
+                                                                } else {
+                                                                    setIsEditingQuiz(true);
+                                                                }
                                                             } else {
                                                                 const cleanParams = new URLSearchParams(window.location.search);
                                                                 cleanParams.delete('returnPath');
@@ -1081,7 +1139,7 @@ const CourseView = () => {
                                                                 const cleanPath = window.location.pathname + cleanSearch;
                                                                 const returnPath = encodeURIComponent(cleanPath);
                                                                 const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
-                                                                const adminQuery = (isAdminView && !userId) ? (query ? `${query}&admin=true` : '?admin=true') : query;
+                                                                const adminQuery = isAdminView ? (query ? `${query}&admin=true` : '?admin=true') : query;
                                                                 if (currentLecture.quizId) {
                                                                     navigate(`/quiz-take/${currentLecture.quizId}${adminQuery}`);
                                                                 } else {
@@ -1095,13 +1153,8 @@ const CourseView = () => {
                                                         lecture={currentLecture}
                                                         courseData={courseData}
                                                         isAdminView={isAdminView}
-                                                        isModeratorViewingStudent={isAdminView && userId}
                                                         onStart={() => {
-                                                            if (isAdminView && userId && !currentLecture.isCompleted) {
-                                                                setIsReminderModalOpen(true);
-                                                                return;
-                                                            }
-                                                            if (isAdminView && !userId) {
+                                                            if (isAdminView) {
                                                                 setIsEditingAssignment(true);
                                                             } else {
                                                                 handleOpenAssignment(currentLecture);
@@ -1253,7 +1306,7 @@ const CourseView = () => {
                                     )}
                                 </div>
                                 {/* Lectures Playlist Section - Right Side - Only if not quiz or editing assignment */}
-                                {!((isEditingQuiz || isEditingAssignment) && isAdminView) && (
+                                {!((isEditingQuiz || isEditingAssignment) && isAdminView) && !isModeratorViewingStudent && (
                                     <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                         <div className="flex-1 relative lg:min-h-0">
@@ -1264,173 +1317,174 @@ const CourseView = () => {
                                                         const a = lecture.assignments || [];
 
                                                         return (
-                                                        <React.Fragment key={lecture.id}>
-                                                        {/* Main Lecture Card */}
-                                                        <div
-                                                            onClick={() => {
-                                                                if (!lecture.isLocked) {
-                                                                    if (lecture.type === 'Assignment') {
-                                                                        handleOpenAssignment(lecture);
-                                                                    } else {
-                                                                        setShouldAutoplay(false);
-                                                                        setCurrentLecture(lecture);
-                                                                    }
-                                                                }
-                                                            }}
-                                                            className={`
+                                                            <React.Fragment key={lecture.id}>
+                                                                {/* Main Lecture Card */}
+                                                                <div
+                                                                    onClick={() => {
+                                                                        if (!lecture.isLocked) {
+                                                                            if (lecture.type === 'Assignment') {
+                                                                                handleOpenAssignment(lecture);
+                                                                            } else {
+                                                                                setShouldAutoplay(false);
+                                                                                setCurrentLecture(lecture);
+                                                                            }
+                                                                        }
+                                                                    }}
+                                                                    className={`
                                                         relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
                                                         w-[260px] sm:w-[280px] lg:w-full flex flex-col
                                                         ${currentLecture?.id === lecture.id
-                                                                    ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
-                                                                    : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                                                                }
+                                                                            ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
+                                                                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                                        }
                                                         ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
                                                         ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
                                                         ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
                                                     `}
-                                                        >
-                                                            <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
-                                                                <div className={`relative w-full h-full overflow-hidden shrink-0`}>
-                                                                <img
-                                                                    src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
-                                                                    alt={lecture.title}
-                                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                                />
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-                                                                <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
-                                                                    <div className="flex justify-between items-start">
-                                                                        <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
-                                                                            {lecture.title}
-                                                                        </h4>
-                                                                    </div>
-                                                                    <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                        {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
-                                                                    </div>
-                                                                    <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                        {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
-                                                                    </div>
-                                                                </div>
-                                                                {lecture.isLocked ? (
-                                                                    <div className="absolute inset-0 flex items-center justify-center z-10">
-                                                                        <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                >
+                                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
+                                                                        <div className={`relative w-full h-full overflow-hidden shrink-0`}>
+                                                                            <img
+                                                                                src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
+                                                                                alt={lecture.title}
+                                                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                                            />
+                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+                                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                                                                <div className="flex justify-between items-start">
+                                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                                                                        {lecture.title}
+                                                                                    </h4>
+                                                                                </div>
+                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
+                                                                                </div>
+                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                                                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                                </div>
+                                                                            </div>
+                                                                            {lecture.isLocked ? (
+                                                                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : lecture.type === 'Assignment' ? (
+                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                                        <span className="text-white text-lg">📋</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : lecture.type === 'Quiz' ? (
+                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                                        <GraduationCap className="text-white w-5 h-5" />
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                                                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="absolute top-2 right-2 z-20">
+                                                                                <img
+                                                                                    src={instructorImg}
+                                                                                    alt="Instructor"
+                                                                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                                                                />
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                ) : lecture.type === 'Assignment' ? (
-                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                        <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                            <span className="text-white text-lg">📋</span>
+                                                                    {currentLecture?.id === lecture.id && (
+                                                                        <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
+                                                                    )}
+                                                                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                                                                        <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm z-30">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
                                                                         </div>
-                                                                    </div>
-                                                                ) : lecture.type === 'Quiz' ? (
-                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                        <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                            <GraduationCap className="text-white w-5 h-5" />
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                        <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                <div className="absolute top-2 right-2 z-20">
-                                                                    <img
-                                                                        src={instructorImg}
-                                                                        alt="Instructor"
-                                                                        className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
-                                                                    />
-                                                                </div>
-                                                                </div>
-                                                            </div>
-                                                            {currentLecture?.id === lecture.id && (
-                                                                <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
-                                                            )}
-                                                            {lecture.isCompleted && currentLecture?.id !== lecture.id && (
-                                                                <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm z-30">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
-                                                                </div>
-                                                            )}
+                                                                    )}
 
-                                                        </div>
-                                                        
-                                                        {/* Quizzes Boxes */}
-                                                        {q.map((quiz, qIdx) => (
-                                                            <div 
-                                                                key={`q-${quiz._id || quiz.id}-${qIdx}`} 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
-                                                                    if (quiz.isLocked && !isAdminView) {
-                                                                        toast.error("Please complete the video lecture first to unlock this quiz.");
-                                                                        return;
-                                                                    }
-                                                                    const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
-                                                                    navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`); 
-                                                                }} 
-                                                                className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
-                                                            >
-                                                                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
-                                                                    <GraduationCap className="text-purple-600 w-5 h-5 group-hover:scale-110 transition-transform" />
                                                                 </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-purple-700 transition-colors">{quiz.title}</h5>
-                                                                    <p className="text-[11px] text-gray-500 font-medium">{t('quiz', 'Quiz')}</p>
-                                                                </div>
-                                                                {quiz.isLocked && !isAdminView ? (
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                    </div>
-                                                                ) : quiz.isCompleted ? (
-                                                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                                                        <Check className="text-green-600 w-3.5 h-3.5" />
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-purple-50 transition-colors">
-                                                                        <ChevronRight className="text-gray-400 group-hover:text-purple-500 w-4 h-4" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ))}
 
-                                                        {/* Assignments Boxes */}
-                                                        {a.map((assignment, aIdx) => (
-                                                            <div 
-                                                                key={`a-${assignment._id || assignment.id}-${aIdx}`} 
-                                                                onClick={(e) => { 
-                                                                    e.stopPropagation(); 
-                                                                    if (assignment.isLocked && !isAdminView) {
-                                                                        toast.error("Please complete the video lecture first to unlock this assignment.");
-                                                                        return;
-                                                                    }
-                                                                    handleOpenSpecificAssignment(lecture, assignment); 
-                                                                }} 
-                                                                className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
-                                                            >
-                                                                <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
-                                                                    <FileText className="text-orange-600 w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-orange-700 transition-colors">{assignment.title}</h5>
-                                                                    <p className="text-[11px] text-gray-500 font-medium">{t('assignment', 'Assignment')}</p>
-                                                                </div>
-                                                                {assignment.isLocked && !isAdminView ? (
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                {/* Quizzes Boxes */}
+                                                                {q.map((quiz, qIdx) => (
+                                                                    <div
+                                                                        key={`q-${quiz._id || quiz.id}-${qIdx}`}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (quiz.isLocked && !isAdminView) {
+                                                                                toast.error("Please complete the video lecture first to unlock this quiz.");
+                                                                                return;
+                                                                            }
+                                                                            const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
+                                                                            navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`);
+                                                                        }}
+                                                                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
+                                                                    >
+                                                                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
+                                                                            <GraduationCap className="text-purple-600 w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-purple-700 transition-colors">{quiz.title}</h5>
+                                                                            <p className="text-[11px] text-gray-500 font-medium">{t('quiz', 'Quiz')}</p>
+                                                                        </div>
+                                                                        {quiz.isLocked && !isAdminView ? (
+                                                                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                            </div>
+                                                                        ) : quiz.isCompleted ? (
+                                                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                                                                <Check className="text-green-600 w-3.5 h-3.5" />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-purple-50 transition-colors">
+                                                                                <ChevronRight className="text-gray-400 group-hover:text-purple-500 w-4 h-4" />
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                ) : assignment.isCompleted ? (
-                                                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                                                        <Check className="text-green-600 w-3.5 h-3.5" />
+                                                                ))}
+
+                                                                {/* Assignments Boxes */}
+                                                                {a.map((assignment, aIdx) => (
+                                                                    <div
+                                                                        key={`a-${assignment._id || assignment.id}-${aIdx}`}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (assignment.isLocked && !isAdminView) {
+                                                                                toast.error("Please complete the video lecture first to unlock this assignment.");
+                                                                                return;
+                                                                            }
+                                                                            handleOpenSpecificAssignment(lecture, assignment);
+                                                                        }}
+                                                                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
+                                                                    >
+                                                                        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+                                                                            <FileText className="text-orange-600 w-5 h-5 group-hover:scale-110 transition-transform" />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-orange-700 transition-colors">{assignment.title}</h5>
+                                                                            <p className="text-[11px] text-gray-500 font-medium">{t('assignment', 'Assignment')}</p>
+                                                                        </div>
+                                                                        {assignment.isLocked && !isAdminView ? (
+                                                                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                                            </div>
+                                                                        ) : assignment.isCompleted ? (
+                                                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                                                                <Check className="text-green-600 w-3.5 h-3.5" />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-orange-50 transition-colors">
+                                                                                <ChevronRight className="text-gray-400 group-hover:text-orange-500 w-4 h-4" />
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                ) : (
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-orange-50 transition-colors">
-                                                                        <ChevronRight className="text-gray-400 group-hover:text-orange-500 w-4 h-4" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                        </React.Fragment>
-                                                        )})}
+                                                                ))}
+                                                            </React.Fragment>
+                                                        )
+                                                    })}
                                                 </div>
                                             </div>
                                         </div>
@@ -1498,11 +1552,11 @@ const CourseView = () => {
                             )}
 
                             {/* Lecture List Table Section */}
-                            {!hideSidebarAndCards && (
+                            {!hideSidebarAndCards && !isModeratorViewingStudent && (
                                 <LectureListTable
                                     lectures={lectures.reduce((acc, lecture) => {
                                         acc.push(lecture);
-                                        
+
                                         if (lecture.quizzes && lecture.quizzes.length > 0) {
                                             lecture.quizzes.forEach((quiz, index) => {
                                                 acc.push({
@@ -1536,7 +1590,7 @@ const CourseView = () => {
                                                 });
                                             });
                                         }
-                                        
+
                                         return acc;
                                     }, [])}
                                     notes={notes}
@@ -1571,15 +1625,6 @@ const CourseView = () => {
                     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
                 `}} />
             </div>
-
-            <ReminderModal 
-                isOpen={isReminderModalOpen}
-                onClose={() => setIsReminderModalOpen(false)}
-                onConfirm={handleSendReminder}
-                isSending={isSendingReminder}
-                studentName="The student"
-                itemTitle={currentLecture?.title}
-            />
 
             <ConfirmDialog
                 isOpen={isDeleteDialogOpen}
@@ -1698,27 +1743,27 @@ const CourseView = () => {
                                     <div className="mt-2">
                                         <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
                                         <div className="flex gap-2">
-                                            <input 
-                                                type="text" 
-                                                placeholder="https://..." 
+                                            <input
+                                                type="text"
+                                                placeholder="https://..."
                                                 value={newAudioLink}
                                                 onChange={e => setNewAudioLink(e.target.value)}
                                                 onKeyDown={e => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
                                                         if (newAudioLink.trim()) {
-                                                            setEditLectureData(prev => ({...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()]}));
+                                                            setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()] }));
                                                             setNewAudioLink('');
                                                         }
                                                     }
                                                 }}
                                                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                                             />
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 onClick={() => {
                                                     if (newAudioLink.trim()) {
-                                                        setEditLectureData(prev => ({...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()]}));
+                                                        setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()] }));
                                                         setNewAudioLink('');
                                                     }
                                                 }}
@@ -1793,27 +1838,27 @@ const CourseView = () => {
                                     <div className="mt-2">
                                         <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
                                         <div className="flex gap-2">
-                                            <input 
-                                                type="text" 
-                                                placeholder="https://..." 
+                                            <input
+                                                type="text"
+                                                placeholder="https://..."
                                                 value={newPdfLink}
                                                 onChange={e => setNewPdfLink(e.target.value)}
                                                 onKeyDown={e => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
                                                         if (newPdfLink.trim()) {
-                                                            setEditLectureData(prev => ({...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()]}));
+                                                            setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()] }));
                                                             setNewPdfLink('');
                                                         }
                                                     }
                                                 }}
                                                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
                                             />
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 onClick={() => {
                                                     if (newPdfLink.trim()) {
-                                                        setEditLectureData(prev => ({...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()]}));
+                                                        setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()] }));
                                                         setNewPdfLink('');
                                                     }
                                                 }}
@@ -1933,8 +1978,8 @@ const CourseView = () => {
                             </button>
                         </div>
                         {activeAudioUrl && activeAudioUrl.includes('drive.google.com') ? (
-                            <iframe 
-                                src={`https://drive.google.com/file/d/${activeAudioUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1]}/preview`} 
+                            <iframe
+                                src={`https://drive.google.com/file/d/${activeAudioUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1]}/preview`}
                                 className="w-full h-16 border-none rounded"
                                 title="Audio Player"
                             />
@@ -1966,6 +2011,30 @@ const CourseView = () => {
                     }
                 `
             }} />
+            <ConfirmDialog
+                isOpen={!!reminderData}
+                onClose={() => setReminderData(null)}
+                onConfirm={async () => {
+                    try {
+                        await createNotification({
+                            title: `Reminder: Complete ${reminderData?.title}`,
+                            type: "app",
+                            message: `You have an incomplete ${reminderData?.type.toLowerCase()}: ${reminderData?.title}. Please complete it.`,
+                            sendto: userId,
+                            sendfrom: user?._id || user?.id,
+                        });
+                        toast.success(`Reminder sent to student for ${reminderData?.title}!`);
+                        setReminderData(null);
+                    } catch (error) {
+                        toast.error("Failed to send reminder");
+                        console.error(error);
+                    }
+                }}
+                title="Send Reminder"
+                message={`The student has not completed this ${reminderData?.type} yet. Want to send them a reminder for it?`}
+                confirmText="Yes, Send Reminder"
+                cancelText="Cancel"
+            />
         </div>
     );
 };

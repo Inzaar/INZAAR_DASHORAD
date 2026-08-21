@@ -29,10 +29,10 @@ const AssignmentSubmitted = () => {
     return (
         <div className="min-h-screen w-full flex flex-col bg-[#F8F9FA]">
             <Navbar />
-            
+
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-                
+
                 {/* Green Checkmark Icon */}
                 <div className="w-16 h-16 rounded-full bg-[#ECFDF3] flex items-center justify-center mb-6">
                     <Check className="w-8 h-8 text-[#027A48] stroke-[1.5]" />
@@ -50,19 +50,19 @@ const AssignmentSubmitted = () => {
 
                 {/* Details Card */}
                 <div className="w-full max-w-[600px] bg-white rounded-[16px] shadow-sm px-6 py-2">
-                    
+
                     {/* File */}
                     <div className="flex justify-between items-center py-4 border-b border-gray-100">
                         <span className="text-sm text-gray-500">{t('file', 'File')}</span>
                         <span className="text-sm font-medium text-gray-800">{fileName || 'assignment_document.pdf'}</span>
                     </div>
-                    
+
                     {/* Status */}
                     <div className="flex justify-between items-center py-4 border-b border-gray-100">
                         <span className="text-sm text-gray-500">{t('status', 'Status')}</span>
                         <span className="text-sm font-medium text-[#027A48]">{status || 'Completed'}</span>
                     </div>
-                    
+
                     {/* Submitted At */}
                     <div className="flex justify-between items-center py-4">
                         <span className="text-sm text-gray-500">{t('submitted', 'Submitted')}</span>
@@ -75,7 +75,7 @@ const AssignmentSubmitted = () => {
                     {location.state?.status === 'Graded' ? (
                         <div className="bg-white rounded-[16px] shadow-sm p-6 border border-gray-100">
                             <h3 className="text-lg font-bold text-gray-900 mb-4">Grading & Feedback</h3>
-                            
+
                             <div className="flex flex-col gap-4">
                                 <div className="flex justify-between items-center pb-4 border-b border-gray-100">
                                     <span className="text-sm text-gray-500">Score / Marks</span>
@@ -83,7 +83,7 @@ const AssignmentSubmitted = () => {
                                         {location.state?.score !== undefined && location.state?.score !== null ? location.state.score : '—'} / {location.state?.totalScore || 100}
                                     </span>
                                 </div>
-                                
+
                                 <div>
                                     <span className="text-sm text-gray-500 block mb-2">Instructions / Feedback</span>
                                     <div className="bg-[#F8F9FA] rounded-lg p-4 text-[13px] text-gray-700 leading-relaxed min-h-[80px]">

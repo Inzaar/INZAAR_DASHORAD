@@ -16,7 +16,7 @@ const StudentCourseDashboard = ({ profileData }) => {
     const { id: userId } = useParams();
     const navigate = useNavigate();
     const enrolledCourses = profileData?.enrolledCourses || [];
-    
+
     // Default to the first course if available
     const [selectedCourseId, setSelectedCourseId] = useState(enrolledCourses[0]?.courseId || "");
     const [selectedCourseData, setSelectedCourseData] = useState(null);
@@ -57,8 +57,11 @@ const StudentCourseDashboard = ({ profileData }) => {
         overallPerformance: 0,
         improvement: "0%"
     };
-    const lectures = selectedCourseData?.lectures || [];
-
+    const rawLectures = selectedCourseData?.lectures || [];
+    const lectures = rawLectures.reduce((acc, l) => {
+        acc.push({ ...l, type: 'Lecture', id: l.id || l._id });
+        return acc;
+    }, []);
     const overviewStats = [
         { label: "Quiz Score", value: stats.quizScore, color: "emerald", labelColor: "text-emerald-500", dotColor: "bg-emerald-500", lineColor: "bg-emerald-400" },
         { label: "lecture Completed", value: stats.lecturesCompleted.toString(), color: "blue", labelColor: "text-blue-600", dotColor: "bg-blue-600", lineColor: "bg-blue-500" },
@@ -82,14 +85,14 @@ const StudentCourseDashboard = ({ profileData }) => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-2">
                 <h2 className="text-[20px] font-bold text-gray-900">{selectedCourseData?.courseTitle || currentCourse.title || "No Course Selected"}</h2>
                 <div className="relative inline-block w-full sm:w-auto">
-                    <button 
+                    <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="flex items-center justify-between gap-3 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium w-full sm:w-[320px] hover:bg-blue-600 transition-all shadow-md group"
                     >
                         <span className="truncate">{selectedCourseData?.courseTitle || "Select Course"}</span>
                         <ChevronDown size={18} className={cn("transition-transform duration-200", isDropdownOpen && "rotate-180")} />
                     </button>
-                    
+
                     {isDropdownOpen && (
                         <div className="absolute right-0 mt-2 w-full sm:w-[320px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in duration-200">
                             {enrolledCourses.length > 0 ? enrolledCourses.map((course) => (
@@ -155,7 +158,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                     <PerformanceCard
                         name="Overall Performance"
                         percentageOverride={stats.overallPerformance}
-                        trendOverride={stats.improvement?.replace('%','')}
+                        trendOverride={stats.improvement?.replace('%', '')}
                         className="border rounded-[16px] h-full w-full"
                     />
                 </div>
@@ -175,15 +178,15 @@ const StudentCourseDashboard = ({ profileData }) => {
                     <div className="absolute top-4 right-4 text-gray-400 cursor-pointer">
                         <MoreVertical size={20} />
                     </div>
-                    
+
                     {selectedCourseData?.moderator ? (
                         <>
                             <div className="flex items-start gap-4 mb-4">
                                 <div className="w-16 h-16 rounded-full overflow-hidden p-0.5 shrink-0 border-2 border-blue-100">
-                                    <img 
-                                        src={selectedCourseData.moderator.profileImageUrl || CoursesPage} 
-                                        alt="moderator" 
-                                        className="w-full h-full rounded-full object-cover" 
+                                    <img
+                                        src={selectedCourseData.moderator.profileImageUrl || CoursesPage}
+                                        alt="moderator"
+                                        className="w-full h-full rounded-full object-cover"
                                     />
                                 </div>
                                 <div className="flex flex-col min-w-0 pr-6">
@@ -228,12 +231,12 @@ const StudentCourseDashboard = ({ profileData }) => {
                     )}
 
                     <div className="flex justify-center mt-auto">
-                        <GradiantButton 
+                        <GradiantButton
                             disabled={!selectedCourseData?.moderator}
                             onClick={() => selectedCourseData?.moderator?.id && navigate(`/moderator-details/${selectedCourseData.moderator.id}`, { state: { moderator: selectedCourseData.moderator } })}
                             className={cn(
                                 "w-full py-2.5 rounded-lg text-sm font-bold transition-all uppercase tracking-wide",
-                                selectedCourseData?.moderator 
+                                selectedCourseData?.moderator
                                     ? "bg-[#6366F1] text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
                             )}
@@ -270,7 +273,14 @@ const StudentCourseDashboard = ({ profileData }) => {
                                 {lectures.length > 0 ? lectures.map((lecture, i) => (
                                     <tr key={i} className="hover:bg-gray-50/30 transition-colors text-sm text-gray-600">
                                         <td className="py-4 px-4 font-medium">{lecture.no}</td>
-                                        <td className="py-4 px-4 font-medium text-gray-800">{lecture.title}</td>
+                                        <td className="py-4 px-4 font-medium text-gray-800">
+                                            {lecture.title}
+                                            {lecture.type !== 'Lecture' && (
+                                                <span className="ml-2 text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                                    {lecture.type}
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="py-4 px-4 text-center font-medium">{lecture.progress}</td>
                                         <td className="py-4 px-4">{lecture.date}</td>
                                         <td className="py-4 px-4">
@@ -281,10 +291,10 @@ const StudentCourseDashboard = ({ profileData }) => {
                                                 {lecture.status}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-4 text-right whitespace-nowrap">
+                                        <td className="py-4 px-4 text-right">
                                             <GradiantButton 
-                                                onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id || lecture._id}`)}
-                                                className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-md"
+                                                className="px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider"
+                                                onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id}`)}
                                             >
                                                 View Detail
                                             </GradiantButton>
