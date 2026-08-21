@@ -12,6 +12,7 @@ import ModeratorProfileComponent from "../components/moderator/ModeratorProfileC
 import StudentPerformance from "../components/student/StudentPerformance";
 import StudentCourseDashboard from "../components/student/StudentCourseDashboard";
 import StudentCertificates from "../components/student/StudentCertificates";
+import StudentSubmissions from "../components/student/StudentSubmissions";
 import AssignModeratorModal from "../components/student/AssignModeratorModal";
 import { BsThreeDotsVertical, BsChatDotsFill } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
@@ -122,7 +123,7 @@ const StudentDetailsPage = () => {
         return null;
     }
 
-    const tabs = ["Profile", "Performance", "Courses", "Certificates"];
+    const tabs = ["Profile", "Performance", "Courses", "Certificates", "Submissions"];
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -316,6 +317,8 @@ const StudentDetailsPage = () => {
                                     <StudentCourseDashboard profileData={profileData} />
                                 ) : activeTab === "Certificates" ? (
                                     <StudentCertificates profileData={profileData} />
+                                ) : activeTab === "Submissions" ? (
+                                    <StudentSubmissions profileData={profileData} />
                                 ) : (
                                     <div className="min-h-[400px] flex items-center justify-center text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                                         {activeTab} Content (Coming Soon)

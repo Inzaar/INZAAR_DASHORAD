@@ -99,6 +99,7 @@ const AssignmentSubmission = () => {
                     status: 'Submitted',
                     submittedAt,
                     returnUrl,
+                    isLate: assignment.isLate || false
                 }
             });
         } catch (error) {

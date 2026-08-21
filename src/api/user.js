@@ -14,6 +14,20 @@ export const getUserProfileById = async (id) => {
     return res.data;
 };
 
+export const getUserSubmissions = async (id) => {
+    const res = await axiosInstance.get(`/users/${id}/submissions`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const gradeSubmission = async (userId, submissionId, data) => {
+    const res = await axiosInstance.patch(`/users/${userId}/submissions/${submissionId}/grade`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 export const updateUser = async (id, data) => {
     const res = await axiosInstance.patch(`/users/${id}`, data, {
         withCredentials: true,
