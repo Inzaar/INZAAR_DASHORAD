@@ -57,8 +57,15 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
     }, [user, navigate]); // Refetch when navigation happens (to clear it if we visited notifications)
 
     return (
-        <div className="w-full h-auto md:min-h-[80px] py-3 md:py-0 flex items-center justify-center bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF] px-4 sm:px-6 md:px-8 shadow-sm">
-            <div className="w-full flex flex-row justify-between items-center gap-2 sm:gap-4">
+        <div className="relative w-full h-auto md:min-h-[80px] py-3 md:py-0 flex items-center justify-center shadow-[0px_4px_4px_rgba(0,0,0,0.25)] px-4 sm:px-6 md:px-8">
+            {/* Base Gradient Layer (Left to Right) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF]"></div>
+            
+            {/* Minimal White Shadow Overlay (Top to Bottom) */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent pointer-events-none"></div>
+
+            {/* Navbar Content */}
+            <div className="relative z-10 w-full flex flex-row justify-between items-center gap-2 sm:gap-4">
                 <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1">
                     <div className="flex items-center gap-1 sm:gap-3">
                         {!hideMenu && (
