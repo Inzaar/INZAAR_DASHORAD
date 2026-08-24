@@ -20,8 +20,8 @@ function Analytics({ userCourses, courseData, name, className }) {
 
     const courseOverviewStats = courseData ? {
         ...(courseData.overview ? {
-            col1: { value: courseData.overview.completed ?? 0, label: t("completed", "Completed"), color: "#22C55E" },
-            col2: { value: courseData.overview.inProgress ?? 0, label: t("in_progress", "In Progress"), color: "#3758EE" },
+            col1: { value: courseData.overview.completed ?? 0, label: t("completed_courses", "Completed Courses"), color: "#22C55E" },
+            col2: { value: courseData.overview.inProgress ?? 0, label: t("in_progress_courses", "In Progress Courses"), color: "#3758EE" },
             col3: { value: courseData.overview.timeSpentLastWeek ?? "0h 0m", label: t("time_spent_last_week", "Time Spent Last week"), color: "#B666E7" }
         } : {
             col1: courseData.quizScore !== undefined ? { value: courseData.quizScore, label: t("quiz_score", "Quiz Score"), color: "#22C55E" } : null,
