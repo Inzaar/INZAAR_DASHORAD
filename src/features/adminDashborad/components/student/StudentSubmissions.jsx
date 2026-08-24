@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { getUserSubmissions, gradeSubmission } from '@/api/user';
@@ -7,7 +8,7 @@ const StudentSubmissions = ({ profileData }) => {
     const enrolledCourses = profileData?.enrolledCourses || [];
     const [selectedCourse, setSelectedCourse] = useState('All Courses');
     const [selectedCourseId, setSelectedCourseId] = useState('all');
-    
+
     const [typeFilter, setTypeFilter] = useState('All Types');
     const [statusFilter, setStatusFilter] = useState('All Status');
     const [searchQuery, setSearchQuery] = useState('');
@@ -67,7 +68,7 @@ const StudentSubmissions = ({ profileData }) => {
 
     const handleGradeSubmit = async () => {
         if (!selectedSubmission || selectedSubmission.type !== 'Assignment') return;
-        
+
         try {
             setIsSubmitting(true);
             const scoreValue = scoreInput ? Number(scoreInput) : null;
@@ -77,14 +78,14 @@ const StudentSubmissions = ({ profileData }) => {
                 feedback: feedbackInput,
                 status: 'Graded'
             });
-            
+
             toast.success("Grade submitted successfully");
-            
+
             // Refetch submissions to update table and state
             const res = await getUserSubmissions(profileData.user._id);
             if (res?.data?.submissions) {
                 setSubmissionsData(res.data.submissions);
-                
+
                 // Update currently viewed submission if it's still open
                 const updatedCourse = res.data.submissions.find(c => c.courseId === selectedCourseId) || res.data.submissions[0];
                 if (updatedCourse) {
@@ -140,7 +141,7 @@ const StudentSubmissions = ({ profileData }) => {
                     </h2>
                 </div>
                 <div className="relative">
-                    <button 
+                    <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="flex items-center gap-2 bg-[#059669] text-white px-4 py-2.5 rounded-[4px] text-sm font-medium hover:bg-[#047857] transition-colors shadow-sm"
                     >
@@ -148,7 +149,7 @@ const StudentSubmissions = ({ profileData }) => {
                     </button>
                     {isDropdownOpen && (
                         <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border border-gray-100 py-1">
-                            <button 
+                            <button
                                 onClick={() => {
                                     setSelectedCourse('All Courses');
                                     setSelectedCourseId('all');
@@ -159,7 +160,7 @@ const StudentSubmissions = ({ profileData }) => {
                                 All Courses
                             </button>
                             {enrolledCourses.map(course => (
-                                <button 
+                                <button
                                     key={course.courseId}
                                     onClick={() => {
                                         setSelectedCourse(course.title);
@@ -181,11 +182,11 @@ const StudentSubmissions = ({ profileData }) => {
                     <div className="p-5 md:p-6 border-b border-gray-100">
                         <h3 className="text-lg font-bold text-gray-800 mb-1">Student Submissions</h3>
                         <p className="text-sm text-gray-400 font-medium">View and grade submitted assignments and quizzes</p>
-                        
+
                         {/* Filters & Search */}
                         <div className="flex flex-col md:flex-row gap-4 mt-6">
                             <div className="relative">
-                                <select 
+                                <select
                                     value={typeFilter}
                                     onChange={(e) => setTypeFilter(e.target.value)}
                                     className="appearance-none w-full md:w-36 px-4 py-2 bg-white border border-gray-100 rounded-md text-[13px] text-gray-600 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500/20 pr-10 cursor-pointer shadow-sm"
@@ -196,9 +197,9 @@ const StudentSubmissions = ({ profileData }) => {
                                 </select>
                                 <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
                             </div>
-                            
+
                             <div className="relative">
-                                <select 
+                                <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                     className="appearance-none w-full md:w-36 px-4 py-2 bg-white border border-gray-100 rounded-md text-[13px] text-gray-600 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500/20 pr-10 cursor-pointer shadow-sm"
@@ -301,14 +302,14 @@ const StudentSubmissions = ({ profileData }) => {
                 </div>
             ) : (
                 <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                    
+
                     {/* User Info Card */}
                     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-4">
                         <div className="flex justify-between items-start w-full">
                             <div className="flex items-center gap-4">
-                                <img 
-                                    src={profileData?.user?.profileImage || "https://ui-avatars.com/api/?name=Mudassar&background=random"} 
-                                    alt="Student" 
+                                <img
+                                    src={profileData?.user?.profileImage || "https://ui-avatars.com/api/?name=Mudassar&background=random"}
+                                    alt="Student"
                                     className="w-14 h-14 rounded-full object-cover"
                                 />
                                 <div className="flex flex-col">
@@ -334,7 +335,7 @@ const StudentSubmissions = ({ profileData }) => {
                     {/* Submission Content Card */}
                     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-5">
                         <h3 className="text-[16px] font-bold text-gray-800">Submission Content</h3>
-                        
+
                         <div className="bg-[#F8F9FA] rounded-lg p-5 text-[13px] text-gray-700 leading-relaxed font-medium">
                             <p className="mb-4">{selectedSubmission.submissionContent || "No detailed submission content provided."}</p>
                         </div>
@@ -356,12 +357,12 @@ const StudentSubmissions = ({ profileData }) => {
                     {/* Grading Card */}
                     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-6">
                         <h3 className="text-[16px] font-bold text-gray-800">Grading</h3>
-                        
+
                         <div className="flex flex-col gap-2">
                             <label className="text-[13px] font-bold text-gray-800">Score / Marks</label>
-                            <input 
-                                type="number" 
-                                placeholder="— / 100" 
+                            <input
+                                type="number"
+                                placeholder="— / 100"
                                 value={scoreInput}
                                 onChange={(e) => setScoreInput(e.target.value)}
                                 className="w-40 px-4 py-2.5 bg-[#F8F9FA] border border-gray-100 rounded-md text-[13px] font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
@@ -370,8 +371,8 @@ const StudentSubmissions = ({ profileData }) => {
 
                         <div className="flex flex-col gap-2">
                             <label className="text-[13px] font-bold text-gray-800">Feedback to Student</label>
-                            <textarea 
-                                placeholder="Enter your feedback here..." 
+                            <textarea
+                                placeholder="Enter your feedback here..."
                                 value={feedbackInput}
                                 onChange={(e) => setFeedbackInput(e.target.value)}
                                 className="w-full h-32 px-4 py-3 bg-[#F8F9FA] border border-gray-100 rounded-lg text-[13px] text-gray-700 font-medium resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/20"
@@ -382,7 +383,7 @@ const StudentSubmissions = ({ profileData }) => {
                             <button className="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-[4px] text-[13px] font-bold transition-colors shadow-sm">
                                 Save as Draft
                             </button>
-                            <button 
+                            <button
                                 onClick={handleGradeSubmit}
                                 disabled={isSubmitting}
                                 className="px-6 py-2.5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[4px] text-[13px] font-bold transition-colors shadow-sm disabled:opacity-50"
