@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import Sidebar from '@/components/layouts/SideBar';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -123,7 +124,9 @@ const AdminDashboard = () => {
                                     className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                                 >
                                     <div className="flex items-center gap-2">
-                                        <span className='bg-white text-blue-500 rounded-full px-2 pb-0.5 flex items-center justify-center'>+</span>
+                                        <div className="bg-white rounded-full p-[2px] flex items-center justify-center">
+                                            <Plus size={14} strokeWidth={3} className="text-[#3758EE]" />
+                                        </div>
                                         <span>Add New Course</span>
                                     </div>
                                 </GradiantButton>

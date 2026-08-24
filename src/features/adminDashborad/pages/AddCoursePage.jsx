@@ -989,8 +989,8 @@ const AddCoursePage = () => {
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#f8f9fa] flex flex-col items-center justify-center font-sans overflow-hidden font-['Public_Sans']">
-            <div className="w-full max-w-[1920px] min-h-screen max-h-[1680px] flex flex-col gap-4">
+        <div className="h-screen w-screen flex items-center justify-center font-sans">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4 font-['Public_Sans']">
                 <Navbar onMenuClick={toggleSidebar} hideMenu={true} />
 
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
@@ -1472,7 +1472,7 @@ const AddCoursePage = () => {
 
                         {/* Footer Actions */}
                         {!showQuizFlow && !showAssignmentFlow && (
-                            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+                            <div className="absolute bottom-0 left-0 right-0 w-full bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
                                 <button
                                     onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
                                     className="w-auto px-4 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"
