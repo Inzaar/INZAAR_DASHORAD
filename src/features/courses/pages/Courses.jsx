@@ -5,13 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getAllCourses } from '@/api/course';
+import { getAllCourses, getEnrolledCoursesByUserId } from '@/api/course';
+import { useAuth } from '@/context/AuthContext';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import CardCourse from '../components/CardCourse';
 import course from "../../../assets/images/course2.png"
 import icon from "../../../assets/logos/Abu_Yahya.png"
 
 const Courses = () => {
+    const { user } = useAuth();
+    const [enrolledCourseIds, setEnrolledCourseIds] = React.useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [searchParams] = useSearchParams();
     const tabParam = searchParams.get('tab');
@@ -28,6 +31,22 @@ const Courses = () => {
     const [itemsPerPage, setItemsPerPage] = React.useState(20);
     const [courses, setCourses] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+
+    useEffect(() => {
+        const fetchEnrolled = async () => {
+            if (user?.role === 'guest' || !user) return;
+            try {
+                const res = await getEnrolledCoursesByUserId();
+                if (res.data?.success) {
+                    const ids = res.data.data.map(c => c.courseId || c._id);
+                    setEnrolledCourseIds(ids);
+                }
+            } catch (error) {
+                console.error("Failed to fetch enrolled courses:", error);
+            }
+        };
+        fetchEnrolled();
+    }, [user]);
 
     // Sync tab with URL parameter
     useEffect(() => {
@@ -109,7 +128,8 @@ const Courses = () => {
         icon: icon, // Using static icon for now as per design
         date: new Date(courseData.createdAt).toLocaleDateString(),
         isNew: courseData.isNewCourse,
-        link: `/course-details/${courseData._id}`
+        link: `/course-details/${courseData._id}`,
+        isEnrolled: enrolledCourseIds.includes(courseData._id)
     });
 
     const filteredCourses = (activeTab === 'new'

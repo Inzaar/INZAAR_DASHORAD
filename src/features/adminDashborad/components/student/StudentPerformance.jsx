@@ -13,16 +13,19 @@ const StudentPerformance = ({ profileData }) => {
 
     const navigate = useNavigate();
     const user = profileData?.user || {};
+    const enrolledCourses = profileData?.enrolledCourses || [];
+
+    const completedCount = profileData?.stats?.completed ?? enrolledCourses.filter(c => c.isCompleted).length;
+    const inProgressCount = profileData?.stats?.inProgress ?? enrolledCourses.filter(c => !c.isCompleted).length;
+
     const stats = profileData?.stats || {
-        totalEnrolled: 0,
-        completed: 0,
-        inProgress: 0,
+        totalEnrolled: enrolledCourses.length,
+        completed: completedCount,
+        inProgress: inProgressCount,
         performance: 0,
         improvement: "0%",
         timeSpent: "0h 0m"
     };
-
-    const enrolledCourses = profileData?.enrolledCourses || [];
 
     const tableData = enrolledCourses.map(e => ({
         id: e.id,
@@ -64,30 +67,56 @@ const StudentPerformance = ({ profileData }) => {
                     />
 
                     {/* Overview items row */}
-                    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6 shadow-sm flex flex-col gap-2">
-                        <span className="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">Overview</span>
-                        <div className="flex flex-wrap items-center justify-between gap-6 sm:gap-12 mt-4 w-full">
-                            <div className="flex flex-col items-start gap-1 min-w-fit">
-                                <span className="text-lg sm:text-xl font-bold text-gray-900 leading-none">{stats.completed}</span>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                    <span className="text-emerald-500 text-[10px] sm:text-xs font-medium">Completed</span>
+                    <div className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm flex flex-col gap-6 min-w-0 w-full">
+                        <span className="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">OVERVIEW</span>
+                        <div className="overflow-x-auto no-scrollbar">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0 w-full">
+                                {/* Completed */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#22C55E]"></div>
+                                        <div className="flex-1 w-[2px] bg-[#22C55E]/80"></div>
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#22C55E]"></div>
+                                    </div>
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{completedCount}</span>
+                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#22C55E]">
+                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#22C55E]"></div>
+                                            Completed
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="hidden sm:block w-[2px] h-10 bg-[#3758EE]/20 rounded-full"></div>
-                            <div className="flex flex-col items-start gap-1 min-w-fit">
-                                <span className="text-lg sm:text-xl font-bold text-gray-900 leading-none">{stats.inProgress}</span>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#3758EE]"></div>
-                                    <span className="text-[#3758EE] text-[10px] sm:text-xs font-medium">In Progress</span>
+                                
+                                {/* In Progress */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#3758EE]"></div>
+                                        <div className="flex-1 w-[2px] bg-[#3758EE]/80"></div>
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#3758EE]"></div>
+                                    </div>
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{inProgressCount}</span>
+                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#3758EE]">
+                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#3758EE]"></div>
+                                            In Progress
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="hidden sm:block w-[2px] h-10 bg-[#B666E7]/20 rounded-full"></div>
-                            <div className="flex flex-col items-start gap-1 min-w-fit">
-                                <span className="text-lg sm:text-xl font-bold text-gray-900 leading-none">{stats.timeSpent || "12h 30m"}</span>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#B666E7]"></div>
-                                    <span className="text-[#B666E7] text-[10px] sm:text-xs font-medium truncate">Time Spent Last week</span>
+
+                                {/* Time Spent */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#B666E7]"></div>
+                                        <div className="flex-1 w-[2px] bg-[#B666E7]/80"></div>
+                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#B666E7]"></div>
+                                    </div>
+                                    <div className="flex flex-col gap-1 min-w-0">
+                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{stats.timeSpent || "12h 30m"}</span>
+                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#B666E7]">
+                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#B666E7]"></div>
+                                            Time Spent Last week
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
