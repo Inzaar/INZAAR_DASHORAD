@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
 import { logout as apiLogout } from '@/api/auth';
 import LogoutModal from '@/components/shared/LogoutModal';
+import { getMyNotifications } from '@/api/notification';
 
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
@@ -17,6 +18,19 @@ function Sidebar({ className, onClose }) {
   const { user, logout: contextLogout } = useAuth();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { t } = useTranslation();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await getMyNotifications();
+        setUnreadCount(res.data?.data?.unreadCount || 0);
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    if (user) fetchUnreadCount();
+  }, [user, location.pathname]);
 
   const tKey = (str) => {
     const map = {
@@ -428,7 +442,14 @@ function Sidebar({ className, onClose }) {
         isActive={activeItem === item}
         onClick={() => handleItemClick(item)}
       >
-        {t(tKey(item), item)}
+        <div className="flex items-center justify-between w-full">
+          <span>{t(tKey(item), item)}</span>
+          {(item === 'Notification' || item === 'Notifications') && unreadCount > 0 && (
+             <span className="bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[10px] font-black min-w-[22px] h-[22px] px-1 flex items-center justify-center rounded-full shadow-sm ml-2">
+                 {unreadCount}
+             </span>
+          )}
+        </div>
       </Sideabrbbutton>
     );
   };

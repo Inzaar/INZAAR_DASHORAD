@@ -28,7 +28,7 @@ const AdminDashboard = () => {
     // Students List Data
     const [students, setStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -71,10 +71,10 @@ const AdminDashboard = () => {
     const fetchStudentsTable = async (page = 1) => {
         setLoadingStudents(true);
         try {
-            const res = await axiosInstance.get(`/admin/reports/students?page=${page}&limit=5`);
+            const res = await axiosInstance.get(`/admin/reports/students?page=${page}&limit=10`);
             if (res?.data?.data) {
                 setStudents(res.data.data.studentsList || []);
-                setPagination(res.data.data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+                setPagination(res.data.data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
             }
         } catch (err) {
             console.error('Failed to fetch students for dashboard:', err);

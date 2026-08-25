@@ -11,14 +11,16 @@ import { useTranslation } from 'react-i18next';
 
 function Pagination({
   className,
+  totalPages,
   ...props
 }) {
+  if (totalPages !== undefined && totalPages <= 1) return null;
   return (
     <nav
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
+      className={cn("mx-auto flex w-full justify-center mt-auto pt-6 pb-2", className)}
       {...props} />
   );
 }

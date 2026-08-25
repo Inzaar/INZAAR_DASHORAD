@@ -274,37 +274,39 @@ const Courses = () => {
                                 ))}
                             </div>
 
-                            <PaginationContent className="w-full flex items-center justify-center lg:justify-end mt-8 gap-1">
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                    />
-                                </PaginationItem>
-
-                                {getPageNumbers().map((page, index) => (
-                                    <PaginationItem key={index}>
-                                        {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                                            <PaginationEllipsis />
-                                        ) : (
-                                            <PaginationLink
-                                                onClick={() => handlePageChange(page)}
-                                                isActive={page === currentPage}
-                                                className={page === currentPage ? "bg-gradient-to-r from-[#A892FF] to-[#6C5DDC] text-white cursor-pointer" : "cursor-pointer hover:bg-gray-100"}
-                                            >
-                                                {page}
-                                            </PaginationLink>
-                                        )}
+                            {totalPages > 1 && (
+                                <PaginationContent className="w-full flex items-center justify-center lg:justify-end mt-auto pt-6 pb-2 gap-1">
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                        />
                                     </PaginationItem>
-                                ))}
 
-                                <PaginationItem>
-                                    <PaginationNext
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
+                                    {getPageNumbers().map((page, index) => (
+                                        <PaginationItem key={index}>
+                                            {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                                                <PaginationEllipsis />
+                                            ) : (
+                                                <PaginationLink
+                                                    onClick={() => handlePageChange(page)}
+                                                    isActive={page === currentPage}
+                                                    className={page === currentPage ? "bg-gradient-to-r from-[#A892FF] to-[#6C5DDC] text-white cursor-pointer" : "cursor-pointer hover:bg-gray-100"}
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            )}
+                                        </PaginationItem>
+                                    ))}
+
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            )}
                         </div>
 
                     </main>
