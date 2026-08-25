@@ -281,7 +281,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             })()}
 
                             {/* Main Content Card */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
+                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[600px]">
                                 <div className="mb-6 flex justify-between items-center">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
                                     <button
@@ -509,7 +509,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                 </div>
 
                                 {/* Students Table */}
-                                <div className="overflow-x-auto relative min-h-[400px]">
+                                <div className="overflow-x-auto relative flex-1 min-h-[400px]">
                                     {isLoading && (
                                         <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                                             <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
@@ -606,8 +606,9 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                 </div>
 
                                 {/* Pagination */}
-                                <div className="flex justify-end items-center mt-12 mb-2">
-                                    <Pagination className="justify-end mx-0">
+                                {totalPages > 1 && (
+                                    <div className="flex justify-end items-center mt-auto mb-2">
+                                        <Pagination className="justify-end mx-0" totalPages={totalPages}>
                                         <PaginationContent className="gap-2">
                                             <PaginationItem>
                                                 <PaginationPrevious
@@ -661,6 +662,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                         </PaginationContent>
                                     </Pagination>
                                 </div>
+                                )}
                             </div>
                         </div>
                     </main>

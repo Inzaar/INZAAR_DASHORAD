@@ -338,7 +338,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
 
             {/* CNIC */}
             <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-3 lg:order-5">
-              <label className="font-medium text-[14px]">CNIC</label>
+              <label className="font-medium text-[14px]">CNIC / Passport</label>
               <input
                 type="text"
                 name="cnic"

@@ -31,7 +31,7 @@ const ReportsPage = () => {
     const [totalStudents, setTotalStudents] = useState({ count: 0, trend: '+2.7%' });
     const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
     // Filter State
     const [filterStatus, setFilterStatus] = useState('');
@@ -90,7 +90,7 @@ const ReportsPage = () => {
             setTotalStudents(data.totalStudents || { count: 0, trend: '+2.7%' });
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
             if (data.sessionActivity) {
                 setSessionData(data.sessionActivity);
             }
@@ -395,7 +395,7 @@ const ReportsPage = () => {
                             </div>
 
                             {/* Students List Table */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
+                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 flex flex-col flex-1 min-h-[600px]">
                                 <div className="mb-6">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
                                 </div>

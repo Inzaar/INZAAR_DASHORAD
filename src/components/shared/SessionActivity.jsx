@@ -9,6 +9,8 @@ function SessionActivity({ profileData }) {
     const { t } = useTranslation();
     const [sessionData, setSessionData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
 
     const userId = profileData?.user?._id;
 
@@ -22,7 +24,13 @@ function SessionActivity({ profileData }) {
             }
 
             try {
-                const res = await axiosInstance.get(`/session-activity/${userId}`);
+                let url = `/session-activity/${userId}`;
+                const queryParams = new URLSearchParams();
+                if (fromDate) queryParams.append('from', fromDate);
+                if (toDate) queryParams.append('to', toDate);
+                if (queryParams.toString()) url += `?${queryParams.toString()}`;
+
+                const res = await axiosInstance.get(url);
                 const weeklyData = res?.data?.data?.weeklyData;
                 if (weeklyData && weeklyData.length > 0) {
                     setSessionData(weeklyData.map(d => ({
@@ -41,7 +49,7 @@ function SessionActivity({ profileData }) {
         };
 
         fetchSessionActivity();
-    }, [userId]);
+    }, [userId, fromDate, toDate]);
 
     const getDefaultWeek = () => [
         { day: t('auth.mon', 'Mon'), value: 0 },
@@ -55,7 +63,29 @@ function SessionActivity({ profileData }) {
 
     return (
         <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] lg:w-[50%] sm:w-full">
-            <h3 className="text-gray-900 font-medium mb-6">{t('auth.session_activity', 'Session Activity')}</h3>
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+                <h3 className="text-gray-900 font-medium">{t('auth.session_activity', 'Session Activity')}</h3>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                        <label className="text-xs text-gray-500">From:</label>
+                        <input 
+                            type="date" 
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50" 
+                        />
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <label className="text-xs text-gray-500">To:</label>
+                        <input 
+                            type="date" 
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50" 
+                        />
+                    </div>
+                </div>
+            </div>
             <div className="h-[220px] w-full">
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-gray-400 text-sm">

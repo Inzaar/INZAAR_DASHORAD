@@ -7,7 +7,7 @@ import { Loader } from 'lucide-react';
 const SharedStudentTable = ({
     students = [],
     loading = false,
-    pagination = { page: 1, limit: 5, totalPages: 1 },
+    pagination = { page: 1, limit: 10, totalPages: 1 },
     onPageChange,
     title = "Students List",
     showDropdown = false,
@@ -77,7 +77,7 @@ const SharedStudentTable = ({
                 </div>
             ) : (
                 <>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto flex-1">
                         <table className="w-full min-w-[1000px] print:min-w-0 print:w-full border-separate border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
                             <thead>
                                 <tr>
@@ -88,7 +88,7 @@ const SharedStudentTable = ({
                                     {visibleColumns.progress && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
                                     {visibleColumns.lastLogin && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
                                     {visibleColumns.status && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
-                                    {visibleColumns.action && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("action", "Action")}</th>}
+                                    {visibleColumns.action && <th className="text-center font-bold text-[16px] print:hidden text-gray-800 pb-2">{t("action", "Action")}</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -149,7 +149,7 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.action && (
-                                            <td className={`py-4 print:py-1 print:border print:border-black text-center ${Object.values(visibleColumns).every(v=>v) ? 'rounded-r-xl print:rounded-none' : ''}`}>
+                                            <td className={`py-4 print:hidden text-center ${Object.values(visibleColumns).every(v=>v) ? 'rounded-r-xl print:rounded-none' : ''}`}>
                                                 <div className="flex justify-center items-center">
                                                     <GradiantButton
                                                         className="text-[15px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
@@ -166,8 +166,8 @@ const SharedStudentTable = ({
                         </table>
                     </div>
                     {/* Pagination */}
-                    {!hidePagination && (
-                        <div className="flex justify-end items-center gap-2 mt-8 print:hidden">
+                    {!hidePagination && pagination && pagination.totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-auto print:hidden">
                             <button
                             className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-[#7C3AED] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             disabled={pagination.page <= 1}
@@ -214,7 +214,7 @@ const SharedStudentTable = ({
     }
 
     return (
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6 print:rounded-none print:border-none print:shadow-none print:p-0 print:m-0">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6 flex flex-col flex-1 min-h-[600px] print:rounded-none print:border-none print:shadow-none print:p-0 print:m-0">
             {content}
         </div>
     );

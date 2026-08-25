@@ -443,7 +443,8 @@ const Certificates = () => {
                                     )}
 
                                     {/* Pagination */}
-                                    <PaginationContent className="w-full h-10 mt-6 flex items-center justify-end">
+                                    {totalPages > 1 && (
+                                    <PaginationContent className="w-full h-10 mt-auto pt-6 pb-2 flex items-center justify-end">
                                         <PaginationItem>
                                             <PaginationPrevious
                                                 onClick={() => handlePageChange(currentPage - 1)}
@@ -483,6 +484,7 @@ const Certificates = () => {
                                             />
                                         </PaginationItem>
                                     </PaginationContent>
+                                    )}
                                 </div>
                             </div>
                         )}

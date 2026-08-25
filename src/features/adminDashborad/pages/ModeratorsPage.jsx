@@ -121,7 +121,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const fetchModeratorsData = async () => {
         try {
             setIsLoading(true);
-            const res = await getModeratorProfiles(currentPage, 6, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
+            const res = await getModeratorProfiles(currentPage, 10, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
             if (res?.data) {
                 setModerators(res.data.moderators || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -380,9 +380,9 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                 ))}
                             </div>
 
-                            {/* Main Content Card */}
-                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 min-h-[600px] relative">
-                                {isLoading && (
+                           {/* Moderators Grid/List */}
+                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[600px] relative">
+                                {/* Header Controls */}{isLoading && (
                                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-[24px]">
                                         <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
@@ -652,8 +652,8 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="flex justify-end items-center mt-12">
-                                        <Pagination className="mx-0 w-auto">
+                                    <div className="flex justify-end items-center mt-auto">
+                                        <Pagination className="mx-0 w-auto" totalPages={totalPages}>
                                             <PaginationContent className="gap-2">
                                                 <PaginationItem>
                                                     <PaginationPrevious

@@ -23,7 +23,7 @@ const ExportModeratorReportsPage = () => {
     const [totalModerators, setTotalModerators] = useState({ count: 0, trend: '+2.7%' });
     const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
     // Top Filter State
     const [filterStatus, setFilterStatus] = useState('');
@@ -39,6 +39,7 @@ const ExportModeratorReportsPage = () => {
     const [tableSearch, setTableSearch] = useState('');
     const [tableSearchType, setTableSearchType] = useState('NAME');
     const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
+    const [isPrintDropdownOpen, setIsPrintDropdownOpen] = useState(false);
 
     // Column Visibility State
     const [visibleColumns, setVisibleColumns] = useState({
@@ -84,8 +85,8 @@ const ExportModeratorReportsPage = () => {
             setTotalModerators(data.totalModerators || { count: 0, trend: '+2.7%' });
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
         } catch (err) {
             console.error('Failed to fetch moderators report:', err);
         } finally {
@@ -149,6 +150,34 @@ const ExportModeratorReportsPage = () => {
             pages.push(total);
         }
         return pages;
+    };
+
+    const handleExportCSV = () => {
+        const headers = ["Name", "Email", "Phone Number", "Manage Batch's", "Progress", "Last Login", "Status"];
+        const csvRows = [];
+        csvRows.push(headers.join(','));
+        
+        moderators.forEach(mod => {
+            const row = [
+                `"${mod.name || ''}"`,
+                `"${mod.email || ''}"`,
+                `"${mod.phone || ''}"`,
+                `"${(mod.batches || []).join('; ')}"`,
+                `"${mod.progress || ''}"`,
+                `"${formatDate(mod.lastLogin)}"`,
+                `"${mod.status || ''}"`
+            ];
+            csvRows.push(row.join(','));
+        });
+
+        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "moderators_report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const toggleColumn = (col) => {
@@ -358,13 +387,34 @@ const ExportModeratorReportsPage = () => {
                                             <BiFilterAlt className="w-4 h-4" />
                                             {t("clear", "Clear")}
                                         </button>
-                                        <button
-                                            onClick={() => window.print()}
-                                            className="flex items-center gap-2 px-4 h-10 bg-blue-100 text-blue-600 font-bold text-sm rounded hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
-                                        >
-                                            <Printer className="w-4 h-4" />
-                                            Print PDF
-                                        </button>
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
+                                                className="flex items-center gap-2 px-4 h-10 bg-blue-100 text-blue-600 font-bold text-sm rounded hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                            >
+                                                <Printer className="w-4 h-4" />
+                                                Print
+                                            </button>
+                                            {isPrintDropdownOpen && (
+                                                <>
+                                                    <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
+                                                    <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
+                                                        <button
+                                                            onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                                                        >
+                                                            print as pdf
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                            className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                                                        >
+                                                            print as csv
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -381,13 +431,34 @@ const ExportModeratorReportsPage = () => {
                                                     <BiFilterAlt className="w-4 h-4" />
                                                     {t("clear_filter", "Clear Filter")}
                                                 </button>
-                                                <button
-                                                    onClick={() => window.print()}
-                                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-100 text-blue-600 font-bold text-sm rounded hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
-                                                >
-                                                    <Printer className="w-4 h-4" />
-                                                    Print PDF
-                                                </button>
+                                                <div className="flex-1 relative">
+                                                    <button
+                                                        onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
+                                                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-100 text-blue-600 font-bold text-sm rounded hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                                    >
+                                                        <Printer className="w-4 h-4" />
+                                                        Print
+                                                    </button>
+                                                    {isPrintDropdownOpen && (
+                                                        <>
+                                                            <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
+                                                            <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
+                                                                <button
+                                                                    onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                                                                >
+                                                                    print as pdf
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                                                                >
+                                                                    print as csv
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="relative">
                                                 <button

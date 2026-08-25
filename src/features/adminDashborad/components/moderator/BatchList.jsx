@@ -195,8 +195,8 @@ function BatchList({ onClose, moderatorId }) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-2 flex justify-center sm:justify-end overflow-hidden pb-1">
-            <Pagination>
+          <div className="mt-auto pt-4 flex justify-center sm:justify-end overflow-hidden pb-1">
+            <Pagination totalPages={totalPages}>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious

@@ -27,7 +27,7 @@ const CourseReportsPage = () => {
     const [totalCourses, setTotalCourses] = useState({ count: 0, trend: '+2.7%' });
     const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
 
     // Top Filter State
     const [filterStatus, setFilterStatus] = useState('');
@@ -75,7 +75,7 @@ const CourseReportsPage = () => {
             setTotalCourses(data.totalCourses || { count: 0, trend: '+2.7%' });
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
             if (data.sessionActivity) {
                 setSessionData(data.sessionActivity);
             }
@@ -299,7 +299,7 @@ const CourseReportsPage = () => {
                             </div>
 
                             {/* Courses List Table */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
+                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 flex flex-col flex-1 min-h-[500px]">
                                 <div className="mb-6">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">{t("courses_list", "Courses List")}</h3>
                                 </div>
@@ -457,7 +457,7 @@ const CourseReportsPage = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="overflow-x-auto">
+                                        <div className="overflow-x-auto flex-1">
                                             <table className="w-full min-w-[1000px]">
                                                 <thead>
                                                     <tr className="border-b border-gray-100">
@@ -508,7 +508,8 @@ const CourseReportsPage = () => {
                                             </table>
                                         </div>
                                         {/* Pagination */}
-                                        <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-8">
+                                        {pagination.totalPages > 1 && (
+                                        <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-auto">
                                             <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40" disabled={pagination.page <= 1} onClick={() => goToPage(pagination.page - 1)}>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                                 {t("previous", "Previous")}
@@ -541,6 +542,7 @@ const CourseReportsPage = () => {
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                             </button>
                                         </div>
+                                        )}
                                     </>
                                 )}
                             </div>
