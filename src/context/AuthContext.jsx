@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }) => {
                     role: profile.role || 'student',
                     profileImageUrl: profile.profileImageUrl || null,
                     assignedFeatures: profile.assignedFeatures || [],
+                    phone: profile.phone || null,
                     loggedIn: true
                 });
             } else {

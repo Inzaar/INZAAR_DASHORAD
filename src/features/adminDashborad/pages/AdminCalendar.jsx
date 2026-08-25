@@ -1177,6 +1177,15 @@ const AdminCalendar = () => {
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                                         Event Type
                                     </div>
+                                    <div className="mb-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Or type custom event type..."
+                                            value={eventType}
+                                            onChange={(e) => setEventType(e.target.value)}
+                                            className="w-full h-[48px] border border-gray-200 rounded-[8px] px-4 text-[14px] outline-none focus:border-[#3758EE] placeholder:text-gray-400"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {[
                                             { label: "Jummah Khutbah", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" /></svg>, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
@@ -1263,7 +1272,7 @@ const AdminCalendar = () => {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                             Start Time
                                         </div>
-                                        <input 
+                                        <input
                                             type="time"
                                             value={eventTime}
                                             onChange={(e) => setEventTime(e.target.value)}

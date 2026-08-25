@@ -20,6 +20,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [showWhatsappModal, setShowWhatsappModal] = useState(false);
 
   const handleEnroll = async () => {
     if (user?.role === 'guest') {
@@ -31,6 +32,11 @@ const CardCourse = ({ course, isAdmin = false }) => {
       // Navigate to admin course details page (placeholder for now)
       console.log("Navigating to admin course details for:", course.id);
       navigate(`/admin-course-view/${course.id}`);
+      return;
+    }
+
+    if (!user?.phone || user?.phone.trim() === '') {
+      setShowWhatsappModal(true);
       return;
     }
 
@@ -101,14 +107,13 @@ const CardCourse = ({ course, isAdmin = false }) => {
           </div>
         </div>
 
-        {/* Button Section */}
         <div className="mt-1">
           <GradiantButton
-            className="px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all w-fit"
-            onClick={handleEnroll}
+            className="px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[140px]"
+            onClick={course.isEnrolled ? () => navigate("/course-view?id=" + course.id) : handleEnroll}
             disabled={isEnrolling}
           >
-            {isAdmin ? t("view_details", "View Details") : t("enroll_now", "Enroll now")}
+            {isAdmin ? t("view_details", "View Details") : (course.isEnrolled ? t("already_enroll", "Already enroll") : t("enroll_now", "Enroll now"))}
           </GradiantButton>
         </div>
       </div>
@@ -187,6 +192,38 @@ const CardCourse = ({ course, isAdmin = false }) => {
               >
                 Sign In / Create Account
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Error Modal */}
+      {showWhatsappModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowWhatsappModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col items-center text-center gap-5 pt-2">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{t("notice", "Notice")}</h3>
+                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
+                  {t("add_whatsapp_number_to_enroll", "Please add your WhatsApp number in your profile to enroll in this course.")}
+                </p>
+              </div>
+              <GradiantButton
+                onClick={() => {
+                  setShowWhatsappModal(false);
+                  navigate('/profile');
+                }}
+                className="mt-2 w-full py-2.5 rounded-xl text-[14px]"
+              >
+                {t("go_to_profile", "Go to Profile")}
+              </GradiantButton>
             </div>
           </div>
         </div>

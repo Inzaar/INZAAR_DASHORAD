@@ -124,18 +124,6 @@ const HoursSpentCard = ({
             {/* Header & Legend */}
             <div className="flex flex-col gap-4">
                 <h3 className="text-lg font-bold text-black leading-normal pb-1">{name}</h3>
-                {!isModerator && name === "Hours Spent" && (
-                    <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-[2px] bg-gradient-to-r from-[#3758EE] to-[#B666E7]"></div>
-                            <span className="text-gray-500">{t("spend_time", "Spend time")}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-[2px] bg-[#E0E7FF]"></div>
-                            <span className="text-gray-500">{t("expected_time", "Expected Time")}</span>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Chart Area */}
@@ -178,12 +166,6 @@ const HoursSpentCard = ({
                                             <div className="w-2 h-2 rounded-full bg-[#B666E7]"></div>
                                             <span>{item.spent}{unit}</span>
                                         </div>
-                                        {!isModerator && (
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-[#E0E7FF]"></div>
-                                                <span>{item.expected}{unit}</span>
-                                            </div>
-                                        )}
                                         {/* Arrow */}
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#3758EE]"></div>
                                     </div>
@@ -197,27 +179,21 @@ const HoursSpentCard = ({
                                     {/* Expected Bar (Background) */}
                                     {!isModerator && (
                                         <div
-                                            className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-full transition-all duration-500"
+                                            className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-t-[8px] transition-all duration-500"
                                             style={{ height: `${expectedHeight}%` }}
                                         ></div>
                                     )}
 
                                     {/* Spent Bar (Foreground) */}
                                     <div
-                                        className={cn(
-                                            "absolute bottom-0 w-full rounded-[8px] transition-all duration-500",
-                                            isModerator ? "bg-gradient-to-r from-[#A3A6F4] to-[#B393F5]" : "bg-gradient-to-b from-[#B666E7] to-[#3758EE]"
-                                        )}
+                                        className="absolute bottom-0 w-full rounded-t-[8px] transition-all duration-500 bg-gradient-to-r from-[#A3A6F4] to-[#B393F5]"
                                         style={{ height: `${spentHeight}%` }}
                                     ></div>
                                 </div>
 
                                 {/* X-Axis Label */}
-                                <span className={cn(
-                                    "text-xs mt-3",
-                                    isModerator ? "text-[#C154F2] font-semibold underline decoration-1 underline-offset-2 uppercase" : "text-gray-400"
-                                )}>
-                                    {isModerator ? item.day.toUpperCase() : item.day}
+                                <span className="text-xs mt-3 text-[#C154F2] font-semibold underline decoration-1 underline-offset-2 uppercase">
+                                    {item.day.toUpperCase()}
                                 </span>
                             </div>
                         );
