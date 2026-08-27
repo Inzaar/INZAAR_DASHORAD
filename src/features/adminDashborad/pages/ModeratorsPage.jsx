@@ -676,7 +676,6 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                                     <PaginationLink
                                                                         onClick={() => !isLoading && setCurrentPage(i)}
                                                                         isActive={isActive}
-                                                                        className={`cursor-pointer w-10 h-10 border-none rounded-[12px] text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200 hover:text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-[#7C3AED]'}`}
                                                                     >
                                                                         {i}
                                                                     </PaginationLink>

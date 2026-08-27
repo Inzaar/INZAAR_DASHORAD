@@ -54,10 +54,17 @@ function PaginationLink({
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}
-      className={cn(buttonVariants({
-        variant: isActive ? "outline" : "ghost",
-        size,
-      }), className)}
+      className={cn(
+        buttonVariants({
+          variant: "ghost",
+          size,
+        }),
+        isActive 
+          ? "bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white shadow-sm hover:text-white"
+          : "hover:bg-gray-100 text-gray-700",
+        "border-none cursor-pointer rounded-[8px]",
+        className
+      )}
       {...props} />
   );
 }

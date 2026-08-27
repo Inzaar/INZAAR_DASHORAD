@@ -633,7 +633,6 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 <PaginationLink
                                                                     onClick={() => !isLoading && setCurrentPage(i)}
                                                                     isActive={isActive}
-                                                                    className={`cursor-pointer w-10 h-10 border-none rounded-[8px] text-[14px] font-bold transition-all ${isActive ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-md hover:text-white' : 'text-gray-600 hover:bg-gray-100'}`}
                                                                 >
                                                                     {i}
                                                                 </PaginationLink>
