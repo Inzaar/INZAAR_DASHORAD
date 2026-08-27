@@ -190,7 +190,8 @@ import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import Input1 from '@/components/ui/inputs/Input1';
-import { isWithinInterval, startOfDay } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import { CustomPagination } from '@/components/ui/Pagination';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event';
 import { getAllCourses } from '@/api/course';
 import { toast } from 'react-hot-toast';
@@ -206,7 +207,7 @@ const AdminCalendar = () => {
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const itemsPerPage = 5;
 
     const fetchEvents = async () => {
         try {
@@ -691,8 +692,8 @@ const AdminCalendar = () => {
     };
 
     return (
-        <div className="min-h-screen lg:h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 min-h-screen lg:h-screen overflow-x-hidden lg:overflow-hidden gap-4">
+        <div className="h-screen w-screen flex items-center justify-center">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} title="Calendar" />
                 <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-visible lg:overflow-hidden relative pb-4'>
 
@@ -712,7 +713,10 @@ const AdminCalendar = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 flex flex-col gap-4 overflow-y-visible lg:overflow-y-auto no-scrollbar scrollbar-hide pb-10 lg:pb-0">
+                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide pb-10 lg:pb-0" style={{
+                        msOverflowStyle: 'none',
+                        scrollbarWidth: 'none'
+                    }}>
                         {/* Toggle Switch */}
                         <div className="flex w-fit mb-6 bg-[#F8F9FA] rounded-[6px] border border-gray-200 p-1">
                             <button
@@ -801,7 +805,7 @@ const AdminCalendar = () => {
                         {view === 'calendar' ? (
                             <>
                                 {/* React Calendar Section */}
-                                <div className="bg-white rounded-xl border p-4 sm:p-6 shadow-sm flex-col custom-calendar-container mb-6 flex overflow-visible min-h-[500px] shrink-0">
+                                <div className="bg-white rounded-xl border p-4 sm:p-6 shadow-sm flex-col custom-calendar-container mb-6 flex overflow-visible h-fit shrink-0">
 
                                     {/* Custom Header */}
                                     <div className="flex flex-col w-full mb-2">
@@ -880,7 +884,7 @@ const AdminCalendar = () => {
                                         </div>
                                     </div>
 
-                                    <div className="overflow-x-auto flex-1 w-full custom-scrollbar">
+                                    <div className="overflow-x-auto w-full custom-scrollbar">
                                         <div className="min-w-[800px] pb-4">
                                             <Calendar
                                                 onChange={(val) => {
@@ -907,7 +911,7 @@ const AdminCalendar = () => {
                                 </div>
                             </>
                         ) : (
-                            <div className="bg-white rounded-xl border border-[#EAEDF2] shadow-sm flex-1 flex flex-col overflow-hidden mb-6">
+                            <div className="bg-white rounded-xl border border-[#EAEDF2] shadow-sm flex flex-col overflow-hidden mb-6">
                                 <div className="p-6 border-b border-[#EAEDF2]">
                                     <h2 className="text-[18px] font-bold text-gray-800">{t('event_table', 'Event Table')}</h2>
                                 </div>
@@ -1000,48 +1004,15 @@ const AdminCalendar = () => {
                                 </div>
 
                                 {/* Pagination matching the design */}
-                                <div className="p-6 border-t border-[#EAEDF2] flex justify-end">
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => paginate(Math.max(1, currentPage - 1))}
-                                            disabled={currentPage === 1}
-                                            className={`flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-800'}`}
-                                        >
-                                            <span className="text-xl leading-none mb-1">‹</span> {t('previous', 'Previous')}
-                                        </button>
-
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
-                                            // Show limited pages if many
-                                            if (totalPages > 5) {
-                                                if (number !== 1 && number !== totalPages && Math.abs(number - currentPage) > 1) {
-                                                    if (Math.abs(number - currentPage) === 2) return <span key={number} className="px-1 text-gray-400">...</span>;
-                                                    return null;
-                                                }
-                                            }
-
-                                            return (
-                                                <button
-                                                    key={number}
-                                                    onClick={() => paginate(number)}
-                                                    className={`w-9 h-9 flex items-center justify-center rounded-lg text-[14px] font-medium transition-all ${currentPage === number
-                                                        ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/30'
-                                                        : 'text-gray-600 hover:bg-gray-100'
-                                                        }`}
-                                                >
-                                                    {number}
-                                                </button>
-                                            );
-                                        })}
-
-                                        <button
-                                            onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                                            disabled={currentPage === totalPages || totalPages === 0}
-                                            className={`flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${currentPage === totalPages || totalPages === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-800'}`}
-                                        >
-                                            {t('next', 'Next')} <span className="text-xl leading-none mb-1">›</span>
-                                        </button>
+                                {totalPages > 1 && (
+                                    <div className="p-6 border-t border-[#EAEDF2] flex justify-end">
+                                        <CustomPagination 
+                                            currentPage={currentPage} 
+                                            totalPages={totalPages} 
+                                            onPageChange={(p) => paginate(p)} 
+                                        />
                                     </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </main>
@@ -1084,7 +1055,7 @@ const AdminCalendar = () => {
                         padding: 2px !important;
                     }
                     .react-calendar__month-view__weekdays { font-size: 0.65rem; padding-bottom: 8px; }
-                    .custom-calendar-container { min-height: 500px !important; }
+                    .custom-calendar-container { height: fit-content; }
                 }
             `}} />
 

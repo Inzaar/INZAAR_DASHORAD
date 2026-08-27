@@ -1,3 +1,4 @@
+import { CustomPagination } from '@/components/ui/Pagination';
 import React, { useEffect, useState } from 'react';
 import { Search, Download, Lock, Loader } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -402,45 +403,13 @@ const StudentCertificates = ({ profileData }) => {
 
                                     {/* Pagination */}
                                     {totalPages > 1 && (
-                                    <PaginationContent className="w-full h-10 mt-auto pt-6 pb-2 flex items-center justify-end">
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                onClick={() => handlePageChange(currentPage - 1)}
-                                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                        <div className="w-full h-10 mt-auto pt-6 pb-2 flex items-center justify-end">
+                                            <CustomPagination 
+                                                currentPage={currentPage} 
+                                                totalPages={totalPages} 
+                                                onPageChange={handlePageChange} 
                                             />
-                                        </PaginationItem>
-                                        {getPageNumbers().map((page, index) => (
-                                            <PaginationItem key={index}>
-                                                {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                                                    <PaginationEllipsis
-                                                        onClick={() => {
-                                                            const blockSize = 4;
-                                                            const currentBlock = Math.ceil(currentPage / blockSize);
-                                                            if (page === 'ellipsis-start') {
-                                                                handlePageChange((currentBlock - 2) * blockSize + 1);
-                                                            } else {
-                                                                handlePageChange(currentBlock * blockSize + 1);
-                                                            }
-                                                        }}
-                                                        className="cursor-pointer hover:bg-gray-100 rounded-md transition-colors"
-                                                    />
-                                                ) : (
-                                                    <PaginationLink
-                                                        onClick={() => handlePageChange(page)}
-                                                        isActive={page === currentPage}
-                                                    >
-                                                        {page}
-                                                    </PaginationLink>
-                                                )}
-                                            </PaginationItem>
-                                        ))}
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                onClick={() => handlePageChange(currentPage + 1)}
-                                                className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                            />
-                                        </PaginationItem>
-                                    </PaginationContent>
+                                        </div>
                                     )}
                                 </div>
                             </div>

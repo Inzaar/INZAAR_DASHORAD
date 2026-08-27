@@ -1,3 +1,4 @@
+import { CustomPagination } from '@/components/ui/Pagination';
 import React, { useEffect } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -275,36 +276,13 @@ const Courses = () => {
                             </div>
 
                             {totalPages > 1 && (
-                                <PaginationContent className="w-full flex items-center justify-center lg:justify-end mt-auto pt-6 pb-2 gap-1">
-                                    <PaginationItem>
-                                        <PaginationPrevious
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                        />
-                                    </PaginationItem>
-
-                                    {getPageNumbers().map((page, index) => (
-                                        <PaginationItem key={index}>
-                                            {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                                                <PaginationEllipsis />
-                                            ) : (
-                                                <PaginationLink
-                                                    onClick={() => handlePageChange(page)}
-                                                    isActive={page === currentPage}
-                                                >
-                                                    {page}
-                                                </PaginationLink>
-                                            )}
-                                        </PaginationItem>
-                                    ))}
-
-                                    <PaginationItem>
-                                        <PaginationNext
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                        />
-                                    </PaginationItem>
-                                </PaginationContent>
+                                <div className="w-full flex items-center justify-end lg:justify-end mt-auto pt-6 pb-2 gap-1">
+                                    <CustomPagination 
+                                        currentPage={currentPage} 
+                                        totalPages={totalPages} 
+                                        onPageChange={handlePageChange} 
+                                    />
+                                </div>
                             )}
                         </div>
 

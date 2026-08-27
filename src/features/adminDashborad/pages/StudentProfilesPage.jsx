@@ -12,13 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import { getStudentProfiles, adminCreateStudent } from '@/api/user';
 import { useAuth } from '@/context/AuthContext';
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
+    CustomPagination
 } from "@/components/ui/Pagination";
 
 const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
@@ -608,59 +604,12 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                 {/* Pagination */}
                                 {totalPages > 1 && (
                                     <div className="flex justify-end items-center mt-auto mb-2">
-                                        <Pagination className="justify-end mx-0" totalPages={totalPages}>
-                                        <PaginationContent className="gap-2">
-                                            <PaginationItem>
-                                                <PaginationPrevious
-                                                    onClick={() => !isLoading && currentPage > 1 && setCurrentPage(prev => prev - 1)}
-                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
-                                                />
-                                            </PaginationItem>
-
-                                            {(() => {
-                                                const pages = [];
-                                                const showMax = 3; // Pages around current
-
-                                                for (let i = 1; i <= totalPages; i++) {
-                                                    if (
-                                                        i === 1 ||
-                                                        i === totalPages ||
-                                                        (i >= currentPage - 1 && i <= currentPage + 1)
-                                                    ) {
-                                                        const isActive = currentPage === i;
-                                                        pages.push(
-                                                            <PaginationItem key={i}>
-                                                                <PaginationLink
-                                                                    onClick={() => !isLoading && setCurrentPage(i)}
-                                                                    isActive={isActive}
-                                                                >
-                                                                    {i}
-                                                                </PaginationLink>
-                                                            </PaginationItem>
-                                                        );
-                                                    } else if (
-                                                        (i === currentPage - 2 && i > 1) ||
-                                                        (i === currentPage + 2 && i < totalPages)
-                                                    ) {
-                                                        pages.push(
-                                                            <PaginationItem key={i}>
-                                                                <PaginationEllipsis className="text-gray-400" />
-                                                            </PaginationItem>
-                                                        );
-                                                    }
-                                                }
-                                                return pages;
-                                            })()}
-
-                                            <PaginationItem>
-                                                <PaginationNext
-                                                    onClick={() => !isLoading && currentPage < totalPages && setCurrentPage(prev => prev + 1)}
-                                                    className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
-                                                />
-                                            </PaginationItem>
-                                        </PaginationContent>
-                                    </Pagination>
-                                </div>
+                                        <CustomPagination 
+                                            currentPage={currentPage} 
+                                            totalPages={totalPages} 
+                                            onPageChange={(p) => { if (!isLoading) setCurrentPage(p); }} 
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>

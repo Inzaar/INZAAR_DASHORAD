@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { CustomPagination } from '@/components/ui/Pagination';
 import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown, Loader } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
@@ -30,7 +31,7 @@ const ModeratorReportsPage = () => {
     const [totalModerators, setTotalModerators] = useState({ count: 0, trend: '+2.7%' });
     const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
     // Top Filter State
     const [filterStatus, setFilterStatus] = useState('');
@@ -85,7 +86,7 @@ const ModeratorReportsPage = () => {
             setTotalModerators(data.totalModerators || { count: 0, trend: '+2.7%' });
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
-            setPagination(data.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
             if (data.sessionActivity) {
                 setSessionData(data.sessionActivity);
             }
@@ -135,22 +136,6 @@ const ModeratorReportsPage = () => {
         const d = new Date(dateStr);
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
-    };
-
-    const getPageNumbers = () => {
-        const pages = [];
-        const total = pagination.totalPages;
-        const current = pagination.page;
-        if (total <= 5) {
-            for (let i = 1; i <= total; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            if (current > 3) pages.push('...');
-            for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
-            if (current < total - 2) pages.push('...');
-            pages.push(total);
-        }
-        return pages;
     };
 
     return (
@@ -585,39 +570,13 @@ const ModeratorReportsPage = () => {
                                         </div>
                                         {/* Pagination */}
                                         {pagination.totalPages > 1 && (
-                                        <div className="flex flex-wrap justify-between min-[600px]:justify-end items-center gap-2 mt-auto">
-                                            <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40" disabled={pagination.page <= 1} onClick={() => goToPage(pagination.page - 1)}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                                {t("previous", "Previous")}
-                                            </button>
-                                            <div className="flex items-center gap-1">
-                                                {getPageNumbers().map((p, idx) => (
-                                                    p === '...' ? (
-                                                        <span key={`dot-${idx}`} className="text-gray-400">...</span>
-                                                    ) : p === pagination.page ? (
-                                                        <GradiantButton
-                                                            key={p}
-                                                            onClick={() => goToPage(p)}
-                                                            className="w-8 h-8 !p-0 flex items-center justify-center text-sm font-bold rounded-lg shadow-sm"
-                                                        >
-                                                            {p}
-                                                        </GradiantButton>
-                                                    ) : (
-                                                        <button
-                                                            key={p}
-                                                            onClick={() => goToPage(p)}
-                                                            className="w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg text-gray-600 hover:bg-gray-100"
-                                                        >
-                                                            {p}
-                                                        </button>
-                                                    )
-                                                ))}
+                                            <div className="flex justify-end items-center mt-auto">
+                                                <CustomPagination 
+                                                    currentPage={pagination.page} 
+                                                    totalPages={pagination.totalPages} 
+                                                    onPageChange={goToPage} 
+                                                />
                                             </div>
-                                            <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-40" disabled={pagination.page >= pagination.totalPages} onClick={() => goToPage(pagination.page + 1)}>
-                                                {t("next", "Next")}
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                            </button>
-                                        </div>
                                         )}
                                     </>
                                 )}

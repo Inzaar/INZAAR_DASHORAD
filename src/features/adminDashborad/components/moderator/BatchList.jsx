@@ -1,3 +1,4 @@
+import { CustomPagination } from '@/components/ui/Pagination';
 import React, { useState } from 'react';
 import batchlist from "../../../../assets/images/batchlist.png"
 import GradiantButton from '@/components/ui/buttons/GradiantButton'
@@ -195,45 +196,12 @@ function BatchList({ onClose, moderatorId }) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-auto pt-4 flex justify-center sm:justify-end overflow-hidden pb-1">
-            <Pagination totalPages={totalPages}>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(prev => Math.max(1, prev - 1));
-                    }}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      href="#"
-                      isActive={currentPage === pageNumber}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentPage(pageNumber);
-                      }}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage(prev => Math.min(totalPages, prev + 1));
-                    }}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+          <div className="mt-auto pt-4 flex justify-end items-center overflow-hidden pb-1">
+            <CustomPagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={(p) => setCurrentPage(p)} 
+            />
           </div>
         )}
       </div>

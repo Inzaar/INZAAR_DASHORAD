@@ -108,41 +108,12 @@ function ModeratorBatchesComponent({ profileData, onEditClick, onViewDetails }) 
 
                 {/* Pagination — functional */}
                 {totalPages > 1 && (
-                    <div className="flex justify-end items-center gap-2 mt-8">
-                        <button
-                            onClick={() => goToPage(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className={`flex items-center gap-1 text-sm font-medium transition ${currentPage === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-900"}`}
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                            Previous
-                        </button>
-
-                        {getPageNumbers().map((page, idx) => (
-                            page === "..." ? (
-                                <span key={`dots-${idx}`} className="text-gray-400">...</span>
-                            ) : (
-                                <button
-                                    key={page}
-                                    onClick={() => goToPage(page)}
-                                    className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition ${currentPage === page
-                                        ? "font-bold text-white bg-[#6366F1] shadow-sm"
-                                        : "text-gray-600 hover:bg-gray-100"
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            )
-                        ))}
-
-                        <button
-                            onClick={() => goToPage(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className={`flex items-center gap-1 text-sm font-medium transition ${currentPage === totalPages ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-900"}`}
-                        >
-                            {t("next", "Next")}
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                        </button>
+                    <div className="flex justify-end items-center mt-8">
+                        <CustomPagination 
+                            currentPage={currentPage} 
+                            totalPages={totalPages} 
+                            onPageChange={goToPage} 
+                        />
                     </div>
                 )}
             </div>
