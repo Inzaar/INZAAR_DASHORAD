@@ -13,13 +13,9 @@ import { getModeratorProfiles, adminCreateModerator, getAllUsers } from '@/api/u
 import { checkUsername, checkEmail } from '@/api/auth';
 import AssignModeratorModal from '../components/student/AssignModeratorModal';
 import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
+    CustomPagination
 } from "@/components/ui/Pagination";
 
 const ModeratorsPage = ({ genderFilter = "All" }) => {
@@ -121,7 +117,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const fetchModeratorsData = async () => {
         try {
             setIsLoading(true);
-            const res = await getModeratorProfiles(currentPage, 10, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
+            const res = await getModeratorProfiles(currentPage, 6, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
             if (res?.data) {
                 setModerators(res.data.moderators || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -652,57 +648,12 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="flex justify-end items-center mt-auto">
-                                        <Pagination className="mx-0 w-auto" totalPages={totalPages}>
-                                            <PaginationContent className="gap-2">
-                                                <PaginationItem>
-                                                    <PaginationPrevious
-                                                        onClick={() => !isLoading && currentPage > 1 && setCurrentPage(prev => prev - 1)}
-                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === 1 ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
-                                                    />
-                                                </PaginationItem>
-
-                                                {(() => {
-                                                    const pages = [];
-                                                    for (let i = 1; i <= totalPages; i++) {
-                                                        if (
-                                                            i === 1 ||
-                                                            i === totalPages ||
-                                                            (i >= currentPage - 1 && i <= currentPage + 1)
-                                                        ) {
-                                                            const isActive = currentPage === i;
-                                                            pages.push(
-                                                                <PaginationItem key={i}>
-                                                                    <PaginationLink
-                                                                        onClick={() => !isLoading && setCurrentPage(i)}
-                                                                        isActive={isActive}
-                                                                    >
-                                                                        {i}
-                                                                    </PaginationLink>
-                                                                </PaginationItem>
-                                                            );
-                                                        } else if (
-                                                            (i === currentPage - 2 && i > 1) ||
-                                                            (i === currentPage + 2 && i < totalPages)
-                                                        ) {
-                                                            pages.push(
-                                                                <PaginationItem key={i}>
-                                                                    <PaginationEllipsis className="text-gray-400" />
-                                                                </PaginationItem>
-                                                            );
-                                                        }
-                                                    }
-                                                    return pages;
-                                                })()}
-
-                                                <PaginationItem>
-                                                    <PaginationNext
-                                                        onClick={() => !isLoading && currentPage < totalPages && setCurrentPage(prev => prev + 1)}
-                                                        className={`cursor-pointer border-none hover:bg-transparent ${currentPage === totalPages ? 'text-gray-200 pointer-events-none' : 'text-gray-500 hover:text-[#7C3AED]'}`}
-                                                    />
-                                                </PaginationItem>
-                                            </PaginationContent>
-                                        </Pagination>
+                                    <div className="flex justify-end items-center mt-auto mb-2">
+                                        <CustomPagination 
+                                            currentPage={currentPage} 
+                                            totalPages={totalPages} 
+                                            onPageChange={(p) => { if (!isLoading) setCurrentPage(p); }} 
+                                        />
                                     </div>
                                 )}
                             </div>

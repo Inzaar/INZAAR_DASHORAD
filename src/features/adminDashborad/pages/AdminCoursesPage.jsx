@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
 import { useTranslation } from 'react-i18next';
+import { CustomPagination } from '@/components/ui/Pagination';
 
 const AdminCoursesPage = () => {
     const { t } = useTranslation();
@@ -22,16 +23,8 @@ const AdminCoursesPage = () => {
     const [courses, setCourses] = useState([]);
     const [courseStats, setCourseStats] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(window.innerWidth < 640 ? 4 : 12);
+    const [itemsPerPage, setItemsPerPage] = useState(8);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setItemsPerPage(window.innerWidth < 640 ? 4 : 12);
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -296,59 +289,14 @@ const AdminCoursesPage = () => {
                                     </div>
                                 )}
 
-                                {/* Enhanced Pagination */}
-                                {filteredCourses.length > itemsPerPage && (
-                                    <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 mt-10 pb-6">
-                                        <button
-                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                            disabled={currentPage === 1}
-                                            className={`flex items-center gap-1 px-2 sm:px-3 py-2 text-sm font-medium transition-colors ${currentPage === 1
-                                                ? 'text-gray-300 cursor-not-allowed'
-                                                : 'text-gray-500 hover:text-[#7C3AED]'
-                                                }`}
-                                        >
-                                            <ChevronLeft size={18} />
-                                            <span className="hidden sm:inline">Previous</span>
-                                        </button>
-
-                                        <div className="flex items-center gap-1">
-                                            {(() => {
-                                                const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
-                                                const pages = [];
-                                                const maxVisible = window.innerWidth < 640 ? 3 : 5;
-                                                let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-                                                let end = Math.min(totalPages, start + maxVisible - 1);
-                                                if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
-
-                                                for (let i = start; i <= end; i++) {
-                                                    pages.push(
-                                                        <button
-                                                            key={i}
-                                                            onClick={() => setCurrentPage(i)}
-                                                            className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-[12px] transition-all ${currentPage === i
-                                                                ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
-                                                                : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
-                                                                }`}
-                                                        >
-                                                            {i}
-                                                        </button>
-                                                    );
-                                                }
-                                                return pages;
-                                            })()}
-                                        </div>
-
-                                        <button
-                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredCourses.length / itemsPerPage), prev + 1))}
-                                            disabled={currentPage === Math.ceil(filteredCourses.length / itemsPerPage)}
-                                            className={`flex items-center gap-1 px-2 sm:px-3 py-2 text-sm font-medium transition-colors ${currentPage === Math.ceil(filteredCourses.length / itemsPerPage)
-                                                ? 'text-gray-300 cursor-not-allowed'
-                                                : 'text-gray-500 hover:text-[#7C3AED]'
-                                                }`}
-                                        >
-                                            <span className="hidden sm:inline">{t("next", "Next")}</span>
-                                            <ChevronRight size={18} />
-                                        </button>
+                                {/* Pagination */}
+                                {Math.ceil(filteredCourses.length / itemsPerPage) > 1 && (
+                                    <div className="flex justify-end items-center mt-12 w-full">
+                                        <CustomPagination 
+                                            currentPage={currentPage} 
+                                            totalPages={Math.ceil(filteredCourses.length / itemsPerPage)} 
+                                            onPageChange={(p) => setCurrentPage(p)} 
+                                        />
                                     </div>
                                 )}
                             </div>

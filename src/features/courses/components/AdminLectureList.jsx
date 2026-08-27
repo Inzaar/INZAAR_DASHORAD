@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { CustomPagination } from '@/components/ui/Pagination';
 import React, { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -142,43 +143,12 @@ const AdminLectureList = ({ lectures, onWatch, id }) => {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex justify-end items-center gap-1 sm:gap-2 mt-8 pb-4">
-                        <button 
-                            disabled={currentPage === 1}
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            className={`flex items-center gap-1 text-sm font-medium transition-colors ${currentPage === 1
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-500 hover:text-[#7C3AED]'
-                                }`}
-                        >
-                            <ChevronLeft size={18} /> <span className="hidden sm:inline">Previous</span>
-                        </button>
-                        
-                        <div className="flex items-center gap-1">
-                            {Array.from({ length: totalPages }).map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => handlePageChange(idx + 1)}
-                                    className={`w-9 h-9 flex items-center justify-center rounded-[12px] text-sm font-bold transition-all ${currentPage === idx + 1
-                                        ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
-                                        : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
-                                        }`}
-                                >
-                                    {idx + 1}
-                                </button>
-                            ))}
-                        </div>
-                        
-                        <button 
-                            disabled={currentPage === totalPages}
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            className={`flex items-center gap-1 text-sm font-medium transition-colors ${currentPage === totalPages
-                                ? 'text-gray-300 cursor-not-allowed'
-                                : 'text-gray-500 hover:text-[#7C3AED]'
-                                }`}
-                        >
-                            <span className="hidden sm:inline">{t("next", "Next")}</span> <ChevronRight size={18} />
-                        </button>
+                    <div className="flex justify-end items-center mt-8 pb-4">
+                        <CustomPagination 
+                            currentPage={currentPage} 
+                            totalPages={totalPages} 
+                            onPageChange={handlePageChange} 
+                        />
                     </div>
                 )}
             </div>

@@ -1,17 +1,19 @@
 import { useTranslation } from 'react-i18next';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MetricCard from '@/components/shared/MetricCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import CourseCard from '@/components/shared/CourseCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { CustomPagination } from '@/components/ui/Pagination';
 import performance from '@/assets/images/performance.png';
 
 const StudentPerformance = ({ profileData }) => {
     const { t } = useTranslation();
 
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(1);
     const user = profileData?.user || {};
     const enrolledCourses = profileData?.enrolledCourses || [];
 
@@ -52,6 +54,10 @@ const StudentPerformance = ({ profileData }) => {
             sat: 15
         }
     };
+
+    const itemsPerPage = 5;
+    const totalPages = Math.ceil(tableData.length / itemsPerPage);
+    const paginatedData = tableData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <div className="flex flex-col gap-6 py-4">
@@ -190,7 +196,7 @@ const StudentPerformance = ({ profileData }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {tableData.length > 0 ? tableData.map((row) => (
+                            {paginatedData.length > 0 ? paginatedData.map((row) => (
                                 <tr key={row.id} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 font-medium text-gray-900">{row.courseName}</td>
                                     <td className="px-6 py-4">
@@ -233,6 +239,15 @@ const StudentPerformance = ({ profileData }) => {
                         </tbody>
                     </table>
                 </div>
+                {totalPages > 1 && (
+                    <div className="flex justify-end items-center p-4 border-t border-gray-100 w-full">
+                        <CustomPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(p) => setCurrentPage(p)}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

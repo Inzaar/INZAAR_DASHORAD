@@ -20,7 +20,7 @@ function Pagination({
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center mt-auto pt-6 pb-2", className)}
+      className={cn("mx-auto flex w-full justify-end mt-auto pt-6 pb-2", className)}
       {...props} />
   );
 }
@@ -60,8 +60,8 @@ function PaginationLink({
           size,
         }),
         isActive 
-          ? "bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white shadow-sm hover:text-white"
-          : "hover:bg-gray-100 text-gray-700",
+          ? "bg-gradient-to-r from-[#5D6AF7] to-[#A15DF6] text-white shadow-[0_4px_10px_rgba(93,106,247,0.3)] hover:text-white"
+          : "hover:bg-gray-100 text-gray-500",
         "border-none cursor-pointer rounded-[8px]",
         className
       )}
@@ -78,7 +78,7 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
+      className={cn("gap-1.5 px-3 hover:bg-transparent text-[#94A3B8] transition-colors duration-200", className)}
       {...props}>
       <ChevronLeftIcon className="size-4" />
       <span className="hidden sm:inline font-medium">{t('previous', 'Previous')}</span>
@@ -95,7 +95,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("gap-1.5 px-3 hover:bg-gray-100 transition-colors duration-200", className)}
+      className={cn("gap-1.5 px-3 hover:bg-transparent text-[#94A3B8] transition-colors duration-200", className)}
       {...props}>
       <span className="hidden sm:inline font-medium">{t('next', 'Next')}</span>
       <ChevronRightIcon className="size-4" />
@@ -127,4 +127,49 @@ export {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
+}
+
+export function CustomPagination({ currentPage, totalPages, onPageChange }) {
+    if (!totalPages || totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+        const pages = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
+    return (
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => { e.preventDefault(); if (currentPage > 1) onPageChange(currentPage - 1); }}
+                        className={currentPage <= 1 ? "opacity-50 pointer-events-none" : ""}
+                    />
+                </PaginationItem>
+                {getPageNumbers().map(p => (
+                    <PaginationItem key={p}>
+                        <PaginationLink 
+                            href="#"
+                            isActive={p === currentPage}
+                            onClick={(e) => { e.preventDefault(); onPageChange(p); }}
+                            className="font-semibold w-9 h-9"
+                        >
+                            {p}
+                        </PaginationLink>
+                    </PaginationItem>
+                ))}
+                <PaginationItem>
+                    <PaginationNext 
+                        href="#" 
+                        onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) onPageChange(currentPage + 1); }}
+                        className={currentPage >= totalPages ? "opacity-50 pointer-events-none" : ""}
+                    />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+    );
 }
