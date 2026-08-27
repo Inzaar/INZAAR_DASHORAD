@@ -574,7 +574,7 @@ const ModeratorReportsPage = () => {
                                                                 </span>
                                                             </td>
                                                             <td className="py-4 text-center">
-                                                                <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
+                                                                <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
                                                                     {t("view_profile", "View Profile")}
                                                                 </GradiantButton>
                                                             </td>

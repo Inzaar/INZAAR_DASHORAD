@@ -179,14 +179,14 @@ const HoursSpentCard = ({
                                     {/* Expected Bar (Background) */}
                                     {!isModerator && (
                                         <div
-                                            className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-t-[8px] transition-all duration-500"
+                                            className="absolute bottom-0 w-full bg-[#E0E7FF] rounded-[8px] transition-all duration-500"
                                             style={{ height: `${expectedHeight}%` }}
                                         ></div>
                                     )}
 
                                     {/* Spent Bar (Foreground) */}
                                     <div
-                                        className="absolute bottom-0 w-full rounded-t-[8px] transition-all duration-500 bg-gradient-to-r from-[#A3A6F4] to-[#B393F5]"
+                                        className="absolute bottom-0 w-full rounded-[8px] transition-all duration-500 bg-gradient-to-r from-[#A3A6F4] to-[#B393F5]"
                                         style={{ height: `${spentHeight}%` }}
                                     ></div>
                                 </div>

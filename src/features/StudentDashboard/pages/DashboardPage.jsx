@@ -161,7 +161,7 @@ const DashboardPage = () => {
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     {t('enrolled_new_course', 'Enrolled New Course')}
                                 </GradiantButton>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:flex hidden items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     +
                                 </GradiantButton>
                             </div>

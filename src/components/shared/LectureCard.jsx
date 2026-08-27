@@ -57,7 +57,7 @@ const LectureCard = ({
 
                 {/* Bottom Section - Play Button */}
                 <div className="flex justify-center mt-auto">
-                    <GradiantButton className="px-6 py-2 rounded-lg">{t("play", "Play")}</GradiantButton>
+                    <GradiantButton className="px-10 py-1 rounded-lg text-sm">{t("play", "Play")}</GradiantButton>
                 </div>
             </div>
         </div>

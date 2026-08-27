@@ -589,7 +589,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             </span>
                                                         </td>
                                                         <td className="py-4 text-center rounded-r-xl">
-                                                            <div className="flex justify-center items-center">
+                                                            <div className="flex justify-center items-center w-full">
                                                                 <button
                                                                     onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                                     className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
