@@ -15,6 +15,7 @@ import Analytics from '@/features/StudentDashboard/components/Analytics';
 import { getAdminCourseById, deleteCourse, updateCourse } from '@/api/course';
 import toast from 'react-hot-toast';
 import DeleteCourseModal from '../components/DeleteCourseModal';
+import { CustomPagination } from '@/components/ui/Pagination';
 
 const AdminCourseDetailPage = () => {
     const { t } = useTranslation();
@@ -29,6 +30,9 @@ const AdminCourseDetailPage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const adminMenuRef = useRef(null);
+
+    const [lecturesPage, setLecturesPage] = useState(1);
+    const [studentsPage, setStudentsPage] = useState(1);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -98,6 +102,14 @@ const AdminCourseDetailPage = () => {
     const lectures = courseData?.lectures || [];
 
     const students = courseData?.students || [];
+
+    const lecturesPerPage = 8;
+    const totalLecturesPages = Math.ceil(lectures.length / lecturesPerPage);
+    const paginatedLectures = lectures.slice((lecturesPage - 1) * lecturesPerPage, lecturesPage * lecturesPerPage);
+
+    const studentsPerPage = 5;
+    const totalStudentsPages = Math.ceil(students.length / studentsPerPage);
+    const paginatedStudents = students.slice((studentsPage - 1) * studentsPerPage, studentsPage * studentsPerPage);
 
     if (loading) {
         return (
@@ -260,7 +272,7 @@ const AdminCourseDetailPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    {lectures.map((lecture, index) => (
+                                    {paginatedLectures.map((lecture, index) => (
                                         <div key={lecture._id || index} className="border border-gray-200 rounded-[12px] p-2 bg-white flex flex-col hover:shadow-md transition-shadow">
                                             <div className="relative w-full h-[150px] rounded-[8px] overflow-hidden mb-3">
                                                 <img src={lecture.thumbnail || img} alt={lecture.title} className="w-full h-full object-cover" />
@@ -287,8 +299,6 @@ const AdminCourseDetailPage = () => {
 
                                             <GradiantButton
                                                 onClick={() => {
-                                                    // ✅ Redirect both Quiz and Video lectures to the play page
-                                                    // The play page (CourseView) will handle rendering the "Start Quiz" UI for quizzes
                                                     const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
                                                     navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
                                                 }}
@@ -296,34 +306,19 @@ const AdminCourseDetailPage = () => {
                                             >
                                                 View Details
                                             </GradiantButton>
-
-                                            {/* <GradiantButton
-                                                onClick={() => {
-                                                    const returnPath = encodeURIComponent(`/admin-course-view/${id}`);
-                                                    navigate(`/admin-course-play?id=${id}&lectureId=${lecture._id || lecture.id}&returnPath=${returnPath}`);
-                                                }}
-                                                className="w-full py-2 bg-[#6366F1] text-white text-xs rounded-[6px] font-medium mt-auto"
-                                            >
-                                                View Details
-                                            </GradiantButton> */}
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="flex justify-end items-center gap-2 mt-8">
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                        Previous
-                                    </button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                                    <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
-                                    <span className="text-gray-400">...</span>
-                                    <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900">
-                                        {t("next", "Next")}
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
-                                </div>
+                                {totalLecturesPages > 1 && (
+                                    <div className="flex justify-end items-center gap-2 mt-8">
+                                        <CustomPagination 
+                                            currentPage={lecturesPage}
+                                            totalPages={totalLecturesPages}
+                                            onPageChange={setLecturesPage}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             {/* Students List Table (Reused) */}
@@ -340,37 +335,32 @@ const AdminCourseDetailPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Simplified Table (No Filters as per image/requirement, or keep them?) 
-                                    Image shows "Student Table" title and dropdown, and then the table headers directly.
-                                    So I will omit the filter bar here to match the specific design image provided for this page.
-                                */}
-
-                                <div className="overflow-x-auto">
-                                    <table className="w-full min-w-[900px]">
-                                        <thead>
-                                            <tr className="border-b border-gray-100">
-                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 pl-4 w-[15%]">{t("name", "Name")}</th>
-                                                <th className="text-left font-bold text-[12px] text-gray-800 pb-4 w-[20%]">{t("contact", "Contact")}</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[20%]">{t("enrollments", "Enrollments")}</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("progress", "Progress")}</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[15%]">{t("last_login", "Last Login")}</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("status", "Status")}</th>
-                                                <th className="text-center font-bold text-[12px] text-gray-800 pb-4 w-[10%]">{t("action", "Action")}</th>
+                                <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
+                                    <table className="w-full text-left border-collapse min-w-[900px]">
+                                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
+                                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
+                                                <th className="px-6 py-4 w-[15%]">{t("name", "Name")}</th>
+                                                <th className="px-6 py-4 w-[20%]">{t("contact", "Contact")}</th>
+                                                <th className="px-6 py-4 text-center w-[20%]">{t("enrollments", "Enrollments")}</th>
+                                                <th className="px-6 py-4 text-center w-[10%]">{t("progress", "Progress")}</th>
+                                                <th className="px-6 py-4 text-center w-[15%]">{t("last_login", "Last Login")}</th>
+                                                <th className="px-6 py-4 text-center w-[10%]">{t("status", "Status")}</th>
+                                                <th className="px-6 py-4 text-center w-[10%]">{t("action", "Action")}</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-50">
-                                            {students.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="py-4 pl-4">
-                                                        <span className="text-[13px] font-medium text-gray-700">{student.name}</span>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {paginatedStudents.map((student) => (
+                                                <tr key={student.id} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <span className="font-medium text-gray-900">{student.name}</span>
                                                     </td>
-                                                    <td className="py-4">
+                                                    <td className="px-6 py-4">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[12px] text-gray-600">{student.email}</span>
-                                                            <span className="text-[12px] text-gray-500">{student.phone}</span>
+                                                            <span className="text-gray-800 font-medium">{student.email}</span>
+                                                            <span className="text-gray-500">{student.phone}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="py-4 text-center">
+                                                    <td className="px-6 py-4 text-center">
                                                         <div className="flex flex-col gap-1 items-center">
                                                             {student.enrollments.slice(0, 3).map((course, idx) => (
                                                                 <span key={idx} className="text-[11px] text-blue-500 underline cursor-pointer hover:text-blue-700">
@@ -384,24 +374,24 @@ const AdminCourseDetailPage = () => {
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[13px] font-medium text-gray-700">{student.progress}</span>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <span className="text-[#3758EE] font-bold">{student.progress}</span>
                                                     </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className="text-[13px] font-medium text-gray-700">{student.lastLogin}</span>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <span className="text-gray-500">{student.lastLogin}</span>
                                                     </td>
-                                                    <td className="py-4 text-center">
-                                                        <span className={`text-[12px] px-2 py-1 rounded-full ${student.status === 'Active'
-                                                            ? 'text-[#00C896]'
-                                                            : 'text-red-500'
+                                                    <td className="px-6 py-4 text-center">
+                                                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${student.status === 'Active'
+                                                            ? 'text-emerald-500 bg-emerald-50'
+                                                            : 'text-red-500 bg-red-50'
                                                             }`}>
                                                             {student.status}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 text-center">
+                                                    <td className="px-6 py-4 text-center">
                                                         <GradiantButton 
                                                             onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                            className="text-[10px] px-3 py-1.5 rounded shadow-none font-medium bg-[#6366F1] mx-auto"
+                                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors mx-auto shadow-none"
                                                         >
                                                             View Profile
                                                         </GradiantButton>
@@ -411,20 +401,15 @@ const AdminCourseDetailPage = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="flex justify-end items-center gap-2 mt-6">
-                                    <button className="flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-gray-900">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                                        Previous
-                                    </button>
-                                    <button className="w-7 h-7 flex items-center justify-center text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">1</button>
-                                    <button className="w-7 h-7 flex items-center justify-center text-xs font-bold text-white bg-[#6366F1] rounded-lg shadow-sm">2</button>
-                                    <button className="w-7 h-7 flex items-center justify-center text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg">3</button>
-                                    <span className="text-gray-400 text-xs">...</span>
-                                    <button className="flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-gray-900">
-                                        {t("next", "Next")}
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                                    </button>
-                                </div>
+                                {totalStudentsPages > 1 && (
+                                    <div className="flex justify-end items-center gap-2 mt-6 p-4 border-t border-gray-100 w-full">
+                                        <CustomPagination 
+                                            currentPage={studentsPage}
+                                            totalPages={totalStudentsPages}
+                                            onPageChange={setStudentsPage}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                         </div>

@@ -24,7 +24,7 @@ const StudentCertificates = ({ profileData }) => {
     });
     const [allCertificates, setAllCertificates] = useState([]);
 
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     useEffect(() => {
         const fetchCertificates = async () => {
             if (!profileData?.user?._id) return;

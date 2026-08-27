@@ -32,7 +32,7 @@ const Certificates = () => {
     });
     const [allCertificates, setAllCertificates] = useState([]);
 
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     useEffect(() => {
@@ -445,7 +445,7 @@ const Certificates = () => {
 
                                     {/* Pagination */}
                                     {totalPages > 1 && (
-                                        <div className="w-full h-10 mt-auto pt-6 pb-2 flex items-center justify-end">
+                                        <div className="flex justify-end items-center mt-6 w-full">
                                             <CustomPagination 
                                                 currentPage={currentPage} 
                                                 totalPages={totalPages} 

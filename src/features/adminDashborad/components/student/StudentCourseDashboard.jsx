@@ -4,6 +4,7 @@ import MetricCard from '@/components/shared/MetricCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { CustomPagination } from '@/components/ui/Pagination';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CoursesPage from '../../../../assets/images/coursespage.jpg';
@@ -22,6 +23,7 @@ const StudentCourseDashboard = ({ profileData }) => {
     const [selectedCourseData, setSelectedCourseData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         if (!selectedCourseId && enrolledCourses.length > 0) {
@@ -62,6 +64,10 @@ const StudentCourseDashboard = ({ profileData }) => {
         acc.push({ ...l, type: 'Lecture', id: l.id || l._id });
         return acc;
     }, []);
+
+    const itemsPerPage = 5;
+    const totalPages = Math.ceil(lectures.length / itemsPerPage);
+    const paginatedLectures = lectures.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     const overviewStats = [
         { label: "Quiz Score", value: stats.quizScore, color: "emerald", labelColor: "text-emerald-500", dotColor: "bg-emerald-500", lineColor: "bg-emerald-400" },
         { label: "lecture Completed", value: stats.lecturesCompleted.toString(), color: "blue", labelColor: "text-blue-600", dotColor: "bg-blue-600", lineColor: "bg-blue-500" },
@@ -248,67 +254,78 @@ const StudentCourseDashboard = ({ profileData }) => {
             </div>
 
             {/* Bottom Section: Lecture List Table */}
-            <div className="bg-white border rounded-[16px] shadow-sm overflow-hidden mt-2">
-                <div className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6 mt-2">
+                <div className="p-6 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Lecture List</h3>
-                            <p className="text-xs text-gray-400">View performance for each lecture</p>
+                            <p className="text-xs text-gray-400 mt-1">View performance for each lecture</p>
                         </div>
                     </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="text-xs text-gray-400 font-bold uppercase border-b border-gray-50">
-                                    <th className="text-left py-4 px-4">Lecture No</th>
-                                    <th className="text-left py-4 px-4">Title</th>
-                                    <th className="text-left py-4 px-4 text-center">Progress & Score</th>
-                                    <th className="text-left py-4 px-4">Date</th>
-                                    <th className="text-left py-4 px-4">{t("status", "Status")}</th>
-                                    <th className="text-left py-4 px-4 text-right">{t("action", "Action")}</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50/50">
-                                {lectures.length > 0 ? lectures.map((lecture, i) => (
-                                    <tr key={i} className="hover:bg-gray-50/30 transition-colors text-sm text-gray-600">
-                                        <td className="py-4 px-4 font-medium">{lecture.no}</td>
-                                        <td className="py-4 px-4 font-medium text-gray-800">
-                                            {lecture.title}
-                                            {lecture.type !== 'Lecture' && (
-                                                <span className="ml-2 text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                                                    {lecture.type}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="py-4 px-4 text-center font-medium">{lecture.progress}</td>
-                                        <td className="py-4 px-4">{lecture.date}</td>
-                                        <td className="py-4 px-4">
-                                            <span className={cn(
-                                                "text-[12px] font-bold transition-colors px-3 py-1 rounded-full",
-                                                lecture.status === 'Completed' ? 'text-blue-600 bg-blue-50' : 'text-gray-400 bg-gray-50'
-                                            )}>
-                                                {lecture.status}
-                                            </span>
-                                        </td>
-                                        <td className="py-4 px-4 text-right">
-                                            <GradiantButton 
-                                                className="px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider"
-                                                onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id}`)}
-                                            >
-                                                View Detail
-                                            </GradiantButton>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan="6" className="py-10 text-center text-gray-400 italic">No lectures available for this course.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
+
+                <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
+                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
+                                <th className="px-6 py-4">Lecture No</th>
+                                <th className="px-6 py-4">Title</th>
+                                <th className="px-6 py-4 text-center">Progress & Score</th>
+                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4">{t("status", "Status")}</th>
+                                <th className="px-6 py-4 text-center">{t("action", "Action")}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {paginatedLectures.length > 0 ? paginatedLectures.map((lecture, i) => (
+                                <tr key={i} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium text-gray-900">{lecture.no}</td>
+                                    <td className="px-6 py-4 font-medium text-gray-800">
+                                        {lecture.title}
+                                        {lecture.type !== 'Lecture' && (
+                                            <span className="ml-2 text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                                {lecture.type}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <span className="text-[#3758EE] font-bold">{lecture.progress}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-500">{lecture.date}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={cn(
+                                            "px-2.5 py-1 rounded-full text-[11px] font-bold",
+                                            lecture.status === 'Completed' ? 'text-emerald-500 bg-emerald-50' : 'text-blue-500 bg-blue-50'
+                                        )}>
+                                            {lecture.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <GradiantButton 
+                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
+                                            onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id}`)}
+                                        >
+                                            View Detail
+                                        </GradiantButton>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="6" className="py-10 text-center text-gray-400 italic">No lectures available for this course.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                {totalPages > 1 && (
+                    <div className="flex justify-end items-center p-4 border-t border-gray-100 w-full">
+                        <CustomPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(p) => setCurrentPage(p)}
+                        />
+                    </div>
+                )}
             </div>
 
             <style dangerouslySetInnerHTML={{

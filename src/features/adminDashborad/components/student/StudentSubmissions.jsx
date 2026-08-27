@@ -16,7 +16,7 @@ const StudentSubmissions = ({ profileData }) => {
     const [submissionsData, setSubmissionsData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchSubmissions = async () => {
@@ -323,50 +323,52 @@ const StudentSubmissions = ({ profileData }) => {
                     </div>
 
                     {/* Pagination */}
-                    <div className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-[12px] text-gray-400 font-medium">
-                            Showing {filteredSubmissions.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + itemsPerPage, filteredSubmissions.length)} of {filteredSubmissions.length} submissions
-                        </p>
-                        <PaginationContent className="w-full sm:w-auto h-10 flex items-center justify-center sm:justify-end">
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                />
-                            </PaginationItem>
-                            {getPageNumbers().map((page, index) => (
-                                <PaginationItem key={index}>
-                                    {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
-                                        <PaginationEllipsis
-                                            onClick={() => {
-                                                const blockSize = 4;
-                                                const currentBlock = Math.ceil(currentPage / blockSize);
-                                                if (page === 'ellipsis-start') {
-                                                    handlePageChange((currentBlock - 2) * blockSize + 1);
-                                                } else {
-                                                    handlePageChange(currentBlock * blockSize + 1);
-                                                }
-                                            }}
-                                            className="cursor-pointer hover:bg-gray-100 rounded-md transition-colors"
-                                        />
-                                    ) : (
-                                        <PaginationLink
-                                            onClick={() => handlePageChange(page)}
-                                            isActive={page === currentPage}
-                                        >
-                                            {page}
-                                        </PaginationLink>
-                                    )}
+                    {totalPages > 1 && (
+                        <div className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <p className="text-[12px] text-gray-400 font-medium">
+                                Showing {filteredSubmissions.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + itemsPerPage, filteredSubmissions.length)} of {filteredSubmissions.length} submissions
+                            </p>
+                            <PaginationContent className="w-full sm:w-auto h-10 flex items-center justify-center sm:justify-end">
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
                                 </PaginationItem>
-                            ))}
-                            <PaginationItem>
-                                <PaginationNext
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </div>
+                                {getPageNumbers().map((page, index) => (
+                                    <PaginationItem key={index}>
+                                        {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                                            <PaginationEllipsis
+                                                onClick={() => {
+                                                    const blockSize = 4;
+                                                    const currentBlock = Math.ceil(currentPage / blockSize);
+                                                    if (page === 'ellipsis-start') {
+                                                        handlePageChange((currentBlock - 2) * blockSize + 1);
+                                                    } else {
+                                                        handlePageChange(currentBlock * blockSize + 1);
+                                                    }
+                                                }}
+                                                className="cursor-pointer hover:bg-gray-100 rounded-md transition-colors"
+                                            />
+                                        ) : (
+                                            <PaginationLink
+                                                onClick={() => handlePageChange(page)}
+                                                isActive={page === currentPage}
+                                            >
+                                                {page}
+                                            </PaginationLink>
+                                        )}
+                                    </PaginationItem>
+                                ))}
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">

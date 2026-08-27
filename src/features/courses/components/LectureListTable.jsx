@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Search, Lock, Unlock, FileText, Volume2, PlayCircle, ChevronLeft, ChevronRight, X, Download, Loader2, ExternalLink, Minus, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import { CustomPagination } from '@/components/ui/Pagination';
 
 const forceDownload = async (url, filename, setDownloadingIdx, idx) => {
     if (setDownloadingIdx) setDownloadingIdx(idx);
@@ -570,21 +572,21 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
             </div>
 
             {/* Table wrapper */}
-            <div className="overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
+            <div className="overflow-x-auto custom-scrollbar-thin -mx-4 sm:mx-0 max-h-[400px]">
                 <div className="min-w-[1000px] px-4 sm:px-0">
-                    <table className="w-full text-center border-collapse">
-                        <thead>
-                            <tr className="border-b border-gray-100">
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('lecture_no', 'Lecture No')}</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('title', 'Title')}</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('date', 'Date')}</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('progress', 'Progress')}</th>
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('status', 'Status')}</th>
-                                {!isAdminView && <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('comments', 'Comments')}</th>}
-                                <th className="pb-4 font-semibold text-gray-700 text-[14px] whitespace-nowrap">{t('action', 'Action')}</th>
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
+                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
+                                <th className="px-6 py-4 w-[15%]">{t('lecture_no', 'Lecture No')}</th>
+                                <th className="px-6 py-4 w-[35%]">{t('title', 'Title')}</th>
+                                <th className="px-6 py-4 text-center w-[15%]">{t('date', 'Date')}</th>
+                                <th className="px-6 py-4 text-center w-[15%]">{t('progress', 'Progress')}</th>
+                                <th className="px-6 py-4 text-center w-[10%]">{t('status', 'Status')}</th>
+                                {!isAdminView && <th className="px-6 py-4 text-center w-[10%]">{t('comments', 'Comments')}</th>}
+                                <th className="px-6 py-4 text-center w-[10%]">{t('action', 'Action')}</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-100">
                             {currentLectures.map((lecture, index) => {
                                 const isCurrent = lecture.id === currentLectureId;
                                 const progress = lecture.watchedPercentage || 0;
@@ -596,28 +598,31 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                     : `#${String(lecture.lectureNo).padStart(2, '0')}`;
 
                                 return (
-                                    <tr key={lecture.id} className={`${isCurrent ? 'bg-blue-50/30' : ''} hover:bg-gray-50/50 transition-colors`}>
-                                        <td className="py-6 text-[13px] font-medium text-gray-600 whitespace-nowrap">{displayLectureNo}</td>
-                                        <td className="py-6 text-[13px] text-gray-700 whitespace-nowrap">{t(lecture.title, lecture.title)}</td>
-                                        <td className="py-6 text-[13px] text-gray-500 whitespace-nowrap">{formatDate(lecture.date)}</td>
-                                        <td className="py-6 text-[13px] text-gray-700 font-medium whitespace-nowrap">{String(progress).padStart(2, '0')}%</td>
-                                        <td className="py-6 whitespace-nowrap">
-                                            <div className="flex items-center justify-center gap-1">
-                                                {lecture.isLocked ? (
-                                                    <>
-                                                        <Lock className="w-3.5 h-3.5 text-gray-400" />
-                                                        <span className="text-[12px] text-gray-400 font-medium">{t('locked', 'Locked')}</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Unlock className="w-3.5 h-3.5 text-yellow-500" />
-                                                        <span className="text-[12px] text-gray-700 font-medium">{t('unlocked', 'Unlocked')}</span>
-                                                    </>
-                                                )}
+                                    <tr key={lecture.id} className={`text-sm text-gray-600 hover:bg-gray-50/50 transition-colors ${isCurrent ? 'bg-blue-50/30' : ''}`}>
+                                        <td className="px-6 py-4">
+                                            <span className="font-medium text-gray-900">{displayLectureNo}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="font-medium text-gray-900">{t(lecture.title, lecture.title)}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-gray-500">{formatDate(lecture.date)}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-[#3758EE] font-bold">{String(progress).padStart(2, '0')}%</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center items-center">
+                                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 ${
+                                                    !lecture.isLocked ? 'text-emerald-500 bg-emerald-50' : 'text-gray-500 bg-gray-50'
+                                                }`}>
+                                                    {lecture.isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                                                    {lecture.isLocked ? t('locked', 'Locked') : t('unlocked', 'Unlocked')}
+                                                </span>
                                             </div>
                                         </td>
                                         {!isAdminView && (
-                                            <td className="py-6">
+                                            <td className="px-6 py-4 text-center">
                                                 <div className="flex items-center justify-center">
                                                     {lectureNotes.length > 0 ? (
                                                         <button
@@ -641,7 +646,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                 </div>
                                             </td>
                                         )}
-                                        <td className="py-6">
+                                        <td className="px-6 py-4 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={(e) => {
@@ -661,8 +666,8 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                     disabled={!lecture.pdfUrl || (Array.isArray(lecture.pdfUrl) && lecture.pdfUrl.length === 0)}
                                                     className={`w-7 h-7 rounded flex items-center justify-center transition-all ${
                                                         !lecture.pdfUrl || (Array.isArray(lecture.pdfUrl) && lecture.pdfUrl.length === 0)
-                                                            ? 'bg-red-100 text-red-300 opacity-40 cursor-not-allowed'
-                                                            : 'bg-red-500 text-white hover:bg-red-600 hover:scale-105 active:scale-95 shadow-sm'
+                                                            ? 'bg-red-50 text-red-300 opacity-50 cursor-not-allowed'
+                                                            : 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95 shadow-sm'
                                                     }`}
                                                 >
                                                     <FileText size={14} />
@@ -683,27 +688,28 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                     disabled={!lecture.audioUrl || (Array.isArray(lecture.audioUrl) && lecture.audioUrl.length === 0)}
                                                     className={`w-7 h-7 rounded flex items-center justify-center transition-all ${
                                                         !lecture.audioUrl || (Array.isArray(lecture.audioUrl) && lecture.audioUrl.length === 0)
-                                                            ? 'bg-[#EBF4FF] text-[#A5C8FF] opacity-40 cursor-not-allowed'
-                                                            : 'bg-[#3B82F6] text-white hover:bg-[#2563EB] hover:scale-105 active:scale-95 shadow-sm'
+                                                            ? 'bg-blue-50 text-blue-300 opacity-50 cursor-not-allowed'
+                                                            : 'bg-blue-50 text-blue-500 hover:bg-blue-100 hover:scale-105 active:scale-95 shadow-sm'
                                                     }`}
                                                 >
                                                     <Volume2 size={14} />
                                                 </button>
                                                 {lecture.type === 'Assignment' ? (
-                                                    <button
+                                                    <GradiantButton
                                                         onClick={() => onWatch(lecture)}
-                                                        className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-all ${lecture.isLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#3758EE] text-white hover:bg-[#2a46c7] hover:scale-105 active:scale-95 shadow-sm'}`}
+                                                        className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors shadow-none disabled:opacity-50"
                                                         disabled={lecture.isLocked}
                                                     >
-                                                        📋 {isAdminView ? t('edit_assignment', 'Edit Assignment') : t('start_assignment', 'Start')}
-                                                    </button>
+                                                        {isAdminView ? t('edit_assignment', 'Edit Assignment') : t('start', 'Start')}
+                                                    </GradiantButton>
                                                 ) : (
-                                                    <button
+                                                    <GradiantButton
                                                         onClick={() => onWatch(lecture)}
-                                                        className={`w-7 h-7 rounded flex items-center justify-center transition-all ${lecture.isLocked ? 'bg-[#EBF4FF] text-[#A5C8FF] cursor-not-allowed' : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'}`}
+                                                        className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors shadow-none disabled:opacity-50"
+                                                        disabled={lecture.isLocked}
                                                     >
-                                                        <PlayCircle size={14} />
-                                                    </button>
+                                                        {t('start', 'Start')}
+                                                    </GradiantButton>
                                                 )}
                                             </div>
                                         </td>
@@ -716,46 +722,15 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
             </div>
 
 
-            <div className="flex items-center justify-end mt-10 gap-1 sm:gap-2">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`flex items-center gap-1 px-2 py-1.5 text-sm font-medium transition-colors ${currentPage === 1
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'text-gray-500 hover:text-[#7C3AED]'
-                        }`}
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                    <span className="hidden sm:inline">{t('previous', 'Previous')}</span>
-                </button>
-
-                <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, i) => (
-                        <button
-                            key={i + 1}
-                            onClick={() => handlePageChange(i + 1)}
-                            className={`w-9 h-9 rounded-[12px] text-sm font-bold flex items-center justify-center transition-all ${currentPage === i + 1
-                                ? 'bg-gradient-to-br from-[#A5A6FF] to-[#7C3AED] text-white shadow-lg shadow-purple-200'
-                                : 'text-gray-500 hover:text-[#7C3AED] hover:bg-gray-50'
-                                }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
+            {totalPages > 1 && (
+                <div className="flex justify-end items-center mt-6 p-4 border-t border-gray-100 w-full">
+                    <CustomPagination 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
                 </div>
-
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`flex items-center gap-1 px-2 py-1.5 text-sm font-medium transition-colors ${currentPage === totalPages
-                        ? 'text-gray-300 cursor-not-allowed'
-                        : 'text-gray-500 hover:text-[#7C3AED]'
-                        }`}
-                >
-                    <span className="hidden sm:inline">{t('next', 'Next')}</span>
-                    <ChevronRight className="w-5 h-5" />
-                </button>
-            </div>
+            )}
             {activeResources && (
                                                 <ResourcesModal 
                                                     activeResources={activeResources} 
@@ -783,6 +758,16 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                     onClose={() => setViewingPdf(null)}
                 />
             )}
+            
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+                .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+                .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+                .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+            `}} />
         </div>
     );
 };
