@@ -70,6 +70,8 @@ const LoginPage = () => {
           email: userData.email,
           role: userData.role || 'student',
           assignedFeatures: userData.assignedFeatures || [],
+          phone: userData.phone || null,
+          profileImageUrl: userData.profileImageUrl || null,
           loggedIn: true
         }, res.data.data.token);
 

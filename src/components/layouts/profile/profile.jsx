@@ -20,7 +20,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [errors, setErrors] = useState({});
-    const { user, logout: contextLogout } = useAuth();
+    const { user, logout: contextLogout, checkAuth } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -105,6 +105,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             }
 
             const res = await updateProfile(payloadToSend);
+            if (checkAuth) await checkAuth();
             toast.success("Profile updated successfully!");
         } catch (error) {
             console.error("Error updating profile", error);

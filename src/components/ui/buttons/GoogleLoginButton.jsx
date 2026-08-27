@@ -27,6 +27,8 @@ const GoogleLoginButton = ({ text = "Continue with Google", className = "" }) =>
             email: userData.email,
             role: userData.role || 'user',
             assignedFeatures: userData.assignedFeatures || [],
+            phone: userData.phone || null,
+            profileImageUrl: userData.profileImageUrl || null,
             loggedIn: true
           }, res.data.data.token);
 
