@@ -10,7 +10,6 @@ function SessionActivity({ profileData }) {
     const [sessionData, setSessionData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
 
     const userId = profileData?.user?._id;
 
@@ -26,8 +25,13 @@ function SessionActivity({ profileData }) {
             try {
                 let url = `/session-activity/${userId}`;
                 const queryParams = new URLSearchParams();
-                if (fromDate) queryParams.append('from', fromDate);
-                if (toDate) queryParams.append('to', toDate);
+                if (fromDate) {
+                    queryParams.append('from', fromDate);
+                    const from = new Date(fromDate);
+                    const to = new Date(from);
+                    to.setDate(to.getDate() + 6); // Add 6 days to get a 7-day range
+                    queryParams.append('to', to.toISOString().split('T')[0]);
+                }
                 if (queryParams.toString()) url += `?${queryParams.toString()}`;
 
                 const res = await axiosInstance.get(url);
@@ -49,7 +53,7 @@ function SessionActivity({ profileData }) {
         };
 
         fetchSessionActivity();
-    }, [userId, fromDate, toDate]);
+    }, [userId, fromDate]);
 
     const getDefaultWeek = () => [
         { day: t('auth.mon', 'Mon'), value: 0 },
@@ -72,15 +76,6 @@ function SessionActivity({ profileData }) {
                             type="date" 
                             value={fromDate}
                             onChange={(e) => setFromDate(e.target.value)}
-                            className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50" 
-                        />
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <label className="text-xs text-gray-500">To:</label>
-                        <input 
-                            type="date" 
-                            value={toDate}
-                            onChange={(e) => setToDate(e.target.value)}
                             className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50" 
                         />
                     </div>

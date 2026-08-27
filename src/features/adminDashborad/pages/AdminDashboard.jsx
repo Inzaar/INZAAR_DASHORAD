@@ -132,7 +132,7 @@ const AdminDashboard = () => {
                                 </GradiantButton>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}
-                                    className="max-[600px]:block hidden text-xl px-3 py-0.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                                    className="max-[600px]:flex hidden items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                                 >
                                     +
                                 </GradiantButton>

@@ -286,10 +286,10 @@ const Certificates = () => {
                                                         value={search}
                                                         onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
                                                         placeholder={t('search_by_course', 'Search certificate by Course name')}
-                                                        className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                        className="w-full pl-9 pr-4 h-[40px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                     />
                                                 </div>
-                                                <GradiantButton className={"py-2 px-3 md:px-4 rounded"}>
+                                                <GradiantButton className={"h-[40px] px-3 md:px-4 rounded"}>
                                                     <Search className="h-4 w-4" />
                                                     <span className="hidden md:inline">{t('search', 'Search')}</span>
                                                 </GradiantButton>

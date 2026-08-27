@@ -150,7 +150,7 @@ const SharedStudentTable = ({
                                         )}
                                         {visibleColumns.action && (
                                             <td className={`py-4 print:hidden text-center ${Object.values(visibleColumns).every(v=>v) ? 'rounded-r-xl print:rounded-none' : ''}`}>
-                                                <div className="flex justify-center items-center">
+                                                <div className="flex justify-center items-center w-full">
                                                     <GradiantButton
                                                         className="text-[15px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
                                                         onClick={() => navigate(`/admin/student-details/${student.id}`)}

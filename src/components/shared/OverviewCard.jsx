@@ -29,16 +29,16 @@ const OverviewCard = ({
     const stats = statsOverride || defaultStats;
 
     const renderColumn = (col) => (
-        <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center h-14 w-2 shrink-0">
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
-                <div className="flex-1 w-[2px]" style={{ backgroundColor: col.color, opacity: 0.8 }}></div>
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+        <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex flex-col items-center h-10 md:h-14 w-2 shrink-0">
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                <div className="flex-1 w-[1.5px] md:w-[2px]" style={{ backgroundColor: col.color, opacity: 0.8 }}></div>
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
             </div>
-            <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{col.value}</span>
-                <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap" style={{ color: col.color }}>
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+            <div className="flex flex-col gap-0.5 md:gap-1 min-w-0">
+                <span className="text-xl md:text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{col.value}</span>
+                <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-sm font-bold whitespace-nowrap" style={{ color: col.color }}>
+                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
                     {col.label}
                 </div>
             </div>
@@ -54,8 +54,8 @@ const OverviewCard = ({
             <p className="text-gray-400 text-sm font-medium">{t("overview", "Overview")}</p>
 
             {/* Stats Row */}
-            <div className="overflow-x-auto no-scrollbar">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0">
+            <div className="overflow-x-auto no-scrollbar pb-1">
+                <div className="flex flex-row items-center justify-between gap-4 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0">
                     {stats.col1 && renderColumn(stats.col1)}
                     {stats.col2 && renderColumn(stats.col2)}
                     {stats.col3 && renderColumn(stats.col3)}

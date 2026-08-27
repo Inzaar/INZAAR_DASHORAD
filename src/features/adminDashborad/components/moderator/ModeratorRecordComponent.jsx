@@ -204,7 +204,7 @@ export default function ModeratorRecordComponent({ profileData, onEditClick, ini
                                             <td className="py-4 px-6 text-center rounded-r-[8px]">
                                                 <GradiantButton
                                                     onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                    className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px]"
+                                                    className="bg-[#8B5CF6] text-white px-5 py-2 rounded-[6px] text-[12px] font-medium hover:bg-[#7c3aed] transition-colors shadow-sm w-[110px] mx-auto"
                                                 >
                                                     View Profile
                                                 </GradiantButton>
