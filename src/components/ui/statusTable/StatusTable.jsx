@@ -148,7 +148,6 @@ function StatusTable({ userCourses, loading }) {
                             <PaginationLink
                                 onClick={() => handlePageChange(page)}
                                 isActive={page === currentPage}
-                                className={page === currentPage ? "bg-linear-to-r from-[#A892FF] to-[#6C5DDC] text-white cursor-pointer border-none" : "cursor-pointer hover:bg-gray-100 border-none"}
                             >
                                 {page}
                             </PaginationLink>

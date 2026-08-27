@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FiSearch, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { getUserSubmissions, gradeSubmission } from '@/api/user';
 import toast from 'react-hot-toast';
+import { PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationEllipsis, PaginationLink } from '@/components/ui/Pagination';
 
 const StudentSubmissions = ({ profileData }) => {
     const enrolledCourses = profileData?.enrolledCourses || [];
@@ -14,6 +15,8 @@ const StudentSubmissions = ({ profileData }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [submissionsData, setSubmissionsData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 6;
 
     useEffect(() => {
         const fetchSubmissions = async () => {
@@ -123,6 +126,42 @@ const StudentSubmissions = ({ profileData }) => {
         if (searchQuery && !sub.title.toLowerCase().includes(searchQuery.toLowerCase())) match = false;
         return match;
     });
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCourseId, typeFilter, statusFilter, searchQuery]);
+
+    const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedSubmissions = filteredSubmissions.slice(startIndex, startIndex + itemsPerPage);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
+
+    const getPageNumbers = () => {
+        const pages = [];
+        const blockSize = 4;
+        const currentBlock = Math.ceil(currentPage / blockSize);
+        const start = (currentBlock - 1) * blockSize + 1;
+        const end = Math.min(start + blockSize - 1, totalPages);
+
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push('ellipsis-start');
+        }
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) pages.push('ellipsis-end');
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -248,9 +287,9 @@ const StudentSubmissions = ({ profileData }) => {
                                     <tr>
                                         <td colSpan="7" className="py-8 text-center text-gray-500 font-medium">No submissions found.</td>
                                     </tr>
-                                ) : filteredSubmissions.map((sub, index) => (
+                                ) : paginatedSubmissions.map((sub, index) => (
                                     <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6 text-sm text-gray-500 font-medium">{index + 1}</td>
+                                        <td className="py-4 px-6 text-sm text-gray-500 font-medium">{startIndex + index + 1}</td>
                                         <td className="py-4 px-6">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-bold ${getTypeStyle(sub.type)}`}>
                                                 {sub.type}
@@ -285,19 +324,48 @@ const StudentSubmissions = ({ profileData }) => {
 
                     {/* Pagination */}
                     <div className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-[12px] text-gray-400 font-medium">Showing 1-6 of 24 submissions</p>
-                        <div className="flex items-center gap-1">
-                            <button className="flex items-center gap-1 px-2 py-1.5 text-[12px] font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded transition-colors">
-                                <FiChevronLeft size={14} /> Previous
-                            </button>
-                            <button className="w-7 h-7 flex items-center justify-center text-[12px] font-bold text-gray-800 bg-gray-100 rounded">1</button>
-                            <button className="w-7 h-7 flex items-center justify-center text-[12px] font-bold text-gray-500 hover:bg-gray-50 rounded transition-colors">2</button>
-                            <button className="w-7 h-7 flex items-center justify-center text-[12px] font-bold text-gray-500 hover:bg-gray-50 rounded transition-colors">3</button>
-                            <span className="text-gray-400 px-1 text-[12px]">...</span>
-                            <button className="flex items-center gap-1 px-2 py-1.5 text-[12px] font-bold text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded transition-colors">
-                                Next <FiChevronRight size={14} />
-                            </button>
-                        </div>
+                        <p className="text-[12px] text-gray-400 font-medium">
+                            Showing {filteredSubmissions.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + itemsPerPage, filteredSubmissions.length)} of {filteredSubmissions.length} submissions
+                        </p>
+                        <PaginationContent className="w-full sm:w-auto h-10 flex items-center justify-center sm:justify-end">
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                            {getPageNumbers().map((page, index) => (
+                                <PaginationItem key={index}>
+                                    {page === 'ellipsis-start' || page === 'ellipsis-end' ? (
+                                        <PaginationEllipsis
+                                            onClick={() => {
+                                                const blockSize = 4;
+                                                const currentBlock = Math.ceil(currentPage / blockSize);
+                                                if (page === 'ellipsis-start') {
+                                                    handlePageChange((currentBlock - 2) * blockSize + 1);
+                                                } else {
+                                                    handlePageChange(currentBlock * blockSize + 1);
+                                                }
+                                            }}
+                                            className="cursor-pointer hover:bg-gray-100 rounded-md transition-colors"
+                                        />
+                                    ) : (
+                                        <PaginationLink
+                                            onClick={() => handlePageChange(page)}
+                                            isActive={page === currentPage}
+                                        >
+                                            {page}
+                                        </PaginationLink>
+                                    )}
+                                </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
                     </div>
                 </div>
             ) : (
