@@ -1,6 +1,6 @@
 import axios from "axios";
 const axiosInstance = axios.create({
-    baseURL: "https://blue-antelope-133752.hostingersite.com/api/v1",
+    baseURL: "https://inzaar.duckdns.org/api/v1",
     // baseURL: "http://localhost:8000/api/v1",
     headers: {
         "Content-Type": "application/json",

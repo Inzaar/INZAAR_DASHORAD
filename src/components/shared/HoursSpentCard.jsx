@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 const HoursSpentCard = ({
     userCourses,
     className,
-    name
+    name,
+    moderators = []
 }) => {
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [filter, setFilter] = useState('top');
     const { t } = useTranslation();
 
     // Check if the component is being used for Moderator Performance
@@ -25,29 +27,29 @@ const HoursSpentCard = ({
         { day: t('day_sat', 'Sat'), key: 'sat', expected: 15 },
     ];
 
-    // Moderator Mock Data (15 items)
-    // We'll generate this dynamically to have "m-1" to "m-12"
-    // Mocking values since we don't have a real data source mapping for "m-X" yet
-    const moderatorData = [
-        { day: 'm-1', key: 'm-1', percentage: 45 },
-        { day: 'm-2', key: 'm-2', percentage: 60 },
-        { day: 'm-3', key: 'm-3', percentage: 35 },
-        { day: 'm-4', key: 'm-4', percentage: 70 },
-        { day: 'm-5', key: 'm-5', percentage: 85 },
-        { day: 'm-6', key: 'm-6', percentage: 40 },
-        { day: 'm-7', key: 'm-7', percentage: 55 },
-        { day: 'm-8', key: 'm-8', percentage: 50 },
-        { day: 'm-9', key: 'm-9', percentage: 75 },
-        { day: 'm-10', key: 'm-10', percentage: 90 },
-        { day: 'm-11', key: 'm-11', percentage: 30 },
-        { day: 'm-12', key: 'm-12', percentage: 65 },
-        { day: 'm-13', key: 'm-13', percentage: 50 },
-        { day: 'm-14', key: 'm-14', percentage: 80 },
-        { day: 'm-15', key: 'm-15', percentage: 45 },
-    ];
+    const dynamicModeratorData = (moderators || []).map((mod, i) => {
+        // We generate a stable percentage for visual testing since real metric isn't implemented
+        const stableScore = 40 + ((mod.firstname.length * 13 + (mod._id ? mod._id.charCodeAt(0) : 0)) % 60);
+        return {
+            day: mod.firstname, // Full first name for label
+            key: mod._id || `m-${i}`,
+            percentage: stableScore
+        };
+    });
+
     const weeklyProgress = userCourses?.hoursSpent || userCourses?.stats?.weeklyProgress || {};
 
-    const sourceData = isModerator ? moderatorData : defaultData;
+    let sourceData = defaultData;
+    if (isModerator) {
+        let filteredModeratorData = [...dynamicModeratorData];
+        if (filter === 'top') {
+            filteredModeratorData.sort((a, b) => b.percentage - a.percentage);
+        } else if (filter === 'lowest') {
+            filteredModeratorData.sort((a, b) => a.percentage - b.percentage);
+        }
+        // Slice to exactly 11 to match Figma
+        sourceData = filteredModeratorData.slice(0, 11);
+    }
 
     const data = sourceData.map((item, index) => {
 
@@ -66,14 +68,16 @@ const HoursSpentCard = ({
             const expectedPct = 0;
 
             // Responsive visibility logic
-            // 0-5 (6 items): Always visible
-            // 6-8 (3 items): Visible on SM+ (total 9)
-            // 9-11 (3 items): Visible on MD+ (total 12)
-            // 12-14 (3 items): Visible on XL+ (total 15) - Changed from LG to XL
             let visibilityClass = "flex";
-            if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
-            if (index >= 9 && index < 12) visibilityClass = "hidden md:flex";
-            if (index >= 12) visibilityClass = "hidden xl:flex";
+            if (isModerator) {
+                // For 11 items
+                if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
+                if (index >= 9) visibilityClass = "hidden md:flex";
+            } else {
+                if (index >= 6 && index < 9) visibilityClass = "hidden sm:flex";
+                if (index >= 9 && index < 12) visibilityClass = "hidden md:flex";
+                if (index >= 12) visibilityClass = "hidden xl:flex";
+            }
 
             return {
                 ...item,
@@ -122,8 +126,25 @@ const HoursSpentCard = ({
             className
         )}>
             {/* Header & Legend */}
-            <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center gap-4">
                 <h3 className="text-lg font-bold text-black leading-normal pb-1">{name}</h3>
+                {isModerator && (
+                    <div className="relative">
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="appearance-none bg-[#F4F4F5] text-[12px] font-medium text-[#18181B] border border-[#EAEDF2] rounded-[6px] px-3 py-1.5 pr-7 outline-none cursor-pointer"
+                        >
+                            <option value="top">Top</option>
+                            <option value="lowest">Lowest</option>
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L5 5L9 1" stroke="#71717A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Chart Area */}
@@ -136,7 +157,7 @@ const HoursSpentCard = ({
                 </div>
 
                 {/* Bars Area */}
-                <div className="flex-1 flex items-end justify-between relative">
+                <div className={cn("flex-1 flex items-end relative", data.length < 6 ? "justify-around" : "justify-between")}>
                     {/* Grid Lines */}
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                         {yAxisLabels.map((_, i) => (

@@ -24,6 +24,7 @@ const AdminDashboard = () => {
     const [moderatorCount, setModeratorCount] = useState(0);
     const [courseCount, setCourseCount] = useState(0);
     const [courseStats, setCourseStats] = useState([]);
+    const [moderatorsData, setModeratorsData] = useState([]);
 
     // Students List Data
     const [students, setStudents] = useState([]);
@@ -41,7 +42,10 @@ const AdminDashboard = () => {
                 if (usersRes?.data) {
                     const users = usersRes.data;
                     setStudentCount(users.filter(u => u.role === 'user').length);
-                    setModeratorCount(users.filter(u => u.role === 'moderator').length);
+                    
+                    const mods = users.filter(u => u.role === 'moderator');
+                    setModeratorCount(mods.length);
+                    setModeratorsData(mods);
                 }
             } catch (err) { console.error('Error fetching users:', err); }
 
@@ -179,8 +183,8 @@ const AdminDashboard = () => {
                                     </div>
 
                                     <div className="flex gap-6 flex-col lg:flex-row">
-                                        <HoursSpentCard className="w-full lg:flex-1 shadow-sm" name="Moderator Performance" />
-                                        <PerformanceCard name="Course completion rate" className="w-full lg:max-w-[340px]" />
+                                        <HoursSpentCard className="w-full lg:w-[68%] shadow-sm" name="Moderator Performance" moderators={moderatorsData} />
+                                        <PerformanceCard name="Course completion rate" className="w-full lg:w-[32%]" />
                                     </div>
 
                                     {/* Courses Enrollment Overview */}
