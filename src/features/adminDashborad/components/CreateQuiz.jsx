@@ -363,7 +363,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
         if (lines.length === 0) return [];
 
         // Basic header cleanup
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const headers = lines[0].split(',').map(h => h.replace(/^\uFEFF/, '').trim().replace(/^"|"$/g, '').trim().toLowerCase());
         const result = [];
 
         for (let i = 1; i < lines.length; i++) {
@@ -398,22 +398,39 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
             try {
                 const parsedData = parseCSV(text);
                 const mappedQuestions = parsedData.map((row, index) => {
-                    // Normalize correct answer index
-                    const correctKey = (row.correct_answer || '').toLowerCase().trim();
+                    // Handle new and old headers (now lowercased)
+                    const correctKey = (row['correct answer'] || row['correct_answer'] || '').toLowerCase().trim();
+                    let correctOption = null;
+                    if (correctKey.startsWith('a.') || correctKey === 'a' || correctKey === 'option_1' || correctKey === 'option a') correctOption = 'A';
+                    else if (correctKey.startsWith('b.') || correctKey === 'b' || correctKey === 'option_2' || correctKey === 'option b') correctOption = 'B';
+                    else if (correctKey.startsWith('c.') || correctKey === 'c' || correctKey === 'option_3' || correctKey === 'option c') correctOption = 'C';
+                    else if (correctKey.startsWith('d.') || correctKey === 'd' || correctKey === 'option_4' || correctKey === 'option d') correctOption = 'D';
+
+                    const optA = row['option a'] || row['option_1'] || '';
+                    const optB = row['option b'] || row['option_2'] || '';
+                    const optC = row['option c'] || row['option_3'] || '';
+                    const optD = row['option d'] || row['option_4'] || '';
+
+                    if (!correctOption) {
+                        if (optA && correctKey.includes(optA.toLowerCase().trim())) correctOption = 'A';
+                        else if (optB && correctKey.includes(optB.toLowerCase().trim())) correctOption = 'B';
+                        else if (optC && correctKey.includes(optC.toLowerCase().trim())) correctOption = 'C';
+                        else if (optD && correctKey.includes(optD.toLowerCase().trim())) correctOption = 'D';
+                    }
 
                     return {
                         id: Date.now() + index,
-                        text: row.question_text || '',
-                        description: row.explanation || '',
+                        text: row['question'] || row['question_text'] || '',
+                        description: row['explanation'] || '',
                         options: [
-                            { id: 'A', text: row.option_1 || '', isCorrect: correctKey === 'option_1' || correctKey === 'a' },
-                            { id: 'B', text: row.option_2 || '', isCorrect: correctKey === 'option_2' || correctKey === 'b' },
-                            { id: 'C', text: row.option_3 || '', isCorrect: correctKey === 'option_3' || correctKey === 'c' },
-                            { id: 'D', text: row.option_4 || '', isCorrect: correctKey === 'option_4' || correctKey === 'd' }
+                            { id: 'A', text: optA, isCorrect: correctOption === 'A' },
+                            { id: 'B', text: optB, isCorrect: correctOption === 'B' },
+                            { id: 'C', text: optC, isCorrect: correctOption === 'C' },
+                            { id: 'D', text: optD, isCorrect: correctOption === 'D' }
                         ],
-                        explanation: row.explanation || '',
-                        points: parseInt(row.points) || 1,
-                        difficulty: row.difficulty || 'Easy',
+                        explanation: row['explanation'] || '',
+                        points: parseInt(row['points']) || 1,
+                        difficulty: row['difficulty'] || 'Easy',
                         shuffle: false,
                         isExpanded: false
                     };
@@ -679,9 +696,9 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                 <div>
                                     <h5 className="text-[13px] md:text-[14px] font-semibold text-blue-900 mb-1">CSV Format Requirements:</h5>
                                     <ul className="text-[12px] md:text-[13px] text-blue-800 space-y-1 list-disc list-inside">
-                                        <li>Required columns: question_text, option_1, option_2, option_3, option_4, correct_answer</li>
-                                        <li>Optional columns: explanation, points, difficulty</li>
-                                        <li>correct_answer should be 'option_1', 'option_2', etc., or 'a', 'b', etc.</li>
+                                        <li>Required columns: Question, Option A, Option B, Option C, Option D, Correct Answer</li>
+                                        <li>Optional columns: Explanation, Points, Difficulty</li>
+                                        <li>Correct Answer should be 'A. Option 1', 'B.', 'a', 'b', etc.</li>
                                     </ul>
                                     <a
                                         href="/template.csv"
@@ -689,7 +706,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                         className="text-[12px] md:text-[13px] text-[#8b5cf6] font-semibold mt-2 md:mt-3 inline-block hover:underline"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            const csvContent = "data:text/csv;charset=utf-8,question_text,option_1,option_2,option_3,option_4,correct_answer,explanation,points,difficulty\\nWhat is HTML?,Hypertext Markup Language,Hypertext Main Language,Hypertool Machine Language,None,option_1,HTML is standard markup language,1,Easy";
+                                            const csvContent = "data:text/csv;charset=utf-8,#,Question,Option A,Option B,Option C,Option D,Correct Answer,Explanation,Points,Difficulty\\n1,What is HTML?,Hypertext Markup Language,Hypertext Main Language,Hypertool Machine Language,None,A. Hypertext Markup Language,HTML is standard markup language,1,Easy";
                                             const encodedUri = encodeURI(csvContent);
                                             const link = document.createElement("a");
                                             link.setAttribute("href", encodedUri);
