@@ -1345,7 +1345,7 @@ const CourseView = () => {
                                                                     <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
                                                                         <div className={`relative w-full h-full overflow-hidden shrink-0`}>
                                                                             <img
-                                                                                src={lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)}
+                                                                                src={lecture.thumbnail || (lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg))}
                                                                                 alt={lecture.title}
                                                                                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                                             />

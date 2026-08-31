@@ -447,7 +447,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
     }
 
     return (
-        <div className="flex-1 flex flex-col w-full h-[80vh] max-h-[850px] min-h-[500px] overflow-hidden font-sans bg-[#f8fafc] lg:rounded-2xl border-t lg:border border-gray-100 shadow-sm relative">
+        <div className="flex-1 flex flex-col w-full min-h-full overflow-hidden font-sans bg-white border border-gray-100/80 shadow-sm relative">
             {/* SVG Gradient Definition */}
             <svg width="0" height="0" className="absolute">
                 <defs>
@@ -1171,7 +1171,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-4 px-4 md:px-6 py-5 border-t border-gray-100 bg-[#f8fafc] z-20">
+            <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-4 px-4 md:px-6 py-5 border-t border-gray-100 bg-white z-20">
                 <button
                     onClick={handleBack}
                     className="w-full sm:w-auto px-8 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-[8px] hover:bg-gray-50 transition-all active:scale-95 text-[14px]"

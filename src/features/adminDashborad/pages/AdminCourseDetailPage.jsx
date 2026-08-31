@@ -275,7 +275,7 @@ const AdminCourseDetailPage = () => {
                                     {paginatedLectures.map((lecture, index) => (
                                         <div key={lecture._id || index} className="border border-gray-200 rounded-[12px] p-2 bg-white flex flex-col hover:shadow-md transition-shadow">
                                             <div className="relative w-full h-[150px] rounded-[8px] overflow-hidden mb-3">
-                                                <img src={lecture.thumbnail || img} alt={lecture.title} className="w-full h-full object-cover" />
+                                                <img src={lecture.thumbnail || courseData?.thumbnail || img} alt={lecture.title} className="w-full h-full object-cover" />
                                                 <div className="absolute top-2 left-2 text-white bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded text-[10px]">
                                                     Lecture {String(lecture.lectureNo || index + 1).padStart(2, '0')}
                                                 </div>
