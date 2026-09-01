@@ -36,6 +36,18 @@ function Account({ setUserPayload, userPayload, userInfo, errors }) {
         }
     };
 
+    const resolveImageUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+        if (url.includes('localhost:8000/uploads')) {
+            return url.replace('http://localhost:8000', 'https://inzaar.duckdns.org');
+        }
+        if (url.startsWith('/uploads')) {
+            return `https://inzaar.duckdns.org${url}`;
+        }
+        return url;
+    };
+
     return (
         <div className="">
             <div className="w-full rounded-[12px] p-[24px] gap-[24px] bg-[#FFFFFF] flex flex-col gap-5">
@@ -108,17 +120,14 @@ function Account({ setUserPayload, userPayload, userInfo, errors }) {
                         <div className="w-[80px] h-[80px] rounded-full overflow-hidden bg-gray-200 border border-gray-100 flex items-center justify-center">
                             {isUploading ? (
                                 <Loader2 className="animate-spin text-blue-500 w-8 h-8" />
-                            ) : userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '' ? (
+                            ) : (userPayload?.profileImageUrl || userInfo?.profileImageUrl) ? (
                                 <img
-                                    src={userPayload.profileImageUrl}
+                                    src={resolveImageUrl(userPayload?.profileImageUrl || userInfo?.profileImageUrl)}
                                     alt="profile"
                                     className="w-full h-full object-cover"
-                                />
-                            ) : userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '' ? (
-                                <img
-                                    src={userInfo.profileImageUrl}
-                                    alt="profile"
-                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
                                 />
                             ) : (
                                 <span className="text-gray-400 text-xs">{t('no_img', 'No img')}</span>
