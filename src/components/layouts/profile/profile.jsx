@@ -19,6 +19,8 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [activeTab, setActiveTab] = useState("account");
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [oldPassword, setOldPassword] = useState("");
     const [errors, setErrors] = useState({});
     const { user, logout: contextLogout, checkAuth } = useAuth();
     const navigate = useNavigate();
@@ -97,20 +99,39 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
 
         setErrors({});
 
-        try {
-            // The backend sends the hashed password in 'user', which we must strip out before updating if not changed
-            const payloadToSend = { ...userPayload };
-            if (!payloadToSend.password || payloadToSend.password.trim() === '') {
-                delete payloadToSend.password;
-            }
+        const payloadToSend = { ...userPayload };
+        if (!payloadToSend.password || payloadToSend.password.trim() === '') {
+            delete payloadToSend.password;
+            await submitProfileUpdate(payloadToSend);
+        } else {
+            setShowPasswordModal(true);
+        }
+    };
 
-            const res = await updateProfile(payloadToSend);
+    const submitProfileUpdate = async (payload) => {
+        try {
+            await updateProfile(payload);
             if (checkAuth) await checkAuth();
             toast.success("Profile updated successfully!");
+            
+            if (payload.password) {
+                setUserPayload(prev => ({...prev, password: ''}));
+                setOldPassword("");
+                setShowPasswordModal(false);
+            }
         } catch (error) {
             console.error("Error updating profile", error);
             toast.error(error?.response?.data?.message || "Failed to update profile");
         }
+    };
+
+    const handlePasswordConfirm = () => {
+        if (!oldPassword.trim()) {
+            toast.error("Please enter your current password");
+            return;
+        }
+        const payloadToSend = { ...userPayload, oldPassword };
+        submitProfileUpdate(payloadToSend);
     };
 
     const handleLogout = async () => {
@@ -243,6 +264,53 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                                 className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
                             >
                                 Sign In / Create Account
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* Old Password Confirmation Modal */}
+            {showPasswordModal && createPortal(
+                <div className="fixed inset-0 z-[10002] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-150 ease-out animate-in fade-in fill-mode-both" onClick={() => setShowPasswordModal(false)} />
+                    <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+                        <button
+                            onClick={() => setShowPasswordModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div className="flex flex-col items-center text-center gap-4 pt-2">
+                            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-[#3758EE] mb-2 border-4 border-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            </div>
+                            <div className="w-full">
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Password Change</h3>
+                                <p className="text-[14px] leading-relaxed text-gray-500 font-medium mb-4">
+                                    Please enter your current password to confirm the changes.
+                                </p>
+                                <input 
+                                    type="password" 
+                                    value={oldPassword} 
+                                    onChange={(e) => setOldPassword(e.target.value)}
+                                    placeholder="Current Password" 
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3758EE] focus:border-transparent transition-all"
+                                />
+                            </div>
+                            <button
+                                onClick={handlePasswordConfirm}
+                                className="mt-4 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                Confirm & Update
+                            </button>
+                            <button
+                                onClick={() => setShowPasswordModal(false)}
+                                className="w-full py-3.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[14px] hover:bg-gray-200 active:scale-95 transition-all"
+                            >
+                                Cancel
                             </button>
                         </div>
                     </div>
