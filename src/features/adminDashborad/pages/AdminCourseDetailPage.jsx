@@ -173,7 +173,7 @@ const AdminCourseDetailPage = () => {
                                             ))}
                                         </div>
                                     </div>
-                                    <GradiantButton 
+                                    <GradiantButton
                                         onClick={() => toast.error('Certificate is not available yet')}
                                         className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                     >
@@ -183,7 +183,7 @@ const AdminCourseDetailPage = () => {
                                         onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
                                         className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                     >
-                                        Edit
+                                        Save
                                     </GradiantButton>
                                     <button
                                         onClick={() => setIsDeleteModalOpen(true)}
@@ -312,7 +312,7 @@ const AdminCourseDetailPage = () => {
 
                                 {totalLecturesPages > 1 && (
                                     <div className="flex justify-end items-center gap-2 mt-8">
-                                        <CustomPagination 
+                                        <CustomPagination
                                             currentPage={lecturesPage}
                                             totalPages={totalLecturesPages}
                                             onPageChange={setLecturesPage}
@@ -389,7 +389,7 @@ const AdminCourseDetailPage = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
-                                                        <GradiantButton 
+                                                        <GradiantButton
                                                             onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                             className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors mx-auto shadow-none"
                                                         >
@@ -403,7 +403,7 @@ const AdminCourseDetailPage = () => {
                                 </div>
                                 {totalStudentsPages > 1 && (
                                     <div className="flex justify-end items-center gap-2 mt-6 p-4 border-t border-gray-100 w-full">
-                                        <CustomPagination 
+                                        <CustomPagination
                                             currentPage={studentsPage}
                                             totalPages={totalStudentsPages}
                                             onPageChange={setStudentsPage}

@@ -134,7 +134,7 @@ const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource
                 lastPart = parts[parts.length - 2]; // Google drive links
             }
             if (lastPart && lastPart.length > 0) return decodeURIComponent(lastPart);
-        } catch(e) {}
+        } catch (e) { }
         return fallback;
     };
     for (let i = 0; i < audios.length && count < 2; i++) {
@@ -189,13 +189,13 @@ const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource
                     </div>
                     <div className="absolute bottom-3 right-3 text-white text-[12px] font-bold">1:00:00</div>
                 </div>
-                
+
                 <div className="p-4 space-y-4">
                     <div className="flex justify-between items-start">
                         <h4 className="text-[17px] font-bold text-[#0f172a] leading-tight">{item.title || 'Untitled Lecture'}</h4>
                         <span className="text-[11px] text-[#64748b] font-medium min-w-max">{item.type || 'Lecture'}</span>
                     </div>
-                    
+
                     {item.videoUrl && (
                         <div className="space-y-1">
                             <span className="text-[11px] text-[#64748b] font-bold">Video</span>
@@ -204,7 +204,7 @@ const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource
                             </div>
                         </div>
                     )}
-                    
+
                     {displayResources.length > 0 && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -303,7 +303,7 @@ const LectureActivitiesCard = ({ item, onEditQuiz, onDeleteQuiz, onEditAssignmen
                     <p className="text-[11px] text-[#64748b] font-medium">For: {item.title || 'Lecture'}</p>
                 </div>
             </div>
-            
+
             <div className="p-4 flex-1 flex flex-col gap-3">
                 {displayActivities.map((act, i) => {
                     if (act.type === 'quiz') {
@@ -347,7 +347,7 @@ const LectureActivitiesCard = ({ item, onEditQuiz, onDeleteQuiz, onEditAssignmen
                     }
                 })}
             </div>
-            
+
             {showActivitiesViewAll && (
                 <div className="p-4 pt-0 border-t border-transparent">
                     <button type="button" onClick={() => onViewAll && onViewAll(item, 'activities')} className="w-full py-2 bg-indigo-50 text-indigo-600 text-[12px] font-bold rounded-lg hover:bg-indigo-100 transition-colors">
@@ -679,9 +679,9 @@ const AddCoursePage = () => {
 
     const handleSaveItem = () => {
         if (!newItem.title.trim()) {
-            setValidationModal({ 
-                isOpen: true, 
-                message: newItem.type === 'Assignment' ? 'Assignment Name is required.' : 'Lecture Name is required.' 
+            setValidationModal({
+                isOpen: true,
+                message: newItem.type === 'Assignment' ? 'Assignment Name is required.' : 'Lecture Name is required.'
             });
             return;
         }
@@ -1289,7 +1289,7 @@ const AddCoursePage = () => {
                                                             />
                                                             <span className="text-[13px] font-bold text-gray-700">This course has multiple sections</span>
                                                         </label>
-                                                        
+
                                                         {courseForm.hasSections && (
                                                             <div className="mb-6">
                                                                 <label className="block text-[13px] font-bold text-gray-700 mb-2">Sections</label>
@@ -1395,14 +1395,14 @@ const AddCoursePage = () => {
                                                                 <React.Fragment key={item.id || idx}>
                                                                     <LectureCard
                                                                         courseThumbnail={courseForm.thumbnail}
-                                                                        item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                        item={{ ...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1 }}
                                                                         onEdit={() => handleEditItemClick(idx)}
                                                                         onDelete={() => handleDeleteItemClick(idx)}
                                                                         onDeleteResource={handleDeleteResource}
                                                                         onViewAll={handleViewAll}
                                                                     />
                                                                     <LectureActivitiesCard
-                                                                        item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                        item={{ ...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1 }}
                                                                         onEditQuiz={handleEditQuiz}
                                                                         onDeleteQuiz={handleDeleteQuiz}
                                                                         onEditAssignment={handleEditAssignment}
@@ -1516,14 +1516,14 @@ const AddCoursePage = () => {
                                                                     }
                                                                     return (
                                                                         <React.Fragment key={item.id || idx}>
-                                                                            <LectureCard 
+                                                                            <LectureCard
                                                                                 courseThumbnail={courseForm.thumbnail}
-                                                                                item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}} 
+                                                                                item={{ ...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1 }}
                                                                                 onDeleteResource={handleDeleteResource}
                                                                                 onViewAll={handleViewAll}
                                                                             />
                                                                             <LectureActivitiesCard
-                                                                                item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
+                                                                                item={{ ...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1 }}
                                                                                 onEditQuiz={handleEditQuiz}
                                                                                 onDeleteQuiz={handleDeleteQuiz}
                                                                                 onEditAssignment={handleEditAssignment}
@@ -1576,7 +1576,7 @@ const AddCoursePage = () => {
                                     >
                                         {isSubmitting
                                             ? <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> <span className="hidden sm:inline">Saving…</span></span>
-                                            : currentStep === 3 ? (isEditMode ? 'Edit' : 'Publish') : 'Next'
+                                            : currentStep === 3 ? (isEditMode ? 'Update' : 'Publish') : 'Next'
                                         }
                                     </GradiantButton>
                                 </div>
@@ -1782,9 +1782,9 @@ const AddCoursePage = () => {
                                                         return (
                                                             <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
                                                                 <div className="flex items-center justify-between">
-                                                                    <input 
-                                                                        type="text" 
-                                                                        value={title} 
+                                                                    <input
+                                                                        type="text"
+                                                                        value={title}
                                                                         onChange={(e) => {
                                                                             const newAudio = [...newItem.audioUrl];
                                                                             newAudio[idx] = { title: e.target.value, url };
@@ -1913,9 +1913,9 @@ const AddCoursePage = () => {
                                                         return (
                                                             <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-3 py-2 shadow-sm">
                                                                 <div className="flex items-center justify-between">
-                                                                    <input 
-                                                                        type="text" 
-                                                                        value={title} 
+                                                                    <input
+                                                                        type="text"
+                                                                        value={title}
                                                                         onChange={(e) => {
                                                                             const newPdf = [...newItem.pdfUrl];
                                                                             newPdf[idx] = { title: e.target.value, url };
@@ -2072,22 +2072,22 @@ const AddCoursePage = () => {
                                                     let lastPart = parts[parts.length - 1];
                                                     if (lastPart === 'view' && parts.length > 2) lastPart = parts[parts.length - 2];
                                                     if (lastPart && lastPart.length > 0) title = decodeURIComponent(lastPart);
-                                                } catch(e) {}
+                                                } catch (e) { }
                                             }
                                             return (
-                                            <div key={`audio-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">A</div>
-                                                <div className="flex flex-col flex-1 min-w-0">
-                                                    <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
-                                                    <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                <div key={`audio-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">A</div>
+                                                    <div className="flex flex-col flex-1 min-w-0">
+                                                        <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
+                                                        <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                    </div>
+                                                    <button onClick={() => {
+                                                        handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'audio', idx);
+                                                        setViewAllModal(prev => ({ ...prev, item: { ...prev.item, audioUrl: prev.item.audioUrl.filter((_, i) => i !== idx) } }));
+                                                    }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
-                                                <button onClick={() => {
-                                                    handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'audio', idx);
-                                                    setViewAllModal(prev => ({...prev, item: {...prev.item, audioUrl: prev.item.audioUrl.filter((_, i) => i !== idx)}}));
-                                                }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
                                             );
                                         })}
                                         {viewAllModal.item.pdfUrl && Array.isArray(viewAllModal.item.pdfUrl) && viewAllModal.item.pdfUrl.map((item, idx) => {
@@ -2103,22 +2103,22 @@ const AddCoursePage = () => {
                                                     let lastPart = parts[parts.length - 1];
                                                     if (lastPart === 'view' && parts.length > 2) lastPart = parts[parts.length - 2];
                                                     if (lastPart && lastPart.length > 0) title = decodeURIComponent(lastPart);
-                                                } catch(e) {}
+                                                } catch (e) { }
                                             }
                                             return (
-                                            <div key={`pdf-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">P</div>
-                                                <div className="flex flex-col flex-1 min-w-0">
-                                                    <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
-                                                    <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                <div key={`pdf-${idx}`} className="flex items-center gap-3 bg-[#f8fafc] rounded-xl px-4 py-3 group/item">
+                                                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-500 font-bold text-xs">P</div>
+                                                    <div className="flex flex-col flex-1 min-w-0">
+                                                        <span className="text-[13px] text-[#0f172a] font-bold truncate pr-4">{title}</span>
+                                                        <span className="text-[11px] text-[#64748b] font-medium truncate">{url}</span>
+                                                    </div>
+                                                    <button onClick={() => {
+                                                        handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'pdf', idx);
+                                                        setViewAllModal(prev => ({ ...prev, item: { ...prev.item, pdfUrl: prev.item.pdfUrl.filter((_, i) => i !== idx) } }));
+                                                    }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
+                                                        <Trash2 size={16} />
+                                                    </button>
                                                 </div>
-                                                <button onClick={() => {
-                                                    handleDeleteResource(viewAllModal.item.id || viewAllModal.item._id, 'pdf', idx);
-                                                    setViewAllModal(prev => ({...prev, item: {...prev.item, pdfUrl: prev.item.pdfUrl.filter((_, i) => i !== idx)}}));
-                                                }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg flex-shrink-0">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
                                             );
                                         })}
                                     </>
@@ -2136,7 +2136,7 @@ const AddCoursePage = () => {
                                                     </button>
                                                     <button onClick={() => {
                                                         handleDeleteQuiz(viewAllModal.item.id || viewAllModal.item._id, quiz._id);
-                                                        setViewAllModal(prev => ({...prev, item: {...prev.item, quizzes: prev.item.quizzes.filter(q => q._id !== quiz._id)}}));
+                                                        setViewAllModal(prev => ({ ...prev, item: { ...prev.item, quizzes: prev.item.quizzes.filter(q => q._id !== quiz._id) } }));
                                                     }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg">
                                                         <Trash2 size={16} />
                                                     </button>
@@ -2154,7 +2154,7 @@ const AddCoursePage = () => {
                                                     </button>
                                                     <button onClick={() => {
                                                         handleDeleteAssignment(viewAllModal.item.id || viewAllModal.item._id, assignment.id || assignment._id);
-                                                        setViewAllModal(prev => ({...prev, item: {...prev.item, assignments: prev.item.assignments.filter(a => a.id !== assignment.id && a._id !== assignment._id)}}));
+                                                        setViewAllModal(prev => ({ ...prev, item: { ...prev.item, assignments: prev.item.assignments.filter(a => a.id !== assignment.id && a._id !== assignment._id) } }));
                                                     }} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg">
                                                         <Trash2 size={16} />
                                                     </button>
