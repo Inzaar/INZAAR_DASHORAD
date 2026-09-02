@@ -12,7 +12,7 @@ import CreateQuiz from '../components/CreateQuiz';
 import CreateAssignment from '../components/CreateAssignment';
 
 /* ─────────────────────────────────────── helpers ── */
-const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
+const DURATIONS = ['8 Weeks', '12 Weeks', '24 Weeks', '52 Weeks'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
@@ -1192,7 +1192,7 @@ const AddCoursePage = () => {
                                                                     </select>
                                                                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                                 </div>
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 12 Weeks / 24 Weeks / 52 Weeks</p>
                                                             </div>
                                                         </div>
 
