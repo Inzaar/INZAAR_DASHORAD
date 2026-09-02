@@ -183,7 +183,7 @@ const AdminCourseDetailPage = () => {
                                         onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
                                         className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                     >
-                                        Save
+                                        Edit
                                     </GradiantButton>
                                     <button
                                         onClick={() => setIsDeleteModalOpen(true)}
