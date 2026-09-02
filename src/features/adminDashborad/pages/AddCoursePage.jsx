@@ -16,7 +16,7 @@ const DURATIONS = ['8 Weeks', '12 Weeks', '24 Weeks', '52 Weeks'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
-const LectureCard = ({ item, onEdit, onDelete, onDeleteResource, onViewAll }) => {
+const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource, onViewAll }) => {
     if (item.type === 'Assignment') {
         return (
             <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
@@ -171,12 +171,13 @@ const LectureCard = ({ item, onEdit, onDelete, onDeleteResource, onViewAll }) =>
     return (
         <div className="w-full h-full bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden font-sans flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-lg">
             <div>
-                <div className="relative aspect-[16/10] bg-gray-900 group">
+                <div className="relative aspect-[16/10] bg-gray-100 group overflow-hidden">
                     <img
-                        src="https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"
+                        src={courseThumbnail || item.thumbnail || "https://images.unsplash.com/photo-1585829365234-781f353c3dce?auto=format&fit=crop&q=80&w=400"}
                         alt="Course Preview"
-                        className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
                             <img src="https://ui-avatars.com/api/?name=Abu+Yahya&background=random" alt="User" />
@@ -894,8 +895,8 @@ const AddCoursePage = () => {
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
                 totalLectures: Number(courseForm.totalLectures) || 0,
-                certificateCriteria: Number(courseForm.certificateCriteria) || 0,
-                unlockCriteria: Number(courseForm.unlockCriteria) || 0,
+                certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
+                unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration || '',
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
@@ -934,8 +935,8 @@ const AddCoursePage = () => {
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
                 totalLectures: Number(courseForm.totalLectures) || 0,
-                certificateCriteria: Number(courseForm.certificateCriteria) || 0,
-                unlockCriteria: Number(courseForm.unlockCriteria) || 0,
+                certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
+                unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration || '',
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
@@ -975,8 +976,8 @@ const AddCoursePage = () => {
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
                 totalLectures: Number(courseForm.totalLectures) || courseItems.length,
-                certificateCriteria: Number(courseForm.certificateCriteria) || 0,
-                unlockCriteria: Number(courseForm.unlockCriteria) || 0,
+                certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
+                unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration,
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
@@ -1127,7 +1128,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 1: Course Setup ── */}
                                         {currentStep === 1 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full text-left bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full text-left bg-white">
                                                 <div className="w-full">
                                                     <div className="mb-6 md:mb-10">
                                                         <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
@@ -1364,7 +1365,7 @@ const AddCoursePage = () => {
                                                                     >
                                                                         Browse file
                                                                     </button>
-                                                                    <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                                    <span className="text-[11px] text-gray-400 font-medium">JPG / PNG / WEBP</span>
                                                                 </>
                                                             )}
                                                         </div>
@@ -1375,7 +1376,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 2: Add Course Content ── */}
                                         {currentStep === 2 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full bg-white">
                                                 <div className="w-full">
                                                     <div className="mb-6 md:mb-10 text-left">
                                                         <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
@@ -1393,6 +1394,7 @@ const AddCoursePage = () => {
                                                             return (
                                                                 <React.Fragment key={item.id || idx}>
                                                                     <LectureCard
+                                                                        courseThumbnail={courseForm.thumbnail}
                                                                         item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}}
                                                                         onEdit={() => handleEditItemClick(idx)}
                                                                         onDelete={() => handleDeleteItemClick(idx)}
@@ -1429,7 +1431,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 3: Review & Publish ── */}
                                         {currentStep === 3 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-32 flex-1 flex flex-col min-h-full space-y-8 md:space-y-12 bg-white">
+                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full space-y-8 md:space-y-12 bg-white">
                                                 <div className="w-full text-left">
 
                                                     {/* Success / Error Alerts */}
@@ -1461,8 +1463,8 @@ const AddCoursePage = () => {
                                                                 { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
                                                                 { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
                                                                 { label: 'Course Duration', value: courseForm.duration || '—' },
-                                                                { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria ? `${courseForm.unlockCriteria}%` : '—' },
-                                                                { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria ? `${courseForm.certificateCriteria}%` : '—' },
+                                                                { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria !== '' ? `${courseForm.unlockCriteria}%` : '90% (Default)' },
+                                                                { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria !== '' ? `${courseForm.certificateCriteria}%` : '90% (Default)' },
                                                                 { label: 'Certificate File', value: courseForm.certificateFile || '—' },
                                                             ].map((field, idx) => (
                                                                 <div key={idx} className="space-y-2 overflow-hidden">
@@ -1515,6 +1517,7 @@ const AddCoursePage = () => {
                                                                     return (
                                                                         <React.Fragment key={item.id || idx}>
                                                                             <LectureCard 
+                                                                                courseThumbnail={courseForm.thumbnail}
                                                                                 item={{...item, startingQuizNo: globalQuizNo + 1, startingAssignmentNo: globalAssignmentNo + 1}} 
                                                                                 onDeleteResource={handleDeleteResource}
                                                                                 onViewAll={handleViewAll}
@@ -1544,7 +1547,7 @@ const AddCoursePage = () => {
 
                         {/* Footer Actions */}
                         {!showQuizFlow && !showAssignmentFlow && (
-                            <div className="absolute bottom-0 left-0 right-0 w-full bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+                            <div className="w-full flex-shrink-0 mt-auto bg-white border-t border-gray-150 py-4 px-4 sm:px-6 md:px-10 flex justify-between items-center z-40">
                                 <button
                                     onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate('/admin-dashboard')}
                                     className="w-auto px-4 sm:px-6 md:px-12 py-2.5 sm:py-3 bg-[#F3F4F6] text-gray-500 font-bold rounded hover:bg-gray-200 hover:text-gray-700 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"

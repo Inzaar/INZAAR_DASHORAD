@@ -127,7 +127,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
 
     return (
         <div className="flex-1 flex flex-col w-full h-full min-h-screen bg-white md:bg-[#f8fafc] overflow-hidden font-sans relative">
-            <div className="flex-1 overflow-y-auto pb-32">
+            <div className="flex-1 overflow-y-auto pb-6">
                 <div className="max-w-[1200px] mx-auto w-full px-4 md:px-8 pt-6 md:pt-10">
                     
                     {/* Header Area */}
@@ -359,7 +359,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
             </div>
 
             {/* Bottom Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+            <div className="w-full flex-shrink-0 bg-white border-t border-gray-150 py-5 px-6 md:px-10 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 z-40">
                 <button
                     type="button"
                     onClick={onBackToSelection}

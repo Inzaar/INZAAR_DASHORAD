@@ -395,7 +395,7 @@ const Certificates = () => {
 
                                                                 {/* Action */}
                                                                 <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex justify-center">
-                                                                    {item.status === 'Completed' || item.isCompleted ? (
+                                                                    {item.isCertEligible ? (
                                                                         item.certificateUrl ? (
                                                                             <button
                                                                                 onClick={() => downloadAsPDF(item.certificateUrl, item.course)}
