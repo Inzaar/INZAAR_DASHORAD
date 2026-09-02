@@ -97,6 +97,7 @@ const CourseView = () => {
     const [pdfLoading, setPdfLoading] = useState(true);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
+    const [expandedSections, setExpandedSections] = useState({});
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -179,6 +180,180 @@ const CourseView = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const renderLectureItem = (lecture, index) => {
+        const q = lecture.quizzes || [];
+        const a = lecture.assignments || [];
+
+        return (
+            <React.Fragment key={lecture.id}>
+                {/* Main Lecture Card */}
+                <div
+                    onClick={() => {
+                        if (!lecture.isLocked) {
+                            if (lecture.type === 'Assignment') {
+                                handleOpenAssignment(lecture);
+                            } else {
+                                setShouldAutoplay(false);
+                                setCurrentLecture(lecture);
+                            }
+                        }
+                    }}
+                    className={`
+                                                        relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                                                        w-full flex flex-col
+                                                        ${currentLecture?.id === lecture.id
+                            ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
+                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                        }
+                                                        ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
+                                                        ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
+                                                        ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
+                                                    `}
+                >
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
+                        <div className={`relative w-full h-full overflow-hidden shrink-0`}>
+                            <img
+                                src={lecture.thumbnail || (lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg))}
+                                alt={lecture.title}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                <div className="flex justify-between items-start">
+                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                        {lecture.title}
+                                    </h4>
+                                </div>
+                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
+                                </div>
+                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                </div>
+                            </div>
+                            {lecture.isLocked ? (
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                    </div>
+                                </div>
+                            ) : lecture.type === 'Assignment' ? (
+                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                        <span className="text-white text-lg">📋</span>
+                                    </div>
+                                </div>
+                            ) : lecture.type === 'Quiz' ? (
+                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                        <GraduationCap className="text-white w-5 h-5" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="absolute top-2 right-2 z-20">
+                                <img
+                                    src={instructorImg}
+                                    alt="Instructor"
+                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {currentLecture?.id === lecture.id && (
+                        <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
+                    )}
+                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                        <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm z-30">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
+                        </div>
+                    )}
+
+                </div>
+
+                {/* Quizzes Boxes */}
+                {q.map((quiz, qIdx) => (
+                    <div
+                        key={`q-${quiz._id || quiz.id}-${qIdx}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (quiz.isLocked && !isAdminView) {
+                                toast.error("Please complete the video lecture first to unlock this quiz.");
+                                return;
+                            }
+                            const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
+                            navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`);
+                        }}
+                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
+                    >
+                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
+                            <GraduationCap className="text-purple-600 w-5 h-5 group-hover:scale-110 transition-transform" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-purple-700 transition-colors">{quiz.title}</h5>
+                            <p className="text-[11px] text-gray-500 font-medium">{t('quiz', 'Quiz')}</p>
+                        </div>
+                        {quiz.isLocked && !isAdminView ? (
+                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            </div>
+                        ) : quiz.isCompleted ? (
+                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                <Check className="text-green-600 w-3.5 h-3.5" />
+                            </div>
+                        ) : (
+                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-purple-50 transition-colors">
+                                <ChevronRight className="text-gray-400 group-hover:text-purple-500 w-4 h-4" />
+                            </div>
+                        )}
+                    </div>
+                ))}
+
+                {/* Assignments Boxes */}
+                {a.map((assignment, aIdx) => (
+                    <div
+                        key={`a-${assignment._id || assignment.id}-${aIdx}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (assignment.isLocked && !isAdminView) {
+                                toast.error("Please complete the video lecture first to unlock this assignment.");
+                                return;
+                            }
+                            handleOpenSpecificAssignment(lecture, assignment);
+                        }}
+                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
+                    >
+                        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+                            <FileText className="text-orange-600 w-5 h-5 group-hover:scale-110 transition-transform" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-orange-700 transition-colors">{assignment.title}</h5>
+                            <p className="text-[11px] text-gray-500 font-medium">{t('assignment', 'Assignment')}</p>
+                        </div>
+                        {assignment.isLocked && !isAdminView ? (
+                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                            </div>
+                        ) : assignment.isCompleted ? (
+                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                <Check className="text-green-600 w-3.5 h-3.5" />
+                            </div>
+                        ) : (
+                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-orange-50 transition-colors">
+                                <ChevronRight className="text-gray-400 group-hover:text-orange-500 w-4 h-4" />
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </React.Fragment>
+        )
+    };
 
     useEffect(() => {
         if (user?.role === 'admin') return;
@@ -281,6 +456,7 @@ const CourseView = () => {
     const lectures = rawLecturesList.map(l => ({
         id: l._id || l.id,
         title: l.title,
+        section: l.section,
         lectureNo: l.lectureNo,
         date: l.date,
         watchedPercentage: l.watchedPercentage || (typeof l.progress === 'string' ? parseInt(l.progress) : (l.progress || 0)),
@@ -296,6 +472,66 @@ const CourseView = () => {
         quizzes: l.quizzes || [],
         assignments: l.assignments || [],
     })) || [];
+
+    const groupedLectures = React.useMemo(() => {
+        const groups = [];
+
+        const hasExplicitSections = lectures.some(l => l.section && l.section.trim() !== "");
+
+        if (hasExplicitSections) {
+            const sectionMap = {};
+            lectures.forEach((lecture, idx) => {
+                const sec = (lecture.section || "").trim();
+                if (sec) {
+                    if (!sectionMap[sec]) {
+                        const newGroup = { sectionName: sec, id: `sec-${sec}`, isExplicitSection: true, lectures: [] };
+                        sectionMap[sec] = newGroup;
+                        groups.push(newGroup);
+                    }
+                    sectionMap[sec].lectures.push(lecture);
+                } else {
+                    groups.push({ sectionName: lecture.title, id: `single-${idx}`, isExplicitSection: false, lectures: [lecture] });
+                }
+            });
+        } else {
+            let currentLegacyGroup = null;
+            lectures.forEach((lecture, idx) => {
+                const t = (lecture.title || "").toLowerCase().trim();
+                const isContinuation = t.startsWith("part") || t.startsWith("پارٹ") || t.startsWith("lecture") || t.startsWith("لیکچر");
+
+                if (isContinuation && currentLegacyGroup) {
+                    currentLegacyGroup.lectures.push(lecture);
+                } else {
+                    if (currentLegacyGroup) {
+                        groups.push(currentLegacyGroup);
+                    }
+                    let secName = lecture.title || `Section ${groups.length + 1}`;
+                    const match = lecture.title?.match(/(.*?)\s*[\(\-]?\s*(part|پارٹ|lecture|لیکچر)/i);
+                    if (match && match[1].trim()) {
+                        secName = match[1].trim();
+                    }
+                    currentLegacyGroup = { sectionName: secName, id: `sec-${idx}`, isExplicitSection: false, lectures: [lecture] };
+                }
+            });
+            if (currentLegacyGroup) {
+                groups.push(currentLegacyGroup);
+            }
+        }
+        return groups;
+    }, [lectures]);
+
+    useEffect(() => {
+        if (currentLecture && groupedLectures.length > 0) {
+            const activeGroup = groupedLectures.find(g => g.lectures.some(l => l.id === currentLecture.id));
+            if (activeGroup && !expandedSections[activeGroup.id]) {
+                setExpandedSections(prev => ({ ...prev, [activeGroup.id]: true }));
+            }
+        }
+    }, [currentLecture, groupedLectures]);
+
+    const toggleSection = (id) => {
+        setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
+    };
 
     const isCourseCompleted = Boolean(
         courseData?.isCompleted ||
@@ -526,127 +762,127 @@ const CourseView = () => {
                             // Do not record progress when moderator plays video for a student
                         } else {
                             lastReportedRef.current = now;
-                        let calculatedPercent = Math.min(Math.round(percent), 100);
-                        if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
+                            let calculatedPercent = Math.min(Math.round(percent), 100);
+                            if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
 
-                        let finalPercent = Math.max(Math.round(maxWatchedMapRef.current[lectureId] || 0), calculatedPercent);
-                        if (finalPercent >= 95) finalPercent = 100;
+                            let finalPercent = Math.max(Math.round(maxWatchedMapRef.current[lectureId] || 0), calculatedPercent);
+                            if (finalPercent >= 95) finalPercent = 100;
 
-                        let timeSpentDelta = 0;
-                        const diff = cur - prevPlaybackTimeRef.current;
-                        // Only record if positive and realistic (e.g., less than 5 seconds jump for normal playback)
-                        if (diff > 0 && diff <= 3) {
-                            timeSpentDelta = Math.round(diff);
-                        }
-                        prevPlaybackTimeRef.current = cur;
+                            let timeSpentDelta = 0;
+                            const diff = cur - prevPlaybackTimeRef.current;
+                            // Only record if positive and realistic (e.g., less than 5 seconds jump for normal playback)
+                            if (diff > 0 && diff <= 3) {
+                                timeSpentDelta = Math.round(diff);
+                            }
+                            prevPlaybackTimeRef.current = cur;
 
-                        updateLectureProgress(courseId, {
-                            lectureId,
-                            watchedPercentage: finalPercent,
-                            lastWatchedTime: Math.floor(cur),
-                            timeSpentDelta
-                        }).then(async (data) => {
-                            maxWatchedMapRef.current[lectureId] = Math.max(maxWatchedMapRef.current[lectureId] || 0, finalPercent);
+                            updateLectureProgress(courseId, {
+                                lectureId,
+                                watchedPercentage: finalPercent,
+                                lastWatchedTime: Math.floor(cur),
+                                timeSpentDelta
+                            }).then(async (data) => {
+                                maxWatchedMapRef.current[lectureId] = Math.max(maxWatchedMapRef.current[lectureId] || 0, finalPercent);
 
-                            setCurrentLecture(prev => {
-                                if (!prev) return prev;
-                                if (prev.id === lectureId || prev._id === lectureId) {
-                                    return { ...prev, watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent) };
-                                }
-                                return prev;
-                            });
-
-                            const unlockPercent = courseData?.unlockCriteria || 100;
-                            // 1. Unlock NEXT lecture if finalPercent >= unlockPercent
-                            if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
-                                completedIdsRef.current.add(lectureId);
-                                setCourseData(prev => {
+                                setCurrentLecture(prev => {
                                     if (!prev) return prev;
-                                    const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
-                                    return {
-                                        ...prev,
-                                        lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
-                                            if (i === idx + 1 && l.isLocked) {
-                                                const prevLec = prev.lecturePlaylist[idx];
-                                                const allQ = (prevLec.quizzes || []).every(q => q.isCompleted);
-                                                const allA = (prevLec.assignments || []).every(a => a.isCompleted);
-                                                if (allQ && allA) {
-                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                                    if (prev.id === lectureId || prev._id === lectureId) {
+                                        return { ...prev, watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent) };
+                                    }
+                                    return prev;
+                                });
+
+                                const unlockPercent = courseData?.unlockCriteria || 100;
+                                // 1. Unlock NEXT lecture if finalPercent >= unlockPercent
+                                if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
+                                    completedIdsRef.current.add(lectureId);
+                                    setCourseData(prev => {
+                                        if (!prev) return prev;
+                                        const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                        return {
+                                            ...prev,
+                                            lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
+                                                if (i === idx + 1 && l.isLocked) {
+                                                    const prevLec = prev.lecturePlaylist[idx];
+                                                    const allQ = (prevLec.quizzes || []).every(q => q.isCompleted);
+                                                    const allA = (prevLec.assignments || []).every(a => a.isCompleted);
+                                                    if (allQ && allA) {
+                                                        return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                                                    }
+                                                    return l;
                                                 }
                                                 return l;
-                                            }
-                                            return l;
-                                        }),
-                                    };
-                                });
-                            }
-
-                            // 2. Unlock CURRENT lecture's quizzes/assignments/certificate ONLY at 99%
-                            if (finalPercent >= 99 && !fullyCompletedIdsRef.current.has(lectureId)) {
-                                fullyCompletedIdsRef.current.add(lectureId);
-                                setCourseData(prev => {
-                                    if (!prev) return prev;
-                                    const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
-                                    return {
-                                        ...prev,
-                                        lectureCompleted: (prev.lectureCompleted || 0) + 1,
-                                        lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
-                                            if (l._id === lectureId || l.id === lectureId) {
-                                                return {
-                                                    ...l,
-                                                    isCompleted: true,
-                                                    watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
-                                                    quizzes: (l.quizzes || []).map(q => ({ ...q, isLocked: false })),
-                                                    assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
-                                                };
-                                            }
-                                            return l;
-                                        }),
-                                    };
-                                });
-                            } else if (!fullyCompletedIdsRef.current.has(lectureId)) {
-                                // Update watchedPercentage only
-                                setCourseData(prev => {
-                                    if (!prev || !prev.lecturePlaylist) return prev;
-                                    return {
-                                        ...prev,
-                                        lecturePlaylist: prev.lecturePlaylist.map(l => {
-                                            if (l._id === lectureId || l.id === lectureId) {
-                                                return { ...l, watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent) };
-                                            }
-                                            return l;
-                                        })
-                                    };
-                                });
-                            }
-
-                            if (data?.certificateGenerated && !generatingCert) {
-                                setGeneratingCert(true);
-                                try {
-                                    const { studentName, courseName, completedAt, templateUrl } = {
-                                        studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
-                                        courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
-                                        completedAt: data.certificate?.completedAt,
-                                        templateUrl: courseData?.certificateTemplate || null
-                                    };
-                                    setCertData({ studentName, courseName, completedAt, templateUrl });
-                                    await new Promise(r => setTimeout(r, 300));
-                                    const { toBlob } = await import('html-to-image');
-                                    const blob = await toBlob(certCardRef.current, { pixelRatio: 2, cacheBust: true });
-                                    if (blob) {
-                                        const { uploadImage } = await import('@/api/course');
-                                        const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
-                                        await saveCertificate(courseId, uploaded.url);
-                                        setCertData(prev => ({ ...prev, certUrl: uploaded.url }));
-                                    }
-                                } catch (e) {
-                                    console.warn('Certificate generation/upload failed:', e);
-                                } finally {
-                                    setGeneratingCert(false);
-                                    setShowCongrats(true);
+                                            }),
+                                        };
+                                    });
                                 }
-                            }
-                        }).catch(err => console.warn('Progress update failed:', err));
+
+                                // 2. Unlock CURRENT lecture's quizzes/assignments/certificate ONLY at 99%
+                                if (finalPercent >= 99 && !fullyCompletedIdsRef.current.has(lectureId)) {
+                                    fullyCompletedIdsRef.current.add(lectureId);
+                                    setCourseData(prev => {
+                                        if (!prev) return prev;
+                                        const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                        return {
+                                            ...prev,
+                                            lectureCompleted: (prev.lectureCompleted || 0) + 1,
+                                            lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
+                                                if (l._id === lectureId || l.id === lectureId) {
+                                                    return {
+                                                        ...l,
+                                                        isCompleted: true,
+                                                        watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
+                                                        quizzes: (l.quizzes || []).map(q => ({ ...q, isLocked: false })),
+                                                        assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
+                                                    };
+                                                }
+                                                return l;
+                                            }),
+                                        };
+                                    });
+                                } else if (!fullyCompletedIdsRef.current.has(lectureId)) {
+                                    // Update watchedPercentage only
+                                    setCourseData(prev => {
+                                        if (!prev || !prev.lecturePlaylist) return prev;
+                                        return {
+                                            ...prev,
+                                            lecturePlaylist: prev.lecturePlaylist.map(l => {
+                                                if (l._id === lectureId || l.id === lectureId) {
+                                                    return { ...l, watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent) };
+                                                }
+                                                return l;
+                                            })
+                                        };
+                                    });
+                                }
+
+                                if (data?.certificateGenerated && !generatingCert) {
+                                    setGeneratingCert(true);
+                                    try {
+                                        const { studentName, courseName, completedAt, templateUrl } = {
+                                            studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
+                                            courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
+                                            completedAt: data.certificate?.completedAt,
+                                            templateUrl: courseData?.certificateTemplate || null
+                                        };
+                                        setCertData({ studentName, courseName, completedAt, templateUrl });
+                                        await new Promise(r => setTimeout(r, 300));
+                                        const { toBlob } = await import('html-to-image');
+                                        const blob = await toBlob(certCardRef.current, { pixelRatio: 2, cacheBust: true });
+                                        if (blob) {
+                                            const { uploadImage } = await import('@/api/course');
+                                            const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
+                                            await saveCertificate(courseId, uploaded.url);
+                                            setCertData(prev => ({ ...prev, certUrl: uploaded.url }));
+                                        }
+                                    } catch (e) {
+                                        console.warn('Certificate generation/upload failed:', e);
+                                    } finally {
+                                        setGeneratingCert(false);
+                                        setShowCongrats(true);
+                                    }
+                                }
+                            }).catch(err => console.warn('Progress update failed:', err));
                         }
                     }
                 }
@@ -992,22 +1228,22 @@ const CourseView = () => {
                             </div>
 
                             {!hideSidebarAndCards && (
-                                <Analytics 
-                                    userCourses={userCourses} 
+                                <Analytics
+                                    userCourses={userCourses}
                                     courseData={isModeratorViewingStudent ? {
                                         progress: progress || 0,
                                         improvementFromLastWeek: 0,
                                         quizScore: undefined,
                                         lectureCompleted: (progress || 0) >= 90 ? 1 : 0,
-                                        timeSpentLastWeek: currentLecture?.lastWatchedTime 
-                                            ? `${Math.floor(currentLecture.lastWatchedTime / 3600)}h ${Math.floor((currentLecture.lastWatchedTime % 3600) / 60)}m` 
+                                        timeSpentLastWeek: currentLecture?.lastWatchedTime
+                                            ? `${Math.floor(currentLecture.lastWatchedTime / 3600)}h ${Math.floor((currentLecture.lastWatchedTime % 3600) / 60)}m`
                                             : "0h 0m",
                                         overallPerformance: {
                                             percentage: progress || 0,
                                             trendingUp: 0
                                         }
-                                    } : courseData} 
-                                    name={isModeratorViewingStudent ? "Lecture Performance" : "Overall Performance"} 
+                                    } : courseData}
+                                    name={isModeratorViewingStudent ? "Lecture Performance" : "Overall Performance"}
                                 />
                             )}
 
@@ -1312,179 +1548,52 @@ const CourseView = () => {
                                         <div className="flex-1 relative lg:min-h-0">
                                             <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth snap-x lg:snap-y">
                                                 <div className="flex flex-row lg:flex-col gap-3 min-w-max lg:min-w-0">
-                                                    {lectures.map((lecture, index) => {
-                                                        const q = lecture.quizzes || [];
-                                                        const a = lecture.assignments || [];
-
-                                                        return (
-                                                            <React.Fragment key={lecture.id}>
-                                                                {/* Main Lecture Card */}
-                                                                <div
-                                                                    onClick={() => {
-                                                                        if (!lecture.isLocked) {
-                                                                            if (lecture.type === 'Assignment') {
-                                                                                handleOpenAssignment(lecture);
-                                                                            } else {
-                                                                                setShouldAutoplay(false);
-                                                                                setCurrentLecture(lecture);
-                                                                            }
-                                                                        }
-                                                                    }}
-                                                                    className={`
-                                                        relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
-                                                        w-[260px] sm:w-[280px] lg:w-full flex flex-col
-                                                        ${currentLecture?.id === lecture.id
-                                                                            ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
-                                                                            : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                                                                        }
-                                                        ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
-                                                        ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
-                                                        ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
-                                                    `}
-                                                                >
-                                                                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
-                                                                        <div className={`relative w-full h-full overflow-hidden shrink-0`}>
-                                                                            <img
-                                                                                src={lecture.thumbnail || (lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg))}
-                                                                                alt={lecture.title}
-                                                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                                                            />
-                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-                                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
-                                                                                <div className="flex justify-between items-start">
-                                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
-                                                                                        {lecture.title}
-                                                                                    </h4>
-                                                                                </div>
-                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
-                                                                                </div>
-                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
-                                                                                </div>
+                                                    {groupedLectures.map((group, groupIdx) => (
+                                                        <div key={group.id || groupIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
+                                                            {(group.lectures.length === 1 && !group.isExplicitSection) ? (
+                                                                renderLectureItem(group.lectures[0], 0)
+                                                            ) : (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => toggleSection(group.id)}
+                                                                        className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${expandedSections[group.id]
+                                                                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
+                                                                            : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
+                                                                            }`}
+                                                                    >
+                                                                        <div className="flex items-center gap-4">
+                                                                            <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${expandedSections[group.id]
+                                                                                ? 'bg-blue-600 text-white border-blue-500'
+                                                                                : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
+                                                                                }`}>
+                                                                                <span className="font-black text-lg">{groupIdx + 1}</span>
                                                                             </div>
-                                                                            {lecture.isLocked ? (
-                                                                                <div className="absolute inset-0 flex items-center justify-center z-10">
-                                                                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : lecture.type === 'Assignment' ? (
-                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                                        <span className="text-white text-lg">📋</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ) : lecture.type === 'Quiz' ? (
-                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                                        <GraduationCap className="text-white w-5 h-5" />
-                                                                                    </div>
-                                                                                </div>
+                                                                            <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${expandedSections[group.id] ? 'text-blue-900' : 'text-gray-800'
+                                                                                }`}>
+                                                                                {group.sectionName}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${expandedSections[group.id]
+                                                                            ? 'bg-blue-100/80 text-blue-700'
+                                                                            : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                                                            }`}>
+                                                                            {expandedSections[group.id] ? (
+                                                                                <ChevronDown size={22} strokeWidth={2.5} />
                                                                             ) : (
-                                                                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                                                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                                                                                    </div>
-                                                                                </div>
+                                                                                <ChevronRight size={22} strokeWidth={2.5} />
                                                                             )}
-                                                                            <div className="absolute top-2 right-2 z-20">
-                                                                                <img
-                                                                                    src={instructorImg}
-                                                                                    alt="Instructor"
-                                                                                    className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
-                                                                                />
-                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    {currentLecture?.id === lecture.id && (
-                                                                        <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
-                                                                    )}
-                                                                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
-                                                                        <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm z-30">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
+                                                                    </button>
+
+                                                                    {expandedSections[group.id] && (
+                                                                        <div className="flex flex-col gap-3 mt-2 lg:mt-3 pt-2 w-full">
+                                                                            {group.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
                                                                         </div>
                                                                     )}
-
-                                                                </div>
-
-                                                                {/* Quizzes Boxes */}
-                                                                {q.map((quiz, qIdx) => (
-                                                                    <div
-                                                                        key={`q-${quiz._id || quiz.id}-${qIdx}`}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            if (quiz.isLocked && !isAdminView) {
-                                                                                toast.error("Please complete the video lecture first to unlock this quiz.");
-                                                                                return;
-                                                                            }
-                                                                            const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
-                                                                            navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`);
-                                                                        }}
-                                                                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
-                                                                    >
-                                                                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
-                                                                            <GraduationCap className="text-purple-600 w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-purple-700 transition-colors">{quiz.title}</h5>
-                                                                            <p className="text-[11px] text-gray-500 font-medium">{t('quiz', 'Quiz')}</p>
-                                                                        </div>
-                                                                        {quiz.isLocked && !isAdminView ? (
-                                                                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                            </div>
-                                                                        ) : quiz.isCompleted ? (
-                                                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                                                                <Check className="text-green-600 w-3.5 h-3.5" />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-purple-50 transition-colors">
-                                                                                <ChevronRight className="text-gray-400 group-hover:text-purple-500 w-4 h-4" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-
-                                                                {/* Assignments Boxes */}
-                                                                {a.map((assignment, aIdx) => (
-                                                                    <div
-                                                                        key={`a-${assignment._id || assignment.id}-${aIdx}`}
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            if (assignment.isLocked && !isAdminView) {
-                                                                                toast.error("Please complete the video lecture first to unlock this assignment.");
-                                                                                return;
-                                                                            }
-                                                                            handleOpenSpecificAssignment(lecture, assignment);
-                                                                        }}
-                                                                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[260px] sm:w-[280px] lg:w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
-                                                                    >
-                                                                        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
-                                                                            <FileText className="text-orange-600 w-5 h-5 group-hover:scale-110 transition-transform" />
-                                                                        </div>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <h5 className="text-[13px] font-bold text-gray-800 truncate leading-tight group-hover:text-orange-700 transition-colors">{assignment.title}</h5>
-                                                                            <p className="text-[11px] text-gray-500 font-medium">{t('assignment', 'Assignment')}</p>
-                                                                        </div>
-                                                                        {assignment.isLocked && !isAdminView ? (
-                                                                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                                            </div>
-                                                                        ) : assignment.isCompleted ? (
-                                                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                                                                                <Check className="text-green-600 w-3.5 h-3.5" />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center shrink-0 group-hover:bg-orange-50 transition-colors">
-                                                                                <ChevronRight className="text-gray-400 group-hover:text-orange-500 w-4 h-4" />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                            </React.Fragment>
-                                                        )
-                                                    })}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
