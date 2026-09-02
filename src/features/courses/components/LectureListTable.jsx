@@ -29,10 +29,6 @@ const forceDownload = async (url, filename, setDownloadingIdx, idx) => {
     } catch (error) {
         console.error('Download failed:', error);
         let downloadUrl = url;
-        if (url.includes('res.cloudinary.com')) {
-            const safeName = (filename || 'resource').split('.')[0].replace(/[^a-zA-Z0-9_]/g, '_');
-            downloadUrl = url.replace(/\/upload\//, `/upload/fl_attachment:${safeName}/`);
-        }
         
         let iframe = document.getElementById('hidden-download-iframe');
         if (!iframe) {

@@ -58,17 +58,25 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
+  const resolveImageUrl = (url) => {
+    if (!url) return Profileimg;
+    if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+    if (url.includes('localhost:8000/uploads')) {
+      return url.replace('http://localhost:8000', 'https://inzaar.duckdns.org');
+    }
+    if (url.startsWith('/uploads')) {
+      return `https://inzaar.duckdns.org${url}`;
+    }
+    return url;
+  };
+
   useEffect(() => {
-    // Priority: 
-    // 1. New pending image file (local preview)
-    // 2. Existing profileImageUrl from API
-    // 3. Static placeholder
     if (pendingProfileImage) {
       const previewUrl = URL.createObjectURL(pendingProfileImage);
       setCurrentImage(previewUrl);
       return () => URL.revokeObjectURL(previewUrl); // Cleanup
     } else if (user?.profileImageUrl) {
-      setCurrentImage(user.profileImageUrl);
+      setCurrentImage(resolveImageUrl(user.profileImageUrl));
     } else {
       setCurrentImage(Profileimg);
     }
@@ -121,6 +129,10 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
         <div className="relative w-full h-[236px]">
           <img
             src={currentImage}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = Profileimg;
+            }}
             className="w-full h-full object-cover rounded-[10px] border border-gray-100 transition-all duration-300 shadow-sm"
             alt="ProfilePreview"
           />

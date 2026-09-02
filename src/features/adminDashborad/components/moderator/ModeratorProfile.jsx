@@ -132,7 +132,13 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       if (!payload.cnicFrontImage && user.cnicFrontImage) payload.cnicFrontImage = user.cnicFrontImage;
       if (!payload.cnicBackImage && user.cnicBackImage) payload.cnicBackImage = user.cnicBackImage;
 
-      await updateUser(user._id, payload);
+      const updatedRes = await updateUser(user._id, payload);
+
+      if (updatedRes?.data && profileData) {
+        profileData.user = updatedRes.data;
+      } else if (payload.profileImageUrl && user) {
+        user.profileImageUrl = payload.profileImageUrl;
+      }
 
       // Clear pending image state on success
       if (setPendingProfileImage) setPendingProfileImage(null);

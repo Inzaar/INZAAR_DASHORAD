@@ -12,7 +12,7 @@ import CreateQuiz from '../components/CreateQuiz';
 import CreateAssignment from '../components/CreateAssignment';
 
 /* ─────────────────────────────────────── helpers ── */
-const DURATIONS = ['3 Months', '12 Weeks', '60 Days', '6 Months', '1 Year'];
+const DURATIONS = ['8 Weeks', '12 Weeks', '24 Weeks', '52 Weeks'];
 const UNLOCK_PCT = ['20', '40', '50', '60', '70', '80', '90', '100'];
 
 /* ─────────────────────────────────────── LectureCard ── */
@@ -407,6 +407,8 @@ const AddCoursePage = () => {
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
 
+    const [sectionInputValue, setSectionInputValue] = useState('');
+
     /* ── Course Setup State ── */
     const [courseForm, setCourseForm] = useState({
         title: '',
@@ -419,7 +421,27 @@ const AddCoursePage = () => {
         releaseDate: '',
         thumbnail: '',
         certificateFile: '',
+        hasSections: false,
+        sections: [],
     });
+
+    const handleAddSection = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const val = sectionInputValue.trim();
+            if (val && !courseForm.sections.includes(val)) {
+                setCourseForm(prev => ({ ...prev, sections: [...prev.sections, val] }));
+                setSectionInputValue('');
+            }
+        }
+    };
+
+    const handleRemoveSection = (sectionToRemove) => {
+        setCourseForm(prev => ({
+            ...prev,
+            sections: prev.sections.filter(s => s !== sectionToRemove)
+        }));
+    };
 
     /* ── Fetch Data for Edit Mode ── */
     React.useEffect(() => {
@@ -440,6 +462,8 @@ const AddCoursePage = () => {
                         releaseDate: data.releaseDate ? data.releaseDate.split('T')[0] : '',
                         thumbnail: data.thumbnail || '',
                         certificateFile: data.certificateFile || '',
+                        hasSections: data.hasSections || false,
+                        sections: data.sections || [],
                     });
 
                     if (data.thumbnail) setThumbnailPreview(data.thumbnail);
@@ -458,6 +482,7 @@ const AddCoursePage = () => {
                             pdfUrl: Array.isArray(l.pdfUrl) ? l.pdfUrl : (l.pdfUrl ? [l.pdfUrl] : []),
                             quizzes: l.quizzes || [],
                             assignments: l.assignments || [],
+                            section: l.section || '',
                         }));
                         setCourseItems(mappedItems);
 
@@ -510,6 +535,7 @@ const AddCoursePage = () => {
         videoUrl: '',
         audioUrl: [],
         pdfUrl: [],
+        section: '',
     });
 
     const steps = [
@@ -677,14 +703,14 @@ const AddCoursePage = () => {
             ]);
         }
 
-        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
         setIsAudioUploading(false);
         setIsPdfUploading(false);
         setIsModalOpen(false);
     };
 
     const handleCloseModal = () => {
-        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
         setEditingIndex(null);
         setIsAudioUploading(false);
         setIsPdfUploading(false);
@@ -700,6 +726,7 @@ const AddCoursePage = () => {
             audioUrl: Array.isArray(item.audioUrl) ? item.audioUrl : (item.audioUrl ? [item.audioUrl] : []),
             pdfUrl: Array.isArray(item.pdfUrl) ? item.pdfUrl : (item.pdfUrl ? [item.pdfUrl] : []),
             quizId: item.quizId || null,
+            section: item.section || '',
         });
         setEditingIndex(index);
         setModalStep('item-form');
@@ -734,7 +761,7 @@ const AddCoursePage = () => {
             setShowAssignmentFlow(true);
         } else {
             // Lecture opens the video/document form flow
-            setNewItem({ type, title: '', videoUrl: '', audioUrl: [], pdfUrl: [] });
+            setNewItem({ type, title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
             setModalStep('item-form');
         }
     };
@@ -873,6 +900,8 @@ const AddCoursePage = () => {
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
+                hasSections: courseForm.hasSections || false,
+                sections: courseForm.sections || [],
                 ...(isEditMode ? {} : { status: 'draft' }),
             };
 
@@ -911,6 +940,8 @@ const AddCoursePage = () => {
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
+                hasSections: courseForm.hasSections || false,
+                sections: courseForm.sections || [],
                 status: 'draft',
             };
 
@@ -951,6 +982,8 @@ const AddCoursePage = () => {
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
                 status,
+                hasSections: courseForm.hasSections || false,
+                sections: courseForm.sections || [],
                 lectures: courseItems.map((item, idx) => ({
                     title: item.title,
                     type: item.type || 'Lecture',
@@ -960,6 +993,7 @@ const AddCoursePage = () => {
                     pdfUrl: item.pdfUrl || [],
                     quizzes: (item.quizzes || []).map(q => q._id || q.quizId),
                     assignments: item.assignments || [],
+                    section: item.section || '',
                 })),
             };
 
@@ -1158,7 +1192,7 @@ const AddCoursePage = () => {
                                                                     </select>
                                                                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                                 </div>
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 3 Months / 12 Weeks / 60 Days</p>
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 12 Weeks / 24 Weeks / 52 Weeks</p>
                                                             </div>
                                                         </div>
 
@@ -1241,6 +1275,44 @@ const AddCoursePage = () => {
                                                                 <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    {/* Sections Setup */}
+                                                    <div className="mt-8">
+                                                        <label className="flex items-center gap-2 cursor-pointer mb-4">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={courseForm.hasSections}
+                                                                onChange={e => handleCourseFormChange('hasSections', e.target.checked)}
+                                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                            />
+                                                            <span className="text-[13px] font-bold text-gray-700">This course has multiple sections</span>
+                                                        </label>
+                                                        
+                                                        {courseForm.hasSections && (
+                                                            <div className="mb-6">
+                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Sections</label>
+                                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                                    {courseForm.sections.map((sec, idx) => (
+                                                                        <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-[13px] font-bold rounded-lg border border-blue-100">
+                                                                            {sec}
+                                                                            <button type="button" onClick={() => handleRemoveSection(sec)} className="text-blue-400 hover:text-blue-600 transition-colors">
+                                                                                <X size={14} />
+                                                                            </button>
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Type a section name and press Enter..."
+                                                                    value={sectionInputValue}
+                                                                    onChange={e => setSectionInputValue(e.target.value)}
+                                                                    onKeyDown={handleAddSection}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                                />
+                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Press Enter to add a section.</p>
+                                                            </div>
+                                                        )}
                                                     </div>
 
                                                     {/* Thumbnail Upload */}
@@ -1543,6 +1615,26 @@ const AddCoursePage = () => {
 
                             <div className="px-8 pb-8 max-h-[75vh] overflow-y-auto no-scrollbar">
                                 <div className="space-y-6">
+                                    {/* Section Dropdown */}
+                                    {courseForm.hasSections && courseForm.sections.length > 0 && (
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Select Section</label>
+                                            <div className="relative group">
+                                                <select
+                                                    value={newItem.section || ''}
+                                                    onChange={e => setNewItem({ ...newItem, section: e.target.value })}
+                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                >
+                                                    <option value="">-- Select a Section --</option>
+                                                    {courseForm.sections.map((section, idx) => (
+                                                        <option key={idx} value={section}>{section}</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Row 1: Lecture name and Lecture Number */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         <div>
