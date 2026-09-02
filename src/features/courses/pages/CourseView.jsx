@@ -1349,18 +1349,15 @@ const CourseView = () => {
                                                                                 alt={lecture.title}
                                                                                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                                             />
-                                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-                                                                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
-                                                                                <div className="flex justify-between items-start">
-                                                                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
-                                                                                        {lecture.title}
-                                                                                    </h4>
-                                                                                </div>
-                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
-                                                                                </div>
-                                                                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
-                                                                                    {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                                            {/* Dark gradient for text readability - from top */}
+                                                                            <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/40 to-transparent transition-colors" />
+                                                                            {/* Text overlay pinned to top */}
+                                                                            <div className="absolute top-0 left-0 right-0 p-2 pr-8 text-white flex flex-col z-20 pointer-events-none">
+                                                                                <h4 className={`font-bold text-[13px] leading-tight mb-0.5 drop-shadow-lg ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`} style={{textShadow:'0 1px 4px rgba(0,0,0,0.9)', display:'-webkit-box', WebkitBoxOrient:'vertical', WebkitLineClamp:1, overflow:'hidden'}}>
+                                                                                    {lecture.title}
+                                                                                </h4>
+                                                                                <div className="text-[10px] text-gray-200 drop-shadow-lg opacity-90" style={{textShadow:'0 1px 3px rgba(0,0,0,0.9)'}}>
+                                                                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')} &nbsp;|&nbsp; {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
                                                                                 </div>
                                                                             </div>
                                                                             {lecture.isLocked ? (
