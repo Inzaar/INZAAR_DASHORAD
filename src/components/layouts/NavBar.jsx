@@ -3,13 +3,14 @@ import { CiBellOn } from "react-icons/ci";
 import { Menu } from "lucide-react";
 import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getMyNotifications } from "@/api/notification";
 import { useTranslation } from "react-i18next";
 
 function Navbar({ onMenuClick, hideMenu = false, title }) {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const { i18n, t } = useTranslation();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
     const [unreadCount, setUnreadCount] = React.useState(0);
@@ -56,6 +57,67 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         if (user) fetchUnreadCount();
     }, [user, navigate]); // Refetch when navigation happens (to clear it if we visited notifications)
 
+    // Map your URL paths to the Display Names
+    const pathToName = {
+        // Student Paths
+        '/dashboard': 'Dashboard',
+        '/enrolled-courses': 'My Courses',
+        '/courses': 'My Courses',
+        '/course-view': "My Courses",
+        '/notifications': 'Notifications',
+        '/certificates': 'Certificates',
+        '/profile': 'Profile',
+        '/help-center': 'Help Center',
+
+        // Admin Paths
+        '/admin-dashboard': 'Dashboard',
+        '/admin-calendar': 'Calendar',
+        '/admin-notifications': 'Notification',
+        '/admin-moderators': 'Moderators',
+        '/admin-moderators/all': 'All Moderators',
+        '/admin-moderators/male': 'Male Moderators',
+        '/admin-moderators/female': 'Female Moderators',
+        '/moderator-details': 'Moderators',
+        '/student-profiles': 'Student Profiles',
+        '/student-profiles/all': 'All Students',
+        '/student-profiles/male': 'Male Students',
+        '/student-profiles/female': 'Female Students',
+        '/admin-courses': 'Courses Management',
+        '/reports': 'Student Reports',
+        '/moderator-reports': 'Moderator Reports',
+        '/course-reports': 'Course Reports',
+        '/export-student-reports': 'Export Student Reports',
+        '/export-moderator-reports': 'Export Moderator Reports',
+
+        '/admin/student-details': 'Student Profiles',
+        '/admin/moderator-details': 'Moderators',
+        '/admin/profile': 'Dashboard',
+        '/admin/course-details': 'Courses Management',
+        '/admin-course-view': 'Courses Management',
+        '/admin-course-play': 'Courses Management',
+        '/admin-course-add': 'Courses Management',
+        '/admin-add-course': 'Courses Management',
+        '/registered-users': 'Student Profiles',
+        '/registered-courses': 'Courses Management',
+
+        // Auth
+        '/logout': 'Logout'
+    };
+
+    let computedTitle = title;
+    if (!computedTitle) {
+        let currentName = pathToName[location.pathname];
+        if (!currentName) {
+            const matchedKey = Object.keys(pathToName).find(key =>
+                location.pathname.startsWith(key) && key !== '/'
+            );
+            if (matchedKey) {
+                currentName = pathToName[matchedKey];
+            }
+        }
+        computedTitle = currentName || 'Dashboard';
+    }
+
     return (
         <div className="relative w-full h-auto md:min-h-[80px] py-3 md:py-0 flex items-center justify-center shadow-[0px_4px_4px_rgba(0,0,0,0.25)] px-4 sm:px-6 md:px-8">
             {/* Base Gradient Layer (Left to Right) */}
@@ -78,7 +140,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         )}
                         <div className="min-w-0">
                             <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-normal tracking-tight text-[#2C2C2C] pb-1">
-                                {t((title || 'Dashboard').toLowerCase().replace(/ /g, '_'), title || 'Dashboard')}
+                                {t((computedTitle).toLowerCase().replace(/ /g, '_'), computedTitle)}
                             </div>
                             <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-normal text-[#2C2C2C]/80">
                                 {today}
