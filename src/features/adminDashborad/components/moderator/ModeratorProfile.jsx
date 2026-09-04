@@ -19,7 +19,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
     setPhone(user.phone || '');
   }, [user.phone]);
 
-  
+
   // Password Modal State
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({ password: '', confirmPassword: '' });
@@ -45,6 +45,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(passwordData.password)) {
       return toast.error("Password must contain at least one special symbol!");
     }
+
 
     setIsChangingPass(true);
     const toastId = toast.loading("Updating password...");
