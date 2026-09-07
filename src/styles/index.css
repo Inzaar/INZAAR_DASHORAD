@@ -184,26 +184,3 @@
     font-family: 'Roboto', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif !important;
   }
 }
-
-/* Custom Date Input Styling */
-input[type="date"] {
-  position: relative;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-}
-
-input[type="date"]::after {
-  content: none;
-  display: none;
-}

@@ -112,6 +112,10 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         try {
             await updateProfile(payload);
             if (checkAuth) await checkAuth();
+            
+            const id = payload._id || 'guest';
+            localStorage.removeItem(`profileDraft_${id}`);
+            
             toast.success("Profile updated successfully!");
             
             if (payload.password) {
