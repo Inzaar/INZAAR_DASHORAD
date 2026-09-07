@@ -10,6 +10,11 @@ export const googleAuthLogin = (data) => {
     return res;
 }
 
+export const sendRegisterOtp = (data) => {
+    const res = axiosInstance.post("/users/send-register-otp", data);
+    return res;
+}
+
 export const register = (data) => {
     const res = axiosInstance.post("/users/register", data);
     return res;
