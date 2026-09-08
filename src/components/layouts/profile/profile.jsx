@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import Account from "./account";
 import GrayButton from "@/components/ui/buttons/GrayButton";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
-import { useState } from "react";
+import React, { useState } from "react";
 import Other from "./other";
 import ProfileDesign from "./ProfileDesign";
 import { updateProfile, logout as apiLogout } from "@/api/auth";
@@ -27,7 +27,6 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const { user, logout: contextLogout, checkAuth } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
-
 
     const calculateProfileCompletion = (user) => {
         if (!user) return 0;

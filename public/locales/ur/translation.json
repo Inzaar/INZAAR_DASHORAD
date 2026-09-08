@@ -480,5 +480,9 @@
     "no_countries_found": "کوئی ملک نہیں ملا",
     "enter_phone_number": "فون نمبر درج کریں",
     "invalid_phone_number": "غلط فون نمبر برائے"
-  }
+  },
+  "unsavedChangesTitle": "غیر محفوظ شدہ تبدیلیاں",
+  "unsavedChangesMessage": "آپ کے پاس غیر محفوظ شدہ تبدیلیاں ہیں۔ اگر آپ یہ صفحہ چھوڑ دیتے ہیں تو آپ کی تبدیلیاں ضائع ہو جائیں گی۔",
+  "leavePage": "صفحہ چھوڑ دیں",
+  "stayAndEdit": "رکیں / ترمیم جاری رکھیں"
 }

@@ -223,5 +223,9 @@
     "no_countries_found": "No countries found",
     "enter_phone_number": "enter phone number",
     "invalid_phone_number": "Invalid phone number for"
-  }
+  },
+  "unsavedChangesTitle": "Unsaved Changes",
+  "unsavedChangesMessage": "You have unsaved changes. If you leave this page, your modifications will be lost.",
+  "leavePage": "Leave Page",
+  "stayAndEdit": "Stay / Keep Editing"
 }
