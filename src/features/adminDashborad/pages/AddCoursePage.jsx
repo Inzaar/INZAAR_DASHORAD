@@ -405,7 +405,9 @@ const AddCoursePage = () => {
     const [certificateUploading, setCertificateUploading] = useState(false);
     const [certificatePreview, setCertificatePreview] = useState('');
     const certificateInputRef = useRef(null);
+
     const audioInputRef = useRef(null);
+    const mainAudioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
 
     const [sectionInputValue, setSectionInputValue] = useState('');
@@ -537,6 +539,7 @@ const AddCoursePage = () => {
         audioUrl: [],
         pdfUrl: [],
         section: '',
+        mediaType: 'Video',
     });
 
     const steps = [
@@ -704,14 +707,14 @@ const AddCoursePage = () => {
             ]);
         }
 
-        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '', mediaType: 'Video' });
         setIsAudioUploading(false);
         setIsPdfUploading(false);
         setIsModalOpen(false);
     };
 
     const handleCloseModal = () => {
-        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '', mediaType: 'Video' });
         setEditingIndex(null);
         setIsAudioUploading(false);
         setIsPdfUploading(false);
@@ -728,6 +731,7 @@ const AddCoursePage = () => {
             pdfUrl: Array.isArray(item.pdfUrl) ? item.pdfUrl : (item.pdfUrl ? [item.pdfUrl] : []),
             quizId: item.quizId || null,
             section: item.section || '',
+            mediaType: item.mediaType || (item.videoUrl ? 'Video' : (item.audioUrl && item.audioUrl.length > 0 ? 'Audio' : 'Video')),
         });
         setEditingIndex(index);
         setModalStep('item-form');
@@ -762,7 +766,7 @@ const AddCoursePage = () => {
             setShowAssignmentFlow(true);
         } else {
             // Lecture opens the video/document form flow
-            setNewItem({ type, title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '' });
+            setNewItem({ type, title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '', mediaType: 'Video' });
             setModalStep('item-form');
         }
     };
@@ -1616,27 +1620,54 @@ const AddCoursePage = () => {
                                 </div>
                             </div>
 
-                            <div className="px-8 pb-8 max-h-[75vh] overflow-y-auto no-scrollbar">
+                            {submitError && (
+                                <div className="px-8 mt-2">
+                                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4">
+                                        <AlertCircle size={20} className="flex-shrink-0" />
+                                        <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="px-8 pb-8 pt-4 max-h-[75vh] overflow-y-auto no-scrollbar">
                                 <div className="space-y-6">
-                                    {/* Section Dropdown */}
-                                    {courseForm.hasSections && courseForm.sections.length > 0 && (
-                                        <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Select Section</label>
-                                            <div className="relative group">
-                                                <select
-                                                    value={newItem.section || ''}
-                                                    onChange={e => setNewItem({ ...newItem, section: e.target.value })}
-                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                >
-                                                    <option value="">-- Select a Section --</option>
-                                                    {courseForm.sections.map((section, idx) => (
-                                                        <option key={idx} value={section}>{section}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    {/* Section and Lecture Type Dropdown */}
+                                    <div className={`grid grid-cols-1 ${(courseForm.hasSections && courseForm.sections.length > 0) && (newItem.type !== 'Assignment' && newItem.type !== 'Quiz') ? 'sm:grid-cols-2' : ''} gap-5`}>
+                                        {courseForm.hasSections && courseForm.sections.length > 0 && (
+                                            <div>
+                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Select Section</label>
+                                                <div className="relative group">
+                                                    <select
+                                                        value={newItem.section || ''}
+                                                        onChange={e => setNewItem({ ...newItem, section: e.target.value })}
+                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                    >
+                                                        <option value="">-- Select a Section --</option>
+                                                        {courseForm.sections.map((section, idx) => (
+                                                            <option key={idx} value={section}>{section}</option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+                                        {newItem.type !== 'Assignment' && newItem.type !== 'Quiz' && (
+                                            <div>
+                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture Type</label>
+                                                <div className="relative group">
+                                                    <select
+                                                        value={newItem.mediaType || 'Video'}
+                                                        onChange={e => setNewItem({ ...newItem, mediaType: e.target.value })}
+                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                    >
+                                                        <option value="Video">Video</option>
+                                                        <option value="Audio">Audio</option>
+                                                    </select>
+                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Row 1: Lecture name and Lecture Number */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -1662,6 +1693,7 @@ const AddCoursePage = () => {
                                     </div>
 
                                     {/* Upload Video Lecture Section */}
+                                    {(!newItem.mediaType || newItem.mediaType === 'Video' || newItem.type === 'Assignment') && (
                                     <div>
                                         <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
                                         <input
@@ -1714,12 +1746,99 @@ const AddCoursePage = () => {
                                         </div>
                                     </div>
 
+                                    )}
+
+                                    {/* Upload Audio Lecture Section (Main) */}
+                                    {newItem.mediaType === 'Audio' && (
+                                    <div>
+                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Audio Lecture</label>
+                                        <input
+                                            ref={mainAudioInputRef}
+                                            type="file"
+                                            accept="audio/*"
+                                            className="hidden"
+                                            onChange={handleAudioFileChange}
+                                        />
+                                        <div
+                                            onClick={() => !isAudioUploading && mainAudioInputRef.current?.click()}
+                                            onMouseEnter={() => setIsModalAudioHovered(true)}
+                                            onMouseLeave={() => setIsModalAudioHovered(false)}
+                                            className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                            ${isAudioUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
+                                            style={{
+                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                borderRadius: '12px'
+                                            }}
+                                        >
+                                            {isAudioUploading ? (
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                    <span className="text-[12px] text-gray-500 font-bold">Uploading audio...</span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                        <path d="M12 12v9" />
+                                                        <path d="m16 16-4-4-4 4" />
+                                                    </svg>
+                                                    <button
+                                                        type="button"
+                                                        className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                    >
+                                                        Browse file
+                                                    </button>
+                                                    <span className="text-[11px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {/* List of Audios */}
+                                        {newItem.audioUrl?.length > 0 && (
+                                            <div className="mt-3 space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
+                                                {newItem.audioUrl.map((item, idx) => {
+                                                    const isObj = typeof item === 'object' && item !== null;
+                                                    const title = isObj ? item.title : `Audio ${idx + 1}`;
+                                                    const url = isObj ? item.url : item;
+                                                    return (
+                                                        <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-4 py-3 shadow-sm">
+                                                            <div className="flex items-center justify-between">
+                                                                <input
+                                                                    type="text"
+                                                                    value={title}
+                                                                    onChange={(e) => {
+                                                                        const newAudio = [...newItem.audioUrl];
+                                                                        newAudio[idx] = { title: e.target.value, url };
+                                                                        setNewItem({ ...newItem, audioUrl: newAudio });
+                                                                    }}
+                                                                    className="text-[13px] font-bold text-gray-700 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 bg-transparent flex-1 mr-3 pb-0.5"
+                                                                    placeholder="Audio Title..."
+                                                                />
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
+                                                                    }}
+                                                                    className="text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                            <div className="text-[11px] text-gray-400 font-medium truncate flex-1">{url}</div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                    )}
+
                                     {/* Or Upload URL */}
                                     <div>
                                         <label className="block text-[13px] font-bold text-gray-700 mb-2">Or Upload URL</label>
                                         <input
                                             type="text"
-                                            placeholder="https://youtube.com"
+                                            placeholder="https://example.com/media"
                                             value={newItem.videoUrl}
                                             onChange={e => setNewItem({ ...newItem, videoUrl: e.target.value })}
                                             className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
@@ -2002,7 +2121,8 @@ const AddCoursePage = () => {
                                     </button>
                                     <GradiantButton
                                         onClick={handleSaveItem}
-                                        className="px-16 py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[14px]"
+                                        disabled={isVideoUploading || isAudioUploading || isPdfUploading}
+                                        className="px-16 py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Save
                                     </GradiantButton>

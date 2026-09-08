@@ -1414,6 +1414,65 @@ const CourseView = () => {
                                                         className="w-full h-full"
                                                         iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
                                                     />
+                                                ) : (currentLecture?.audioUrl?.length > 0 || currentLecture?.videoUrl) && !currentLecture?.videoId ? (
+                                                    <div className="w-full h-full flex flex-col items-center justify-center relative bg-[#0f172a] overflow-hidden group min-h-[300px] sm:min-h-0">
+                                                        <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
+
+                                                        <div className="relative z-10 w-full px-6 sm:px-12 flex flex-col items-center justify-center flex-1 py-12">
+                                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-[3px] border-white/20 overflow-hidden mb-8 shadow-2xl relative">
+                                                                <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="w-full h-full object-cover" />
+                                                            </div>
+
+                                                            <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl border border-white/10 shadow-2xl">
+                                                                {(() => {
+                                                                    const url = currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : currentLecture.videoUrl;
+                                                                    if (url && url.includes('drive.google.com')) {
+                                                                        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                                                        if (match && match[1]) {
+                                                                            return (
+                                                                                <iframe
+                                                                                    src={`https://drive.google.com/file/d/${match[1]}/preview`}
+                                                                                    className="w-full h-16 border-none rounded"
+                                                                                    title="Audio Player"
+                                                                                    allow="autoplay"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                    }
+                                                                    return (
+                                                                        <audio
+                                                                            controls
+                                                                            autoPlay={shouldAutoplay}
+                                                                            className="w-full h-12 outline-none"
+                                                                            src={getAudioSrc(url)}
+                                                                            controlsList="nodownload"
+                                                                            onLoadedMetadata={(e) => {
+                                                                                const audioEl = e.target;
+                                                                                playerRef.current = {
+                                                                                    getCurrentTime: () => audioEl.currentTime,
+                                                                                    getDuration: () => audioEl.duration,
+                                                                                    seekTo: (time) => { audioEl.currentTime = time; },
+                                                                                    mute: () => { audioEl.muted = true; },
+                                                                                    unMute: () => { audioEl.muted = false; },
+                                                                                    setVolume: (vol) => { audioEl.volume = vol / 100; },
+                                                                                    getVideoData: () => ({ video_id: 'audio-lecture' })
+                                                                                };
+                                                                                if (currentLecture?.lastWatchedTime > 0) {
+                                                                                    audioEl.currentTime = currentLecture.lastWatchedTime;
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            Your browser does not support the audio element.
+                                                                        </audio>
+                                                                    );
+                                                                })()}
+                                                                <div className="text-white text-xs mt-2 break-all">
+                                                                    DEBUG src: {currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : currentLecture.videoUrl}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 ) : (
                                                     <div
                                                         className="w-full h-full flex items-center justify-center relative cursor-pointer"
@@ -1770,30 +1829,32 @@ const CourseView = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Content Type</label>
+                                    <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Lecture Type</label>
                                     <div className="relative">
                                         <select
                                             value={editLectureData.type}
                                             onChange={e => setEditLectureData({ ...editLectureData, type: e.target.value })}
                                             className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm appearance-none cursor-pointer"
                                         >
-                                            <option value="Lecture">Lecture</option>
-                                            <option value="QA">Q&A</option>
+                                            <option value="Lecture">Video</option>
+                                            <option value="Audio">Audio</option>
                                         </select>
                                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Video URL */}
+                            {/* URL */}
                             <div>
-                                <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">Video URL <span className="text-gray-400 font-normal lowercase">(YouTube)</span></label>
+                                <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">
+                                    {editLectureData.type === 'Audio' ? 'Audio URL' : 'Video URL'} <span className="text-gray-400 font-normal lowercase">(youtube/drive)</span>
+                                </label>
                                 <input
                                     type="text"
                                     value={editLectureData.videoUrl}
                                     onChange={e => setEditLectureData({ ...editLectureData, videoUrl: e.target.value })}
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm"
-                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    placeholder={editLectureData.type === 'Audio' ? "https://drive.google.com/..." : "https://www.youtube.com/watch?v=..."}
                                 />
                             </div>
 
