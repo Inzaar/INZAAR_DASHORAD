@@ -828,9 +828,10 @@ const CourseView = () => {
                                     setCourseData(prev => {
                                         if (!prev) return prev;
                                         const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                        const wasAlreadyCompleted = prev.lecturePlaylist[idx]?.isCompleted;
                                         return {
                                             ...prev,
-                                            lectureCompleted: (prev.lectureCompleted || 0) + 1,
+                                            lectureCompleted: wasAlreadyCompleted ? prev.lectureCompleted : (prev.lectureCompleted || 0) + 1,
                                             lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
                                                 if (l._id === lectureId || l.id === lectureId) {
                                                     return {
