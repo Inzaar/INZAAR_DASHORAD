@@ -6,7 +6,11 @@ import AppRouter from "./router/AppRouter";
 function App() {
   return (
     <AuthProvider>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false} 
+        containerStyle={{ zIndex: 999999 }} 
+      />
       <AppRouter />
     </AuthProvider>
   );

@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "@/components/shared/LogoutModal";
 import { useTranslation } from "react-i18next";
+import { Eye, EyeOff } from "lucide-react";
 // import profile from "@/assets/images/profile.png"
 
 function Profile({ userInfo, setUserPayload, userPayload }) {
@@ -21,6 +22,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [oldPassword, setOldPassword] = useState("");
+    const [showOldPassword, setShowOldPassword] = useState(false);
     const [errors, setErrors] = useState({});
     const { user, logout: contextLogout, checkAuth } = useAuth();
     const navigate = useNavigate();
@@ -80,14 +82,16 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         }
 
         if (userPayload.password && userPayload.password.trim() !== '') {
-            if (userPayload.password.length < 8) {
-                newErrors.password = 'Password must be at least 8 characters long.';
-            }
-            else if (!/[A-Z]/.test(userPayload.password)) {
-                newErrors.password = 'Password must contain at least one uppercase letter.';
-            }
-            else if (!/[!@#$%^&*(),.?":{}|<>]/.test(userPayload.password)) {
-                newErrors.password = 'Password must contain at least one special symbol.';
+            if (userPayload.password.length < 40) {
+                if (userPayload.password.length < 8) {
+                    newErrors.password = 'Password must be at least 8 characters long.';
+                }
+                else if (!/[A-Z]/.test(userPayload.password)) {
+                    newErrors.password = 'Password must contain at least one uppercase letter.';
+                }
+                else if (!/[!@#$%^&*(),.?":{}|<>]/.test(userPayload.password)) {
+                    newErrors.password = 'Password must contain at least one special symbol.';
+                }
             }
         }
 
@@ -100,7 +104,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         setErrors({});
 
         const payloadToSend = { ...userPayload };
-        if (!payloadToSend.password || payloadToSend.password.trim() === '') {
+        if (!payloadToSend.password || payloadToSend.password.trim() === '' || payloadToSend.password.length > 40) {
             delete payloadToSend.password;
             await submitProfileUpdate(payloadToSend);
         } else {
@@ -119,7 +123,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             toast.success("Profile updated successfully!");
             
             if (payload.password) {
-                setUserPayload(prev => ({...prev, password: ''}));
+                setUserPayload(prev => ({...prev, password: '', hasUpdatedPassword: true}));
                 setOldPassword("");
                 setShowPasswordModal(false);
             }
@@ -129,12 +133,17 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         }
     };
 
+    const hasPreviousPassword = !!userInfo?.password && !((userInfo?.username?.startsWith('google_') || userInfo?.username?.startsWith('guest_')) && !userInfo?.hasUpdatedPassword && !userPayload?.hasUpdatedPassword);
+
     const handlePasswordConfirm = () => {
-        if (!oldPassword.trim()) {
+        if (hasPreviousPassword && !oldPassword.trim()) {
             toast.error("Please enter your current password");
             return;
         }
-        const payloadToSend = { ...userPayload, oldPassword };
+        const payloadToSend = { ...userPayload };
+        if (hasPreviousPassword) {
+            payloadToSend.oldPassword = oldPassword;
+        }
         submitProfileUpdate(payloadToSend);
     };
 
@@ -292,23 +301,38 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                             </div>
                             <div className="w-full">
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Password Change</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                    {hasPreviousPassword ? "Confirm Password Change" : "Setup Password"}
+                                </h3>
                                 <p className="text-[14px] leading-relaxed text-gray-500 font-medium mb-4">
-                                    Please enter your current password to confirm the changes.
+                                    {hasPreviousPassword 
+                                        ? "Please enter your current password to confirm the changes."
+                                        : "You are going to setup your password, please copy it and save for you to remember."}
                                 </p>
-                                <input 
-                                    type="password" 
-                                    value={oldPassword} 
-                                    onChange={(e) => setOldPassword(e.target.value)}
-                                    placeholder="Current Password" 
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3758EE] focus:border-transparent transition-all"
-                                />
+                                {hasPreviousPassword && (
+                                    <div className="relative w-full">
+                                        <input 
+                                            type={showOldPassword ? "text" : "password"} 
+                                            value={oldPassword} 
+                                            onChange={(e) => setOldPassword(e.target.value)}
+                                            placeholder="Current Password" 
+                                            className="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3758EE] focus:border-transparent transition-all"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                            onClick={() => setShowOldPassword(!showOldPassword)}
+                                        >
+                                            {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <button
                                 onClick={handlePasswordConfirm}
                                 className="mt-4 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
                             >
-                                Confirm & Update
+                                {hasPreviousPassword ? "Confirm & Update" : "Confirm & Save"}
                             </button>
                             <button
                                 onClick={() => setShowPasswordModal(false)}

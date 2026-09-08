@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ThumbnailCropper from '@/features/adminDashborad/components/ThumbnailCropper';
 import { uploadProfilePic } from '@/api/auth';
 import PhoneInput from '@/components/ui/inputs/PhoneInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { MdUploadFile } from "react-icons/md";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ function Account({ setUserPayload, userPayload, userInfo, errors }) {
     const [showCropper, setShowCropper] = useState(false);
     const [cropSrc, setCropSrc] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { t } = useTranslation();
 
     const handleFileChange = (e) => {
@@ -82,14 +83,23 @@ function Account({ setUserPayload, userPayload, userInfo, errors }) {
                     <div className="w-full gap-[16px] opacity-[1px] flex flex-col min-[1218px]:flex-row ">
                         <div className="w-full min-[1218px]:w-[50%] opacity-[1px] gap-[8px] flex flex-col">
                             <label className="font-medium font-[16px] leading-none tracking-normal leading-[1.8]">{t('password_required', 'Password*')}</label>
-                            <input 
-                                type="password" 
-                                value={(userPayload?.password && userPayload.password.length > 40) ? '' : (userPayload?.password || '')}
-                                onChange={(e) => setUserPayload({ ...userPayload, password: e.target.value })}
-                                placeholder={t('leave_blank_to_keep', 'Leave blank to keep unchanged')}
-                                className={`h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 gap-1 border ${errors?.password ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`} 
-                                autoComplete="new-password"
-                            />
+                            <div className="relative w-full">
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
+                                    value={(userPayload?.password && userPayload.password.length > 40) ? '' : (userPayload?.password || '')}
+                                    onChange={(e) => setUserPayload({ ...userPayload, password: e.target.value })}
+                                    placeholder={t('leave_blank_to_keep', 'Leave blank to keep unchanged')}
+                                    className={`w-full h-[52px] rotate-0 opacity-100 gap-2 rounded pt-4 pb-4 px-3 pr-10 border ${errors?.password ? 'border-red-500 bg-red-50' : 'border-[#E4E4E7]'}`} 
+                                    autoComplete="new-password"
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
                             {errors?.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                         </div>
 
