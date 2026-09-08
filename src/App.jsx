@@ -7,19 +7,14 @@ import AppRouter from "./router/AppRouter";
 function App() {
   return (
     <AuthProvider>
-<<<<<<< Updated upstream
-      <Toaster 
-        position="top-center" 
-        reverseOrder={false} 
-        containerStyle={{ zIndex: 999999 }} 
-      />
-      <AppRouter />
-=======
       <NotificationProvider>
-        <Toaster position="top-center" reverseOrder={false} />
+        <Toaster 
+          position="top-center" 
+          reverseOrder={false} 
+          containerStyle={{ zIndex: 999999 }} 
+        />
         <AppRouter />
       </NotificationProvider>
->>>>>>> Stashed changes
     </AuthProvider>
   );
 }
