@@ -998,7 +998,16 @@ const CourseView = () => {
         if (!editLectureData.title.trim()) return;
         setIsSavingLecture(true);
         try {
-            const res = await updateLecture(editLectureData.id, editLectureData);
+            const payload = {
+                ...editLectureData,
+                audioUrl: editLectureData.audioUrl.map((item, idx) => 
+                    typeof item === 'string' ? { title: `Audio ${idx + 1}`, url: item } : item
+                ),
+                pdfUrl: editLectureData.pdfUrl.map((item, idx) => 
+                    typeof item === 'string' ? { title: `PDF ${idx + 1}`, url: item } : item
+                )
+            };
+            const res = await updateLecture(editLectureData.id, payload);
             const updated = res.data.data;
 
             // Sync with local courseData
