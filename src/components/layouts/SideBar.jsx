@@ -4,9 +4,9 @@ import Sideabrbbutton from '../ui/buttons/Sideabrbbutton';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'; // Added useLocation
 import { useAuth } from '@/context/AuthContext';
+import { useNotification } from '@/context/NotificationContext';
 import { logout as apiLogout } from '@/api/auth';
 import LogoutModal from '@/components/shared/LogoutModal';
-import { getMyNotifications } from '@/api/notification';
 
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
@@ -16,21 +16,9 @@ function Sidebar({ className, onClose }) {
   const [isStudentsExpanded, setIsStudentsExpanded] = useState(false);
   const [isModeratorsExpanded, setIsModeratorsExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
+  const { unreadCount } = useNotification();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { t } = useTranslation();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await getMyNotifications();
-        setUnreadCount(res.data?.data?.unreadCount || 0);
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    if (user) fetchUnreadCount();
-  }, [user, location.pathname]);
 
   const tKey = (str) => {
     const map = {

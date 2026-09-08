@@ -3,17 +3,17 @@ import { CiBellOn } from "react-icons/ci";
 import { Menu } from "lucide-react";
 import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
+import { useNotification } from "@/context/NotificationContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getMyNotifications } from "@/api/notification";
 import { useTranslation } from "react-i18next";
 
 function Navbar({ onMenuClick, hideMenu = false, title }) {
     const { user } = useAuth();
+    const { unreadCount } = useNotification();
     const navigate = useNavigate();
     const location = useLocation();
     const { i18n, t } = useTranslation();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
-    const [unreadCount, setUnreadCount] = React.useState(0);
 
     const languages = [
         { name: "English", code: "en", flag: "https://flagcdn.com/us.svg", dir: "ltr" },
@@ -44,18 +44,6 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         month: 'long',
         year: 'numeric'
     }).format(new Date());
-
-    React.useEffect(() => {
-        const fetchUnreadCount = async () => {
-            try {
-                const res = await getMyNotifications();
-                setUnreadCount(res.data.data.unreadCount || 0);
-            } catch (error) {
-                console.error("Error fetching unread count:", error);
-            }
-        };
-        if (user) fetchUnreadCount();
-    }, [user, navigate]); // Refetch when navigation happens (to clear it if we visited notifications)
 
     // Map your URL paths to the Display Names
     const pathToName = {

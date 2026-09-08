@@ -1,19 +1,16 @@
 import Navbar from '@/components/layouts/NavBar';
 import Sidebar from '@/components/layouts/SideBar';
 import React from 'react';
-// Verify if you are using Vite/React (react-router-dom) or Next.js (next/navigation)
 import { useNavigate } from 'react-router-dom';
 import Notification from '@/components/shared/notification/Notification';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-
-import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
+import { useNotification } from '@/context/NotificationContext';
 import { Loader, BellOff, Lock } from 'lucide-react';
 
 const NotificationPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const [notifications, setNotifications] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    const { notifications, loading, markAsRead } = useNotification();
     const { user } = useAuth();
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -88,45 +85,20 @@ const NotificationPage = () => {
 
     const handleNotificationClick = async (notification) => {
         try {
-            // Mark as read in backend
-            await markSingleAsRead(notification.id);
+            if (notification.isUnread) {
+                await markAsRead(notification.id);
+            }
 
-            // Update local state for immediate feedback
-            setNotifications(prev => prev.map(n =>
-                n.id === notification.id ? { ...n, isUnread: false } : n
-            ));
-
-            // Navigate if link exists
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 navigate(notification.link);
             }
         } catch (error) {
             console.error("Error marking notification as read:", error);
-            // Still navigate even if marking as read fails
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 navigate(notification.link);
             }
         }
     };
-
-    React.useEffect(() => {
-        const fetchNotifications = async () => {
-            if (user?.role === 'guest') {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const res = await getMyNotifications();
-                setNotifications(res.data.data.notifications || []);
-            } catch (error) {
-                console.error("Error fetching notifications:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchNotifications();
-    }, []);
 
     return (
         // Changed h-screen to min-h-screen for better mobile compatibility

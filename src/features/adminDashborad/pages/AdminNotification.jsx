@@ -1,35 +1,27 @@
 import Navbar from '@/components/layouts/NavBar';
 import Sidebar from '@/components/layouts/SideBar';
 import React from 'react';
-// Verify if you are using Vite/React (react-router-dom) or Next.js (next/navigation)
 import { useNavigate } from 'react-router-dom';
-import { getMyNotifications, markNotificationsAsSeen, markSingleAsRead } from '@/api/notification';
+import { useNotification } from '@/context/NotificationContext';
 import { Loader, BellOff } from 'lucide-react';
 
 import Notification from '@/components/shared/notification/Notification';
 
 const AdminNotification = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const [notifications, setNotifications] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    const { notifications, loading, markAsRead } = useNotification();
     const navigate = useNavigate();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const handleNotificationClick = async (notification) => {
         try {
-            // Mark as read in backend
-            await markSingleAsRead(notification.id);
+            if (notification.isUnread) {
+                await markAsRead(notification.id);
+            }
 
-            // Update local state for immediate feedback
-            setNotifications(prev => prev.map(n =>
-                n.id === notification.id ? { ...n, isUnread: false } : n
-            ));
-
-            // Navigate if link exists
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 let targetLink = notification.link;
-                // Redirect to admin-specific pages if needed
                 if (targetLink.startsWith("/dashboard")) {
                     targetLink = targetLink.replace("/dashboard", "/admin-calendar");
                 } else if (targetLink.startsWith("/courses")) {
@@ -40,7 +32,6 @@ const AdminNotification = () => {
             }
         } catch (error) {
             console.error("Error marking notification as read:", error);
-            // Still navigate
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 let targetLink = notification.link;
                 if (targetLink.startsWith("/dashboard")) {
@@ -93,20 +84,6 @@ const AdminNotification = () => {
 
         return { today, yesterday, earlier };
     };
-
-    React.useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const res = await getMyNotifications();
-                setNotifications(res.data.data.notifications || []);
-            } catch (error) {
-                console.error("Error fetching notifications:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchNotifications();
-    }, []);
 
     return (
         // Changed h-screen to min-h-screen for better mobile compatibility
