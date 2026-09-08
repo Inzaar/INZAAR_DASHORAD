@@ -10,6 +10,7 @@ import { Search, Plus, ChevronDown, MoreVertical, X, Eye, EyeOff, Loader } from 
 import { BiFilterAlt } from 'react-icons/bi';
 import { useNavigate } from 'react-router-dom';
 import { getStudentProfiles, adminCreateStudent } from '@/api/user';
+import { checkUsername, checkEmail } from '@/api/auth';
 import { useAuth } from '@/context/AuthContext';
 import {
     PaginationItem,
@@ -47,13 +48,17 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     const [newStudent, setNewStudent] = useState({
         firstname: '',
         lastname: '',
+        username: '',
         email: '',
         phone: '',
-        password: ''
+        password: '',
+        gender: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -100,6 +105,50 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
         return () => clearTimeout(timer);
     }, [searchText, searchType]);
 
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newStudent.username || newStudent.username.trim().length === 0) {
+            setUsernameError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkUsername(newStudent.username.trim());
+                if (!res.data?.data?.available) {
+                    setUsernameError('this username is already exist');
+                } else {
+                    setUsernameError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newStudent.username, isAddModalOpen]);
+
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newStudent.email || newStudent.email.trim().length === 0) {
+            setEmailError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkEmail(newStudent.email.trim());
+                if (!res.data?.data?.available) {
+                    setEmailError('this email is already exist');
+                } else {
+                    setEmailError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newStudent.email, isAddModalOpen]);
+
     const handleSearchClick = () => {
         setCurrentPage(1);
         fetchStudentsData();
@@ -125,6 +174,17 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
         setFormError('');
         setPasswordError('');
 
+        if (newStudent.username) {
+            if (newStudent.username.includes(' ')) {
+                setUsernameError('Username cannot contain spaces.');
+                return;
+            }
+            if (newStudent.username.length < 4) {
+                setUsernameError('Username must be at least 4 characters long.');
+                return;
+            }
+        }
+
         const rawDigits = (newStudent.phone || '').replace(/\D/g, '');
         if (!newStudent.phone || rawDigits.length < 10) {
             setFormError('Please enter a valid phone number.');
@@ -149,6 +209,10 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
             return;
         }
 
+        if (usernameError || emailError) {
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await adminCreateStudent(newStudent);
@@ -156,13 +220,25 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
             setNewStudent({
                 firstname: '',
                 lastname: '',
+                username: '',
                 email: '',
                 phone: '',
-                password: ''
+                password: '',
+                gender: ''
             });
+            setUsernameError('');
+            setEmailError('');
             fetchStudentsData();
         } catch (err) {
-            setFormError(err.response?.data?.message || 'Failed to add student');
+            const errorMsg = err.response?.data?.message || 'Failed to add student';
+            const lowerMsg = errorMsg.toLowerCase();
+            if (lowerMsg.includes('username')) {
+                setUsernameError('this username is already exist');
+            } else if (lowerMsg.includes('email')) {
+                setEmailError('this email is already exist');
+            } else {
+                setFormError(errorMsg);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -673,6 +749,24 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             </div>
 
                             <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="Enter Username"
+                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${usernameError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
+                                    value={newStudent.username}
+                                    onChange={(e) => {
+                                        setUsernameError('');
+                                        setNewStudent({ ...newStudent, username: e.target.value.toLowerCase().replace(/\s+/g, '') });
+                                    }}
+                                />
+                                {usernameError && (
+                                    <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
                                 <select
                                     required
@@ -693,10 +787,16 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     required
                                     type="email"
                                     placeholder="Enter Email Address"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    className={`w-full px-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                                     value={newStudent.email}
-                                    onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                                    onChange={(e) => {
+                                        setEmailError('');
+                                        setNewStudent({ ...newStudent, email: e.target.value });
+                                    }}
                                 />
+                                {emailError && (
+                                    <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
@@ -740,15 +840,21 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             <div className="pt-4 flex gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => setIsAddModalOpen(false)}
+                                    onClick={() => {
+                                        setIsAddModalOpen(false);
+                                        setFormError('');
+                                        setPasswordError('');
+                                        setUsernameError('');
+                                        setEmailError('');
+                                    }}
                                     className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || Boolean(usernameError || emailError)}
                                     type="submit"
-                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                    className="flex-[2] py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
