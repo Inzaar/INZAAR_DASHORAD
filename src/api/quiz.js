@@ -53,6 +53,14 @@ export const submitQuiz = async (quizId, payload) => {
     return res.data;
 };
 
+// GET /api/v1/quizzes/:id/my-attempt
+export const getLatestQuizAttempt = async (quizId) => {
+    const res = await axiosInstance.get(`/quizzes/${quizId}/my-attempt`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 // DELETE /api/v1/quizzes/:id
 export const deleteQuiz = async (quizId) => {
     const res = await axiosInstance.delete(`/quizzes/${quizId}`, {
