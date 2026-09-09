@@ -39,6 +39,17 @@ import ExportModeratorReportsPage from '@/features/adminDashborad/pages/ExportMo
 import RegisteredUsersPage from '@/features/adminDashborad/pages/RegisteredUsersPage';
 import RegisteredCoursesPage from '@/features/adminDashborad/pages/RegisteredCoursesPage';
 import GlobalUnsavedChangesTracker from '@/components/shared/GlobalUnsavedChangesTracker';
+import { useAuth } from '@/context/AuthContext';
+import Loader from '@/components/ui/Loader';
+
+const RootRedirect = () => {
+    const { user, loading } = useAuth();
+    if (loading) return <Loader />;
+    if (!user) return <Navigate to="/login" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
+    if (user.role === 'moderator') return <Navigate to="/student-profiles" replace />;
+    return <Navigate to="/dashboard" replace />;
+};
 
 const routes = createRoutesFromElements(
     <Route element={<GlobalUnsavedChangesTracker />}>
@@ -99,7 +110,7 @@ const routes = createRoutesFromElements(
         </Route>
 
         {/* Fallback routes */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<RootRedirect />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/admin/*" element={<Navigate to="/admin-dashboard" replace />} />
     </Route>

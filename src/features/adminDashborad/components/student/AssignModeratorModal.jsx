@@ -18,11 +18,13 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
         try {
           const res = await getModeratorFeatures();
           if (res?.data) {
-            const dbFeatures = res.data.map(f => ({
-              id: f._id || f.key || f.name,
-              label: f.name,
-              checked: (assignedFeatures || []).includes(f.name) || (assignedFeatures || []).includes(f.key)
-            }));
+            const dbFeatures = res.data
+              .filter(f => f.name !== 'Student Profiles' && f.key !== 'Student Profiles')
+              .map(f => ({
+                id: f._id || f.key || f.name,
+                label: f.name,
+                checked: (assignedFeatures || []).includes(f.name) || (assignedFeatures || []).includes(f.key)
+              }));
             setFeatures(dbFeatures);
           }
         } catch (err) {

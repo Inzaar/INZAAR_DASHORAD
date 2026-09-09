@@ -14,6 +14,8 @@ const PublicRoute = () => {
         // If user is already logged in, redirect them to their respective dashboard
         if (user.role === 'admin') {
             return <Navigate to="/admin-dashboard" replace />;
+        } else if (user.role === 'moderator') {
+            return <Navigate to="/student-profiles" replace />;
         } else {
             return <Navigate to="/dashboard" replace />;
         }

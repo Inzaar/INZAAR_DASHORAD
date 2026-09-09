@@ -43,6 +43,7 @@ function Sidebar({ className, onClose }) {
       'Student Reports': 'student_reports',
       'Moderator Reports': 'moderator_reports',
       'Course Reports': 'course_reports',
+      'Dashboard': 'student_dashboard',
       'Logout': 'logout',
     };
     return map[str] || str;
@@ -66,17 +67,28 @@ function Sidebar({ className, onClose }) {
 
   // ONLY FULL ADMIN gets the adminItems main list. Moderators keep the student list.
   let menuItems = (isAdminRoute && user?.role === 'admin') ? adminItems : studentItems;
+
+  // Customization for moderators
+  if (user?.role === 'moderator') {
+    menuItems = ['Dashboard', 'Certificates', 'Notifications', 'Help Center'];
+  }
+
   let moderatorFeatures = [];
 
   // Display moderator features below the student items seamlessly across all views
   if (user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
     moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature));
+    moderatorFeatures.sort((a, b) => {
+      if (a === 'Student Profiles') return -1;
+      if (b === 'Student Profiles') return 1;
+      return 0;
+    });
   }
 
   // Map your URL paths to the Display Names
   const pathToName = {
     // Student Paths
-    '/dashboard': 'Dashboard',
+    '/dashboard': user?.role === 'moderator' ? 'Student Dashboard' : 'Dashboard',
     '/enrolled-courses': 'My Courses',
     '/courses': 'My Courses',
     '/course-view': "My Courses",
@@ -185,7 +197,7 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    if (itemName === 'Dashboard') {
+    if (itemName === 'Dashboard' || itemName === 'Student Dashboard') {
       if (user?.role === 'admin') {
         navigate('/admin-dashboard');
       } else {
@@ -433,9 +445,9 @@ function Sidebar({ className, onClose }) {
         <div className="flex items-center justify-between w-full">
           <span>{t(tKey(item), item)}</span>
           {(item === 'Notification' || item === 'Notifications') && unreadCount > 0 && (
-             <span className="bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[10px] font-black min-w-[22px] h-[22px] px-1 flex items-center justify-center rounded-full shadow-sm ml-2">
-                 {unreadCount}
-             </span>
+            <span className="bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[10px] font-black min-w-[22px] h-[22px] px-1 flex items-center justify-center rounded-full shadow-sm ml-2">
+              {unreadCount}
+            </span>
           )}
         </div>
       </Sideabrbbutton>
@@ -453,15 +465,31 @@ function Sidebar({ className, onClose }) {
       </div>
 
       <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] lg:max-h-[70vh]'>
-        <div className='w-full flex flex-col items-start gap-2'>
-          {menuItems.map(renderMenuItem)}
-        </div>
-
-        {moderatorFeatures.length > 0 && (
-          <div className='w-full flex flex-col items-start gap-2 mt-4 pt-4 border-t border-gray-100'>
-            <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>{t('moderator_features', 'Moderator Features')}</div>
-            {moderatorFeatures.map(renderMenuItem)}
-          </div>
+        {user?.role === 'moderator' ? (
+          <>
+            {moderatorFeatures.length > 0 && (
+              <div className='w-full flex flex-col items-start gap-2 mb-4 pb-4 border-b border-gray-100'>
+                <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>{t('moderator_features', 'Moderator Features')}</div>
+                {moderatorFeatures.map(renderMenuItem)}
+              </div>
+            )}
+            <div className='w-full flex flex-col items-start gap-2'>
+              <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3 mt-2'>{t('student_features', 'Student Features')}</div>
+              {menuItems.map(renderMenuItem)}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className='w-full flex flex-col items-start gap-2'>
+              {menuItems.map(renderMenuItem)}
+            </div>
+            {moderatorFeatures.length > 0 && (
+              <div className='w-full flex flex-col items-start gap-2 mt-4 pt-4 border-t border-gray-100'>
+                <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>{t('moderator_features', 'Moderator Features')}</div>
+                {moderatorFeatures.map(renderMenuItem)}
+              </div>
+            )}
+          </>
         )}
       </div>
 

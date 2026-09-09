@@ -81,6 +81,8 @@ const LoginPage = () => {
 
         if (userData.role === 'admin') {
           navigate('/admin-dashboard', { replace: true });
+        } else if (userData.role === 'moderator') {
+          navigate('/student-profiles', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
         }

@@ -8,10 +8,10 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <Toaster 
-          position="top-center" 
-          reverseOrder={false} 
-          containerStyle={{ zIndex: 999999 }} 
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          containerStyle={{ zIndex: 999999 }}
         />
         <AppRouter />
       </NotificationProvider>
