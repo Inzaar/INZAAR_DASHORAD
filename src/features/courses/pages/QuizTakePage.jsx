@@ -17,6 +17,7 @@ const QuizTakePage = () => {
     const isAdminView = location.pathname.includes('admin') || queryParams.get('admin') === 'true';
 
     const [quizData, setQuizData] = useState(null);
+    const [activeQuestions, setActiveQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -30,11 +31,49 @@ const QuizTakePage = () => {
     const [selectedOption, setSelectedOption] = useState(null); // Currently selected option in UI
     const [isStarted, setIsStarted] = useState(location.state?.viewStudent || false);
 
+    const shuffleArray = (array) => {
+        if (!array || !Array.isArray(array)) return [];
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+
+    const prepareQuizQuestions = (quiz) => {
+        if (!quiz || !quiz.questions || !Array.isArray(quiz.questions)) return [];
+
+        const shouldShuffleAllOptions = Boolean(quiz.shuffleAllAnswerOptions);
+
+        let processed = quiz.questions.map((q) => {
+            const shouldShuffleThisQuestionOptions = shouldShuffleAllOptions || Boolean(q.shuffleOptions) || Boolean(q.shuffle);
+
+            let options = q.options ? [...q.options] : [];
+            if (shouldShuffleThisQuestionOptions) {
+                options = shuffleArray(options);
+            }
+
+            return {
+                ...q,
+                options
+            };
+        });
+
+        if (quiz.shuffleQuestions) {
+            processed = shuffleArray(processed);
+        }
+
+        return processed;
+    };
+
     useEffect(() => {
         const fetchQuizAndAttempt = async () => {
             try {
                 const res = await getQuizById(quizId);
                 setQuizData(res.data);
+                const prepared = prepareQuizQuestions(res.data);
+                setActiveQuestions(prepared);
 
                 // Fetch latest attempt if not available in location state
                 if (!result) {
@@ -60,7 +99,7 @@ const QuizTakePage = () => {
     }, [quizId]);
 
     // Derived states
-    const questions = quizData?.questions || [];
+    const questions = activeQuestions.length > 0 ? activeQuestions : (quizData?.questions || []);
     const totalQuestions = questions.length;
     const progress = totalQuestions > 0 ? ((currentQuestionIndex) / totalQuestions) * 100 : 0;
     const currentQuestion = questions[currentQuestionIndex];
@@ -68,7 +107,8 @@ const QuizTakePage = () => {
     // Load saved option if navigating backward? We only go forward for now.
     useEffect(() => {
         if (currentQuestion) {
-            setSelectedOption(selectedAnswers[currentQuestion._id] || null);
+            const optId = selectedAnswers[currentQuestion._id];
+            setSelectedOption(optId !== undefined ? optId : null);
         }
     }, [currentQuestionIndex, currentQuestion, selectedAnswers]);
 
@@ -118,6 +158,10 @@ const QuizTakePage = () => {
     };
 
     const handleRetry = () => {
+        if (quizData) {
+            const reshuffled = prepareQuizQuestions(quizData);
+            setActiveQuestions(reshuffled);
+        }
         setCurrentQuestionIndex(0);
         setIsCompleted(false);
         setShowReview(false);
