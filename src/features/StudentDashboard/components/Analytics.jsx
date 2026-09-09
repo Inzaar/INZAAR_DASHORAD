@@ -7,12 +7,12 @@ import { useTranslation } from 'react-i18next';
 // Analytics renders differently depending on context:
 //  - Dashboard view: pass userCourses (shows total enrolled, completed/inProgress/timeSpent, overallProgress)
 //  - Course detail view: pass courseData (shows Progress%, quizScore/lectureCompleted/timeSpent, overallPerformance)
-function Analytics({ userCourses, courseData, name, className }) {
+function Analytics({ userCourses, courseData, name, courseTitle, className }) {
     const { t } = useTranslation();
 
     // Build course-detail overrides from courseData when present
     const courseMetricProps = courseData ? {
-        title: t("progress", "Progress"),
+        title: courseTitle ? t("progress_in", "Progress in ") + courseTitle : t("progress", "Progress"),
         value: `${courseData.progress ?? 0}%`,
         trendValue: `${courseData.improvementFromLastWeek ?? 0}%`,
         trendLabel: t("improvement_from_last_week", "Improvement From last Week"),

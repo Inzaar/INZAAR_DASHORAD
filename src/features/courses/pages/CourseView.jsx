@@ -1258,7 +1258,8 @@ const CourseView = () => {
                                             trendingUp: 0
                                         }
                                     } : courseData}
-                                    name={isModeratorViewingStudent ? "Lecture Performance" : "Overall Performance"}
+                                    courseTitle={courseData?.title}
+                                    name={isModeratorViewingStudent ? "Lecture Performance" : (courseData?.title ? `Overall Performance in ${courseData.title}` : "Overall Performance")}
                                 />
                             )}
 

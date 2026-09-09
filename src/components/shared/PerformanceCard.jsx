@@ -30,8 +30,7 @@ const PerformanceCard = ({
             "w-full min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
             className
         )}>
-            <h3 className="text-[18px] font-bold text-black leading-normal pb-1">{name}</h3>
-
+            <h3 className="text-[18px] font-bold text-black leading-normal pb-1 text-center">{name}</h3>
             <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
                 <svg width={size} height={size} className="transform -rotate-90">
                     <defs>
