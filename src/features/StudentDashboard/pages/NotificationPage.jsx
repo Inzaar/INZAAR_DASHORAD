@@ -174,6 +174,7 @@ const NotificationPage = () => {
                                                         <Notification
                                                             key={notification.id}
                                                             isUnread={notification.isUnread}
+                                                            title={notification.title}
                                                             message={translateMessage(notification.message)}
                                                             time={notification.time}
                                                             onClick={() => handleNotificationClick(notification)}
@@ -192,6 +193,7 @@ const NotificationPage = () => {
                                                         <Notification
                                                             key={notification.id}
                                                             isUnread={notification.isUnread}
+                                                            title={notification.title}
                                                             message={translateMessage(notification.message)}
                                                             time={notification.time}
                                                             onClick={() => handleNotificationClick(notification)}
@@ -210,6 +212,7 @@ const NotificationPage = () => {
                                                         <Notification
                                                             key={notification.id}
                                                             isUnread={notification.isUnread}
+                                                            title={notification.title}
                                                             message={translateMessage(notification.message)}
                                                             time={notification.time}
                                                             onClick={() => handleNotificationClick(notification)}

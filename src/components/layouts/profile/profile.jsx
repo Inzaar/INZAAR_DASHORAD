@@ -10,6 +10,7 @@ import Other from "./other";
 import ProfileDesign from "./ProfileDesign";
 import { updateProfile, logout as apiLogout } from "@/api/auth";
 import { useAuth } from "@/context/AuthContext";
+import { useNotification } from "@/context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "@/components/shared/LogoutModal";
 import { useTranslation } from "react-i18next";
@@ -25,6 +26,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [errors, setErrors] = useState({});
     const { user, logout: contextLogout, checkAuth } = useAuth();
+    const { fetchNotifications } = useNotification();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -115,6 +117,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         try {
             await updateProfile(payload);
             if (checkAuth) await checkAuth();
+            if (fetchNotifications) await fetchNotifications(true);
             
             const id = payload._id || 'guest';
             localStorage.removeItem(`profileDraft_${id}`);

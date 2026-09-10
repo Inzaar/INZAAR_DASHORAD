@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-function Notification({ message = "Default Notification", time = "Just now", onClick, className = "", isUnread = false }) {
+function Notification({ title, message = "Default Notification", time = "Just now", onClick, className = "", isUnread = false }) {
     const { t } = useTranslation();
 
     const translateTime = (timeStr) => {
@@ -26,7 +26,8 @@ function Notification({ message = "Default Notification", time = "Just now", onC
                         <span className="w-2.5 h-2.5 rounded-full bg-gray-400 shrink-0 mt-1.5" />
                     )}
                     <div className={`text-[14px] md:text-[16px] font-['inter'] leading-snug flex-1 break-words ${isUnread ? 'font-black text-slate-900' : 'font-medium text-slate-500'}`}>
-                        {message}
+                        {title && <div className={`text-[15px] md:text-[17px] mb-0.5 ${isUnread ? 'font-extrabold text-blue-700' : 'font-bold text-slate-700'}`}>{title}</div>}
+                        <div className={title ? "text-[13px] md:text-[14px] mt-1" : ""}>{message}</div>
                     </div>
                 </div>
                 <div className={`shrink-0 ml-4 text-[10px] md:text-[12px] font-['Roboto'] mt-1 ${isUnread ? 'font-bold text-blue-600' : 'font-medium text-slate-400'}`}>
