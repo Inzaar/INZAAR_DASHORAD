@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Navbar from '@/components/layouts/NavBar';
-import { ChevronRight, RotateCcw, Trophy, Loader, CheckCircle2, XCircle, FileText, ArrowLeft, HelpCircle } from 'lucide-react';
+import { ChevronRight, RotateCcw, Trophy, Loader, CheckCircle2, XCircle, FileText, ArrowLeft, HelpCircle, AlertCircle, X } from 'lucide-react';
 import { getQuizById, submitQuiz, getLatestQuizAttempt } from '@/api/quiz';
 import LectureQuizAssessment from '../components/LectureQuizAssessment';
 
@@ -30,6 +30,7 @@ const QuizTakePage = () => {
 
     const [selectedOption, setSelectedOption] = useState(null); // Currently selected option in UI
     const [isStarted, setIsStarted] = useState(location.state?.viewStudent || false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
 
     const shuffleArray = (array) => {
         if (!array || !Array.isArray(array)) return [];
@@ -170,6 +171,22 @@ const QuizTakePage = () => {
         setResult(null);
     };
 
+    const handleCancel = () => {
+        setShowCancelModal(true);
+    };
+
+    const confirmCancel = () => {
+        setShowCancelModal(false);
+        const returnPath = queryParams.get('returnPath');
+        if (returnPath) {
+            navigate(decodeURIComponent(returnPath));
+        } else if (courseId) {
+            navigate(`/course-view?id=${courseId}`);
+        } else {
+            navigate(-1);
+        }
+    };
+
     const handleContinue = () => {
         const returnPath = queryParams.get('returnPath');
         if (returnPath) {
@@ -254,7 +271,13 @@ const QuizTakePage = () => {
                             ))}
                         </div>
 
-                        <div className="flex justify-end pt-4 border-t border-gray-50">
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                            <button
+                                onClick={handleCancel}
+                                className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold transition-all"
+                            >
+                                Cancel Quiz
+                            </button>
                             <button
                                 onClick={handleNext}
                                 disabled={!selectedOption || submitting}
@@ -548,6 +571,54 @@ const QuizTakePage = () => {
                     </div>
                 )}
             </main>
+
+            {/* Custom Cancel Quiz Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
+                    <div
+                        className="bg-white rounded-[24px] w-full max-w-[400px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-6 text-left">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                    <AlertCircle className="w-6 h-6 text-red-600" />
+                                </div>
+                                <button
+                                    onClick={() => setShowCancelModal(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-400" />
+                                </button>
+                            </div>
+
+                            <h2 className="text-[20px] font-bold text-[#0f172a] mb-2">
+                                Cancel Quiz?
+                            </h2>
+                            <p className="text-[14px] text-gray-500 mb-6">
+                                Are you sure you want to cancel the quiz? Your current progress will not be saved.
+                            </p>
+
+                            <div className="flex gap-3 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={confirmCancel}
+                                    className="px-5 py-2.5 text-[14px] font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                                >
+                                    Confirm / Leave
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCancelModal(false)}
+                                    className="px-5 py-2.5 text-[14px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
+                                >
+                                    Cancel / Stay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style dangerouslySetInnerHTML={{
                 __html: `
