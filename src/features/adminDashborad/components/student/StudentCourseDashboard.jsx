@@ -5,25 +5,168 @@ import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { CustomPagination } from '@/components/ui/Pagination';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, MoreVertical, X, MoreHorizontal, Edit2, Trash2, Smile, Square, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CoursesPage from '../../../../assets/images/coursespage.jpg';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getStudentCourseStats } from '@/api/user';
+import { getComments, createComment, updateComment, deleteComment, reactToComment } from '@/api/comments';
+import { createNotification } from '@/api/notification';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 const StudentCourseDashboard = ({ profileData }) => {
     const { t } = useTranslation();
 
     const { id: userId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const enrolledCourses = profileData?.enrolledCourses || [];
 
-    // Default to the first course if available
-    const [selectedCourseId, setSelectedCourseId] = useState(enrolledCourses[0]?.courseId || "");
+    const searchParams = new URLSearchParams(window.location.search);
+    const targetCourseId = searchParams.get("courseId");
+    const targetLectureId = searchParams.get("lectureId");
+
+    // Default to target course or first course if available
+    const [selectedCourseId, setSelectedCourseId] = useState(targetCourseId || enrolledCourses[0]?.courseId || "");
     const [selectedCourseData, setSelectedCourseData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+
+    const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
+    const [selectedLectureForComments, setSelectedLectureForComments] = useState(null);
+    const [lectureComments, setLectureComments] = useState([]);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [newCommentText, setNewCommentText] = useState("");
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingText, setEditingText] = useState("");
+    const [activeReactionPopup, setActiveReactionPopup] = useState(null);
+    const [commentToDelete, setCommentToDelete] = useState(null);
+
+    const EMOJIS = ['👍', '❤️', '😂', '🔥', '🤔'];
+
+    // Selection mode state
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedComments, setSelectedComments] = useState([]);
+
+    const handleEditComment = async (commentId) => {
+        if (!editingText.trim()) return;
+        try {
+            const res = await updateComment(commentId, { content: editingText });
+            if (res?.data?.data) {
+                setLectureComments(prev => prev.map(c => c._id === commentId ? res.data.data : c));
+                setEditingCommentId(null);
+                setEditingText("");
+            }
+        } catch (error) {
+            toast.error("Failed to update comment");
+        }
+    };
+
+    const handleDeleteComment = (commentId) => {
+        setCommentToDelete(commentId);
+    };
+
+    const confirmDeleteComment = async () => {
+        if (!commentToDelete) return;
+        try {
+            await deleteComment(commentToDelete);
+            setLectureComments(prev => prev.filter(c => c._id !== commentToDelete));
+            toast.success("Comment deleted");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete comment");
+        } finally {
+            setCommentToDelete(null);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedComments.length === 0) return;
+        
+        try {
+            await Promise.all(selectedComments.map(id => deleteComment(id)));
+            setLectureComments(prev => prev.filter(c => !selectedComments.includes(c._id)));
+            setSelectedComments([]);
+            setIsSelectionMode(false);
+            toast.success(`${selectedComments.length} comments deleted successfully`);
+        } catch (error) {
+            console.error("Failed to delete comments:", error);
+            toast.error('Failed to delete some comments');
+        }
+    };
+
+    const handleToggleCommentSelection = (commentId) => {
+        setSelectedComments(prev => 
+            prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
+        );
+    };
+
+    const handleReactToComment = async (commentId, emoji) => {
+        try {
+            const res = await reactToComment(commentId, emoji);
+            if (res?.data?.data) {
+                setLectureComments(prev => prev.map(c => c._id === commentId ? res.data.data : c));
+            }
+            setActiveReactionPopup(null);
+        } catch (error) {
+            toast.error("Failed to add reaction");
+        }
+    };
+
+    const handleAddComment = async (e) => {
+        if ((e.type === 'click' || e.key === 'Enter') && newCommentText.trim()) {
+            const lectureId = selectedLectureForComments?.id || selectedLectureForComments?._id;
+            if (!lectureId) {
+                toast.error("Lecture ID not found.");
+                return;
+            }
+            try {
+                const res = await createComment({ lectureId, studentId: userId, content: newCommentText });
+                if (res?.data?.data) {
+                    setLectureComments([...lectureComments, res.data.data]);
+                    setNewCommentText("");
+
+                    createNotification({
+                        title: `New Reply from Admin`,
+                        type: "app",
+                        message: `Admin replied to your comment in ${selectedLectureForComments?.title}`,
+                        link: `/course-view?id=${selectedCourseId}&lectureId=${lectureId}`,
+                        sendto: userId,
+                        sendfrom: user?._id || user?.id,
+                    })
+                    .then(res => console.log("Notification created:", res))
+                    .catch(err => {
+                        console.error("Notification failed", err);
+                        toast.error(`Notification failed: ${err.message}`);
+                    });
+                } else {
+                    toast.error("Failed to post comment");
+                }
+            } catch (error) {
+                console.error("Error saving comment:", error);
+                toast.error(error?.response?.data?.message || "Failed to post comment");
+            }
+        }
+    };
+
+    const handleViewComments = async (lecture) => {
+        setSelectedLectureForComments(lecture);
+        setIsCommentsModalOpen(true);
+        setLoadingComments(true);
+        try {
+            const res = await getComments(lecture.id, userId);
+            if (res?.data?.data) {
+                setLectureComments(res.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+            setLectureComments([]);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
 
     useEffect(() => {
         if (!selectedCourseId && enrolledCourses.length > 0) {
@@ -49,6 +192,22 @@ const StudentCourseDashboard = ({ profileData }) => {
     useEffect(() => {
         fetchCourseStats();
     }, [selectedCourseId]);
+
+    // Handle deep linking for lecture comments
+    useEffect(() => {
+        if (targetLectureId && selectedCourseData && !isCommentsModalOpen) {
+            const rawLectures = selectedCourseData.lectures || [];
+            const lec = rawLectures.find(l => (l.id || l._id) === targetLectureId);
+            if (lec) {
+                // Remove the lectureId from URL to prevent reopening on refresh or close
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.delete("lectureId");
+                window.history.replaceState({}, "", newUrl);
+                
+                handleViewComments({ ...lec, type: 'Lecture', id: lec.id || lec._id });
+            }
+        }
+    }, [targetLectureId, selectedCourseData]);
 
     const currentCourse = enrolledCourses.find(c => c.courseId === selectedCourseId) || enrolledCourses[0] || {};
     const stats = selectedCourseData?.stats || {
@@ -273,6 +432,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                 <th className="px-6 py-4 text-center">Progress & Score</th>
                                 <th className="px-6 py-4">Date</th>
                                 <th className="px-6 py-4">{t("status", "Status")}</th>
+                                <th className="px-6 py-4 text-center">Comments</th>
                                 <th className="px-6 py-4 text-center">{t("action", "Action")}</th>
                             </tr>
                         </thead>
@@ -301,6 +461,14 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center">
+                                        <button 
+                                            className="text-[#3758EE] underline font-medium text-[12px] hover:text-blue-800 transition-colors"
+                                            onClick={() => handleViewComments(lecture)}
+                                        >
+                                            View Comments
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
                                         <GradiantButton 
                                             className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
                                             onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id}`)}
@@ -327,6 +495,237 @@ const StudentCourseDashboard = ({ profileData }) => {
                     </div>
                 )}
             </div>
+
+            {isCommentsModalOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                    <div className="bg-white w-full max-w-2xl rounded-[24px] shadow-2xl flex flex-col max-h-[80vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            {isSelectionMode ? (
+                                <div className="flex items-center gap-3 w-full bg-blue-50/50 p-2 rounded-xl border border-blue-100">
+                                    <button onClick={() => { setIsSelectionMode(false); setSelectedComments([]); }} className="p-1.5 text-gray-500 hover:bg-gray-200 rounded-full transition-colors">
+                                        <X size={18} />
+                                    </button>
+                                    <span className="font-medium text-blue-700">{selectedComments.length} Selected</span>
+                                    <div className="flex-1"></div>
+                                    <button 
+                                        onClick={() => {
+                                            if (window.confirm(`Delete ${selectedComments.length} comments?`)) {
+                                                handleBulkDelete();
+                                            }
+                                        }}
+                                        disabled={selectedComments.length === 0}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 text-sm font-medium"
+                                    >
+                                        <Trash2 size={16} /> Delete
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">Lecture Comments</h3>
+                                        <p className="text-sm text-gray-500 mt-1">{selectedLectureForComments?.title}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => setIsSelectionMode(true)}
+                                            className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                                        >
+                                            Select
+                                        </button>
+                                        <button onClick={() => setIsCommentsModalOpen(false)} className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors">
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="p-6 pb-12 overflow-y-auto flex-1 bg-[#F8F9FA] custom-scrollbar-thin flex flex-col">
+                            {loadingComments ? (
+                                <div className="flex justify-center items-center h-32 flex-1">
+                                    <div className="w-8 h-8 border-4 border-[#3758EE] border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            ) : lectureComments && lectureComments.length > 0 ? (
+                                <div className="flex flex-col gap-4 flex-1">
+                                    {lectureComments.map(comment => {
+                                        const senderIdStr = String(comment.senderId?._id || comment.senderId?.id || comment.senderId);
+                                        const isStudent = senderIdStr === String(userId);
+                                        const isMe = senderIdStr === String(user?._id || user?.id);
+                                        const canEdit = isMe || user?.role === 'admin';
+                                        const isSelected = selectedComments.includes(comment._id);
+                                        
+                                        return (
+                                            <div key={comment._id} className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
+                                                {isSelectionMode && !isMe && (
+                                                    <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                        {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                    </button>
+                                                )}
+                                                <div className={cn("flex flex-col max-w-[90%]", !isMe ? "items-start" : "items-end")}>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {(!isSelectionMode && isMe) && (
+                                                            <>
+                                                                <div className="relative">
+                                                                    <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                        <Smile size={14} />
+                                                                    </button>
+                                                                    {activeReactionPopup === comment._id && (
+                                                                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                            {EMOJIS.map(emoji => (
+                                                                                <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                    {emoji}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {canEdit && (
+                                                                    <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                        <Edit2 size={14} />
+                                                                    </button>
+                                                                )}
+                                                                <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <span className="font-bold text-xs opacity-90">
+                                                            {comment.senderId?.firstname} {comment.senderId?.lastname}
+                                                            {!isStudent && <span className="text-[9px] font-bold uppercase bg-white/20 px-2 py-0.5 rounded-full ml-2">{comment.senderId?.role}</span>}
+                                                            {isStudent && <span className="text-[9px] font-bold uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-2">Student</span>}
+                                                        </span>
+                                                        <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">{new Date(comment.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                    </div>
+                                                    
+                                                    {editingCommentId === comment._id ? (
+                                                        <div className="mt-2 flex flex-col gap-2">
+                                                            <textarea 
+                                                                className="w-full text-sm text-gray-800 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px]" 
+                                                                value={editingText} 
+                                                                onChange={(e) => setEditingText(e.target.value)} 
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        e.preventDefault();
+                                                                        handleEditComment(comment._id);
+                                                                    } else if (e.key === 'Escape') {
+                                                                        setEditingCommentId(null);
+                                                                    }
+                                                                }}
+                                                                autoFocus
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm leading-relaxed mt-1">{comment.content}</p>
+                                                    )}
+
+                                                    {comment.reactions && comment.reactions.length > 0 && (
+                                                        <div className={cn("absolute -bottom-3 flex items-center gap-1", !isMe ? "right-2" : "left-2")}>
+                                                            <div className="bg-white border border-gray-100 shadow-sm rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1">
+                                                                {Array.from(new Set(comment.reactions.map(r => r.emoji))).map(e => (
+                                                                    <span key={e}>{e}</span>
+                                                                ))}
+                                                                <span className="text-gray-500 font-bold ml-0.5">{comment.reactions.length}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                                                    {(!isSelectionMode && !isMe) && (
+                                                        <>
+                                                            <div className="relative">
+                                                                <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                    <Smile size={14} />
+                                                                </button>
+                                                                {activeReactionPopup === comment._id && (
+                                                                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                        {EMOJIS.map(emoji => (
+                                                                            <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                {emoji}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {canEdit && (
+                                                                <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                    <Edit2 size={14} />
+                                                                </button>
+                                                            )}
+                                                            <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {isSelectionMode && isMe && (
+                                                <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                    {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-40 text-gray-400 flex-1">
+                                    <p className="italic font-medium">No comments found for this lecture.</p>
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4 bg-white border-t border-gray-100">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder={t('add_reply_placeholder', 'Write a reply... (Press Enter to post)')}
+                                    value={newCommentText}
+                                    onChange={(e) => setNewCommentText(e.target.value)}
+                                    onKeyDown={handleAddComment}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all pl-4 pr-12"
+                                />
+                                <button 
+                                    onClick={handleAddComment}
+                                    disabled={!newCommentText.trim()}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3758EE] hover:text-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Send Reply"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {commentToDelete && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans text-left">
+                    <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-sm">
+                                <Trash2 className="text-red-600 w-5 h-5" />
+                            </div>
+                            <h2 className="text-[22px] font-bold text-gray-800">Confirm Deletion</h2>
+                        </div>
+                        <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
+                            Are you sure you want to delete this comment? This action cannot be undone.
+                        </div>
+                        <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
+                            <button onClick={() => setCommentToDelete(null)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                                No, Cancel
+                            </button>
+                            <button onClick={confirmDeleteComment} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style dangerouslySetInnerHTML={{
                 __html: `
