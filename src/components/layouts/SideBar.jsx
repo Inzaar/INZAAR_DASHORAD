@@ -11,7 +11,6 @@ import LogoutModal from '@/components/shared/LogoutModal';
 function Sidebar({ className, onClose }) {
   const navigate = useNavigate();
   const location = useLocation(); // Gets the current URL (e.g., /profile)
-  const [activeItem, setActiveItem] = useState('Dashboard');
   const [isReportsExpanded, setIsReportsExpanded] = useState(false);
   const [isStudentsExpanded, setIsStudentsExpanded] = useState(false);
   const [isModeratorsExpanded, setIsModeratorsExpanded] = useState(false);
@@ -132,6 +131,21 @@ function Sidebar({ className, onClose }) {
     '/logout': 'Logout'
   };
 
+  let activeItem = 'Dashboard';
+  let currentName = pathToName[location.pathname];
+  if (!currentName) {
+    const matchedKey = Object.keys(pathToName).find(key =>
+      location.pathname.startsWith(key) && key !== '/'
+    );
+    if (matchedKey) {
+      currentName = pathToName[matchedKey];
+    }
+  }
+
+  if (currentName) {
+    activeItem = currentName;
+  }
+
   useEffect(() => {
     let currentName = pathToName[location.pathname];
     if (!currentName) {
@@ -144,7 +158,6 @@ function Sidebar({ className, onClose }) {
     }
 
     if (currentName) {
-      setActiveItem(currentName);
       if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(currentName) || currentName === 'Reports & Logs') {
         setIsReportsExpanded(true);
       }
@@ -176,7 +189,6 @@ function Sidebar({ className, onClose }) {
     }
     if (itemName === 'Student Profiles') {
       if (user?.role === 'moderator') {
-        setActiveItem('Student Profiles');
         navigate('/student-profiles');
         if (onClose) onClose();
         return;
@@ -190,7 +202,6 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
-    setActiveItem(itemName);
 
     if (itemName === 'Logout') {
       setIsLogoutModalOpen(true);
