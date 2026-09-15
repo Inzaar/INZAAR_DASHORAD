@@ -84,7 +84,7 @@ export default function ModeratorRecordComponent({ profileData, onEditClick, ini
         inActiveStudents: filteredStats?.inActiveStudents ?? apiStats.inActiveStudents ?? 0,
         averageSpendRate: filteredStats?.averageSpendRate ?? apiStats.averageSpendRate ?? "0%",
         completionRate: filteredStats?.completionRate ?? apiStats.completionRate ?? 0,
-        trend: filteredStats?.improvement ?? apiStats.improvement ?? "2.7%"
+        trend: filteredStats?.weeklyTrendPercentage ?? 0
     };
 
     return (
@@ -133,8 +133,8 @@ export default function ModeratorRecordComponent({ profileData, onEditClick, ini
                         <MetricCard
                             className="w-full"
                             title="Total Enrolled Students"
-                            value={moderatorStats.totalEnrolled}
-                            trendValue={moderatorStats.trend}
+                            value={moderatorStats.totalEnrolled.toString()}
+                            trendValue={`${moderatorStats.trend}%`}
                             trendLabel="Improvement From last Week"
                         />
                     </div>
@@ -157,7 +157,7 @@ export default function ModeratorRecordComponent({ profileData, onEditClick, ini
                     className="shadow-sm w-full min-[973px]:w-[40%] min-[1250px]:w-[35%]"
                     name="Course Completion Rate"
                     percentageOverride={moderatorStats.completionRate}
-                    trendOverride={moderatorStats.trend?.replace('%', '') || 2.7}
+                    trendOverride={moderatorStats.trend}
                 />
             </div>
 

@@ -19,9 +19,8 @@ const MetricCard = ({
         title: titleProp ?? t("total_enrolled_courses", "Total Enrolled Courses"),
         value: valueProp ?? (userCourses?.stats?.totalEnrolled || "0"),
         trend: {
-            value: trendValueProp ?? (userCourses?.stats?.improvement || "0"),
+            value: trendValueProp ?? (userCourses?.stats?.weeklyTrendPercentage ? Math.abs(userCourses.stats.weeklyTrendPercentage) + "%" : "0%"),
             label: trendLabelProp ?? t("improvement_from_last_week", "Improvement From last Week"),
-            direction: "up"
         },
         data: [70, 150, 120],
     }

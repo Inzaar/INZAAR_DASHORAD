@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // from 'react';
 import { cn } from "@/lib/utils";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const PerformanceCard = ({
     userCourses,
@@ -15,7 +15,7 @@ const PerformanceCard = ({
 
     const percentageInfo = {
         percentage: percentageOverride ?? userCourses?.stats?.overallProgress ?? 0,
-        trend: trendOverride ?? userCourses?.stats?.improvement ?? 0,
+        trend: trendOverride ?? (userCourses?.stats?.weeklyTrendPercentage ? userCourses.stats.weeklyTrendPercentage : 0),
     }
 
     const size = 139;

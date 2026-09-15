@@ -67,7 +67,7 @@ const StudentPerformance = ({ profileData }) => {
                     <MetricCard
                         title="Total Enrolled Courses"
                         value={stats.totalEnrolled.toString()}
-                        trendValue={stats.improvement || "2.7%"}
+                        trendValue={`${stats.weeklyTrendPercentage ?? 0}%`}
                         trendLabel="Improvement From last Week"
                         className="h-full"
                     />
@@ -133,7 +133,7 @@ const StudentPerformance = ({ profileData }) => {
                     className="xl:w-[400px]"
                     name="Performance Overview"
                     percentageOverride={stats.performance}
-                    trendOverride="2.7"
+                    trendOverride={stats.weeklyTrendPercentage !== undefined ? stats.weeklyTrendPercentage : 0}
                 />
             </div>
 
