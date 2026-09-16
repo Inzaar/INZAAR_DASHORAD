@@ -1,4 +1,6 @@
 import { enrollCourse } from "@/api/course";
+import { getBatchesByCourse } from "@/api/batch";
+import { getMyCourses } from "@/api/enrollment";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import Card from "@/components/ui/Card";
 import { useEffect, useState } from "react";
@@ -21,16 +23,20 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
+  
+  // Batch selection states
+  const [showBatchSelectionModal, setShowBatchSelectionModal] = useState(false);
+  const [availableBatches, setAvailableBatches] = useState([]);
+  const [enrolledBatchIds, setEnrolledBatchIds] = useState([]);
+  const [isLoadingBatches, setIsLoadingBatches] = useState(false);
 
-  const handleEnroll = async () => {
+  const handleEnrollClick = async () => {
     if (user?.role === 'guest') {
       setShowGuestModal(true);
       return;
     }
 
     if (isAdmin) {
-      // Navigate to admin course details page (placeholder for now)
-      console.log("Navigating to admin course details for:", course.id);
       navigate(`/admin-course-view/${course.id}`);
       return;
     }
@@ -40,20 +46,63 @@ const CardCourse = ({ course, isAdmin = false }) => {
       return;
     }
 
-    console.log("courseid", course.id);
+    setIsLoadingBatches(true);
+    try {
+      const [batches, myCoursesRes] = await Promise.all([
+        getBatchesByCourse(course.id),
+        getMyCourses()
+      ]);
+      
+      // Filter out completed batches
+      const activeBatches = batches.filter(b => new Date(b.endDate) > new Date());
+      
+      if (activeBatches.length === 0) {
+        toast.error("No upcoming or running batches available for this course.");
+        return;
+      }
+      
+      // Determine which batches the user is already enrolled in
+      const myCourses = myCoursesRes?.data || [];
+      const enrolledInThisCourse = myCourses.filter(c => c.courseId === course.id);
+      const enrolledIds = enrolledInThisCourse.map(c => c.batchId).filter(Boolean);
+      
+      setEnrolledBatchIds(enrolledIds);
+      setAvailableBatches(activeBatches);
+      setShowBatchSelectionModal(true);
+    } catch (error) {
+      console.error("Failed to fetch batches:", error);
+      toast.error("Failed to check course availability.");
+    } finally {
+      setIsLoadingBatches(false);
+    }
+  };
+
+  const proceedWithEnrollment = async (batchId) => {
+    if (enrolledBatchIds.includes(batchId)) {
+      toast("You have already enrolled in it and it will be coming soon", { icon: "⏳" });
+      return;
+    }
+    
+    setShowBatchSelectionModal(false);
     setIsEnrolling(true);
     try {
-      const res = await enrollCourse(course.id,);
-      console.log(res);
+      const res = await enrollCourse(course.id, batchId);
       if (res.data.success === true) {
-        toast.success(t("successfully_enrolled", "You are successfully enrolled"));
-        navigate("/course-view?id=" + course.id);
+        // Find if the selected batch is upcoming
+        const selectedBatch = availableBatches.find(b => b._id === batchId);
+        const isUpcoming = selectedBatch && new Date(selectedBatch.startDate) > new Date();
+        
+        if (isUpcoming) {
+          toast.success("Successfully enrolled. Course batch is coming soon!");
+        } else {
+          toast.success(t("successfully_enrolled", "You are successfully enrolled"));
+          navigate("/course-view?id=" + course.id);
+        }
       }
     } catch (error) {
-      console.log("Enrollment error:", error);
+      console.error("Enrollment error:", error);
       const msg = error.response?.data?.message;
       
-      // Only navigate to course view if they are actually enrolled
       if (msg === "You are already enrolled in this course") {
         setShouldNavigate(true);
       } else {
@@ -110,10 +159,10 @@ const CardCourse = ({ course, isAdmin = false }) => {
         <div className="mt-1">
           <GradiantButton
             className="px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[140px]"
-            onClick={course.isEnrolled ? () => navigate("/course-view?id=" + course.id) : handleEnroll}
-            disabled={isEnrolling}
+            onClick={handleEnrollClick}
+            disabled={isEnrolling || isLoadingBatches}
           >
-            {isAdmin ? t("view_details", "View Details") : (course.isEnrolled ? t("already_enroll", "Already enroll") : t("enroll_now", "Enroll now"))}
+            {isAdmin ? t("view_details", "View Details") : t("enroll_now", "Enroll now")}
           </GradiantButton>
         </div>
       </div>
@@ -224,6 +273,99 @@ const CardCourse = ({ course, isAdmin = false }) => {
               >
                 {t("go_to_profile", "Go to Profile")}
               </GradiantButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Selection Modal */}
+      {showBatchSelectionModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-lg p-8 relative animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowBatchSelectionModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col gap-5 pt-2">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Batch</h3>
+                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
+                  Please select which batch you would like to enroll in for {course.title}.
+                </p>
+              </div>
+              
+              <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                {availableBatches.map(batch => {
+                  const now = new Date();
+                  const isUpcoming = new Date(batch.startDate) > now;
+                  const isEnrolled = enrolledBatchIds.includes(batch._id);
+                  
+                  const enrollmentStart = batch.enrollmentStartDate ? new Date(batch.enrollmentStartDate) : null;
+                  const enrollmentEnd = batch.enrollmentEndDate ? new Date(batch.enrollmentEndDate) : null;
+                  
+                  const isEnrollmentUpcoming = enrollmentStart && now < enrollmentStart;
+                  const isEnrollmentClosed = enrollmentEnd && now > enrollmentEnd;
+                  const isEnrollmentOpen = !isEnrollmentUpcoming && !isEnrollmentClosed;
+                  
+                  const isDisabled = isEnrolled || isEnrollmentUpcoming || isEnrollmentClosed;
+
+                  return (
+                    <div 
+                      key={batch._id} 
+                      className={`border rounded-xl p-4 flex flex-col gap-2 transition-colors ${
+                        isDisabled 
+                          ? 'border-gray-300 bg-gray-100 opacity-80 cursor-not-allowed' 
+                          : 'border-gray-200 hover:border-[#3758EE] bg-gray-50 hover:bg-white cursor-pointer'
+                      }`}
+                      onClick={() => {
+                        if (isEnrolled) {
+                          toast("You are already enrolled in this batch.", { icon: "⏳" });
+                        } else if (isEnrollmentUpcoming) {
+                          toast(`Enrollment starts on ${enrollmentStart.toLocaleDateString()}`, { icon: "⏳" });
+                        } else if (isEnrollmentClosed) {
+                          toast(`Enrollment closed on ${enrollmentEnd.toLocaleDateString()}`, { icon: "🔒" });
+                        } else {
+                          proceedWithEnrollment(batch._id);
+                        }
+                      }}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-gray-900">
+                          {isEnrolled 
+                            ? (batch.name ? `${batch.name} (Enrolled)` : 'Already Enrolled') 
+                            : (batch.name || (isUpcoming ? 'Upcoming Batch' : 'Running Batch'))}
+                        </span>
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                          isEnrolled ? 'bg-gray-200 text-gray-700' :
+                          (isEnrollmentClosed ? 'bg-red-100 text-red-600' :
+                           isEnrollmentUpcoming ? 'bg-orange-100 text-orange-600' :
+                           'bg-green-100 text-green-600')
+                        }`}>
+                          {isEnrolled ? 'Enrolled' : 
+                           (isEnrollmentClosed ? 'Enrollment Closed' : 
+                            isEnrollmentUpcoming ? 'Enrollment Starts Soon' : 
+                            'Enrollment Open')}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 mt-1">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Course Schedule</span>
+                          <span className="text-[13px]">Starts: <span className="font-semibold text-gray-800">{new Date(batch.startDate).toLocaleDateString()}</span></span>
+                          <span className="text-[13px]">Ends: <span className="font-semibold text-gray-800">{new Date(batch.endDate).toLocaleDateString()}</span></span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Enrollment Window</span>
+                          <span className="text-[13px]">Starts: <span className="font-semibold text-gray-800">{enrollmentStart ? enrollmentStart.toLocaleDateString() : 'N/A'}</span></span>
+                          <span className="text-[13px]">Ends: <span className="font-semibold text-gray-800">{enrollmentEnd ? enrollmentEnd.toLocaleDateString() : 'N/A'}</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

@@ -61,20 +61,18 @@ function ModeratorBatchesComponent({ profileData, onEditClick, onViewDetails }) 
                     <div className="w-full">
                         {/* heading */}
                         <div className="w-full h-[40px] flex justify-between items-center pt-[24px] pr-[14px] pb-[24px] pl-[14px]">
-                            <h3 className="">Assigned Batches</h3>
+                            <h3 className="">Assigned Groups</h3>
                             <div className="flex gap-[12px]">
                                 <GradiantButton
                                     onClick={onEditClick}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-[4px] text-sm !bg-none !text-black !border border-gray-300 w-[90px]"
-                                >
-                                    Edit
-                                </GradiantButton>
+                                    className="bg-gray-200 text-gray-700 hover:bg-gray-300 w-[63px] h-[37px] rounded-sm"
+                                    text={<span className="text-[14px]">Edit</span>}
+                                />
                                 <GradiantButton
                                     onClick={() => setShowBatchModal(true)}
-                                    className="w-[159px] h-[40px] font-bold text-[14px] rounded-[4px]"
-                                >
-                                    Assign new batch
-                                </GradiantButton>
+                                    className="bg-indigo-500 text-white hover:bg-indigo-600 w-[161px] h-[37px] rounded-sm"
+                                    text={<span className="text-[14px]">Assign new group</span>}
+                                />
                             </div>
                         </div>
 
@@ -99,7 +97,7 @@ function ModeratorBatchesComponent({ profileData, onEditClick, onViewDetails }) 
                                 </div>
                             ) : (
                                 <div className="w-full py-10 text-center text-gray-400 italic">
-                                    No batches assigned to this moderator yet.
+                                    No groups assigned to this moderator yet.
                                 </div>
                             )}
                         </div>

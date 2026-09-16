@@ -22,7 +22,7 @@ function EnrolledCourse({ userCourses = [], loading }) {
                 <p className="text-gray-500 h-[160px] w-full flex items-center justify-center">{t('no_any_course_enrolled_yet', 'No any course enrolled yet')}</p>
             ) : (
                 userCourses?.map((course) => (
-                    <CourseCard key={course._id} id={course._id} title={course.title} completed={course.completedLecturesCount} total={course.totalLectures} className="min-w-[300px] shadow-sm shrink-0" image={course.thumbnail} />
+                    <CourseCard key={course._id} id={course._id} title={course.title} completed={course.completedLecturesCount} total={course.totalLectures} className="min-w-[300px] shadow-sm shrink-0" image={course.thumbnail} batchStartDate={course.batchStartDate} />
                 ))
             )}
         </div>

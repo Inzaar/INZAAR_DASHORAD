@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/Pagination';
 import GrayButton from '@/components/ui/buttons/GrayButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllBatches, updateBatch } from '../../../../api/batch';
+import { getAllLimits, updateLimit } from '@/api/limit';
 import { getAllCourses } from '../../../../api/course';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -28,7 +28,7 @@ function BatchList({ onClose, moderatorId }) {
   const queryClient = useQueryClient();
 
   const assignMutation = useMutation({
-    mutationFn: (batchId) => updateBatch(batchId, { assignedModerator: moderatorId }),
+    mutationFn: (batchId) => updateLimit(batchId, { assignedModerator: moderatorId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       queryClient.invalidateQueries({ queryKey: ['user'] }); // Also refresh moderator batches list if needed
@@ -41,7 +41,7 @@ function BatchList({ onClose, moderatorId }) {
 
   const { data: batches = [], isLoading, isError } = useQuery({
     queryKey: ['batches'],
-    queryFn: getAllBatches
+    queryFn: getAllLimits
   });
 
   const { data: coursesResponse, isLoading: isCoursesLoading } = useQuery({

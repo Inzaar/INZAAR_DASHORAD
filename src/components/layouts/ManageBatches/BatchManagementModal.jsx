@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { X, Search, PlusCircle, User, Users, Loader2, Check, Edit2, UserX } from 'lucide-react';
 import BatchInformation from './BatchInformation';
 import AdjustStudentsTab from './AdjustStudentsTab';
-import { fetchAllModerators, assignBatch, removeModerator } from '../../../api/user';
+import { fetchAllModerators, removeModerator } from '../../../api/user';
+import { updateLimit } from '../../../api/limit';
 import CreateModeratorModal from '../../../features/adminDashborad/components/CreateModeratorModal';
 import { toast } from 'react-hot-toast';
 
@@ -61,15 +62,14 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
 
         setAssigningId(moderatorId);
         try {
-            const response = await assignBatch(moderatorId, batchId);
-            if (response.success) {
-                setAssignedModId(moderatorId);
-                setIsEditMode(false);
-                // Refresh moderator list to show updated batch counts
-                const modResponse = await fetchAllModerators();
-                if (modResponse.success) {
-                    setModerators(modResponse.data.moderatorList);
-                }
+            const response = await updateLimit(batchId, { assignedModerator: moderatorId });
+            // updateLimit throws error if fails, otherwise returns updated data
+            setAssignedModId(moderatorId);
+            setIsEditMode(false);
+            // Refresh moderator list to show updated batch counts
+            const modResponse = await fetchAllModerators();
+            if (modResponse.success) {
+                setModerators(modResponse.data.moderatorList);
             }
         } catch (error) {
             console.error("Failed to assign moderator:", error);

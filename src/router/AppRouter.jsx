@@ -38,6 +38,9 @@ import ExportStudentReportsPage from '@/features/adminDashborad/pages/ExportStud
 import ExportModeratorReportsPage from '@/features/adminDashborad/pages/ExportModeratorReportsPage';
 import RegisteredUsersPage from '@/features/adminDashborad/pages/RegisteredUsersPage';
 import RegisteredCoursesPage from '@/features/adminDashborad/pages/RegisteredCoursesPage';
+import BatchesPage from '@/features/adminDashborad/pages/BatchesPage';
+import BatchDetailsPage from '@/features/adminDashborad/pages/BatchDetailsPage';
+import GroupStudentsPage from '@/features/adminDashborad/pages/GroupStudentsPage';
 import GlobalUnsavedChangesTracker from '@/components/shared/GlobalUnsavedChangesTracker';
 import { useAuth } from '@/context/AuthContext';
 import Loader from '@/components/ui/Loader';
@@ -74,6 +77,12 @@ const routes = createRoutesFromElements(
             <Route path="/admin-moderators/all" element={<ModeratorsPage genderFilter="All" />} />
             <Route path="/admin-moderators/male" element={<ModeratorsPage genderFilter="Male" />} />
             <Route path="/admin-moderators/female" element={<ModeratorsPage genderFilter="Female" />} />
+            <Route path="/admin-batches" element={<Navigate to="/admin-batches/all" replace />} />
+            <Route path="/admin-batches/all" element={<BatchesPage filter="All" />} />
+            <Route path="/admin-batches/running" element={<BatchesPage filter="Running" />} />
+            <Route path="/admin-batches/completed" element={<BatchesPage filter="Completed" />} />
+            <Route path="/admin-batches/details/:id" element={<BatchDetailsPage />} />
+            <Route path="/admin-batches/groups/:id/students" element={<GroupStudentsPage />} />
             <Route path="/student-profiles" element={<StudentProfilesPage genderFilter="All" />} />
             <Route path="/student-profiles/all" element={<StudentProfilesPage genderFilter="All" />} />
             <Route path="/student-profiles/male" element={<StudentProfilesPage genderFilter="Male" />} />

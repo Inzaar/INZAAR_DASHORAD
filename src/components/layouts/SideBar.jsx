@@ -14,6 +14,7 @@ function Sidebar({ className, onClose }) {
   const [isReportsExpanded, setIsReportsExpanded] = useState(false);
   const [isStudentsExpanded, setIsStudentsExpanded] = useState(false);
   const [isModeratorsExpanded, setIsModeratorsExpanded] = useState(false);
+  const [isBatchesExpanded, setIsBatchesExpanded] = useState(false);
   const { user, logout: contextLogout } = useAuth();
   const { unreadCount } = useNotification();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -25,6 +26,10 @@ function Sidebar({ className, onClose }) {
       'Calendar': 'calendar',
       'Notification': 'notification',
       'Moderators': 'moderators',
+      'Batches': 'batches',
+      'All Batches': 'all_batches',
+      'Running Batches': 'running_batches',
+      'Completed Batches': 'completed_batches',
       'Student Profiles': 'student_profiles',
       'Courses Management': 'courses_management',
       'Reports & Logs': 'reports_logs',
@@ -42,14 +47,13 @@ function Sidebar({ className, onClose }) {
       'Student Reports': 'student_reports',
       'Moderator Reports': 'moderator_reports',
       'Course Reports': 'course_reports',
-      'Dashboard': 'student_dashboard',
       'Logout': 'logout',
     };
     return map[str] || str;
   };
 
   // Define menu items based on role
-  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
+  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   // Determine which items to show based on the active path/context, not strictly user role
@@ -61,6 +65,7 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/export-moderator-reports') ||
     location.pathname.startsWith('/student-profiles') ||
     location.pathname.startsWith('/moderator-details') ||
+    location.pathname.startsWith('/admin-batches') ||
     location.pathname.startsWith('/registered-users') ||
     location.pathname.startsWith('/registered-courses');
 
@@ -105,6 +110,11 @@ function Sidebar({ className, onClose }) {
     '/admin-moderators/male': 'Male Moderators',
     '/admin-moderators/female': 'Female Moderators',
     '/moderator-details': 'Moderators',
+    '/admin-batches': 'Batches',
+    '/admin-batches/all': 'All Batches',
+    '/admin-batches/running': 'Running Batches',
+    '/admin-batches/completed': 'Completed Batches',
+    '/admin-batches/details': 'Batches',
     '/student-profiles': 'Student Profiles',
     '/student-profiles/all': 'All Students',
     '/student-profiles/male': 'Male Students',
@@ -167,6 +177,9 @@ function Sidebar({ className, onClose }) {
       if (['All Moderators', 'Male Moderators', 'Female Moderators'].includes(currentName) || currentName === 'Moderators') {
         setIsModeratorsExpanded(true);
       }
+      if (['All Batches', 'Running Batches', 'Completed Batches'].includes(currentName) || currentName === 'Batches') {
+        setIsBatchesExpanded(true);
+      }
     }
   }, [location.pathname]);
 
@@ -202,6 +215,10 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
+    if (itemName === 'Batches') {
+      setIsBatchesExpanded(!isBatchesExpanded);
+      return;
+    }
 
     if (itemName === 'Logout') {
       setIsLogoutModalOpen(true);
@@ -256,6 +273,17 @@ function Sidebar({ className, onClose }) {
         'All Moderators': '/admin-moderators/all',
         'Male Moderators': '/admin-moderators/male',
         'Female Moderators': '/admin-moderators/female'
+      };
+      navigate(subRoutes[itemName]);
+      if (onClose) onClose();
+      return;
+    }
+
+    if (['All Batches', 'Running Batches', 'Completed Batches'].includes(itemName)) {
+      const subRoutes = {
+        'All Batches': '/admin-batches/all',
+        'Running Batches': '/admin-batches/running',
+        'Completed Batches': '/admin-batches/completed'
       };
       navigate(subRoutes[itemName]);
       if (onClose) onClose();
@@ -374,6 +402,55 @@ function Sidebar({ className, onClose }) {
                   >
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
                     {t('female_moderators', 'Female Moderators')}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (item === 'Batches') {
+      const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
+      return (
+        <div key={item} className="w-full flex flex-col gap-1">
+          <Sideabrbbutton
+            isActive={isAnyBatchActive}
+            onClick={(e) => {
+              e.preventDefault();
+              handleItemClick(item);
+            }}
+          >
+            <div className="flex items-center justify-between w-full pr-2">
+              <span>{t(tKey(item), item)}</span>
+              {isBatchesExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </Sideabrbbutton>
+          {isBatchesExpanded && (
+            <div className="flex flex-col gap-1 ml-4 border-l-2 border-[#E5E7EB] pl-2 transition-all">
+              {user?.role === 'admin' && (
+                <>
+                  <button
+                    onClick={() => handleItemClick('All Batches')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Batches' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                    {t('all_batches', 'All Batches')}
+                  </button>
+                  <button
+                    onClick={() => handleItemClick('Running Batches')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Running Batches' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                    {t('running_batches', 'Running Batches')}
+                  </button>
+                  <button
+                    onClick={() => handleItemClick('Completed Batches')}
+                    className={`w-full flex items-center gap-2 px-2 py-2 text-[14px] cursor-pointer transition-colors text-[#10B981] hover:text-[#059669] ${activeItem === 'Completed Batches' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#10B981]"></span>
+                    {t('completed_batches', 'Completed Batches')}
                   </button>
                 </>
               )}

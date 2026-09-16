@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, BookOpen, Users } from 'lucide-react';
 import BatchManagementModal from './BatchManagementModal';
-import { getAllBatches } from '@/api/batch';
+import { getAllLimits } from '@/api/limit';
 import { getAllEnrollments } from '@/api/enrollment';
 
 const NewBatchAlert = () => {
@@ -14,7 +14,7 @@ const NewBatchAlert = () => {
         const fetchUnassignedBatches = async () => {
             try {
                 const [batchesData, enrollmentsRes] = await Promise.all([
-                    getAllBatches(),
+                    getAllLimits(),
                     getAllEnrollments()
                 ]);
 
@@ -28,15 +28,15 @@ const NewBatchAlert = () => {
 
                 const batchesWithStats = unassigned.reduce((acc, batch) => {
                     const studentCount = allEnrollments.filter(e => {
-                        const eBatchId = e.batchId?._id || e.batchId;
-                        return String(eBatchId) === String(batch._id);
+                        const eLimitId = e.limitId?._id || e.limitId;
+                        return String(eLimitId) === String(batch._id);
                     }).length;
 
                     if (studentCount > 0) {
                         const limit = batch.limit || 50;
                         acc.push({
                             ...batch,
-                            batchId: batch.name || batch._id.substring(0, 8),
+                            displayGroupName: batch.name || batch._id.substring(0, 8),
                             courseName: batch.courseId?.title || 'Unknown Course',
                             genderType: batch.genderType || 'Unassigned',
                             studentsCount: `${studentCount} / ${limit}`,
@@ -85,9 +85,9 @@ const NewBatchAlert = () => {
                         <AlertCircle className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">New Batch Created</h3>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">New Group Created</h3>
                         <p className="text-gray-500 text-xs sm:text-sm mt-1 max-w-full lg:max-w-2xl break-words">
-                            A new batch has been created for Course: {batchData.courseName}. This batch currently has no moderator assigned.
+                            A new group has been created for Course: {batchData.courseName}. This group currently has no moderator assigned.
                         </p>
                     </div>
                 </div>
@@ -125,9 +125,9 @@ const NewBatchAlert = () => {
                             <Users className="text-[#5D5FEF] w-4 h-4" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Batch</p>
+                            <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Group</p>
                             <p className="text-[13px] font-bold text-gray-700 whitespace-nowrap">
-                                {batchData.batchId}
+                                {batchData.displayGroupName || batchData.name}
                                 {(batchData.genderType === 'Male' || batchData.genderType === 'Female') ? ` (${batchData.genderType})` : ''}
                             </p>
                         </div>
@@ -176,7 +176,7 @@ const NewBatchAlert = () => {
                                 <div className="bg-red-50 p-2 rounded-lg">
                                     <AlertCircle className="text-red-500 w-5 h-5" />
                                 </div>
-                                <h2 className="text-lg font-bold text-gray-900">Unassigned Batches ({unassignedBatches.length})</h2>
+                                <h2 className="text-lg font-bold text-gray-900">Unassigned Groups ({unassignedBatches.length})</h2>
                             </div>
                             <button
                                 onClick={() => setIsViewAllOpen(false)}

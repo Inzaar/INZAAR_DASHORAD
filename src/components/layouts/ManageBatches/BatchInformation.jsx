@@ -16,14 +16,14 @@ const BatchInformation = ({ data }) => {
 
     return (
         <div className="bg-[#F8F9FA] p-3 sm:p-5 rounded-xl border border-gray-100 shadow-sm">
-            <h3 className="text-gray-900 font-bold mb-3 sm:mb-5 text-sm tracking-tight">Batch Information</h3>
+            <h3 className="text-gray-900 font-bold mb-3 sm:mb-5 text-sm tracking-tight">Group Information</h3>
             <div className="grid grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr] gap-x-4 sm:gap-x-6 gap-y-4 sm:gap-y-8 mb-3 sm:mb-5">
                 <div className="flex items-center gap-4">
                     <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-50 flex-shrink-0">
                         <Hash className="text-[#3758EE] w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider leading-none mb-1.5">Batch ID</p>
+                        <p className="text-[9px] text-gray-400 uppercase font-bold tracking-wider leading-none mb-1.5">Group ID</p>
                         <p className="text-xs font-bold text-gray-700 truncate">{batchId}</p>
                     </div>
                 </div>

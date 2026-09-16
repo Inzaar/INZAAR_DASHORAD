@@ -190,7 +190,7 @@ import 'react-calendar/dist/Calendar.css';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import Input1 from '@/components/ui/inputs/Input1';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfDay, isWithinInterval } from 'date-fns';
 import { CustomPagination } from '@/components/ui/Pagination';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event';
 import { getAllCourses } from '@/api/course';

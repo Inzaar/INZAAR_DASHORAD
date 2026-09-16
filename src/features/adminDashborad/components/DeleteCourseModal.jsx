@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, AlertTriangle, Users, User, X, Loader2 } from "lucide-react";
-import { getBatchesByCourse } from "@/api/batch";
+import { getLimitsByCourse } from "@/api/limit";
 
 const DeleteCourseModal = ({
     isOpen,
@@ -20,7 +20,7 @@ const DeleteCourseModal = ({
                 try {
                     setLoadingBatches(true);
                     setError(null);
-                    const data = await getBatchesByCourse(courseId);
+                    const data = await getLimitsByCourse(courseId);
                     setBatches(data || []);
                 } catch (err) {
                     console.error("Error fetching batches for delete warning:", err);

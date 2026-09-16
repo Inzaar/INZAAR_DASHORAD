@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, Users, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { getAllBatches, getBatchesByCourse, moveStudents } from '@/api/batch';
+import { getAllLimits, getLimitsByCourse, moveStudents } from '@/api/limit';
 
 // ── Toast component ──────────────────────────────────────────────────────────
 const Toast = ({ type, message }) => (
@@ -61,7 +61,8 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
     const [sliderValues, setSliderValues]   = React.useState({});   
     const [toast, setToast]                 = React.useState(null); 
 
-    const sourceBatchId  = batchData?._id || batchData?.id;
+    const sourceLimitId  = batchData?._id || batchData?.id;
+    const currentBatchId = batchData?.batchId?._id || batchData?.batchId;
     const courseId       = batchData?.courseId?._id || batchData?.courseId;
     const courseName     = batchData?.courseName || batchData?.courseId?.title || 'this course';
     
@@ -79,12 +80,15 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                 return;
             }
             try {
-                const apiData = await getBatchesByCourse(courseId) || [];
+                const apiData = await getLimitsByCourse(courseId) || [];
                 
-                // Filter out the source batch and mismatching genders
+                // Filter out the source limit, mismatching batches, and mismatching genders
                 const sourceGender = batchData?.genderType || 'Unassigned';
                 const siblings = apiData.filter(b => {
-                    if (String(b._id) === String(sourceBatchId)) return false;
+                    if (String(b._id) === String(sourceLimitId)) return false;
+                    
+                    const targetBatchId = b.batchId?._id || b.batchId;
+                    if (String(targetBatchId) !== String(currentBatchId)) return false;
                     
                     const targetGender = b.genderType || 'Unassigned';
                     if (targetGender !== 'Unassigned' && sourceGender !== 'Unassigned' && targetGender !== sourceGender) {
@@ -113,7 +117,7 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
             }
         };
         fetchBatches();
-    }, [courseId, sourceBatchId]);
+    }, [courseId, sourceLimitId, currentBatchId]);
 
     const handleSliderChange = (batchId, val) => {
         const reset = {};
@@ -126,10 +130,10 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
         if (!targetId || isMoving) return;
 
         const count = sliderValues[targetId];
-        console.log("Submitting Move:", { sourceBatchId, targetId, count });
+        console.log("Submitting Move:", { sourceLimitId, targetId, count });
         setIsMoving(true);
         try {
-            await moveStudents(sourceBatchId, targetId, count);
+            await moveStudents(sourceLimitId, targetId, count);
             setToast({ type: 'success', message: `Successfully moved ${count} students!` });
             setTimeout(() => { setToast(null); onClose(); }, 2000);
         } catch (err) {
@@ -219,22 +223,22 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
 
             <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar pb-6 no-scrollbar">
                 <div className="mb-4">
-                    <h3 className="text-[#334155] text-[15px] font-bold">Adjust Students Across Batches</h3>
+                    <h3 className="text-[#334155] text-[15px] font-bold">Adjust Students Across Groups</h3>
                     <p className="text-gray-400 text-[11px] mt-0.5">
-                        You can merge or redistribute students into existing batches instead of creating a new one.
+                        You can merge or redistribute students into existing groups instead of creating a new one.
                     </p>
                 </div>
 
                 <div className="bg-[#FFF8F1] border border-[#FFEDD5] p-3.5 rounded-xl flex items-center gap-3 mb-6">
                     <AlertCircle className="w-5 h-5 text-[#F97316] flex-shrink-0" />
                     <p className="text-[#9A3412] text-[11px] font-medium leading-relaxed">
-                        Batch <span className="font-bold">{batchData?.name || batchData?.batchId || 'this batch'}</span> has only {sourceStudents} students. You may merge it with another batch to optimize capacity.
+                        Group <span className="font-bold">{batchData?.name || batchData?.batchId || 'this group'}</span> has only {sourceStudents} students. You may merge it with another group to optimize capacity.
                     </p>
                 </div>
 
                 <div className="mb-4">
                     <h4 className="text-gray-500 text-[11px] font-bold uppercase tracking-wide">
-                        All Batches for {courseName}
+                        All Groups for {courseName}
                     </h4>
                 </div>
 
@@ -245,11 +249,11 @@ const AdjustStudentsTab = ({ batchData, onClose }) => {
                     {loading ? (
                         <div className="py-10 flex flex-col items-center justify-center">
                             <Loader2 className="w-6 h-6 text-[#5D5FEF] animate-spin mb-2" />
-                            <p className="text-gray-400 text-[10px] font-bold uppercase">Syncing Sibling Batches...</p>
+                            <p className="text-gray-400 text-[10px] font-bold uppercase">Syncing Sibling Groups...</p>
                         </div>
                     ) : others.length === 0 ? (
                         <div className="py-8 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                             <p className="text-gray-400 text-[10px] font-bold uppercase">No target batches available for redistribution.</p>
+                             <p className="text-gray-400 text-[12px] font-medium">No other groups found for this course.</p>
                         </div>
                     ) : (
                         others.map((batch) => renderBatchCard(batch, false))

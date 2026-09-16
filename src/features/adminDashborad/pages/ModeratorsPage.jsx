@@ -639,7 +639,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={new Date(mod.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
-                                                performance={mod.assignedBatches > 0 ? `${mod.assignedBatches} Batches` : "No Batches"}
+                                                performance={mod.assignedBatches > 0 ? `${mod.assignedBatches} Groups` : "No Groups"}
                                                 onViewClick={() => navigate(`/moderator-details/${mod.id}`)}
                                             />
                                         ))

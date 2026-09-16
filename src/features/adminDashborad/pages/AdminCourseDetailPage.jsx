@@ -13,8 +13,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import img from '@/assets/images/course.png';
 import Analytics from '@/features/StudentDashboard/components/Analytics';
 import { getAdminCourseById, deleteCourse, updateCourse } from '@/api/course';
+import { createBatch, updateBatch, deleteBatch } from '@/api/batch';
 import toast from 'react-hot-toast';
 import DeleteCourseModal from '../components/DeleteCourseModal';
+import ScheduleBatchModal from '@/features/courses/components/ScheduleBatchModal';
+import SemesterBatchesListModal from '@/features/courses/components/SemesterBatchesListModal';
 import { CustomPagination } from '@/components/ui/Pagination';
 
 const AdminCourseDetailPage = () => {
@@ -29,6 +32,9 @@ const AdminCourseDetailPage = () => {
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [isScheduleListModalOpen, setIsScheduleListModalOpen] = useState(false);
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [scheduling, setScheduling] = useState(false);
     const adminMenuRef = useRef(null);
 
     const [lecturesPage, setLecturesPage] = useState(1);
@@ -66,6 +72,58 @@ const AdminCourseDetailPage = () => {
             setCourseData(prev => ({ ...prev, status: newStatus }));
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update status');
+        }
+    };
+
+    const [batchToEdit, setBatchToEdit] = useState(null);
+
+    const handleEditBatch = (batch) => {
+        setBatchToEdit(batch);
+        setIsScheduleListModalOpen(false);
+        setIsScheduleModalOpen(true);
+    };
+
+    const handleDeleteBatch = async (batchId) => {
+        if (!window.confirm("Are you sure you want to delete this batch?")) return;
+        try {
+            await deleteBatch(batchId);
+            toast.success('Batch deleted successfully');
+            // Refresh course data
+            const res = await getAdminCourseById(id);
+            setCourseData(res?.data?.data);
+        } catch (error) {
+            console.error("Error deleting batch:", error);
+            toast.error(error.response?.data?.message || 'Failed to delete batch');
+        }
+    };
+
+    const handleSchedule = async (scheduleData) => {
+        try {
+            setScheduling(true);
+            if (scheduleData.id) {
+                await updateBatch(scheduleData.id, {
+                    name: scheduleData.name,
+                    startDate: scheduleData.startDate,
+                    endDate: scheduleData.endDate
+                });
+                toast.success('Batch updated successfully');
+            } else {
+                await createBatch({
+                    ...scheduleData,
+                    courseId: id,
+                });
+                toast.success('Batch scheduled successfully');
+            }
+            setIsScheduleModalOpen(false);
+            setBatchToEdit(null);
+            // Refresh course data
+            const res = await getAdminCourseById(id);
+            setCourseData(res?.data?.data);
+        } catch (error) {
+            console.error("Error scheduling batch:", error);
+            toast.error(error.response?.data?.message || 'Failed to schedule batch');
+        } finally {
+            setScheduling(false);
         }
     };
 
@@ -156,23 +214,6 @@ const AdminCourseDetailPage = () => {
 
                                 {/* Desktop Buttons */}
                                 <div className="hidden md:flex items-center gap-3">
-                                    <div className="relative group">
-                                        <button className="bg-white border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:bg-gray-50 flex items-center gap-2 capitalize">
-                                            Status: {courseData?.status === 'published' ? 'Active' : (courseData?.status || 'Draft')}
-                                            <ChevronDown size={16} />
-                                        </button>
-                                        <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                                            {['draft', 'published', 'inactive'].map((st) => (
-                                                <button
-                                                    key={st}
-                                                    onClick={() => handleStatusChange(st)}
-                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 capitalize ${courseData?.status === st ? 'text-[#8B5CF6] font-bold bg-blue-50' : 'text-gray-700'}`}
-                                                >
-                                                    {st === 'published' ? 'Active' : st}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
                                     <GradiantButton
                                         onClick={() => toast.error('Certificate is not available yet')}
                                         className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
@@ -180,22 +221,49 @@ const AdminCourseDetailPage = () => {
                                         Download Certificate
                                     </GradiantButton>
                                     <GradiantButton
-                                        onClick={() => navigate(`/admin-add-course?edit=true&id=${id}`)}
-                                        className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                                        onClick={() => setIsScheduleListModalOpen(true)}
+                                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-[#8B5CF6] text-white text-sm font-medium rounded-xl hover:bg-purple-600 transition-colors shadow-sm"
                                     >
-                                        Save
+                                        Schedule
                                     </GradiantButton>
-                                    <button
-                                        onClick={() => setIsDeleteModalOpen(true)}
-                                        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:shadow-md transition-all whitespace-nowrap cursor-pointer"
-                                    >
-                                        <Trash2 size={16} />
-                                        {t('delete', 'Delete')}
-                                    </button>
+                                    
+                                    {/* 3 dots menu */}
+                                    <div className="relative">
+                                        <button
+                                            onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+                                            className="hidden md:flex p-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95 items-center justify-center h-[36px] w-[36px]"
+                                            ref={adminMenuRef}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
+                                        </button>
+                                        
+                                        {isAdminMenuOpen && (
+                                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                                <button
+                                                    onClick={() => {
+                                                        navigate(`/admin-add-course?edit=true&id=${id}`);
+                                                        setIsAdminMenuOpen(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setIsDeleteModalOpen(true);
+                                                        setIsAdminMenuOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                                >
+                                                    <Trash2 size={16} /> Delete
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Mobile Three-Dots */}
-                                <div className="md:hidden relative" ref={adminMenuRef}>
+                                <div className="md:hidden relative">
                                     <button
                                         onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
                                         className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95"
@@ -205,20 +273,15 @@ const AdminCourseDetailPage = () => {
 
                                     {isAdminMenuOpen && (
                                         <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
-                                            <div className="px-4 py-2 border-b border-gray-100 mb-2">
-                                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Change Status</p>
-                                                <div className="flex flex-col gap-1">
-                                                    {['draft', 'published', 'inactive'].map((st) => (
-                                                        <button
-                                                            key={st}
-                                                            onClick={() => { handleStatusChange(st); setIsAdminMenuOpen(false); }}
-                                                            className={`w-full text-left px-3 py-1.5 rounded-lg text-sm capitalize ${courseData?.status === st ? 'bg-blue-50 text-[#8B5CF6] font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
-                                                        >
-                                                            {st === 'published' ? 'Active' : st}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <button
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                onClick={() => {
+                                                    setIsScheduleListModalOpen(true);
+                                                    setIsAdminMenuOpen(false);
+                                                }}
+                                            >
+                                                Schedule
+                                            </button>
                                             <button
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
                                                 onClick={() => {
@@ -423,12 +486,31 @@ const AdminCourseDetailPage = () => {
                 </div>
             </div>
 
+            <SemesterBatchesListModal
+                isOpen={isScheduleListModalOpen}
+                onClose={() => setIsScheduleListModalOpen(false)}
+                batches={courseData?.batches || []}
+                onOpenScheduleModal={() => {
+                    setBatchToEdit(null);
+                    setIsScheduleListModalOpen(false);
+                    setIsScheduleModalOpen(true);
+                }}
+                onEditBatch={handleEditBatch}
+                onDeleteBatch={handleDeleteBatch}
+            />
+            <ScheduleBatchModal
+                isOpen={isScheduleModalOpen}
+                onClose={() => setIsScheduleModalOpen(false)}
+                onSchedule={handleSchedule}
+                loading={scheduling}
+                initialData={batchToEdit}
+            />
             <DeleteCourseModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteCourse}
-                courseId={id}
-                courseTitle={courseData?.title || ""}
+                courseId={courseData?._id}
+                courseTitle={courseData?.title}
                 loading={deleting}
             />
         </div>

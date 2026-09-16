@@ -25,10 +25,11 @@ const StudentCourseDashboard = ({ profileData }) => {
 
     const searchParams = new URLSearchParams(window.location.search);
     const targetCourseId = searchParams.get("courseId");
+    const targetEnrollmentId = targetCourseId ? enrolledCourses.find(c => c.courseId === targetCourseId)?.id : null;
     const targetLectureId = searchParams.get("lectureId");
 
-    // Default to target course or first course if available
-    const [selectedCourseId, setSelectedCourseId] = useState(targetCourseId || enrolledCourses[0]?.courseId || "");
+    // Default to the target enrollment or first course if available
+    const [selectedEnrollmentId, setSelectedEnrollmentId] = useState(targetEnrollmentId || enrolledCourses[0]?.id || "");
     const [selectedCourseData, setSelectedCourseData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -132,7 +133,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                         title: `New Reply from Admin`,
                         type: "app",
                         message: `Admin replied to your comment in ${selectedLectureForComments?.title}`,
-                        link: `/course-view?id=${selectedCourseId}&lectureId=${lectureId}`,
+                        link: `/course-view?id=${currentCourse?.courseId}&lectureId=${lectureId}`,
                         sendto: userId,
                         sendfrom: user?._id || user?.id,
                     })
@@ -169,16 +170,16 @@ const StudentCourseDashboard = ({ profileData }) => {
     };
 
     useEffect(() => {
-        if (!selectedCourseId && enrolledCourses.length > 0) {
-            setSelectedCourseId(enrolledCourses[0].courseId);
+        if (!selectedEnrollmentId && enrolledCourses.length > 0) {
+            setSelectedEnrollmentId(enrolledCourses[0].id);
         }
     }, [enrolledCourses]);
 
     const fetchCourseStats = async () => {
-        if (!userId || !selectedCourseId) return;
+        if (!userId || !selectedEnrollmentId) return;
         try {
             setLoading(true);
-            const res = await getStudentCourseStats(userId, selectedCourseId);
+            const res = await getStudentCourseStats(userId, selectedEnrollmentId);
             if (res?.data) {
                 setSelectedCourseData(res.data);
             }
@@ -191,7 +192,7 @@ const StudentCourseDashboard = ({ profileData }) => {
 
     useEffect(() => {
         fetchCourseStats();
-    }, [selectedCourseId]);
+    }, [selectedEnrollmentId]);
 
     // Handle deep linking for lecture comments
     useEffect(() => {
@@ -207,9 +208,9 @@ const StudentCourseDashboard = ({ profileData }) => {
                 handleViewComments({ ...lec, type: 'Lecture', id: lec.id || lec._id });
             }
         }
-    }, [targetLectureId, selectedCourseData]);
+    }, [targetLectureId, selectedCourseData, isCommentsModalOpen]);
 
-    const currentCourse = enrolledCourses.find(c => c.courseId === selectedCourseId) || enrolledCourses[0] || {};
+    const currentCourse = enrolledCourses.find(c => c.id === selectedEnrollmentId) || enrolledCourses[0] || {};
     const stats = selectedCourseData?.stats || {
         progress: "0%",
         quizScore: "0%",
@@ -262,18 +263,18 @@ const StudentCourseDashboard = ({ profileData }) => {
                         <div className="absolute right-0 mt-2 w-full sm:w-[320px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in duration-200">
                             {enrolledCourses.length > 0 ? enrolledCourses.map((course) => (
                                 <button
-                                    key={course.courseId}
+                                    key={course.id}
                                     onClick={() => {
-                                        setSelectedCourseId(course.courseId);
+                                        setSelectedEnrollmentId(course.id);
                                         setIsDropdownOpen(false);
                                     }}
                                     className={cn(
                                         "w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 flex items-center gap-3",
-                                        selectedCourseId === course.courseId ? "text-[#6366F1] font-bold bg-blue-50/50" : "text-gray-600 font-medium"
+                                        selectedEnrollmentId === course.id ? "text-[#6366F1] font-bold bg-blue-50/50" : "text-gray-600 font-medium"
                                     )}
                                 >
-                                    <div className={cn("w-1.5 h-1.5 rounded-full", selectedCourseId === course.courseId ? "bg-[#6366F1]" : "bg-gray-200")} />
-                                    <span className="truncate">{course.title}</span>
+                                    <div className={cn("w-1.5 h-1.5 rounded-full", selectedEnrollmentId === course.id ? "bg-[#6366F1]" : "bg-gray-200")} />
+                                    <span className="truncate">{course.title} ({course.groupName})</span>
                                 </button>
                             )) : (
                                 <div className="px-4 py-3 text-sm text-gray-400 italic">No courses found.</div>
@@ -471,7 +472,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     <td className="px-6 py-4 text-center">
                                         <GradiantButton 
                                             className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
-                                            onClick={() => navigate(`/admin-course-play?id=${selectedCourseId}&userId=${userId}&lectureId=${lecture.id}`)}
+                                            onClick={() => navigate(`/admin-course-play?id=${currentCourse?.courseId}&userId=${userId}&lectureId=${lecture.id}`)}
                                         >
                                             View Detail
                                         </GradiantButton>

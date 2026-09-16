@@ -49,11 +49,12 @@ export const getCourseById = (courseId, userId = null) => {
     return res;
 }
 
-export const enrollCourse = async (id) => {
+export const enrollCourse = async (id, batchId) => {
     try {
-        const res = await axiosInstance.post(`/enrollments/enroll`, {
-            courseId: id,
-        }, {
+        const payload = { courseId: id };
+        if (batchId) payload.batchId = batchId;
+        
+        const res = await axiosInstance.post(`/enrollments/enroll`, payload, {
             withCredentials: true
         });
         return res;

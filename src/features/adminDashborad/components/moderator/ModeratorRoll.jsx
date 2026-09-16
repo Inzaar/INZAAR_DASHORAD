@@ -194,7 +194,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
                     ))
                   ) : (
                     <div className="w-full h-[40px] bg-gray-50 rounded-[6px] flex items-center px-[10px] flex-shrink-0 text-gray-500 italic text-sm border border-gray-200">
-                      No batches assigned
+                      No groups assigned
                     </div>
                   )}
                 </>

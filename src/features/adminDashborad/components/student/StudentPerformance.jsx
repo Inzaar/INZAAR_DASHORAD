@@ -201,9 +201,14 @@ const StudentPerformance = ({ profileData }) => {
                                     <td className="px-6 py-4 font-medium text-gray-900">{row.courseName}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            {row.moderators.length > 0 ? row.moderators.map((mod, i) => (
-                                                <span key={i} className="text-[#3758EE] underline cursor-pointer">{mod}</span>
-                                            )) : <span className="text-gray-400 italic">None</span>}
+                                            {row.moderators.length > 0 ? row.moderators.map((mod, i) => {
+                                                const modName = typeof mod === 'string' ? mod : (mod?.firstname || mod?.lastname ? `${mod.firstname || ""} ${mod.lastname || ""}`.trim() : (mod?.name || mod?.username || "Unknown"));
+                                                return (
+                                                    <span key={i} className="text-[#3758EE] underline cursor-pointer">
+                                                        {modName}
+                                                    </span>
+                                                );
+                                            }) : <span className="text-gray-400 italic">None</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
