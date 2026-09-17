@@ -6,6 +6,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import Loader from '@/components/ui/Loader';
 import { ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 import { getStudentsByGroup, getLimitById } from '@/api/limit';
 import BatchManagementModal from '@/components/layouts/ManageBatches/BatchManagementModal';
 
@@ -13,6 +14,7 @@ const GroupStudentsPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
+    const { user } = useAuth();
     
     // Extract group name from URL query if available
     const queryParams = new URLSearchParams(location.search);
@@ -86,7 +88,7 @@ const GroupStudentsPage = () => {
                                     </h1>
                                     <p className="text-gray-500 text-[14px] min-[641px]:text-[16px]">Manage students enrolled in this specific group</p>
                                 </div>
-                                {limitData && (
+                                {limitData && user?.role === 'admin' && (
                                     <div className="flex flex-row justify-end gap-2 sm:gap-3 w-full md:w-auto flex-shrink-0">
                                         <button
                                             onClick={() => handleOpenModal('assign')}

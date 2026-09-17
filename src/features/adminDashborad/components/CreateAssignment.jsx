@@ -129,7 +129,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
         <div className="flex-1 flex flex-col w-full h-full min-h-screen bg-white md:bg-[#f8fafc] overflow-hidden font-sans relative">
             <div className="flex-1 overflow-y-auto pb-6">
                 <div className="max-w-[1200px] mx-auto w-full px-4 md:px-8 pt-6 md:pt-10">
-                    
+
                     {/* Header Area */}
                     <div className="mb-8 md:mb-10 text-left flex flex-col items-start">
                         <button
@@ -149,7 +149,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
 
                     {/* Form Container */}
                     <div className="bg-white md:rounded-2xl md:shadow-[0_4px_20px_rgb(0,0,0,0.02)] md:border border-gray-100 p-6 md:p-10 mb-10">
-                        
+
                         {/* Lectures Dropdown */}
                         <div className="mb-8">
                             <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Lectures *</label>
@@ -277,8 +277,8 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                                             key={type}
                                             onClick={() => toggleAcceptedType(type)}
                                             className={`px-4 py-2 rounded-full border flex items-center gap-2 text-[13px] font-bold transition-all cursor-pointer
-                                                ${isSelected 
-                                                    ? 'border-[#8b5cf6] text-[#8b5cf6] bg-purple-50/30' 
+                                                ${isSelected
+                                                    ? 'border-[#8b5cf6] text-[#8b5cf6] bg-purple-50/30'
                                                     : 'border-gray-200 text-gray-500 hover:border-gray-300 bg-white'}`}
                                         >
                                             {isSelected && <Check size={14} strokeWidth={3} />}
@@ -336,7 +336,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                                     </div>
                                 )}
                             </div>
-                            <div 
+                            <div
                                 onClick={() => handleInputChange('setDueDate', !assignmentData.setDueDate)}
                                 className={`w-12 h-6 rounded-full cursor-pointer relative transition-colors duration-300 mt-1 ${assignmentData.setDueDate ? 'bg-[#8b5cf6]' : 'bg-gray-200'}`}
                             >

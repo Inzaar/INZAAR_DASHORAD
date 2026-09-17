@@ -216,6 +216,11 @@ function Sidebar({ className, onClose }) {
     }
 
     if (itemName === 'Batches') {
+      if (user?.role === 'moderator') {
+        navigate('/admin-batches');
+        if (onClose) onClose();
+        return;
+      }
       setIsBatchesExpanded(!isBatchesExpanded);
       return;
     }
@@ -412,6 +417,22 @@ function Sidebar({ className, onClose }) {
     }
 
     if (item === 'Batches') {
+      if (user?.role === 'moderator') {
+        const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
+        return (
+          <Sideabrbbutton
+            key={item}
+            isActive={isAnyBatchActive}
+            onClick={(e) => {
+              e.preventDefault();
+              handleItemClick('Batches');
+            }}
+          >
+            {t('batches', 'Batches')}
+          </Sideabrbbutton>
+        );
+      }
+
       const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
       return (
         <div key={item} className="w-full flex flex-col gap-1">
