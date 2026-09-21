@@ -333,7 +333,7 @@ const CourseView = () => {
                     }}
                     className={`
                                                         relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
-                                                        w-full flex flex-col
+                                                        w-[260px] sm:w-[300px] lg:w-full flex flex-col
                                                         ${currentLecture?.id === lecture.id
                             ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                             : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
@@ -423,7 +423,7 @@ const CourseView = () => {
                             const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
                             navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`);
                         }}
-                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
+                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[240px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
                     >
                         <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
                             <GraduationCap className="text-purple-600 w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -461,7 +461,7 @@ const CourseView = () => {
                             }
                             handleOpenSpecificAssignment(lecture, assignment);
                         }}
-                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
+                        className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[240px] sm:w-[280px] lg:w-full flex items-center gap-3 ${assignment.isLocked ? 'opacity-70' : ''}`}
                     >
                         <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
                             <FileText className="text-orange-600 w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -623,6 +623,8 @@ const CourseView = () => {
                         groups.push(newGroup);
                     }
                     sectionMap[sec].lectures.push(lecture);
+                } else if ((lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz') && groups.length > 0) {
+                    groups[groups.length - 1].lectures.push(lecture);
                 } else {
                     groups.push({ sectionName: lecture.title, id: `single-${idx}`, isExplicitSection: false, lectures: [lecture] });
                 }
@@ -631,7 +633,7 @@ const CourseView = () => {
             let currentLegacyGroup = null;
             lectures.forEach((lecture, idx) => {
                 const t = (lecture.title || "").toLowerCase().trim();
-                const isContinuation = t.startsWith("part") || t.startsWith("پارٹ") || t.startsWith("lecture") || t.startsWith("لیکچر");
+                const isContinuation = t.startsWith("part") || t.startsWith("پارٹ") || t.startsWith("lecture") || t.startsWith("لیکچر") || lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz';
 
                 if (isContinuation && currentLegacyGroup) {
                     currentLegacyGroup.lectures.push(lecture);
@@ -1834,14 +1836,11 @@ const CourseView = () => {
                                     <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                         <div className="flex-1 relative lg:min-h-0">
-                                            <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-x-auto lg:overflow-y-auto no-scrollbar scroll-smooth snap-x lg:snap-y">
-                                                <div className="flex flex-row lg:flex-col gap-3 min-w-max lg:min-w-0">
+                                            <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-y-auto no-scrollbar scroll-smooth snap-y">
+                                                <div className="flex flex-col gap-3">
                                                     {groupedLectures.map((group, groupIdx) => (
                                                         <div key={group.id || groupIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
-                                                            {(group.lectures.length === 1 && !group.isExplicitSection) ? (
-                                                                renderLectureItem(group.lectures[0], 0)
-                                                            ) : (
-                                                                <>
+                                                            <div className="w-full group">
                                                                     <button
                                                                         onClick={() => toggleSection(group.id)}
                                                                         className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${expandedSections[group.id]
@@ -1874,12 +1873,11 @@ const CourseView = () => {
                                                                     </button>
 
                                                                     {expandedSections[group.id] && (
-                                                                        <div className="flex flex-col gap-3 mt-2 lg:mt-3 pt-2 w-full">
+                                                                        <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
                                                                             {group.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
                                                                         </div>
                                                                     )}
-                                                                </>
-                                                            )}
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
