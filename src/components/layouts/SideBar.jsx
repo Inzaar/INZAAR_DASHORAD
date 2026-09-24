@@ -26,6 +26,7 @@ function Sidebar({ className, onClose }) {
       'Calendar': 'calendar',
       'Notification': 'notification',
       'Moderators': 'moderators',
+      'Management': 'management',
       'Batches': 'batches',
       'All Batches': 'all_batches',
       'Running Batches': 'running_batches',
@@ -53,7 +54,7 @@ function Sidebar({ className, onClose }) {
   };
 
   // Define menu items based on role
-  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
+  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Management', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   // Determine which items to show based on the active path/context, not strictly user role
@@ -61,10 +62,13 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/reports') ||
     location.pathname.startsWith('/moderator-reports') ||
     location.pathname.startsWith('/course-reports') ||
+    location.pathname.startsWith('/admin-management') ||
+    location.pathname.startsWith('/management-dashboard') ||
     location.pathname.startsWith('/export-student-reports') ||
     location.pathname.startsWith('/export-moderator-reports') ||
     location.pathname.startsWith('/student-profiles') ||
     location.pathname.startsWith('/moderator-details') ||
+    location.pathname.startsWith('/management-details') ||
     location.pathname.startsWith('/admin-batches') ||
     location.pathname.startsWith('/registered-users') ||
     location.pathname.startsWith('/registered-courses');
@@ -77,16 +81,27 @@ function Sidebar({ className, onClose }) {
     menuItems = ['Dashboard', 'Certificates', 'Notifications', 'Help Center'];
   }
 
+  // Customization for management
+  if (user?.role === 'management') {
+    menuItems = [];
+  }
+
   let moderatorFeatures = [];
 
-  // Display moderator features below the student items seamlessly across all views
-  if (user?.role === 'moderator' && user?.assignedFeatures?.length > 0) {
-    moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature));
-    moderatorFeatures.sort((a, b) => {
-      if (a === 'Student Profiles') return -1;
-      if (b === 'Student Profiles') return 1;
-      return 0;
-    });
+  // Display moderator/management features seamlessly
+  if (user?.role === 'moderator' || user?.role === 'management') {
+    if (user?.assignedFeatures?.length > 0) {
+      moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature) && feature !== 'Reports & Logs');
+      moderatorFeatures.sort((a, b) => {
+        if (a === 'Student Profiles') return -1;
+        if (b === 'Student Profiles') return 1;
+        return 0;
+      });
+    }
+    
+    if (user?.role === 'management') {
+      moderatorFeatures.unshift('Dashboard');
+    }
   }
 
   // Map your URL paths to the Display Names
@@ -109,7 +124,10 @@ function Sidebar({ className, onClose }) {
     '/admin-moderators/all': 'All Moderators',
     '/admin-moderators/male': 'Male Moderators',
     '/admin-moderators/female': 'Female Moderators',
+    '/admin-management': 'Management',
+    '/management-details': 'Management',
     '/moderator-details': 'Moderators',
+    '/management-dashboard': 'Dashboard',
     '/admin-batches': 'Batches',
     '/admin-batches/all': 'All Batches',
     '/admin-batches/running': 'Running Batches',
@@ -215,6 +233,12 @@ function Sidebar({ className, onClose }) {
       return;
     }
 
+    if (itemName === 'Management') {
+      navigate('/admin-management');
+      if (onClose) onClose();
+      return;
+    }
+
     if (itemName === 'Batches') {
       if (user?.role === 'moderator') {
         navigate('/admin-batches');
@@ -233,6 +257,8 @@ function Sidebar({ className, onClose }) {
     if (itemName === 'Dashboard' || itemName === 'Student Dashboard') {
       if (user?.role === 'admin') {
         navigate('/admin-dashboard');
+      } else if (user?.role === 'management') {
+        navigate('/management-dashboard');
       } else {
         navigate('/dashboard');
       }
@@ -574,18 +600,22 @@ function Sidebar({ className, onClose }) {
       </div>
 
       <div className='w-full lg:w-[192px] mx-auto px-4 lg:px-0 flex-1 overflow-y-auto overflow-x-hidden custom-sidebar-scrollbar min-h-0 pr-1 pb-4 flex flex-col gap-2 text-[14px] text-[#6A6F78] font-[500] max-h-[65vh] lg:max-h-[70vh]'>
-        {user?.role === 'moderator' ? (
+        {user?.role === 'moderator' || user?.role === 'management' ? (
           <>
             {moderatorFeatures.length > 0 && (
-              <div className='w-full flex flex-col items-start gap-2 mb-4 pb-4 border-b border-gray-100'>
-                <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>{t('moderator_features', 'Moderator Features')}</div>
+              <div className={`w-full flex flex-col items-start gap-2 ${menuItems.length > 0 ? 'mb-4 pb-4 border-b border-gray-100' : ''}`}>
+                <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3'>
+                  {user?.role === 'management' ? t('management_features', 'Management Features') : t('moderator_features', 'Moderator Features')}
+                </div>
                 {moderatorFeatures.map(renderMenuItem)}
               </div>
             )}
-            <div className='w-full flex flex-col items-start gap-2'>
-              <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3 mt-2'>{t('student_features', 'Student Features')}</div>
-              {menuItems.map(renderMenuItem)}
-            </div>
+            {menuItems.length > 0 && (
+              <div className='w-full flex flex-col items-start gap-2'>
+                <div className='uppercase text-[10px] font-bold text-[#A0AEC0] tracking-wider mb-1 pl-3 mt-2'>{t('student_features', 'Student Features')}</div>
+                {menuItems.map(renderMenuItem)}
+              </div>
+            )}
           </>
         ) : (
           <>

@@ -20,7 +20,17 @@ const SharedStudentTable = ({
         enrollments: true,
         progress: true,
         lastLogin: true,
+        lastLearningActivity: false,
         status: true,
+        gender: false,
+        age: false,
+        ageGroup: false,
+        region: false,
+        country: false,
+        education: false,
+        profession: false,
+        loginFrequency: false,
+        courseCompletionRate: false,
         action: true
     },
     hidePagination = false
@@ -83,12 +93,23 @@ const SharedStudentTable = ({
                             <thead>
                                 <tr>
                                     {visibleColumns.name && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
+                                    {visibleColumns.studentId && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("student_id", "Student ID")}</th>}
                                     {visibleColumns.contact && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("email", "Email")}</th>}
                                     {visibleColumns.phone && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
                                     {visibleColumns.enrollments && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
                                     {visibleColumns.progress && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
                                     {visibleColumns.lastLogin && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
+                                    {visibleColumns.lastLearningActivity && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_learning_activity", "Last Learning Activity")}</th>}
                                     {visibleColumns.status && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
+                                    {visibleColumns.gender && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("gender", "Gender")}</th>}
+                                    {visibleColumns.age && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("age", "Age")}</th>}
+                                    {visibleColumns.ageGroup && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("age_group", "Age Group")}</th>}
+                                    {visibleColumns.region && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("region", "Region")}</th>}
+                                    {visibleColumns.country && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("country", "Country")}</th>}
+                                    {visibleColumns.education && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("education", "Education")}</th>}
+                                    {visibleColumns.profession && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("profession", "Profession")}</th>}
+                                    {visibleColumns.loginFrequency && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("login_frequency", "Login Frequency")}</th>}
+                                    {visibleColumns.courseCompletionRate && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("course_completion", "Course Completion Rate")}</th>}
                                     {visibleColumns.action && <th className="text-center font-bold text-[16px] print:hidden text-gray-800 pb-2">{t("action", "Action")}</th>}
                                 </tr>
                             </thead>
@@ -98,6 +119,11 @@ const SharedStudentTable = ({
                                         {visibleColumns.name && (
                                             <td className={`py-4 print:py-1 print:border print:border-black ${!visibleColumns.contact && !visibleColumns.enrollments ? 'rounded-l-xl print:rounded-none' : (Object.values(visibleColumns).every(v=>v) ? 'rounded-l-xl print:rounded-none' : '')} text-center`}>
                                                 <span className="text-[16px] print:text-[10px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.studentId && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.studentId || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.contact && (
@@ -142,11 +168,63 @@ const SharedStudentTable = ({
                                                 <span className="text-[16px] print:text-[10px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
                                             </td>
                                         )}
+                                        {visibleColumns.lastLearningActivity && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.lastLearningActivity || '-'}</span>
+                                            </td>
+                                        )}
                                         {visibleColumns.status && (
                                             <td className="py-4 print:py-1 print:border print:border-black text-center">
                                                 <span className={`text-[16px] print:text-[10px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                                                     {t(student.status.toLowerCase(), student.status)}
                                                 </span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.gender && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.gender || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.age && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.age || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.ageGroup && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.ageGroup || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.region && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.region || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.country && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.country || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.education && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.education || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.profession && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.profession || '-'}</span>
+                                            </td>
+                                        )}
+
+
+                                        {visibleColumns.loginFrequency && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.loginFrequency || '-'}</span>
+                                            </td>
+                                        )}
+                                        {visibleColumns.courseCompletionRate && (
+                                            <td className="py-4 print:py-1 print:border print:border-black text-center">
+                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.courseCompletionRate || '0%'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.action && (
