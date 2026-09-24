@@ -28,9 +28,24 @@ const ExportStudentReportsPage = () => {
 
     // Filter State
     const [filterStatus, setFilterStatus] = useState('');
+    const [filterGender, setFilterGender] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+
+    const [courses, setCourses] = useState([]);
+    const [batches, setBatches] = useState([]);
+    const [moderators, setModerators] = useState([]);
+
+    const [filterCourse, setFilterCourse] = useState('');
+    const [filterBatch, setFilterBatch] = useState('');
+    const [filterModerator, setFilterModerator] = useState('');
+
+    const [appliedCourse, setAppliedCourse] = useState('');
+    const [appliedBatch, setAppliedBatch] = useState('');
+    const [appliedModerator, setAppliedModerator] = useState('');
+    const [appliedGender, setAppliedGender] = useState('');
+
 
     // Applied Top Filters State
     const [appliedStatus, setAppliedStatus] = useState('');
@@ -52,9 +67,42 @@ const ExportStudentReportsPage = () => {
         progress: true,
         lastLogin: true,
         status: true,
+        gender: false,
+        age: false,
+        ageGroup: false,
+        region: false,
+        country: false,
+        education: false,
+        profession: false,
+        loginFrequency: false,
+        lastLearningActivity: false,
+        courseCompletionRate: false,
         action: false
     });
     const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+
+    
+    useEffect(() => {
+        const fetchFilterData = async () => {
+            try {
+                const [cRes, bRes, mRes] = await Promise.all([
+                    axiosInstance.get('/admin/courses'),
+                    axiosInstance.get('/batches'),
+                    axiosInstance.get('/admin/moderators')
+                ]);
+                const cData = cRes.data?.data;
+                const bData = bRes.data?.data;
+                const mData = mRes.data?.data;
+
+                setCourses(Array.isArray(cData) ? cData : cData?.coursesList || cData?.courses || []);
+                setBatches(Array.isArray(bData) ? bData : bData?.batches || []);
+                setModerators(Array.isArray(mData) ? mData : mData?.moderatorsList || mData?.moderators || []);
+            } catch (err) {
+                console.error("Failed to fetch filter lists", err);
+            }
+        };
+        fetchFilterData();
+    }, []);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -74,8 +122,14 @@ const ExportStudentReportsPage = () => {
 
             // Apply filters
             if (appliedStatus) params.append('status', appliedStatus);
+            if (appliedGender) params.append('gender', appliedGender);
             if (appliedFrom) params.append('from', appliedFrom);
             if (appliedTo) params.append('to', appliedTo);
+
+            if (appliedCourse) params.append('courseId', appliedCourse);
+            if (appliedBatch) params.append('batchId', appliedBatch);
+            if (appliedModerator) params.append('moderatorId', appliedModerator);
+
 
             // Apply table filters
             if (tableSearch.trim()) {
@@ -97,7 +151,7 @@ const ExportStudentReportsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [appliedStatus, appliedFrom, appliedTo, tableSearch, tableSearchType]);
+    }, [appliedStatus, appliedGender, appliedFrom, appliedTo, appliedCourse, appliedBatch, appliedModerator, tableSearch, tableSearchType]);
 
     // Real-time search effect
     useEffect(() => {
@@ -110,8 +164,14 @@ const ExportStudentReportsPage = () => {
     // Handle top search
     const handleTopSearch = () => {
         setAppliedStatus(filterStatus);
+        setAppliedGender(filterGender);
         setAppliedFrom(filterFrom);
         setAppliedTo(filterTo);
+
+        setAppliedCourse(filterCourse);
+        setAppliedBatch(filterBatch);
+        setAppliedModerator(filterModerator);
+
         setTableSearch(searchQuery);
         setTableSearchType(searchType);
         setIsFilterDropdownOpen(false);
@@ -121,11 +181,21 @@ const ExportStudentReportsPage = () => {
     // Handle top clear filter
     const handleTopClear = () => {
         setFilterStatus('');
+        setFilterGender('');
         setFilterFrom('');
         setFilterTo('');
         setAppliedStatus('');
+        setAppliedGender('');
         setAppliedFrom('');
         setAppliedTo('');
+
+        setFilterCourse('');
+        setFilterBatch('');
+        setFilterModerator('');
+        setAppliedCourse('');
+        setAppliedBatch('');
+        setAppliedModerator('');
+
         setSearchQuery('');
         setTableSearch('');
         setTimeout(() => fetchReport(1), 0);
@@ -157,31 +227,61 @@ const ExportStudentReportsPage = () => {
     };
 
     const handleExportCSV = () => {
-        const headers = ["Name", "Email", "Phone Number", "Enrollments", "Progress", "Last Login", "Status"];
+        // Build headers dynamically from visibleColumns, skipping 'action'
+        const columnMap = {
+            name: "Name",
+            email: "Email",
+            phone: "Phone Number",
+            enrollments: "Enrollments",
+            progress: "Progress",
+            lastLogin: "Last Login",
+            status: "Status",
+            gender: "Gender",
+            age: "Age",
+            ageGroup: "Age Group",
+            region: "Region",
+            country: "Country",
+            education: "Education",
+            profession: "Profession",
+            loginFrequency: "Login Frequency",
+            lastLearningActivity: "Last Learning Activity",
+            courseCompletionRate: "Course Completion Rate"
+        };
+        
+        const activeKeys = Object.keys(visibleColumns).filter(col => visibleColumns[col] && col !== 'action');
+        const headers = activeKeys.map(key => columnMap[key]);
+        
         const csvRows = [];
         csvRows.push(headers.join(','));
         
         students.forEach(student => {
-            const row = [
-                `"${student.name || ''}"`,
-                `"${student.email || ''}"`,
-                `"${student.phone || ''}"`,
-                `"${student.enrollments || 0}"`,
-                `"${student.progress || ''}"`,
-                `"${formatDate(student.lastLogin)}"`,
-                `"${student.status || ''}"`
-            ];
-            csvRows.push(row.join(','));
+            const rowValues = activeKeys.map(key => {
+                let val = student[key];
+                
+                // Format specific fields if needed
+                if (key === 'enrollments') {
+                    val = (student.enrollments || []).join(' | ');
+                } else if (key === 'progress') {
+                    val = student.progress || '0%';
+                } else if (key === 'lastLogin') {
+                    val = formatDate(student.lastLogin) || '-';
+                }
+                
+                return `"${(val || '').toString().replace(/"/g, '""')}"`;
+            });
+            csvRows.push(rowValues.join(','));
         });
 
-        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "students_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `student_reports_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     };
 
     // Format date for display
@@ -273,6 +373,53 @@ const ExportStudentReportsPage = () => {
                                         </select>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">GENDER</span>
+                                        <select
+                                            value={filterGender}
+                                            onChange={(e) => setFilterGender(e.target.value)}
+                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        >
+                                            <option value="">All Genders</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">COURSE</span>
+                                        <select
+                                            value={filterCourse}
+                                            onChange={(e) => setFilterCourse(e.target.value)}
+                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        >
+                                            <option value="">All Courses</option>
+                                            {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">BATCH</span>
+                                        <select
+                                            value={filterBatch}
+                                            onChange={(e) => setFilterBatch(e.target.value)}
+                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        >
+                                            <option value="">All Batches</option>
+                                            {batches.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">MODERATOR</span>
+                                        <select
+                                            value={filterModerator}
+                                            onChange={(e) => setFilterModerator(e.target.value)}
+                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                        >
+                                            <option value="">All Moderators</option>
+                                            {moderators.map(m => <option key={m._id} value={m._id}>{m.firstname} {m.lastname}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
                                             <input
@@ -284,6 +431,7 @@ const ExportStudentReportsPage = () => {
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
+
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
@@ -332,7 +480,7 @@ const ExportStudentReportsPage = () => {
                                             className="fixed inset-0 z-40"
                                             onClick={() => setIsFilterDropdownOpen(false)}
                                         />
-                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
+                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] max-h-[80vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                                 <select
@@ -343,6 +491,51 @@ const ExportStudentReportsPage = () => {
                                                     <option value="">{t("all_students_filter", "All Students")}</option>
                                                     <option value="active">{t("active_students", "Active Students")}</option>
                                                     <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <span className="text-xs font-bold text-gray-400 uppercase">GENDER</span>
+                                                <select
+                                                    value={filterGender}
+                                                    onChange={(e) => setFilterGender(e.target.value)}
+                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="">All Genders</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <span className="text-xs font-bold text-gray-400 uppercase">COURSE</span>
+                                                <select
+                                                    value={filterCourse}
+                                                    onChange={(e) => setFilterCourse(e.target.value)}
+                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="">All Courses</option>
+                                                    {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <span className="text-xs font-bold text-gray-400 uppercase">BATCH</span>
+                                                <select
+                                                    value={filterBatch}
+                                                    onChange={(e) => setFilterBatch(e.target.value)}
+                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="">All Batches</option>
+                                                    {batches.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <span className="text-xs font-bold text-gray-400 uppercase">MODERATOR</span>
+                                                <select
+                                                    value={filterModerator}
+                                                    onChange={(e) => setFilterModerator(e.target.value)}
+                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                >
+                                                    <option value="">All Moderators</option>
+                                                    {moderators.map(m => <option key={m._id} value={m._id}>{m.firstname} {m.lastname}</option>)}
                                                 </select>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">

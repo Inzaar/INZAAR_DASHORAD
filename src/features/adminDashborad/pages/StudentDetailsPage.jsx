@@ -324,7 +324,7 @@ const StudentDetailsPage = () => {
 
                                 {/* Content Area */}
                                 {activeTab === "Profile" ? (
-                                    <ModeratorProfileComponent profileData={profileData} type="student" />
+                                    <ModeratorProfileComponent profileData={profileData} setProfileData={setProfileData} type="student" />
                                 ) : activeTab === "Performance" ? (
                                     <StudentPerformance profileData={profileData} />
                                 ) : activeTab === "Courses" ? (

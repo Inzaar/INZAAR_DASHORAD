@@ -13,12 +13,10 @@ import AssignmentSubmitted from "@/features/StudentDashboard/components/Assignme
 import Certificates from "@/features/StudentDashboard/pages/Certificates";
 import HelpCenter from "@/features/StudentDashboard/pages/HelpCenter";
 import NotificationPage from "@/features/StudentDashboard/pages/NotificationPage";
-
 import AdminRoute from "@/components/auth/AdminRoute";
 import StudentRoute from "@/components/auth/StudentRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-
 import ProfilePage from "@/features/StudentDashboard/pages/ProfilePage";
 import AdminDashboard from "@/features/adminDashborad/pages/AdminDashboard";
 import AdminCalendar from "@/features/adminDashborad/pages/AdminCalendar";
@@ -41,6 +39,9 @@ import RegisteredCoursesPage from '@/features/adminDashborad/pages/RegisteredCou
 import BatchesPage from '@/features/adminDashborad/pages/BatchesPage';
 import BatchDetailsPage from '@/features/adminDashborad/pages/BatchDetailsPage';
 import GroupStudentsPage from '@/features/adminDashborad/pages/GroupStudentsPage';
+import ManagementPage from '@/features/adminDashborad/pages/ManagementPage';
+import ManagementDetails from '@/features/adminDashborad/pages/ManagementDetails';
+import ManagementDashboard from '@/features/adminDashborad/pages/ManagementDashboard';
 import GlobalUnsavedChangesTracker from '@/components/shared/GlobalUnsavedChangesTracker';
 import { useAuth } from '@/context/AuthContext';
 import Loader from '@/components/ui/Loader';
@@ -51,6 +52,7 @@ const RootRedirect = () => {
     if (!user) return <Navigate to="/login" replace />;
     if (user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
     if (user.role === 'moderator') return <Navigate to="/student-profiles" replace />;
+    if (user.role === 'management') return <Navigate to="/management-dashboard" replace />;
     return <Navigate to="/dashboard" replace />;
 };
 
@@ -77,6 +79,9 @@ const routes = createRoutesFromElements(
             <Route path="/admin-moderators/all" element={<ModeratorsPage genderFilter="All" />} />
             <Route path="/admin-moderators/male" element={<ModeratorsPage genderFilter="Male" />} />
             <Route path="/admin-moderators/female" element={<ModeratorsPage genderFilter="Female" />} />
+            <Route path="/admin-management" element={<ManagementPage />} />
+            <Route path="/management-dashboard" element={<ManagementDashboard />} />
+            <Route path="/management-details/:id" element={<ManagementDetails />} />
             <Route path="/admin-batches" element={<Navigate to="/admin-batches/all" replace />} />
             <Route path="/admin-batches/all" element={<BatchesPage filter="All" />} />
             <Route path="/admin-batches/running" element={<BatchesPage filter="Running" />} />

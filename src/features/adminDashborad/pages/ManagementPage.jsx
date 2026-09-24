@@ -1,0 +1,830 @@
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import Sidebar from '@/components/layouts/SideBar';
+import Navbar from '@/components/layouts/NavBar';
+import GradiantButton from '@/components/ui/buttons/GradiantButton';
+import PhoneInput from '@/components/ui/inputs/PhoneInput';
+import StatsCard from '../components/StatsCard';
+import UserCard from '../components/UserCard';
+import { Search, Plus, ChevronDown, MoreVertical, X, Loader, Eye, EyeOff, LayoutGrid } from 'lucide-react';
+import { BiFilterAlt } from 'react-icons/bi';
+import { useNavigate } from 'react-router-dom';
+import { getManagementProfiles, adminCreateManagement, getAllUsers } from '@/api/user';
+import { checkUsername, checkEmail } from '@/api/auth';
+
+import {
+    PaginationItem,
+    PaginationLink,
+    CustomPagination
+} from "@/components/ui/Pagination";
+
+const ManagementsPage = ({ genderFilter = "All" }) => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const navigate = useNavigate();
+    const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [managements, setManagements] = useState([]);
+    const [statsData, setStatsData] = useState({
+        totalManagements: 0,
+        activeManagements: 0,
+        inactiveManagements: 0,
+        managementsInPool: 0
+    });
+
+    // Pagination & Loading
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    // Add Management Modal State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+    const [newManagement, setNewManagement] = useState({
+        firstname: '',
+        lastname: '',
+        username: '',
+        email: '',
+        phone: '',
+        password: '',
+        gender: '',
+        role: 'management',
+        assignedFeatures: []
+    });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newManagement.username || newManagement.username.trim().length === 0) {
+            setUsernameError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkUsername(newManagement.username.trim());
+                if (!res.data?.data?.available) {
+                    setUsernameError('this username is already exist');
+                } else {
+                    setUsernameError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newManagement.username, isAddModalOpen]);
+
+    useEffect(() => {
+        if (!isAddModalOpen) return;
+        if (!newManagement.email || newManagement.email.trim().length === 0) {
+            setEmailError('');
+            return;
+        }
+        const delayDebounceFn = setTimeout(async () => {
+            try {
+                const res = await checkEmail(newManagement.email.trim());
+                if (!res.data?.data?.available) {
+                    setEmailError('this email is already exist');
+                } else {
+                    setEmailError('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [newManagement.email, isAddModalOpen]);
+
+    const availableFeatures = [
+        "Calendar",
+        "Courses Management",
+        "Reports & Logs",
+        "Student Profiles"
+    ];
+
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const fetchManagementsData = async () => {
+        try {
+            setIsLoading(true);
+            const res = await getManagementProfiles(currentPage, 6, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
+            if (res?.data) {
+                setManagements(res.data.managements || []);
+                setTotalPages(res.data.totalPages || 1);
+                setStatsData(res.data.stats || {
+                    totalManagements: 0,
+                    activeManagements: 0,
+                    inactiveManagements: 0,
+                    managementsInPool: 0
+                });
+            }
+        } catch (error) {
+            console.error("Failed to fetch managements:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        setCurrentPage(1);
+        setStatusFilter("");
+        fetchManagementsData();
+    }, [genderFilter]);
+
+    useEffect(() => {
+        fetchManagementsData();
+    }, [currentPage, statusFilter, fromDate, toDate]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentPage !== 1) {
+                setCurrentPage(1);
+            } else {
+                fetchManagementsData();
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchText, searchType]);
+
+    const handleSearchClick = () => {
+        setCurrentPage(1);
+        fetchManagementsData();
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearchClick();
+        }
+    };
+
+    const handleSearchChange = (val) => {
+        if (searchType === 'PHONE') {
+            const numericValue = val.replace(/[^0-9+]/g, '');
+            setSearchText(numericValue);
+        } else {
+            setSearchText(val);
+        }
+    };
+
+    const handleFeatureToggle = (feature) => {
+        setNewManagement(prev => {
+            const features = prev.assignedFeatures.includes(feature)
+                ? prev.assignedFeatures.filter(f => f !== feature)
+                : [...prev.assignedFeatures, feature];
+            return { ...prev, assignedFeatures: features };
+        });
+    };
+
+    const handleAddManagement = async (e) => {
+        e.preventDefault();
+        setFormError('');
+        setPasswordError('');
+
+        if (newManagement.username && newManagement.username.includes(' ')) {
+            setUsernameError('Username cannot contain spaces.');
+            return;
+        }
+
+        const rawDigits = (newManagement.phone || '').replace(/\D/g, '');
+        if (!newManagement.phone || rawDigits.length < 10) {
+            setFormError('Please enter a valid phone number.');
+            return;
+        }
+
+        if (newManagement.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newManagement.email)) {
+            setEmailError('Please enter a valid email address.');
+            return;
+        }
+
+        if (newManagement.password.length < 8) {
+            setPasswordError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (!/[A-Z]/.test(newManagement.password)) {
+            setPasswordError('Password must contain at least one uppercase letter.');
+            return;
+        }
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(newManagement.password)) {
+            setPasswordError('Password must contain at least one special symbol.');
+            return;
+        }
+
+        let hasError = false;
+
+        // Perform instant API check on Submit
+        try {
+            if (newManagement.username) {
+                const uRes = await checkUsername(newManagement.username.trim());
+                if (!uRes.data?.data?.available) {
+                    setUsernameError('this username is already exist');
+                    hasError = true;
+                } else {
+                    setUsernameError('');
+                }
+            }
+            if (newManagement.email) {
+                const eRes = await checkEmail(newManagement.email.trim());
+                if (!eRes.data?.data?.available) {
+                    setEmailError('this email is already exist');
+                    hasError = true;
+                } else {
+                    setEmailError('');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+
+        if (hasError || usernameError || emailError) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        setFormError('');
+        try {
+            const managementData = {
+                ...newManagement,
+                role: 'management',
+                assignedFeatures: ['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports']
+            };
+            await adminCreateManagement(managementData);
+            toast.success("Management created successfully!");
+            setIsAddModalOpen(false);
+            setNewManagement({
+                firstname: '',
+                lastname: '',
+                username: '',
+                email: '',
+                phone: '',
+                password: '',
+                gender: '',
+                role: 'management',
+                assignedFeatures: []
+            });
+            setUsernameError('');
+            setEmailError('');
+            fetchManagementsData();
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || 'Failed to add management';
+            const lowerMsg = errorMsg.toLowerCase();
+            if (lowerMsg.includes('username')) {
+                setUsernameError('this username is already exist');
+                setFormError('');
+            } else if (lowerMsg.includes('email')) {
+                setEmailError('this email is already exist');
+                setFormError('');
+            } else {
+                setFormError(errorMsg);
+                toast.error(errorMsg);
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const activeCount = managements.filter(m => m.status === 'active' || m.status === undefined).length;
+    const inactiveCount = managements.filter(m => m.status === 'in-active').length;
+    const poolCount = managements.filter(m => m.status === 'pending').length;
+
+    const stats = [
+        { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}Managements`, value: (statsData?.totalManagements || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
+        { title: "Active Managements", value: (statsData?.activeManagements || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "Active" },
+        { title: "Inactive Managements", value: (statsData?.inactiveManagements || 0).toString(), trend: "2.4%", trendDirection: "down", trendText: "vs last month", type: "Inactive" },
+        { title: "Managements in Pool", value: (statsData?.managementsInPool || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "Pool" },
+    ];
+
+    return (
+        <div className="h-screen w-screen flex items-center justify-center font-sans">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
+                <Navbar onMenuClick={toggleSidebar} />
+
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+
+                    {isSidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                            onClick={() => setIsSidebarOpen(false)}
+                        />
+                    )}
+
+                    <Sidebar
+                        onClose={() => setIsSidebarOpen(false)}
+                        className={`
+                        transition-transform duration-300 ease-in-out z-40
+                        lg:translate-x-0 lg:static lg:block
+                        fixed left-0 top-0 shadow-2xl
+                        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    `} />
+
+                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
+                        <div className="py-2 sm:py-4 px-2 sm:pr-2">
+                            {/* Header */}
+                            <div className="flex justify-between items-start mb-8 gap-4">
+                                <div>
+                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Managements' : `${genderFilter} Managements`}</h2>
+                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Managements</p>
+                                </div>
+                                <GradiantButton
+                                    onClick={() => {
+                                        setIsAddModalOpen(true);
+                                        setModalStep(1);
+                                    }}
+                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                                >
+                                    <div className="flex items-center justify-center">
+                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                    </div>
+                                    <span className="hidden sm:block">Add New Management</span>
+                                </GradiantButton>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
+                                {stats.map((stat, index) => (
+                                    <StatsCard
+                                        key={index}
+                                        {...stat}
+                                        trendColor={stat.trendDirection === 'down' ? 'text-red-500' : 'text-green-500'}
+                                        iconColor={stat.trendDirection === 'down' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}
+                                        onClick={() => {
+                                            setStatusFilter(stat.type);
+                                            setCurrentPage(1);
+                                        }}
+                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[115px] min-w-[220px] sm:min-w-[240px]" : "h-[115px] min-w-[220px] sm:min-w-[240px]"}
+                                    />
+                                ))}
+                            </div>
+
+                           {/* Managements Grid/List */}
+                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[600px] relative">
+                                {/* Header Controls */}{isLoading && (
+                                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-[24px]">
+                                        <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
+                                    </div>
+                                )}
+
+                                <div className="mb-6 flex justify-between items-center">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Management List</h3>
+                                    <button
+                                        onClick={fetchManagementsData}
+                                        className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isLoading ? "animate-spin" : ""}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>
+                                        Refresh
+                                    </button>
+                                </div>
+
+                                {/* Filters */}
+                                {/* Filters - Desktop */}
+                                <div className="hidden xl:flex flex-row gap-4 mb-8">
+                                    <div className='flex-1 flex gap-2 flex-col'>
+                                        <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
+                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                                            <input
+                                                type="text"
+                                                placeholder={`Search by ${searchType.toLowerCase()}`}
+                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                value={searchText}
+                                                onChange={(e) => handleSearchChange(e.target.value)}
+                                                onKeyDown={handleSearchKeyDown}
+                                            />
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'PHONE') {
+                                                            setSearchType('PHONE');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    PHONE#
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'NAME') {
+                                                            setSearchType('NAME');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    NAME
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">From</span>
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            value={fromDate}
+                                            onChange={(e) => setFromDate(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">To</span>
+                                        <input
+                                            type="date"
+                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            value={toDate}
+                                            onChange={(e) => setToDate(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">Status</span>
+                                        <div className="relative">
+                                            <select
+                                                value={statusFilter}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="">All Statuses</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                                <option value="Pool">Pool</option>
+                                                <option value="Deleted">Deleted</option>
+                                            </select>
+                                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            setSearchText("");
+                                            setStatusFilter("");
+                                            setFromDate("");
+                                            setToDate("");
+                                            setCurrentPage(1);
+                                        }}
+                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                    >
+                                        <BiFilterAlt className="w-4 h-4" />
+                                        Clear
+                                    </button>
+                                </div>
+
+                                {/* Filters - Responsive (Mobile Only) */}
+                                <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
+                                    <div className='flex flex-col gap-4'>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setSearchText("");
+                                                    setStatusFilter("");
+                                                    setFromDate("");
+                                                    setToDate("");
+                                                    setCurrentPage(1);
+                                                }}
+                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                                            >
+                                                <BiFilterAlt className="w-4 h-4" />
+                                                Clear Filter
+                                            </button>
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
+                                                >
+                                                    {isFilterOpen ? <X size={20} /> : <MoreVertical size={20} />}
+                                                </button>
+
+                                                {isFilterOpen && (
+                                                    <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
+                                                        <div className="space-y-5">
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <div className="relative">
+                                                                    <select
+                                                                        value={statusFilter}
+                                                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                                                        className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                                                                    >
+                                                                        <option value="">All Statuses</option>
+                                                                        <option value="Active">Active</option>
+                                                                        <option value="Inactive">Inactive</option>
+                                                                        <option value="Pool">Pool</option>
+                                                                        <option value="Deleted">Deleted</option>
+                                                                    </select>
+                                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <input
+                                                                    type="date"
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    value={fromDate}
+                                                                    onChange={(e) => setFromDate(e.target.value)}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <input
+                                                                    type="date"
+                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    value={toDate}
+                                                                    onChange={(e) => setToDate(e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Advanced Search Segment UI as per request */}
+                                    <div className='flex flex-col gap-3'>
+                                        <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
+                                            <div className="flex items-center px-4 py-3 border-b border-gray-100">
+                                                <Search className="text-gray-400 w-5 h-5 mr-3" />
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Search by ${searchType.toLowerCase()}`}
+                                                    className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
+                                                    value={searchText}
+                                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                                    onKeyDown={handleSearchKeyDown}
+                                                />
+                                            </div>
+                                            <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'PHONE') {
+                                                            setSearchType('PHONE');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    PHONE#
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'NAME') {
+                                                            setSearchType('NAME');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    NAME
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Managements Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {managements.length === 0 ? (
+                                        !isLoading && (
+                                            <div className="col-span-full py-20 text-center">
+                                                <div className="flex flex-col items-center gap-2 text-gray-400">
+                                                    <Search size={48} className="opacity-20" />
+                                                    <p className="font-medium text-[16px]">No managements found matching your criteria</p>
+                                                    <button
+                                                        onClick={() => { setSearchText(""); setStatusFilter(""); fetchManagementsData(); }}
+                                                        className="text-blue-500 text-sm font-bold hover:underline"
+                                                    >
+                                                        Clear all filters
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )
+                                    ) : (
+                                        managements.map((mod) => (
+                                            <UserCard
+                                                key={mod.id}
+                                                name={mod.name}
+                                                id={mod.id}
+                                                image={mod.profileImageUrl}
+                                                status={mod.status === 'Deleted' || mod.isDeleted ? "deleted" : (mod.isActive ? "online" : "offline")}
+                                                email={mod.email}
+                                                phone={mod.phone}
+                                                joiningDate={new Date(mod.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                                performance={mod.assignedBatches > 0 ? `${mod.assignedBatches} Groups` : "No Groups"}
+                                                onViewClick={() => navigate(`/management-details/${mod.id}`)}
+                                            />
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex justify-end items-center mt-auto mb-2">
+                                        <CustomPagination 
+                                            currentPage={currentPage} 
+                                            totalPages={totalPages} 
+                                            onPageChange={(p) => { if (!isLoading) setCurrentPage(p); }} 
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </main>
+
+                    <style dangerouslySetInnerHTML={{
+                        __html: `
+                        .no-scrollbar::-webkit-scrollbar { display: none; }
+                        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    `}} />
+                </div>
+            </div>
+
+            {/* Add Management Modal - Step 1 */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+                        <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 shrink-0">
+                            <div>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Add New Management</h3>
+                                <p className="text-xs sm:text-sm text-gray-500">Step 1: Basic Information</p>
+                            </div>
+                            <button
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAddManagement} className="flex flex-col flex-1 overflow-hidden min-h-0">
+                            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 min-h-0">
+                                {formError && (
+                                    <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
+                                        <X size={16} className="bg-red-500 text-white rounded-full p-0.5" />
+                                        {formError}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">First Name</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            placeholder="Enter First Name"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                                            value={newManagement.firstname}
+                                            onChange={(e) => setNewManagement({ ...newManagement, firstname: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Last Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter Last Name"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                                            value={newManagement.lastname}
+                                            onChange={(e) => setNewManagement({ ...newManagement, lastname: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Username</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder="Enter Username"
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border ${usernameError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm`}
+                                        value={newManagement.username}
+                                        onChange={(e) => {
+                                            setUsernameError('');
+                                            setNewManagement({ ...newManagement, username: e.target.value.toLowerCase().replace(/\s+/g, '') });
+                                        }}
+                                    />
+                                    {usernameError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
+                                    <input
+                                        required
+                                        type="email"
+                                        placeholder="Enter Email Address"
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border ${emailError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm`}
+                                        value={newManagement.email}
+                                        onChange={(e) => {
+                                            setEmailError('');
+                                            setNewManagement({ ...newManagement, email: e.target.value });
+                                        }}
+                                    />
+                                    {emailError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
+                                    <PhoneInput
+                                        name="phone"
+                                        value={newManagement.phone}
+                                        onChange={(e) => setNewManagement({ ...newManagement, phone: e.target.value })}
+                                        label={null}
+                                        containerClassName="w-full relative"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Enter Password"
+                                            className={`w-full px-4 py-2.5 bg-gray-50 border ${passwordError ? 'border-red-500 text-red-600' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pr-12 text-sm`}
+                                            value={newManagement.password}
+                                            onChange={(e) => {
+                                                setPasswordError('');
+                                                setNewManagement({ ...newManagement, password: e.target.value });
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                    {passwordError && (
+                                        <p className="text-red-500 text-[13px] mt-1 text-left">{passwordError}</p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Gender</label>
+                                    <div className="relative">
+                                        <select
+                                            required
+                                            value={newManagement.gender}
+                                            onChange={(e) => setNewManagement({ ...newManagement, gender: e.target.value })}
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer text-sm"
+                                        >
+                                            <option value="" disabled>Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-4 sm:p-6 border-t border-gray-100 flex gap-3 shrink-0 bg-white">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className="flex-1 py-2.5 sm:py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm sm:text-base"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={Boolean(usernameError || emailError)}
+                                    className="flex-[2] py-2.5 sm:py-3 px-4 bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white font-bold rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+
+        </div>
+    );
+};
+
+export default ManagementsPage;

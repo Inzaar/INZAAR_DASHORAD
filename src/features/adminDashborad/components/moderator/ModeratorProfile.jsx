@@ -393,6 +393,8 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
               />
             </div>
 
+
+
             {/* Front CNIC */}
             {/* 
             <div className="w-full lg:w-[48%] order-9 lg:order-9">

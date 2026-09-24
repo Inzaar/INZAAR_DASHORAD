@@ -128,3 +128,18 @@ export const adminCreateModerator = async (data) => {
     });
     return res.data;
 };
+
+export const getManagementProfiles = async (page = 1, limit = 6, search = "", status = "", gender = "", fromDate = "", toDate = "", searchType = "NAME") => {
+    const res = await axiosInstance.get("/users/management/profiles", {
+        params: { page, limit, search, status, gender, fromDate, toDate, searchType },
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const adminCreateManagement = async (data) => {
+    const res = await axiosInstance.post("/admin/management", data, {
+        withCredentials: true,
+    });
+    return res.data;
+};

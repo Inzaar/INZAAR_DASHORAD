@@ -3,7 +3,6 @@ import SessionActivity from "@/components/shared/SessionActivity";
 import ModeratorRoll from "./ModeratorRoll";
 import ModeratorProfile from "./ModeratorProfile";
 
-
 // function ModeratorProfileComponent () {
 //     return (
 //         <div>
@@ -20,7 +19,7 @@ import ModeratorProfile from "./ModeratorProfile";
 //     )
 // }
 // export default ModeratorProfileComponent;
-function ModeratorProfileComponent({ profileData, type = 'moderator', onEditClick }) {
+function ModeratorProfileComponent({ profileData, setProfileData, type = 'moderator', onEditClick }) {
     const [pendingProfileImage, setPendingProfileImage] = React.useState(null);
 
     return (

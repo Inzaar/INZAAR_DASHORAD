@@ -16,13 +16,13 @@ const AdminRoute = () => {
         return <Navigate to="/login" replace />;
     }
 
-    // If logged in but not admin or moderator, redirect to student dashboard
-    if (user.role !== 'admin' && user.role !== 'moderator') {
+    // If logged in but not admin, moderator, or management, redirect to student dashboard
+    if (user.role !== 'admin' && user.role !== 'moderator' && user.role !== 'management') {
         return <Navigate to="/dashboard" replace />;
     }
 
-    // Protect moderator routes selectively based on their assigned features
-    if (user.role === 'moderator') {
+    // Protect moderator and management routes selectively based on their assigned features
+    if (user.role === 'moderator' || user.role === 'management') {
         // Map paths to feature names to match against user.assignedFeatures
         const pathToName = {
             '/admin-dashboard': 'Dashboard',
@@ -32,20 +32,21 @@ const AdminRoute = () => {
             '/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
             '/student-profiles': 'Student Profiles',
             '/admin-courses': 'Courses Management',
-            '/reports': 'Reports & Logs', 
-            '/moderator-reports': 'Reports & Logs',
-            '/course-reports': 'Reports & Logs',
-            '/export-student-reports': 'Reports & Logs',
-            '/export-moderator-reports': 'Reports & Logs',
-            '/admin/student-details': ['Student Profiles', 'Reports & Logs', 'Courses Management', 'Dashboard'],
-            '/admin/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
+            '/reports': 'Student Reports', 
+            '/moderator-reports': 'Moderator Reports',
+            '/course-reports': 'Course Reports',
+            '/export-student-reports': 'Export Student Reports',
+            '/export-moderator-reports': 'Export Moderator Reports',
+            '/admin/student-details': ['Student Profiles', 'Reports & Logs', 'Student Reports', 'Courses Management', 'Dashboard'],
+            '/admin/moderator-details': ['Moderators', 'Reports & Logs', 'Moderator Reports', 'Dashboard'],
             '/admin/course-details': 'Courses Management',
             '/admin-course-view': 'Courses Management',
             '/admin-course-play': 'Courses Management',
             '/admin-course-add': 'Courses Management',
             '/admin-add-course': 'Courses Management',
             '/registered-users': 'Student Profiles',
-            '/registered-courses': 'Courses Management'
+            '/registered-courses': 'Courses Management',
+            '/admin-management': 'Management'
         };
 
         // Try exact match first

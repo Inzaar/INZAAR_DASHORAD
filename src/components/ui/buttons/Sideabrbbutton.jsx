@@ -17,7 +17,7 @@ function Sideabrbbutton({ children, isActive, onClick }) {
 
         readOnly
       />
-      <p className="select-none">
+      <p className="select-none flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left pr-2">
         {children}
       </p>
     </label>
