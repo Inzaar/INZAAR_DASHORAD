@@ -51,7 +51,7 @@ const CoursesEnrollmentOverview = ({
 
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans mt-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center justify-between gap-4 mb-4">
                 <h3 className="text-[14px] font-medium text-[#64748b] truncate pr-2">{t('courses_enrollment_overview', 'Courses Enrollment Overview')}</h3>
                 {showViewAll && (
                     <GradiantButton

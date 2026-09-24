@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { Check } from "lucide-react";
 import { BsChatDotsFill } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
 
 const ModeratorDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -291,6 +292,20 @@ const ModeratorDetails = () => {
                     {open && (
                       <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-50 py-1">
                         {/* Action Buttons */}
+                        <button
+                          onClick={() => {
+                            if (profileData?.user?.phone) {
+                              const phone = profileData.user.phone.replace(/\D/g, '');
+                              window.open(`https://wa.me/${phone}`, '_blank');
+                            } else {
+                              import('react-hot-toast').then(({ default: toast }) => toast.error("Phone number not available"));
+                            }
+                            setOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
+                        >
+                          <FaWhatsapp className="w-4 h-4 text-green-500" /> WhatsApp
+                        </button>
                         {!profileData?.user?.isDeleted ? (
                           <>
                             <button
@@ -298,9 +313,9 @@ const ModeratorDetails = () => {
                                 setIsAssignModalOpen(true);
                                 setOpen(false);
                               }}
-                              className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors"
+                              className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
                             >
-                              Edit
+                              <FiEdit className="w-4 h-4" /> Edit
                             </button>
                             <button
                               onClick={() => {
@@ -309,7 +324,7 @@ const ModeratorDetails = () => {
                               }}
                               className="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700 transition-colors flex items-center gap-2"
                             >
-                              <img src={deactivate} alt="Deactivate" className="w-4 h-4 opacity-70" /> Deactivate
+                              <img src={deactivate} alt="Deactivate" className="w-4 h-4 brightness-0 opacity-60" /> Deactivate
                             </button>
                             <button
                               onClick={() => {

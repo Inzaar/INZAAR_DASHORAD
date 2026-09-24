@@ -302,6 +302,20 @@ const StudentDetailsPage = () => {
                                                             </label>
                                                         </div>
                                                     )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (profileData?.user?.phone) {
+                                                                const phone = profileData.user.phone.replace(/\D/g, '');
+                                                                window.open(`https://wa.me/${phone}`, '_blank');
+                                                                setOpen(false);
+                                                            } else {
+                                                                toast.error("Phone number not available");
+                                                            }
+                                                        }}
+                                                        className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
+                                                    >
+                                                        WhatsApp <FaWhatsapp size={16} className="text-[#25D366]" />
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>

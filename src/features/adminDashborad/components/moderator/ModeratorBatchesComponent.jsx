@@ -66,13 +66,15 @@ function ModeratorBatchesComponent({ profileData, onEditClick, onViewDetails }) 
                                 <GradiantButton
                                     onClick={onEditClick}
                                     className="bg-gray-200 text-gray-700 hover:bg-gray-300 w-[63px] h-[37px] rounded-sm"
-                                    text={<span className="text-[14px]">Edit</span>}
-                                />
+                                >
+                                    <span className="text-[14px]">Edit</span>
+                                </GradiantButton>
                                 <GradiantButton
                                     onClick={() => setShowBatchModal(true)}
                                     className="bg-indigo-500 text-white hover:bg-indigo-600 w-[161px] h-[37px] rounded-sm"
-                                    text={<span className="text-[14px]">Assign new group</span>}
-                                />
+                                >
+                                    <span className="text-[14px]">Assign new group</span>
+                                </GradiantButton>
                             </div>
                         </div>
 

@@ -76,7 +76,7 @@ const StudentPerformance = ({ profileData }) => {
                     <div className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm flex flex-col gap-6 min-w-0 w-full">
                         <span className="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">OVERVIEW</span>
                         <div className="overflow-x-auto no-scrollbar">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0 w-full">
+                            <div className="flex flex-row items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0 w-full">
                                 {/* Completed */}
                                 <div className="flex items-center gap-4">
                                     <div className="flex flex-col items-center h-14 w-2 shrink-0">
@@ -182,7 +182,7 @@ const StudentPerformance = ({ profileData }) => {
                 <div className="p-6 border-b border-gray-100">
                     <h3 className="text-lg font-bold text-gray-900">Enrolled Courses Table</h3>
                 </div>
-                <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
+                <div className="max-h-[400px] overflow-y-auto overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
                             <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
@@ -230,7 +230,7 @@ const StudentPerformance = ({ profileData }) => {
                                     <td className="px-6 py-4 text-center">
                                         <GradiantButton 
                                             onClick={() => navigate(`/admin-course-play?id=${row.courseId || row.id}&userId=${user._id || user.id}`)}
-                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
+                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
                                         >
                                             View Details
                                         </GradiantButton>

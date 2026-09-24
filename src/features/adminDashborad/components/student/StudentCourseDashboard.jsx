@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MetricCard from '@/components/shared/MetricCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
@@ -50,6 +50,21 @@ const StudentCourseDashboard = ({ profileData }) => {
     // Selection mode state
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedComments, setSelectedComments] = useState([]);
+
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleEditComment = async (commentId) => {
         if (!editingText.trim()) return;
@@ -248,15 +263,15 @@ const StudentCourseDashboard = ({ profileData }) => {
             )}
 
             {/* Header: Course Selection */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-2">
-                <h2 className="text-[20px] font-bold text-gray-900">{selectedCourseData?.courseTitle || currentCourse.title || "No Course Selected"}</h2>
-                <div className="relative inline-block w-full sm:w-auto">
+            <div className="flex flex-row justify-between items-center gap-2 sm:gap-4 py-2">
+                <h2 className="text-[16px] sm:text-[20px] font-bold text-gray-900 truncate flex-1">{selectedCourseData?.courseTitle || currentCourse.title || "No Course Selected"}</h2>
+                <div className="relative inline-block w-auto shrink-0" ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center justify-between gap-3 px-4 py-2 bg-[#6366F1] text-white rounded-lg text-sm font-medium w-full sm:w-[320px] hover:bg-blue-600 transition-all shadow-md group"
+                        className="flex items-center justify-between gap-2 px-3 py-1.5 sm:gap-3 sm:px-4 sm:py-2 bg-[#6366F1] text-white rounded-lg text-xs sm:text-sm font-medium max-w-[140px] sm:max-w-none sm:w-[320px] hover:bg-blue-600 transition-all shadow-md group"
                     >
                         <span className="truncate">{selectedCourseData?.courseTitle || "Select Course"}</span>
-                        <ChevronDown size={18} className={cn("transition-transform duration-200", isDropdownOpen && "rotate-180")} />
+                        <ChevronDown size={16} className={cn("transition-transform duration-200 shrink-0", isDropdownOpen && "rotate-180")} />
                     </button>
 
                     {isDropdownOpen && (
@@ -298,7 +313,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                     <div className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm flex flex-col gap-6 min-w-0">
                         <p className="text-gray-400 text-sm font-medium">Overview</p>
                         <div className="overflow-x-auto no-scrollbar">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0">
+                            <div className="flex flex-row items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0">
                                 {overviewStats.map((stat, i) => (
                                     <div key={i} className="flex items-center gap-4">
                                         <div className="flex flex-col items-center h-14 w-2 shrink-0">
@@ -331,8 +346,8 @@ const StudentCourseDashboard = ({ profileData }) => {
             </div>
 
             {/* Row 2: Hours Spent (left) | Student Info (right) */}
-            <div className="flex flex-col xl:flex-row gap-6 h-[400px]">
-                <div className="flex-1 min-w-0 h-full">
+            <div className="flex flex-col xl:flex-row gap-6 xl:h-[400px]">
+                <div className="flex-1 min-w-0 xl:h-full min-h-[300px]">
                     <HoursSpentCard
                         name="Hours Spent"
                         userCourses={userCoursesData}
@@ -340,7 +355,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                     />
                 </div>
 
-                <div className="xl:w-[400px] shrink-0 h-full bg-white border border-[#EAEDF2] rounded-[16px] p-6 shadow-sm relative min-w-0 overflow-hidden flex flex-col">
+                <div className="xl:w-[400px] shrink-0 xl:h-full bg-white border border-[#EAEDF2] rounded-[16px] p-6 shadow-sm relative min-w-0 overflow-hidden flex flex-col">
                     <div className="absolute top-4 right-4 text-gray-400 cursor-pointer">
                         <MoreVertical size={20} />
                     </div>
@@ -424,7 +439,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                     </div>
                 </div>
 
-                <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
+                <div className="max-h-[400px] overflow-y-auto overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
                             <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
@@ -463,7 +478,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <button 
-                                            className="text-[#3758EE] underline font-medium text-[12px] hover:text-blue-800 transition-colors"
+                                            className="text-[#3758EE] underline font-medium text-[12px] hover:text-blue-800 transition-colors whitespace-nowrap"
                                             onClick={() => handleViewComments(lecture)}
                                         >
                                             View Comments
@@ -471,7 +486,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <GradiantButton 
-                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors"
+                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
                                             onClick={() => navigate(`/admin-course-play?id=${currentCourse?.courseId}&userId=${userId}&lectureId=${lecture.id}`)}
                                         >
                                             View Detail
