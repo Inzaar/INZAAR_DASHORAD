@@ -87,9 +87,11 @@ const BatchDetailsPage = () => {
                                                 trend={batchData.stats?.improvement || "0%"} 
                                             />
                                             <OverviewCard
-                                                activeStudents={batchData.stats?.activeStudents || 0}
-                                                inActiveStudents={batchData.stats?.inActiveStudents || 0}
-                                                averageSpendRate={batchData.stats?.averageSpendRate || "0%"} 
+                                                statsOverride={{
+                                                    col1: { value: batchData.stats?.totalGroups || 0, label: "total groups", color: "#22C55E" },
+                                                    col2: { value: batchData.stats?.assignedGroups || 0, label: "assigned groups", color: "#3758EE" },
+                                                    col3: { value: batchData.stats?.unassignedGroups || 0, label: "unassigned group", color: "#B666E7" }
+                                                }}
                                             />
                                         </div>
                                         <div className="lg:col-span-1 h-full">

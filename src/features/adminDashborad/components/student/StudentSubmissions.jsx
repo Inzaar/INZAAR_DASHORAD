@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FiSearch, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { getUserSubmissions, gradeSubmission } from '@/api/user';
 import toast from 'react-hot-toast';
@@ -164,22 +164,36 @@ const StudentSubmissions = ({ profileData }) => {
     };
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-10">
             {/* Top Course Selector */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center gap-3">
+            <div className="flex flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                     {selectedSubmission && (
                         <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
                             <FiChevronLeft size={20} />
                         </button>
                     )}
-                    <h2 className="text-[22px] font-bold text-gray-800">
+                    <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-800 truncate">
                         {selectedCourse}
                     </h2>
                 </div>
-                <div className="relative">
+                <div className="relative shrink-0" ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="flex items-center gap-2 bg-[#059669] text-white px-4 py-2.5 rounded-[4px] text-sm font-medium hover:bg-[#047857] transition-colors shadow-sm"

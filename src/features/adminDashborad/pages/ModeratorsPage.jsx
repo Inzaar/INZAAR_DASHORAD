@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import PhoneInput from '@/components/ui/inputs/PhoneInput';
 import StatsCard from '../components/StatsCard';
+import GenderStatsCard from '../components/GenderStatsCard';
 import UserCard from '../components/UserCard';
 import { Search, Plus, ChevronDown, MoreVertical, X, Loader, Eye, EyeOff, LayoutGrid } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
@@ -39,6 +40,20 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const filterDropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+                setIsFilterOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Add Moderator Modal State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -376,6 +391,36 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                 ))}
                             </div>
 
+                            {/* Gender Stats Grid */}
+                            {genderFilter === 'All' && (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+                                    <GenderStatsCard
+                                        title="Total Male Moderators"
+                                        value={statsData?.totalMale || 0}
+                                        trend="2.4%"
+                                        trendDirection="up"
+                                        activeCount={statsData?.activeMale || 0}
+                                        activeTrend="15"
+                                        activeTrendDirection="down"
+                                        inactiveCount={statsData?.inactiveMale || 0}
+                                        inactiveTrend="21"
+                                        inactiveTrendDirection="up"
+                                    />
+                                    <GenderStatsCard
+                                        title="Total Female Moderators"
+                                        value={statsData?.totalFemale || 0}
+                                        trend="2.4%"
+                                        trendDirection="up"
+                                        activeCount={statsData?.activeFemale || 0}
+                                        activeTrend="15"
+                                        activeTrendDirection="down"
+                                        inactiveCount={statsData?.inactiveFemale || 0}
+                                        inactiveTrend="21"
+                                        inactiveTrendDirection="up"
+                                    />
+                                </div>
+                            )}
+
                            {/* Moderators Grid/List */}
                             <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[600px] relative">
                                 {/* Header Controls */}{isLoading && (
@@ -386,13 +431,6 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
                                 <div className="mb-6 flex justify-between items-center">
                                     <h3 className="text-lg font-bold text-gray-900 mb-1">Moderator List</h3>
-                                    <button
-                                        onClick={fetchModeratorsData}
-                                        className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={isLoading ? "animate-spin" : ""}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>
-                                        Refresh
-                                    </button>
                                 </div>
 
                                 {/* Filters */}
@@ -512,7 +550,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                 <BiFilterAlt className="w-4 h-4" />
                                                 Clear Filter
                                             </button>
-                                            <div className="relative">
+                                            <div className="relative" ref={filterDropdownRef}>
                                                 <button
                                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                                     className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}

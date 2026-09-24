@@ -695,7 +695,7 @@ const AdminCalendar = () => {
         <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} title="Calendar" />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-visible lg:overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
 
                     {isSidebarOpen && (
                         <div

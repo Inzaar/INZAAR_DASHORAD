@@ -27,7 +27,7 @@ const MetricCard = ({
 
     return (
         <div className={cn(
-            "bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4",
+            "bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-row items-end justify-between gap-4",
             className
         )}>
             {/* Left Content */}
