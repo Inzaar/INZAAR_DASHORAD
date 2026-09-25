@@ -1841,42 +1841,42 @@ const CourseView = () => {
                                                     {groupedLectures.map((group, groupIdx) => (
                                                         <div key={group.id || groupIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
                                                             <div className="w-full group">
-                                                                    <button
-                                                                        onClick={() => toggleSection(group.id)}
-                                                                        className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${expandedSections[group.id]
-                                                                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
-                                                                            : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
-                                                                            }`}
-                                                                    >
-                                                                        <div className="flex items-center gap-4">
-                                                                            <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${expandedSections[group.id]
-                                                                                ? 'bg-blue-600 text-white border-blue-500'
-                                                                                : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
-                                                                                }`}>
-                                                                                <span className="font-black text-lg">{groupIdx + 1}</span>
-                                                                            </div>
-                                                                            <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${expandedSections[group.id] ? 'text-blue-900' : 'text-gray-800'
-                                                                                }`}>
-                                                                                {group.sectionName}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${expandedSections[group.id]
-                                                                            ? 'bg-blue-100/80 text-blue-700'
-                                                                            : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                                                <button
+                                                                    onClick={() => toggleSection(group.id)}
+                                                                    className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${expandedSections[group.id]
+                                                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
+                                                                        : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
+                                                                        }`}
+                                                                >
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${expandedSections[group.id]
+                                                                            ? 'bg-blue-600 text-white border-blue-500'
+                                                                            : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
                                                                             }`}>
-                                                                            {expandedSections[group.id] ? (
-                                                                                <ChevronDown size={22} strokeWidth={2.5} />
-                                                                            ) : (
-                                                                                <ChevronRight size={22} strokeWidth={2.5} />
-                                                                            )}
+                                                                            <span className="font-black text-lg">{groupIdx + 1}</span>
                                                                         </div>
-                                                                    </button>
+                                                                        <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${expandedSections[group.id] ? 'text-blue-900' : 'text-gray-800'
+                                                                            }`}>
+                                                                            {group.sectionName}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${expandedSections[group.id]
+                                                                        ? 'bg-blue-100/80 text-blue-700'
+                                                                        : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                                                        }`}>
+                                                                        {expandedSections[group.id] ? (
+                                                                            <ChevronDown size={22} strokeWidth={2.5} />
+                                                                        ) : (
+                                                                            <ChevronRight size={22} strokeWidth={2.5} />
+                                                                        )}
+                                                                    </div>
+                                                                </button>
 
-                                                                    {expandedSections[group.id] && (
-                                                                        <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
-                                                                            {group.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
-                                                                        </div>
-                                                                    )}
+                                                                {expandedSections[group.id] && (
+                                                                    <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
+                                                                        {group.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     ))}

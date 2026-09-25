@@ -4,11 +4,13 @@ import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
 import { getAllBatches } from '@/api/batch';
 import Loader from '@/components/ui/Loader';
+import { CustomPagination } from '@/components/ui/Pagination';
 
 const BatchesPage = ({ filter = 'All' }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [batches, setBatches] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -48,6 +50,17 @@ const BatchesPage = ({ filter = 'All' }) => {
         ? batches 
         : batches.filter(b => b.status === filter);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter, batches]);
+
+    const itemsPerPage = 9;
+    const totalPages = Math.ceil(filteredBatches.length / itemsPerPage);
+    const paginatedBatches = filteredBatches.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     return (
@@ -79,37 +92,48 @@ const BatchesPage = ({ filter = 'All' }) => {
                                     No {filter !== 'All' ? filter.toLowerCase() : ''} batches found.
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {filteredBatches.map(batch => (
-                                    <div key={batch.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="text-xl font-bold text-gray-900">{batch.title}</h3>
-                                            <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full shrink-0 ${batch.status === 'Running' ? 'bg-blue-100 text-[#3758EE]' : 'bg-emerald-100 text-emerald-600'}`}>
-                                                {batch.status}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm font-medium text-gray-500 mb-4 line-clamp-1">Course: <span className="text-gray-700">{batch.courseName}</span></p>
-
-                                        <div className="bg-blue-50/50 rounded-xl p-4 flex justify-between mt-auto mb-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Enrollments</span>
-                                                <span className="text-[15px] font-bold text-[#3758EE]">{batch.enrolled}</span>
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {paginatedBatches.map(batch => (
+                                        <div key={batch.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-xl font-bold text-gray-900">{batch.title}</h3>
+                                                <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full shrink-0 ${batch.status === 'Running' ? 'bg-blue-100 text-[#3758EE]' : 'bg-emerald-100 text-emerald-600'}`}>
+                                                    {batch.status}
+                                                </span>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Groups</span>
-                                                <span className="text-[15px] font-bold text-[#3758EE]">{batch.groups}</span>
-                                            </div>
-                                        </div>
+                                            <p className="text-sm font-medium text-gray-500 mb-4 line-clamp-1">Course: <span className="text-gray-700">{batch.courseName}</span></p>
 
-                                        <button 
-                                            onClick={() => navigate(`/admin-batches/details/${batch.id}`)}
-                                            className="w-full py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white rounded-xl font-medium shadow-sm hover:opacity-90 transition-opacity"
-                                        >
-                                            View Details
-                                        </button>
+                                            <div className="bg-blue-50/50 rounded-xl p-4 flex justify-between mt-auto mb-5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Enrollments</span>
+                                                    <span className="text-[15px] font-bold text-[#3758EE]">{batch.enrolled}</span>
+                                                </div>
+                                                <div className="flex flex-col items-end">
+                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Groups</span>
+                                                    <span className="text-[15px] font-bold text-[#3758EE]">{batch.groups}</span>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={() => navigate(`/admin-batches/details/${batch.id}`)}
+                                                className="w-full py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white rounded-xl font-medium shadow-sm hover:opacity-90 transition-opacity"
+                                            >
+                                                View Details
+                                            </button>
+                                        </div>
+                                    ))}
                                     </div>
-                                ))}
-                            </div>
+                                    {totalPages > 1 && (
+                                        <div className="mt-10">
+                                            <CustomPagination 
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={(page) => setCurrentPage(page)}
+                                            />
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </main>
