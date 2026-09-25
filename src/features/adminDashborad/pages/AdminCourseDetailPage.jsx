@@ -36,13 +36,17 @@ const AdminCourseDetailPage = () => {
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [scheduling, setScheduling] = useState(false);
     const adminMenuRef = useRef(null);
+    const mobileAdminMenuRef = useRef(null);
 
     const [lecturesPage, setLecturesPage] = useState(1);
     const [studentsPage, setStudentsPage] = useState(1);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
+            const clickedDesktop = adminMenuRef.current && adminMenuRef.current.contains(event.target);
+            const clickedMobile = mobileAdminMenuRef.current && mobileAdminMenuRef.current.contains(event.target);
+            
+            if (!clickedDesktop && !clickedMobile) {
                 setIsAdminMenuOpen(false);
             }
         };
@@ -228,11 +232,10 @@ const AdminCourseDetailPage = () => {
                                     </GradiantButton>
                                     
                                     {/* 3 dots menu */}
-                                    <div className="relative">
+                                    <div className="relative" ref={adminMenuRef}>
                                         <button
                                             onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
                                             className="hidden md:flex p-2 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95 items-center justify-center h-[36px] w-[36px]"
-                                            ref={adminMenuRef}
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
                                         </button>
@@ -263,7 +266,7 @@ const AdminCourseDetailPage = () => {
                                 </div>
 
                                 {/* Mobile Three-Dots */}
-                                <div className="md:hidden relative">
+                                <div className="md:hidden relative" ref={mobileAdminMenuRef}>
                                     <button
                                         onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
                                         className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:bg-gray-50 transition-all text-gray-600 active:scale-95"
