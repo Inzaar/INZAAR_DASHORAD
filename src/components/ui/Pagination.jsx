@@ -134,33 +134,35 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
 
   const getPageNumbers = () => {
     const pages = [];
-    if (totalPages <= 3) {
+    if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      let startPage = currentPage - 1;
-      let endPage = currentPage + 1;
+      pages.push(1);
       
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+
       if (currentPage === 1) {
-        startPage = 1;
         endPage = 3;
       } else if (currentPage === totalPages) {
         startPage = totalPages - 2;
-        endPage = totalPages;
       }
 
-      if (startPage > 1) {
+      if (startPage > 2) {
         pages.push('...');
       }
-      
+
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
-      
-      if (endPage < totalPages) {
+
+      if (endPage < totalPages - 1) {
         pages.push('...');
       }
+
+      pages.push(totalPages);
     }
     return pages;
   };

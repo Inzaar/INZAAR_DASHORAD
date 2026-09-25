@@ -558,10 +558,12 @@ const ModeratorReportsPage = () => {
                                                                     {t(moderator.status?.trim().toLowerCase(), moderator.status)}
                                                                 </span>
                                                             </td>
-                                                            <td className="py-4 text-center">
-                                                                <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
-                                                                    {t("view_profile", "View Profile")}
-                                                                </GradiantButton>
+                                                            <td className="py-4">
+                                                                <div className="flex justify-center items-center w-full">
+                                                                    <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto w-max" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
+                                                                        {t("view_profile", "View Profile")}
+                                                                    </GradiantButton>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ))}

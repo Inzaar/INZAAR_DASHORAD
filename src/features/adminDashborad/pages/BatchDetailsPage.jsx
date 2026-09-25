@@ -9,6 +9,7 @@ import PerformanceCard from '@/components/shared/PerformanceCard';
 import Loader from '@/components/ui/Loader';
 import { getBatchById } from '@/api/batch';
 import { getStudentsByGroup } from '@/api/limit';
+import { CustomPagination } from '@/components/ui/Pagination';
 
 const BatchDetailsPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -19,6 +20,11 @@ const BatchDetailsPage = () => {
     const { id } = useParams();
     const [batchData, setBatchData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [id]);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -108,9 +114,10 @@ const BatchDetailsPage = () => {
                                     <div className="mt-8">
                                         <h3 className="text-lg font-bold text-gray-900 mb-4">Batch Groups</h3>
                                         {batchData.groups && batchData.groups.length > 0 ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                                {batchData.groups.map(group => {
-                                                    const mod = group.assignedModerator;
+                                            <>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                                    {batchData.groups.slice((currentPage - 1) * 16, currentPage * 16).map(group => {
+                                                        const mod = group.assignedModerator;
                                                     const moderatorName = mod ? (mod.firstname || mod.lastname ? `${mod.firstname || ""} ${mod.lastname || ""}`.trim() : (mod.name || mod.username)) : "Not Assigned";
                                                     
                                                     return (
@@ -143,6 +150,16 @@ const BatchDetailsPage = () => {
                                                     </div>
                                                 )})}
                                             </div>
+                                            {Math.ceil(batchData.groups.length / 16) > 1 && (
+                                                <div className="mt-8">
+                                                    <CustomPagination 
+                                                        currentPage={currentPage}
+                                                        totalPages={Math.ceil(batchData.groups.length / 16)}
+                                                        onPageChange={(page) => setCurrentPage(page)}
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                         ) : (
                                             <div className="text-center py-10 bg-gray-50 rounded-xl border border-gray-100">
                                                 <p className="text-gray-500 font-medium">No groups assigned to this batch yet.</p>
