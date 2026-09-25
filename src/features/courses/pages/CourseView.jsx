@@ -1769,11 +1769,11 @@ const CourseView = () => {
                                                                         {currentLecture.pdfUrl.map((url, i) => (
                                                                             <button
                                                                                 key={i}
-                                                                                onClick={() => { setActivePdfUrl(url); setShowPdfMenu(false); }}
+                                                                                onClick={() => { setActivePdfUrl(typeof url === 'object' ? (url.url || '') : (url || '')); setShowPdfMenu(false); }}
                                                                                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                                                                             >
                                                                                 <FileText size={14} className="text-red-400" />
-                                                                                <span className="truncate">Resource {i + 1}</span>
+                                                                                <span className="truncate">{typeof url === 'object' ? (url.title || `Resource ${i + 1}`) : `Resource ${i + 1}`}</span>
                                                                             </button>
                                                                         ))}
                                                                     </div>
@@ -1805,11 +1805,11 @@ const CourseView = () => {
                                                                         {currentLecture.audioUrl.map((url, i) => (
                                                                             <button
                                                                                 key={i}
-                                                                                onClick={() => { setActiveAudioUrl(url); setShowAudioMenu(false); }}
+                                                                                onClick={() => { setActiveAudioUrl(typeof url === 'object' ? (url.url || '') : (url || '')); setShowAudioMenu(false); }}
                                                                                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
                                                                             >
                                                                                 <Volume2 size={14} className="text-blue-400" />
-                                                                                <span className="truncate">Audio {i + 1}</span>
+                                                                                <span className="truncate">{typeof url === 'object' ? (url.title || `Audio ${i + 1}`) : `Audio ${i + 1}`}</span>
                                                                             </button>
                                                                         ))}
                                                                     </div>
