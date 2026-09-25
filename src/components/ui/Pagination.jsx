@@ -59,7 +59,7 @@ function PaginationLink({
           variant: "ghost",
           size,
         }),
-        isActive 
+        isActive
           ? "bg-gradient-to-r from-[#5D6AF7] to-[#A15DF6] text-white shadow-[0_4px_10px_rgba(93,106,247,0.3)] hover:text-white"
           : "hover:bg-gray-100 text-gray-500",
         "border-none cursor-pointer rounded-[8px]",
@@ -130,46 +130,75 @@ export {
 }
 
 export function CustomPagination({ currentPage, totalPages, onPageChange }) {
-    if (!totalPages || totalPages <= 1) return null;
+  if (!totalPages || totalPages <= 1) return null;
 
-    const getPageNumbers = () => {
-        const pages = [];
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(i);
-        }
-        return pages;
-    };
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 3) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = currentPage - 1;
+      let endPage = currentPage + 1;
+      
+      if (currentPage === 1) {
+        startPage = 1;
+        endPage = 3;
+      } else if (currentPage === totalPages) {
+        startPage = totalPages - 2;
+        endPage = totalPages;
+      }
 
-    return (
-        <Pagination>
-            <PaginationContent>
-                <PaginationItem>
-                    <PaginationPrevious 
-                        href="#" 
-                        onClick={(e) => { e.preventDefault(); if (currentPage > 1) onPageChange(currentPage - 1); }}
-                        className={currentPage <= 1 ? "opacity-50 pointer-events-none" : ""}
-                    />
-                </PaginationItem>
-                {getPageNumbers().map(p => (
-                    <PaginationItem key={p}>
-                        <PaginationLink 
-                            href="#"
-                            isActive={p === currentPage}
-                            onClick={(e) => { e.preventDefault(); onPageChange(p); }}
-                            className="font-semibold w-9 h-9"
-                        >
-                            {p}
-                        </PaginationLink>
-                    </PaginationItem>
-                ))}
-                <PaginationItem>
-                    <PaginationNext 
-                        href="#" 
-                        onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) onPageChange(currentPage + 1); }}
-                        className={currentPage >= totalPages ? "opacity-50 pointer-events-none" : ""}
-                    />
-                </PaginationItem>
-            </PaginationContent>
-        </Pagination>
-    );
+      if (startPage > 1) {
+        pages.push('...');
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      if (endPage < totalPages) {
+        pages.push('...');
+      }
+    }
+    return pages;
+  };
+
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e) => { e.preventDefault(); if (currentPage > 1) onPageChange(currentPage - 1); }}
+            className={currentPage <= 1 ? "opacity-50 pointer-events-none" : ""}
+          />
+        </PaginationItem>
+        {getPageNumbers().map((p, index) => (
+          <PaginationItem key={index}>
+            {p === '...' ? (
+              <PaginationEllipsis />
+            ) : (
+              <PaginationLink
+                href="#"
+                isActive={p === currentPage}
+                onClick={(e) => { e.preventDefault(); onPageChange(p); }}
+                className="font-semibold w-9 h-9"
+              >
+                {p}
+              </PaginationLink>
+            )}
+          </PaginationItem>
+        ))}
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) onPageChange(currentPage + 1); }}
+            className={currentPage >= totalPages ? "opacity-50 pointer-events-none" : ""}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
 }

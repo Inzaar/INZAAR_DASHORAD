@@ -22,6 +22,23 @@ const AdminNotification = () => {
 
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 let targetLink = notification.link;
+
+                // Intercept any notifications that point to admin-course-play for comments
+                // and redirect them back to the student details page
+                if (targetLink.includes("/admin-course-play") && targetLink.includes("lectureId=") && targetLink.includes("userId=")) {
+                    try {
+                        const urlParams = new URLSearchParams(targetLink.split('?')[1]);
+                        const userId = urlParams.get('userId');
+                        const courseId = urlParams.get('id');
+                        const lectureId = urlParams.get('lectureId');
+                        if (userId && courseId && lectureId) {
+                            targetLink = `/admin/student-details/${userId}?courseId=${courseId}&lectureId=${lectureId}`;
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
                 if (targetLink.startsWith("/dashboard")) {
                     targetLink = targetLink.replace("/dashboard", "/admin-calendar");
                 } else if (targetLink.startsWith("/courses")) {
@@ -34,6 +51,22 @@ const AdminNotification = () => {
             console.error("Error marking notification as read:", error);
             if (notification.title !== "Welcome Aboard" && notification.link) {
                 let targetLink = notification.link;
+
+                // Intercept for error block too
+                if (targetLink.includes("/admin-course-play") && targetLink.includes("lectureId=") && targetLink.includes("userId=")) {
+                    try {
+                        const urlParams = new URLSearchParams(targetLink.split('?')[1]);
+                        const userId = urlParams.get('userId');
+                        const courseId = urlParams.get('id');
+                        const lectureId = urlParams.get('lectureId');
+                        if (userId && courseId && lectureId) {
+                            targetLink = `/admin/student-details/${userId}?courseId=${courseId}&lectureId=${lectureId}`;
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
                 if (targetLink.startsWith("/dashboard")) {
                     targetLink = targetLink.replace("/dashboard", "/admin-calendar");
                 } else if (targetLink.startsWith("/courses")) {

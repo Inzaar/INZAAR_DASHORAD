@@ -25,7 +25,10 @@ const StudentCourseDashboard = ({ profileData }) => {
 
     const searchParams = new URLSearchParams(window.location.search);
     const targetCourseId = searchParams.get("courseId");
-    const targetEnrollmentId = targetCourseId ? enrolledCourses.find(c => c.courseId === targetCourseId)?.id : null;
+    const targetEnrollmentId = targetCourseId ? enrolledCourses.find(c => {
+        const cId = c.courseId?._id || c.courseId?.id || c.courseId || c.course?._id || c.course?.id || c.course || c.id || c._id;
+        return cId === targetCourseId || c.id === targetCourseId || c._id === targetCourseId;
+    })?.id : null;
     const targetLectureId = searchParams.get("lectureId");
 
     // Default to the target enrollment or first course if available
@@ -186,9 +189,16 @@ const StudentCourseDashboard = ({ profileData }) => {
 
     useEffect(() => {
         if (!selectedEnrollmentId && enrolledCourses.length > 0) {
-            setSelectedEnrollmentId(enrolledCourses[0].id);
+            // Re-evaluate targetEnrollmentId in case enrolledCourses loaded after initial render
+            const targetCourseId = new URLSearchParams(window.location.search).get("courseId");
+            const targetId = targetCourseId ? enrolledCourses.find(c => {
+                const cId = c.courseId?._id || c.courseId?.id || c.courseId || c.course?._id || c.course?.id || c.course || c.id || c._id;
+                return cId === targetCourseId || c.id === targetCourseId || c._id === targetCourseId;
+            })?.id : null;
+            
+            setSelectedEnrollmentId(targetId || enrolledCourses[0].id);
         }
-    }, [enrolledCourses]);
+    }, [enrolledCourses, selectedEnrollmentId]);
 
     const fetchCourseStats = async () => {
         if (!userId || !selectedEnrollmentId) return;
