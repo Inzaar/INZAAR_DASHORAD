@@ -498,10 +498,12 @@ const CourseReportsPage = () => {
                                                                     {course.status}
                                                                 </span>
                                                             </td>
-                                                            <td className="py-4 text-center">
-                                                                <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1]" onClick={() => navigate(`/admin-course-view/${course.id}`)}>
-                                                                    View Details
-                                                                </GradiantButton>
+                                                            <td className="py-4">
+                                                                <div className="flex justify-center items-center w-full">
+                                                                    <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto w-max" onClick={() => navigate(`/admin-course-view/${course.id}`)}>
+                                                                        View Details
+                                                                    </GradiantButton>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ))}
