@@ -1640,8 +1640,7 @@ const CourseView = () => {
                                                                                                         return { ...prev, lecturePlaylist: newLectures, lectures: newLectures };
                                                                                                     });
 
-                                                                                                    // Fallback reload
-                                                                                                    setTimeout(() => window.location.reload(), 1000);
+
                                                                                                 } catch (error) {
                                                                                                     console.error("Failed to mark complete", error);
                                                                                                     toast.error("Error marking complete", { id: "markComplete" });
@@ -1698,9 +1697,7 @@ const CourseView = () => {
                                                                         </audio>
                                                                     );
                                                                 })()}
-                                                                <div className="text-white text-xs mt-2 break-all">
-                                                                    DEBUG src: {currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : currentLecture.videoUrl}
-                                                                </div>
+
                                                             </div>
                                                         </div>
                                                     </div>
