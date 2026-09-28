@@ -272,10 +272,10 @@ const QuizTakePage = () => {
                             ))}
                         </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                        <div className="flex gap-3 justify-between items-center pt-4 border-t border-gray-50 overflow-x-auto no-scrollbar">
                             <button
                                 onClick={handleCancel}
-                                className="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold transition-all"
+                                className="px-4 md:px-6 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold transition-all whitespace-nowrap shrink-0"
                             >
                                 Cancel Quiz
                             </button>
@@ -283,7 +283,7 @@ const QuizTakePage = () => {
                                 onClick={handleNext}
                                 disabled={!selectedOption || submitting}
                                 className={`
-                                    flex items-center justify-center gap-2 w-full md:w-auto px-8 py-3 font-bold rounded-xl transition-all group
+                                    flex items-center justify-center gap-2 px-4 md:px-8 py-3 font-bold rounded-xl transition-all group whitespace-nowrap shrink-0
                                     ${(!selectedOption || submitting)
                                         ? 'bg-[#E5E7EB] text-gray-400 cursor-not-allowed opacity-70'
                                         : 'bg-gradient-to-r from-[#3758EE] to-[#9333EA] text-white hover:opacity-90 shadow-lg'
