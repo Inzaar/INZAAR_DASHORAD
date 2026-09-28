@@ -193,7 +193,7 @@ import Input1 from '@/components/ui/inputs/Input1';
 import { format, parseISO, startOfDay, isWithinInterval } from 'date-fns';
 import { CustomPagination } from '@/components/ui/Pagination';
 import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event';
-import { getAllCourses } from '@/api/course';
+import { getAllBatches } from '@/api/batch';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -202,7 +202,7 @@ const AdminCalendar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [view, setView] = useState('calendar'); // 'calendar' or 'list'
     const [events, setEvents] = useState([]);
-    const [courses, setCourses] = useState([]);
+    const [batches, setBatches] = useState([]);
     const [activeTab, setActiveTab] = useState('events');
 
     // Pagination State
@@ -230,28 +230,29 @@ const AdminCalendar = () => {
         }
     };
 
-    const fetchCourses = async () => {
+    const fetchBatches = async () => {
         try {
-            const data = await getAllCourses();
-            if (data?.data?.data) {
-                const mappedCourses = data.data.data.map(c => ({
-                    id: c._id,
-                    title: c.title,
-                    status: c.status || "active",
-                    startDate: new Date(c.createdAt), // fallback for display
-                    endDate: new Date(c.createdAt),
-                    ...c
+            const data = await getAllBatches();
+            if (Array.isArray(data)) {
+                const mappedBatches = data.map(b => ({
+                    ...b,
+                    id: b._id,
+                    title: b.name || "Unnamed Batch",
+                    courseTitle: b.courseId?.title || "Unknown Course",
+                    status: b.status || "active",
+                    startDate: new Date(b.startDate),
+                    endDate: new Date(b.endDate)
                 }));
-                setCourses(mappedCourses);
+                setBatches(mappedBatches);
             }
         } catch (error) {
-            console.error("Failed to fetch courses:", error);
+            console.error("Failed to fetch batches:", error);
         }
     };
 
     useEffect(() => {
         fetchEvents();
-        fetchCourses();
+        fetchBatches();
     }, []);
 
     // Pagination Logic
@@ -613,36 +614,60 @@ const AdminCalendar = () => {
                 </div>
             );
         } else {
-            // Courses rendering
-            const dayCourses = courses.filter(course => {
-                const courseStart = startOfDay(course.startDate);
-                // For mock display, let's just show course if start date matches, since courses might not have endDates that map well to calendar days in our basic mocked version
-                return isWithinInterval(startOfDay(date), {
-                    start: courseStart,
-                    end: courseStart // just show on start date for now
-                });
+            // Batches rendering
+            const dayBatches = batches.filter(batch => {
+                if (!batch.startDate || !batch.endDate) return false;
+                
+                const dY = date.getFullYear();
+                const dM = date.getMonth();
+                const dD = date.getDate();
+
+                const sY = batch.startDate.getFullYear();
+                const sM = batch.startDate.getMonth();
+                const sD = batch.startDate.getDate();
+
+                const eY = batch.endDate.getFullYear();
+                const eM = batch.endDate.getMonth();
+                const eD = batch.endDate.getDate();
+                
+                const isStart = dY === sY && dM === sM && dD === sD;
+                const isEnd = dY === eY && dM === eM && dD === eD;
+                
+                return isStart || isEnd;
             });
 
             return (
                 <div className="flex flex-col gap-1 w-full mt-1 px-1 overflow-visible">
-                    {dayCourses.map(course => {
-                        const isActive = course.status !== 'upcoming';
+                    {dayBatches.map(batch => {
+                        const dY = date.getFullYear();
+                        const dM = date.getMonth();
+                        const dD = date.getDate();
+
+                        const sY = batch.startDate.getFullYear();
+                        const sM = batch.startDate.getMonth();
+                        const sD = batch.startDate.getDate();
+
+                        const isStart = dY === sY && dM === sM && dD === sD;
+
+                        const isActive = batch.status !== 'upcoming';
                         const statusBg = isActive ? 'bg-blue-100' : 'bg-[#E5F0FF]';
                         const statusText = isActive ? 'text-[#3758EE]' : 'text-[#60A5FA]';
                         const statusLabel = isActive ? 'Active' : 'Upcoming';
+                        
+                        const labelText = isStart ? 'Starts: ' : 'Ends: ';
 
                         return (
                             <div
-                                key={course.id}
+                                key={`${batch.id}-${isStart ? 'start' : 'end'}`}
                                 className="flex flex-col p-1.5 rounded-[4px] text-[10px] font-medium bg-[#F0F5FF] border-l-[3px] border-[#3758EE] mb-1 relative"
                             >
                                 <div className="flex items-start gap-1">
                                     <svg className="w-[12px] h-[12px] text-[#3758EE] mt-[1px] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                         <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path>
                                     </svg>
-                                    <span className="truncate text-[#3758EE] font-bold text-[11px] leading-tight">{course.title}</span>
+                                    <span className="truncate text-[#3758EE] font-bold text-[11px] leading-tight">{labelText}{batch.courseTitle} - {batch.title}</span>
                                 </div>
-                                <div className="mt-1 pl-4">
+                                <div className="mt-1 pl-4 flex items-center justify-between">
                                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${statusBg} ${statusText}`}>
                                         {statusLabel}
                                     </span>
@@ -872,14 +897,14 @@ const AdminCalendar = () => {
                                                 <span className={`text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold ${activeTab === 'events' ? 'bg-[#3758EE] text-white' : 'bg-gray-200 text-gray-600'}`}>{events.length}</span>
                                             </div>
 
-                                            {/* Courses Tab */}
+                                            {/* Batches Tab */}
                                             <div
-                                                onClick={() => setActiveTab('courses')}
-                                                className={`flex items-center gap-2 pb-3 px-4 border-b-[3px] -mb-[1.5px] cursor-pointer transition-colors ${activeTab === 'courses' ? 'border-[#3758EE] text-[#3758EE]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                                onClick={() => setActiveTab('batches')}
+                                                className={`flex items-center gap-2 pb-3 px-4 border-b-[3px] -mb-[1.5px] cursor-pointer transition-colors ${activeTab === 'batches' ? 'border-[#3758EE] text-[#3758EE]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
                                                 <span className="font-bold text-sm">Courses</span>
-                                                <span className={`text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold ${activeTab === 'courses' ? 'bg-[#3758EE] text-white' : 'bg-gray-200 text-gray-600'}`}>{courses.length}</span>
+                                                <span className={`text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold ${activeTab === 'batches' ? 'bg-[#3758EE] text-white' : 'bg-gray-200 text-gray-600'}`}>{batches.length}</span>
                                             </div>
                                         </div>
                                     </div>
