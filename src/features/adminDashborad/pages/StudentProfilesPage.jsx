@@ -373,7 +373,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             <Search className="text-gray-400 w-[18px] h-[18px] ml-2 mr-2 shrink-0" />
                                             <input
                                                 type="text"
-                                                placeholder={t("search_by_name", "Search by name")}
+                                                placeholder={searchType === "NAME" ? t("search_by_name", "Search by name") : searchType === "PHONE" ? t("search_by_phone", "Search by phone") : t("search_by_email", "Search by email")}
                                                 className="flex-1 bg-transparent text-[13px] text-gray-700 placeholder:text-gray-400 focus:outline-none min-w-0"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
@@ -405,6 +405,19 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                     className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'EMAIL' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -541,7 +554,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={searchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                    placeholder={searchType === "NAME" ? t("search_by_name", "Search by name") : searchType === "PHONE" ? t("search_by_phone", "Search by phone") : t("search_by_email", "Search by email")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={searchText}
                                                     onChange={(e) => handleSearchChange(e.target.value)}
@@ -574,6 +587,19 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                     className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>

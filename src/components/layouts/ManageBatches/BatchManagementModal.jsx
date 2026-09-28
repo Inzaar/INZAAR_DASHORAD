@@ -22,6 +22,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
     // Custom error popup state
     const [showErrorPopup, setShowErrorPopup] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isConfirmPopup, setIsConfirmPopup] = useState(false);
 
     // Sync state with batchData when it opens
     useEffect(() => {
@@ -53,7 +54,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
         getModerators();
     }, [isOpen]);
 
-    const handleAssign = async (moderatorId) => {
+    const handleAssign = async (moderatorId, force = false) => {
         const batchId = batchData?._id || batchData?.id;
         if (!batchId) {
             toast.error("No Batch ID found for assignment");
@@ -62,11 +63,16 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
 
         setAssigningId(moderatorId);
         try {
-            const response = await updateLimit(batchId, { assignedModerator: moderatorId });
-            // updateLimit throws error if fails, otherwise returns updated data
+            const payload = { assignedModerator: moderatorId };
+            if (force) payload.forceAssign = true;
+            const response = await updateLimit(batchId, payload);
+            
             setAssignedModId(moderatorId);
             setIsEditMode(false);
-            // Refresh moderator list to show updated batch counts
+            setShowErrorPopup(false);
+            setIsConfirmPopup(false);
+            setAssigningId(null);
+            
             const modResponse = await fetchAllModerators();
             if (modResponse.success) {
                 setModerators(modResponse.data.moderatorList);
@@ -75,11 +81,16 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
             console.error("Failed to assign moderator:", error);
             const errMsg = error.response?.data?.message || error.message || "Failed to assign moderator";
             
-            // Show custom popup for assignment errors / course completion requirement
-            setErrorMessage(errMsg);
-            setShowErrorPopup(true);
-        } finally {
-            setAssigningId(null);
+            if (errMsg.startsWith("CONFIRM_ASSIGN:")) {
+                setErrorMessage(errMsg.replace("CONFIRM_ASSIGN:", ""));
+                setIsConfirmPopup(true);
+                setShowErrorPopup(true);
+            } else {
+                setErrorMessage(errMsg);
+                setIsConfirmPopup(false);
+                setShowErrorPopup(true);
+                setAssigningId(null);
+            }
         }
     };
 
@@ -404,12 +415,35 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">Assignment Conflict</h3>
                                 <p className="text-[14px] leading-relaxed text-gray-500 font-medium">{errorMessage}</p>
                             </div>
-                            <button
-                                onClick={() => setShowErrorPopup(false)}
-                                className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
-                            >
-                                Got it
-                            </button>
+                            {isConfirmPopup ? (
+                                <div className="mt-2 w-full flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowErrorPopup(false);
+                                            setAssigningId(null);
+                                        }}
+                                        className="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-700 font-bold text-[14px] hover:bg-gray-200 active:scale-95 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => handleAssign(assigningId, true)}
+                                        className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                                    >
+                                        Assign
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setShowErrorPopup(false);
+                                        setAssigningId(null);
+                                    }}
+                                    className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                                >
+                                    Got it
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
