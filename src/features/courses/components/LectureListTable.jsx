@@ -381,7 +381,7 @@ const ResourcesModal = ({ activeResources, onClose }) => {
                         return (
                             <div 
                                 key={idx}
-                                onClick={() => !isDownloading && forceDownload(url, filename, setDownloadingIdx, idx)}
+                                onClick={() => window.open(url, '_blank')}
                                 className={`flex items-center justify-between p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 group active:scale-[0.99] ${
                                     isPdf 
                                         ? 'bg-slate-50 hover:bg-red-50/40 border-slate-100 hover:border-red-100' 
@@ -648,7 +648,9 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         const pdfUrls = Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : []);
-                                                        if (pdfUrls.length > 0) {
+                                                        if (pdfUrls.length === 1) {
+                                                            window.open(pdfUrls[0], '_blank');
+                                                        } else if (pdfUrls.length > 1) {
                                                             const rect = e.currentTarget.getBoundingClientRect();
                                                             setPdfPopover({
                                                                 lectureId: lecture.id,
@@ -672,7 +674,9 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         const audioUrls = Array.isArray(lecture.audioUrl) ? lecture.audioUrl : (lecture.audioUrl ? [lecture.audioUrl] : []);
-                                                        if (audioUrls.length > 0) {
+                                                        if (audioUrls.length === 1) {
+                                                            window.open(audioUrls[0], '_blank');
+                                                        } else if (audioUrls.length > 1) {
                                                             setActiveResources({
                                                                 lectureNo: displayLectureNo,
                                                                 title: lecture.title,
@@ -744,7 +748,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                     popover={pdfPopover}
                     onClose={() => setPdfPopover(null)}
                     onSelectResource={(url, name) => {
-                        setViewingPdf({ url, filename: name });
+                        window.open(url, '_blank');
                     }}
                 />
             )}
