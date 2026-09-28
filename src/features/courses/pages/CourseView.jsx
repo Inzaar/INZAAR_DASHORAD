@@ -1258,11 +1258,11 @@ const CourseView = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className={`py-4 pr-2`}>
-                            <div className="grid grid-cols-[1fr_auto] items-center gap-4 mb-8 w-full">
-                                <div className="min-w-0">
-                                    <h2 className="text-[26px] md:text-4xl font-extrabold text-gray-900 truncate leading-tight pr-2">{courseData?.title}</h2>
+                            <div className="flex items-start md:items-center justify-between gap-4 mb-8 w-full">
+                                <div className="flex-1 min-w-0 pr-2">
+                                    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-900 line-clamp-2 overflow-hidden text-ellipsis leading-snug break-words">{courseData?.title}</h2>
                                     {user?.role !== 'admin' && (
-                                        <p className="text-gray-500 text-[11px] md:text-[16px]">Let's learn something new today!</p>
+                                        <p className="text-gray-500 text-[11px] md:text-[16px] mt-1">Let's learn something new today!</p>
                                     )}
                                 </div>
 
