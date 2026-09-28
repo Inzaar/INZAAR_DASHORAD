@@ -16,21 +16,15 @@ function Notification({ title, message = "Default Notification", time = "Just no
     };
     return (
         <div onClick={onClick} className={`${className} group cursor-pointer w-full`}>
-            <div className={`flex justify-between items-start p-3.5 md:p-4 border-b border-gray-100 transition-all duration-300 ${isUnread ? 'bg-blue-50/30 border-l-4 border-l-blue-600' : 'bg-white hover:bg-gray-50 border-l-4 border-l-transparent'}`}>
-                <div className="flex-1 flex items-start gap-3 min-w-0">
-                    {isUnread ? (
-                        <span className="mt-1 px-1.5 py-0.5 bg-blue-600 text-white text-[8px] md:text-[9px] font-black rounded uppercase tracking-wider shadow-sm shrink-0">
-                            {t("new_badge", "New")}
-                        </span>
-                    ) : (
-                        <span className="w-2.5 h-2.5 rounded-full bg-gray-400 shrink-0 mt-1.5" />
-                    )}
-                    <div className={`text-[14px] md:text-[16px] font-['inter'] leading-snug flex-1 break-words ${isUnread ? 'font-black text-slate-900' : 'font-medium text-slate-500'}`}>
-                        {title && <div className={`text-[15px] md:text-[17px] mb-0.5 ${isUnread ? 'font-extrabold text-blue-700' : 'font-bold text-slate-700'}`}>{title}</div>}
-                        <div className={title ? "text-[13px] md:text-[14px] mt-1" : ""}>{message}</div>
+            <div className={`flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100 transition-all duration-300 ${isUnread ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'}`}>
+                <div className="flex-1 flex items-center gap-4 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
+                    <div className="text-[13px] md:text-[14px] text-gray-500 font-normal leading-snug flex-1 break-words">
+                        {title && <span className="text-gray-600">{title} &ndash; </span>}
+                        <span>{message}</span>
                     </div>
                 </div>
-                <div className={`shrink-0 ml-4 text-[10px] md:text-[12px] font-['Roboto'] mt-1 ${isUnread ? 'font-bold text-blue-600' : 'font-medium text-slate-400'}`}>
+                <div className="shrink-0 ml-4 text-[11px] md:text-[12px] font-normal text-gray-400">
                     {translateTime(time)}
                 </div>
             </div>
