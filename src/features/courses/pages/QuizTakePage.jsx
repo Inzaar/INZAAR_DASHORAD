@@ -222,6 +222,7 @@ const QuizTakePage = () => {
                             onStart={() => setIsStarted(true)}
                             isAdminView={isAdminView}
                             onEdit={handleEditQuiz}
+                            onCancel={confirmCancel}
                         />
                     </div>
                 ) : !isCompleted ? (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GraduationCap, Loader } from 'lucide-react';
 import { getQuizById } from '@/api/quiz';
 
-const LectureQuizAssessment = ({ quizId, onStart, isAdminView, onEdit }) => {
+const LectureQuizAssessment = ({ quizId, onStart, isAdminView, onEdit, onCancel }) => {
     const [quizData, setQuizData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -73,16 +73,26 @@ const LectureQuizAssessment = ({ quizId, onStart, isAdminView, onEdit }) => {
                     </div>
                 )}
 
-                {/* Start/Edit Button */}
-                <button
-                    onClick={isAdminView ? onEdit : onStart}
-                    disabled={(!isAdminView && loading) || (!isAdminView && totalQuestions === 0)}
-                    className={`w-full max-w-[600px] py-4 md:py-5 font-bold text-lg md:text-xl rounded-2xl transition-all shadow-lg mb-6
-                        ${((!isAdminView && loading) || (!isAdminView && totalQuestions === 0)) ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white hover:opacity-90 active:scale-[0.98] shadow-indigo-100'}
-                    `}
-                >
-                    {isAdminView ? 'Edit Quiz' : (totalQuestions === 0 && !loading ? 'No Questions Added' : 'Start Quiz')}
-                </button>
+                {/* Start/Edit and Cancel Buttons */}
+                <div className="w-full max-w-[600px] flex flex-col md:flex-row gap-4 mb-6">
+                    {onCancel && (
+                        <button
+                            onClick={onCancel}
+                            className="w-full md:w-1/3 py-4 md:py-5 font-bold text-lg md:text-xl rounded-2xl transition-all shadow-sm border-2 border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-[0.98]"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                    <button
+                        onClick={isAdminView ? onEdit : onStart}
+                        disabled={(!isAdminView && loading) || (!isAdminView && totalQuestions === 0)}
+                        className={`w-full ${onCancel ? 'md:w-2/3' : 'max-w-[600px]'} py-4 md:py-5 font-bold text-lg md:text-xl rounded-2xl transition-all shadow-lg
+                            ${((!isAdminView && loading) || (!isAdminView && totalQuestions === 0)) ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none' : 'bg-gradient-to-r from-[#4F46E5] to-[#A855F7] text-white hover:opacity-90 active:scale-[0.98] shadow-indigo-100'}
+                        `}
+                    >
+                        {isAdminView ? 'Edit Quiz' : (totalQuestions === 0 && !loading ? 'No Questions Added' : 'Start Quiz')}
+                    </button>
+                </div>
 
                 {/* Footer Text */}
                 <p className="text-[#94A3B8] text-xs md:text-sm font-medium">
