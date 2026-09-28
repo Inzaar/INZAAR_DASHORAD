@@ -40,7 +40,7 @@ const LectureCard = ({
                 <div className="flex justify-between items-start">
                     {/* Text Info */}
                     <div className="flex flex-col text-white">
-                        <h3 className="font-semibold text-base leading-normal pb-1 mb-1">{t(title?.trim(), title)}</h3>
+                        <h3 className="font-semibold text-base leading-normal pb-1 mb-1 line-clamp-2">{t(title?.trim(), title)}</h3>
                         <span className="text-[10px] font-medium opacity-90">{t("lecture", "Lecture")}:{lecture}</span>
                         <span className="text-[10px] font-medium opacity-90">{t("date", "Date")}:{date}</span>
                     </div>

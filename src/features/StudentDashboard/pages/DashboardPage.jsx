@@ -23,9 +23,12 @@ const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     // const userId = localStorage.getItem('userId');
     // const firstName = localStorage.getItem('firstName');
-    const progressPercentage = 40;
-
     const [userCourses, setUserCourses] = useState([]);
+
+    const enrolledCoursesList = userCourses?.enrolledCourses || [];
+    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + (course.completedLecturesCount || course.completedLectures || 0), 0);
+    const totalLectures = enrolledCoursesList.reduce((sum, course) => sum + (course.totalLectures || 0), 0);
+    const progressPercentage = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
 
     // useEffect(() => {
     //     const fetchUserProfile = async () => {
@@ -105,6 +108,10 @@ const DashboardPage = () => {
     const selectedCourseData = userCourses?.enrolledCourses?.find(course =>
         course._id === selectedLectureFilter
     );
+
+    const ongoingProgressPercentage = selectedCourseData && selectedCourseData.totalLectures > 0
+        ? Math.round(((selectedCourseData.completedLecturesCount || selectedCourseData.completedLectures || 0) / selectedCourseData.totalLectures) * 100)
+        : 0;
 
     const filteredLectures = selectedCourseData?.lectures || [];
     const toggleSidebar = () => {
@@ -274,7 +281,7 @@ const DashboardPage = () => {
                                             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${progressPercentage}%` }}
+                                                    style={{ width: `${ongoingProgressPercentage}%` }}
                                                 />
                                             </div>
                                         </div>
