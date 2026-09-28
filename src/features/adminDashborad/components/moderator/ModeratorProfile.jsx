@@ -1,6 +1,8 @@
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaIdCard, FaEdit, FaLock, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
+import { AlertTriangle } from "lucide-react";
 import toast from "react-hot-toast";
 import { uploadImage } from "@/api/course";
 import { updateUser } from "@/api/user";
@@ -22,6 +24,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
 
   // Password Modal State
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showSamePasswordModal, setShowSamePasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({ password: '', confirmPassword: '' });
   const [showPass, setShowPass] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
@@ -56,7 +59,12 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
       setShowPasswordModal(false);
       setPasswordData({ password: '', confirmPassword: '' });
     } catch (error) {
-      toast.error(error?.message || "Failed to change password", { id: toastId });
+      if (error?.message === "New password cannot be the same as your current password.") {
+        toast.dismiss(toastId);
+        setShowSamePasswordModal(true);
+      } else {
+        toast.error(error?.message || "Failed to change password", { id: toastId });
+      }
     } finally {
       setIsChangingPass(false);
     }
@@ -248,6 +256,42 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
             </form>
           </div>
         </div>
+      )}
+
+      {/* Same Password Warning Modal */}
+      {showSamePasswordModal && createPortal(
+        <div className="fixed inset-0 z-[10003] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-150 ease-out animate-in fade-in fill-mode-both" onClick={() => setShowSamePasswordModal(false)} />
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowSamePasswordModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div className="flex flex-col items-center text-center gap-4 pt-2">
+              <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2 border-4 border-red-50">
+                <AlertTriangle size={28} strokeWidth={2} />
+              </div>
+              <div className="w-full">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Same Password Entered
+                </h3>
+                <p className="text-[14px] leading-relaxed text-gray-500 font-medium mb-4">
+                  Your new password cannot be the same as your old password. Please choose a different password.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowSamePasswordModal(false)}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-[14px] shadow-lg shadow-red-500/20 hover:opacity-90 active:scale-95 transition-all"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       <form key={user._id ? `profile-form-${user._id}` : 'form'} onSubmit={handleSave} className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">

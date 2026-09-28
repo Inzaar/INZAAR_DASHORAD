@@ -2,13 +2,14 @@ function Sideabrbbutton({ children, isActive, onClick }) {
   return (
     <label
       onClick={onClick}
-      className={`w-full h-[44px] flex items-center justify-start gap-[10px] text-[16px] cursor-pointer
+      className={`w-full py-2.5 px-3 flex items-center justify-start text-[16px] cursor-pointer text-left transition-all rounded-lg
       ${isActive
-          ? 'text-[#265CEB]'
-          : 'text-[#6A6F78] hover:text-[#265CEB]' // Added hover here for consistency
+          ? 'text-[#265CEB] bg-[#265CEB]/10 font-medium'
+          : 'text-[#6A6F78] hover:text-[#265CEB] hover:bg-gray-50'
         }
       `}
     >
+      {/* 
       <input
         type='checkbox'
         className='w-[12px] h-[12px] accent-[#265CEB]'
@@ -17,9 +18,10 @@ function Sideabrbbutton({ children, isActive, onClick }) {
 
         readOnly
       />
-      <p className="select-none flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left pr-2">
+      */}
+      <div className="select-none flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left pr-2">
         {children}
-      </p>
+      </div>
     </label>
   )
 }

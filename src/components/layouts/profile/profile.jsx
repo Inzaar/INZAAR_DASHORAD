@@ -14,7 +14,7 @@ import { useNotification } from "@/context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "@/components/shared/LogoutModal";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle } from "lucide-react";
 // import profile from "@/assets/images/profile.png"
 
 function Profile({ userInfo, setUserPayload, userPayload }) {
@@ -22,6 +22,7 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showSamePasswordModal, setShowSamePasswordModal] = useState(false);
     const [oldPassword, setOldPassword] = useState("");
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [errors, setErrors] = useState({});
@@ -140,6 +141,10 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const handlePasswordConfirm = () => {
         if (hasPreviousPassword && !oldPassword.trim()) {
             toast.error("Please enter your current password");
+            return;
+        }
+        if (hasPreviousPassword && oldPassword.trim() === userPayload.password?.trim()) {
+            setShowSamePasswordModal(true);
             return;
         }
         const payloadToSend = { ...userPayload };
@@ -341,6 +346,41 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                                 className="w-full py-3.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[14px] hover:bg-gray-200 active:scale-95 transition-all"
                             >
                                 Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+            
+            {showSamePasswordModal && createPortal(
+                <div className="fixed inset-0 z-[10003] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-150 ease-out animate-in fade-in fill-mode-both" onClick={() => setShowSamePasswordModal(false)} />
+                    <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+                        <button
+                            onClick={() => setShowSamePasswordModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                        <div className="flex flex-col items-center text-center gap-4 pt-2">
+                            <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-2 border-4 border-red-50">
+                                <AlertTriangle size={28} strokeWidth={2} />
+                            </div>
+                            <div className="w-full">
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                    Same Password Entered
+                                </h3>
+                                <p className="text-[14px] leading-relaxed text-gray-500 font-medium mb-4">
+                                    Your new password cannot be the same as your old password. Please choose a different password.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowSamePasswordModal(false)}
+                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-[14px] shadow-lg shadow-red-500/20 hover:opacity-90 active:scale-95 transition-all"
+                            >
+                                Understood
                             </button>
                         </div>
                     </div>
