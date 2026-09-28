@@ -482,7 +482,7 @@ const QuizTakePage = () => {
                                     onClick={handleContinue}
                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#3758EE] to-[#9333EA] text-white font-bold text-sm rounded-xl hover:opacity-90 transition-opacity shadow-md whitespace-nowrap"
                                 >
-                                    <span>{result?.isPassed ? 'Continue Course' : 'Go Back'}</span>
+                                    <span>Continue Course</span>
                                     <ChevronRight size={16} />
                                 </button>
                             </div>
@@ -499,7 +499,7 @@ const QuizTakePage = () => {
                                 {result?.isPassed ? 'Quiz Passed! 🎊' : 'Needs Improvement 📚'}
                             </h2>
                             <p className="text-[#64748B] text-sm md:text-base px-2">
-                                {result?.isPassed ? 'Great effort! Here is your result.' : 'Review the material and try again to unlock the next lecture.'}
+                                {result?.isPassed ? 'Great effort! Here is your result.' : 'Review the material to improve your score. The next lecture is unlocked.'}
                             </p>
                         </div>
 
@@ -565,7 +565,7 @@ const QuizTakePage = () => {
                                 onClick={handleContinue}
                                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-[#3758EE] to-[#9333EA] text-white font-bold text-sm md:text-[15px] rounded-xl hover:opacity-90 transition-opacity shadow-md whitespace-nowrap"
                             >
-                                <span>{result?.isPassed ? 'Continue Course' : 'Go Back'}</span>
+                                <span>Continue Course</span>
                                 <ChevronRight size={16} />
                             </button>
                         </div>
