@@ -207,9 +207,9 @@ const DashboardPage = () => {
                                                 <div className="relative z-20" ref={lectureDropdownRef}>
                                                     <button
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
-                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[120px] justify-between"
+                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[250px] justify-between"
                                                     >
-                                                        <span className="truncate max-w-[150px]">
+                                                        <span className="truncate flex-1 text-left">
                                                             {t(selectedCourseData?.title, selectedCourseData?.title) || t('select_course', 'Select Course')}
                                                         </span>
                                                         <svg
@@ -229,7 +229,7 @@ const DashboardPage = () => {
                                                     </button>
 
                                                     {isLectureDropdownOpen && (
-                                                        <div className="absolute top-full mt-1 right-0 w-[200px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
+                                                        <div className="absolute top-full mt-1 right-0 w-[200px] min-[900px]:w-[280px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
                                                             {lectureOptions.length > 0 ? (
                                                                 lectureOptions.map((option) => (
                                                                     <button
