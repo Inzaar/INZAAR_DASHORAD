@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 const AssignmentSubmission = () => {
     const location = useLocation();
-    const { assignment, returnUrl } = location.state || {};
+    const { assignment, returnUrl, enrollmentId } = location.state || {};
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -119,7 +119,7 @@ const AssignmentSubmission = () => {
             const targetAssignmentId = assignment?.id || assignment?._id;
             if (targetCourseId && targetAssignmentId) {
                 try {
-                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name, { signal });
+                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name, { signal }, enrollmentId);
                 } catch (progressErr) {
                     if (progressErr.name === 'CanceledError' || progressErr.code === 'ERR_CANCELED') throw progressErr;
                     console.error("Failed to update assignment progress in backend:", progressErr);

@@ -294,6 +294,7 @@ const CourseView = () => {
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
     const courseId = new URLSearchParams(window.location.search).get("id");
+    const enrollmentId = new URLSearchParams(window.location.search).get("enrollmentId");
     const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
     const userId = new URLSearchParams(window.location.search).get("userId");
     const isQuizView = currentLecture?.type === 'Quiz';
@@ -509,7 +510,7 @@ const CourseView = () => {
             try {
                 const res = (isAdminView && !userId)
                     ? await getAdminCourseById(courseId)
-                    : await getCourseById(courseId, userId);
+                    : await getCourseById(courseId, userId, enrollmentId);
                 const data = res.data.data;
                 setCourseData(data);
 
@@ -741,7 +742,8 @@ const CourseView = () => {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
                 isAdminView,
-                assignment: mappedAssignmentObj
+                assignment: mappedAssignmentObj,
+                enrollmentId
             }
         });
     };
@@ -800,7 +802,8 @@ const CourseView = () => {
         navigate('/assignment', {
             state: {
                 returnUrl: window.location.pathname + window.location.search,
-                assignment: mappedAssignmentObj
+                assignment: mappedAssignmentObj,
+                enrollmentId
             }
         });
     };
@@ -919,7 +922,8 @@ const CourseView = () => {
                                 lectureId,
                                 watchedPercentage: finalPercent,
                                 lastWatchedTime: Math.floor(cur),
-                                timeSpentDelta
+                                timeSpentDelta,
+                                enrollmentId
                             }).then(async (data) => {
                                 maxWatchedMapRef.current[lectureId] = Math.max(maxWatchedMapRef.current[lectureId] || 0, finalPercent);
 
@@ -999,20 +1003,32 @@ const CourseView = () => {
                                 if (data?.certificateGenerated && !generatingCert) {
                                     setGeneratingCert(true);
                                     try {
-                                        const { studentName, courseName, completedAt, templateUrl } = {
+                                        const fmtDate = (d) =>
+                                            d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-') : 'N/A';
+
+                                        const newCertData = {
                                             studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
                                             courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
                                             completedAt: data.certificate?.completedAt,
-                                            templateUrl: courseData?.certificateTemplate || null
+                                            templateUrl: courseData?.certificateTemplate || null,
+                                            studentId: courseData?.studentId || 'N/A',
+                                            batchId: courseData?.batchIdString || 'N/A',
+                                            fromDate: courseData?.batchStartDate ? fmtDate(courseData.batchStartDate) : 'N/A',
+                                            toDate: courseData?.batchEndDate ? fmtDate(courseData.batchEndDate) : 'N/A'
                                         };
-                                        setCertData({ studentName, courseName, completedAt, templateUrl });
+                                        
+                                        console.log("Certificate Data Sent from API in CourseView:");
+                                        console.log("courseData object:", courseData);
+                                        console.log("req.user.studentId fetched from backend?:", courseData?.studentId);
+                                        
+                                        setCertData(newCertData);
                                         await new Promise(r => setTimeout(r, 300));
                                         const { toBlob } = await import('html-to-image');
                                         const blob = await toBlob(certCardRef.current, { pixelRatio: 2, cacheBust: true });
                                         if (blob) {
                                             const { uploadImage } = await import('@/api/course');
                                             const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
-                                            await saveCertificate(courseId, uploaded.url);
+                                            await saveCertificate(courseId, uploaded.url, enrollmentId);
                                             setCertData(prev => ({ ...prev, certUrl: uploaded.url }));
                                         }
                                     } catch (e) {
@@ -1190,6 +1206,10 @@ const CourseView = () => {
                         courseName={certData.courseName}
                         completedAt={certData.completedAt}
                         templateUrl={certData.templateUrl}
+                        studentId={certData.studentId}
+                        batchId={certData.batchId}
+                        fromDate={certData.fromDate}
+                        toDate={certData.toDate}
                     />
                 </div>
             )}
@@ -1617,7 +1637,8 @@ const CourseView = () => {
                                                                                                         lectureId,
                                                                                                         watchedPercentage: 100,
                                                                                                         lastWatchedTime: 100,
-                                                                                                        timeSpentDelta: 60
+                                                                                                        timeSpentDelta: 60,
+                                                                                                        enrollmentId
                                                                                                     });
                                                                                                     toast.success("Completed! Unlocking...", { id: "markComplete" });
 

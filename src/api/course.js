@@ -38,12 +38,16 @@ export const getAdminCourseById = (courseId) => {
 }
 
 // Fetch complete course detail for the logged-in user or a specific student (for admins/mods)
-export const getCourseById = (courseId, userId = null) => {
+export const getCourseById = (courseId, userId = null, enrollmentId = null) => {
     const config = {
         withCredentials: true,
+        params: {}
     };
     if (userId) {
-        config.params = { userId };
+        config.params.userId = userId;
+    }
+    if (enrollmentId) {
+        config.params.enrollmentId = enrollmentId;
     }
     const res = axiosInstance.get(`/enrollments/my-courses/${courseId}`, config);
     return res;
@@ -77,20 +81,26 @@ export const createCourseWithLectures = async (data) => {
 // lectureId  — the specific lecture being watched
 // watchedPercentage — 0–100
 // lastWatchedTime   — current video playback position in seconds (for resume)
-export const updateLectureProgress = async (courseId, { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta }) => {
+export const updateLectureProgress = async (courseId, { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta, enrollmentId }) => {
+    const payload = { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta };
+    if (enrollmentId) payload.enrollmentId = enrollmentId;
+    
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/progress`,
-        { lectureId, watchedPercentage, lastWatchedTime, timeSpentDelta },
+        payload,
         { withCredentials: true }
     );
     return res.data.data;
 };
 
 // Submit assignment progress
-export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, fileName, config = {}) => {
+export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, fileName, config = {}, enrollmentId = null) => {
+    const payload = { assignmentId, fileUrl, fileName };
+    if (enrollmentId) payload.enrollmentId = enrollmentId;
+
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/assignment-progress`,
-        { assignmentId, fileUrl, fileName },
+        payload,
         { withCredentials: true, ...config }
     );
     return res.data.data;
@@ -141,10 +151,13 @@ export const uploadPdf = async (file, config = {}) => {
 }
 
 // Save a generated certificate URL back to the enrollment
-export const saveCertificate = async (courseId, certificateUrl) => {
+export const saveCertificate = async (courseId, certificateUrl, enrollmentId = null) => {
+    const payload = { certificateUrl };
+    if (enrollmentId) payload.enrollmentId = enrollmentId;
+    
     const res = await axiosInstance.patch(
         `/enrollments/my-courses/${courseId}/certificate`,
-        { certificateUrl },
+        payload,
         { withCredentials: true }
     );
     return res.data.data;

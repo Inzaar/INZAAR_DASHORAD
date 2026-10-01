@@ -12,6 +12,7 @@ const CourseCard = ({
     total = 0,
     className,
     id,
+    enrollmentId,
     batchStartDate
 }) => {
     const { t } = useTranslation();
@@ -23,7 +24,8 @@ const CourseCard = ({
             e.preventDefault();
             toast("Coming soon! This course batch hasn't started yet.", { icon: "⏳" });
         } else {
-            navigate(`/course-view?id=${id}`);
+            const url = enrollmentId ? `/course-view?id=${id}&enrollmentId=${enrollmentId}` : `/course-view?id=${id}`;
+            navigate(url);
         }
     };
 

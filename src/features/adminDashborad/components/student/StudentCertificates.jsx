@@ -87,8 +87,16 @@ const StudentCertificates = ({ profileData }) => {
                 completedAt: enrollment.endDate !== 'N/A' && enrollment.endDate !== 'In Progress'
                     ? new Date(enrollment.endDate).toISOString()
                     : new Date().toISOString(),
-                templateUrl: enrollment.certificateTemplate
+                templateUrl: enrollment.certificateTemplate,
+                studentId: profileData?.user?.studentId || 'N/A',
+                batchId: enrollment.batchIdString || 'N/A',
+                fromDate: enrollment.batchStartDate || 'N/A',
+                toDate: enrollment.batchEndDate || 'N/A'
             });
+
+            console.log("Certificate Data Sent from API:");
+            console.log("enrollment object from API:", enrollment);
+            console.log("profileData.user.studentId:", profileData?.user?.studentId);
 
             // wait for the hidden card to render
             await new Promise(r => setTimeout(r, 100));
@@ -108,7 +116,7 @@ const StudentCertificates = ({ profileData }) => {
                 const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
                 console.log('Uploaded certificate image:', uploaded.url);
 
-                await saveCertificate(enrollment.courseId, uploaded.url);
+                await saveCertificate(enrollment.courseId, uploaded.url, enrollment.enrollmentId);
 
                 // Update UI
                 setAllCertificates(prev => prev.map(c =>
@@ -200,6 +208,10 @@ const StudentCertificates = ({ profileData }) => {
                         courseName={certData.courseName}
                         completedAt={certData.completedAt}
                         templateUrl={certData.templateUrl}
+                        studentId={certData.studentId}
+                        batchId={certData.batchId}
+                        fromDate={certData.fromDate}
+                        toDate={certData.toDate}
                     />
                 </div>
             )}

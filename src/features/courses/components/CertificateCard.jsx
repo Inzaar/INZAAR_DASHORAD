@@ -8,7 +8,7 @@ import React from 'react';
  *  courseName  — title of the completed course
  *  completedAt — ISO date string or Date object
  */
-const CertificateCard = React.forwardRef(({ studentName, courseName, completedAt, templateUrl }, ref) => {
+const CertificateCard = React.forwardRef(({ studentName, courseName, completedAt, templateUrl, studentId, batchId, fromDate, toDate }, ref) => {
     const dateStr = completedAt
         ? new Date(completedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
         : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -25,20 +25,120 @@ const CertificateCard = React.forwardRef(({ studentName, courseName, completedAt
                 backgroundImage: isCustomTemplate ? `url('${templateUrl}')` : 'linear-gradient(135deg, #1a1040 0%, #2d1b69 50%, #1a1040 100%)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'block',
                 position: 'relative',
                 fontFamily: 'Georgia, serif',
                 overflow: 'hidden',
-                padding: '48px',
-                boxSizing: 'border-box',
                 color: isCustomTemplate ? '#000000' : '#ffffff'
             }}
         >
-            {!isCustomTemplate && (
+            {isCustomTemplate ? (
                 <>
+                    {/* Student Name */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '400px',
+                        left: '0',
+                        width: '100%',
+                        textAlign: 'center',
+                        fontSize: '48px',
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                        letterSpacing: '3px',
+                    }}>
+                        {studentName}
+                    </div>
+
+                    {/* Course Name */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '505px',
+                        left: '0',
+                        width: '100%',
+                        textAlign: 'center',
+                        fontSize: '36px',
+                        fontWeight: 'bold',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                    }}>
+                        {courseName}
+                    </div>
+
+                    {/* Batch Number */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '560px',
+                        left: '380px',
+                        fontSize: '20px',
+                        fontWeight: 'normal',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                    }}>
+                        {batchId || 'N/A'}
+                    </div>
+
+                    {/* Student ID */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '560px',
+                        left: '850px',
+                        fontSize: '20px',
+                        fontWeight: 'normal',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                    }}>
+                        {studentId || 'N/A'}
+                    </div>
+
+                    {/* From Date */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '600px',
+                        left: '460px',
+                        width: '140px',
+                        textAlign: 'center',
+                        fontSize: '18px',
+                        fontWeight: 'normal',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                    }}>
+                        {fromDate || 'N/A'}
+                    </div>
+
+                    {/* To Date */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '600px',
+                        left: '680px',
+                        width: '140px',
+                        textAlign: 'center',
+                        fontSize: '18px',
+                        fontWeight: 'normal',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                    }}>
+                        {toDate || 'N/A'}
+                    </div>
+
+                    {/* Date of Issue */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '645px',
+                        left: '160px',
+                        width: '250px',
+                        textAlign: 'center',
+                        fontSize: '20px',
+                        fontWeight: 'normal',
+                        color: '#000000',
+                        fontFamily: 'Georgia, serif',
+                        whiteSpace: 'nowrap',
+                    }}>
+                        {dateStr}
+                    </div>
+                </>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '48px', boxSizing: 'border-box' }}>
                     {/* Decorative corner accents */}
                     {[
                         { top: '16px', left: '16px' },
@@ -131,67 +231,62 @@ const CertificateCard = React.forwardRef(({ studentName, courseName, completedAt
                     <div style={{ color: 'rgba(255, 255, 255, 0.55)', fontSize: '14px', marginBottom: '12px', fontFamily: 'Arial, sans-serif' }}>
                         This is to certify that
                     </div>
-                </>
-            )}
 
-            {/* Student Name */}
-            <div style={{
-                fontSize: '44px',
-                fontWeight: 'bold',
-                color: isCustomTemplate ? '#1a1040' : '#ffffff',
-                letterSpacing: '1px',
-                marginBottom: isCustomTemplate ? '20px' : '8px',
-                marginTop: isCustomTemplate ? '100px' : '0px',
-                textShadow: isCustomTemplate ? 'none' : '0px 2px 20px rgba(201, 162, 39, 0.3)',
-            }}>
-                {studentName}
-            </div>
+                    {/* Student Name */}
+                    <div style={{
+                        fontSize: '44px',
+                        fontWeight: 'bold',
+                        color: '#ffffff',
+                        letterSpacing: '1px',
+                        marginBottom: '8px',
+                        textShadow: '0px 2px 20px rgba(201, 162, 39, 0.3)',
+                    }}>
+                        {studentName}
+                    </div>
 
-            {!isCustomTemplate && (
-                <div style={{ color: 'rgba(255, 255, 255, 0.55)', fontSize: '14px', marginBottom: '16px', fontFamily: 'Arial, sans-serif' }}>
-                    has successfully completed the course
-                </div>
-            )}
+                    <div style={{ color: 'rgba(255, 255, 255, 0.55)', fontSize: '14px', marginBottom: '16px', fontFamily: 'Arial, sans-serif' }}>
+                        has successfully completed the course
+                    </div>
 
-            {/* Course Name */}
-            <div style={{
-                fontSize: '22px',
-                color: isCustomTemplate ? '#1a1040' : '#f0d060',
-                fontWeight: isCustomTemplate ? 'bold' : 'normal',
-                textAlign: 'center',
-                maxWidth: '640px',
-                lineHeight: '1.35',
-                marginBottom: isCustomTemplate ? '20px' : '28px',
-            }}>
-                {courseName}
-            </div>
+                    {/* Course Name */}
+                    <div style={{
+                        fontSize: '22px',
+                        color: '#f0d060',
+                        fontWeight: 'normal',
+                        textAlign: 'center',
+                        maxWidth: '640px',
+                        lineHeight: '1.35',
+                        marginBottom: '28px',
+                    }}>
+                        {courseName}
+                    </div>
 
-            {/* Date */}
-            <div style={{
-                fontSize: '13px',
-                color: isCustomTemplate ? '#1a1040' : 'rgba(255, 255, 255, 0.45)',
-                fontWeight: isCustomTemplate ? 'bold' : 'normal',
-                fontFamily: 'Arial, sans-serif',
-                letterSpacing: '1px',
-            }}>
-                {isCustomTemplate ? dateStr : `Awarded on ${dateStr}`}
-            </div>
+                    {/* Date */}
+                    <div style={{
+                        fontSize: '13px',
+                        color: 'rgba(255, 255, 255, 0.45)',
+                        fontWeight: 'normal',
+                        fontFamily: 'Arial, sans-serif',
+                        letterSpacing: '1px',
+                    }}>
+                        Awarded on {dateStr}
+                    </div>
 
-            {!isCustomTemplate && (
-                <div style={{
-                    position: 'absolute',
-                    bottom: '40px',
-                    right: '64px',
-                    width: '70px',
-                    height: '70px',
-                    borderRadius: '35px',
-                    border: '2px solid #c9a227',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(201, 162, 39, 0.1)',
-                }}>
-                    <div style={{ fontSize: '20px' }}>✦</div>
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '40px',
+                        right: '64px',
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: '35px',
+                        border: '2px solid #c9a227',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(201, 162, 39, 0.1)',
+                    }}>
+                        <div style={{ fontSize: '20px' }}>✦</div>
+                    </div>
                 </div>
             )}
         </div>

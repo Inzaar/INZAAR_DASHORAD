@@ -107,14 +107,18 @@ const Certificates = () => {
 
         try {
             const studentName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student';
-
+            console.log(enrollment);
             setCertData({
                 studentName,
                 courseName: enrollment.course,
                 completedAt: enrollment.endDate !== 'N/A' && enrollment.endDate !== 'In Progress'
                     ? new Date(enrollment.endDate).toISOString()
                     : new Date().toISOString(),
-                templateUrl: enrollment.certificateTemplate
+                templateUrl: enrollment.certificateTemplate,
+                studentId: user?.studentId || 'N/A',
+                batchId: enrollment.batchIdString || 'N/A',
+                fromDate: enrollment.batchStartDate || 'N/A',
+                toDate: enrollment.batchEndDate || 'N/A'
             });
 
             // wait for the hidden card to render
@@ -135,7 +139,7 @@ const Certificates = () => {
                 const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
                 console.log('Uploaded certificate image:', uploaded.url);
 
-                await saveCertificate(enrollment.courseId, uploaded.url);
+                await saveCertificate(enrollment.courseId, uploaded.url, enrollment.enrollmentId);
 
                 // Update UI
                 setAllCertificates(prev => prev.map(c =>
@@ -227,6 +231,10 @@ const Certificates = () => {
                         courseName={certData.courseName}
                         completedAt={certData.completedAt}
                         templateUrl={certData.templateUrl}
+                        studentId={certData.studentId}
+                        batchId={certData.batchId}
+                        fromDate={certData.fromDate}
+                        toDate={certData.toDate}
                     />
                 </div>
             )}
@@ -446,10 +454,10 @@ const Certificates = () => {
                                     {/* Pagination */}
                                     {totalPages > 1 && (
                                         <div className="flex justify-end items-center mt-6 w-full">
-                                            <CustomPagination 
-                                                currentPage={currentPage} 
-                                                totalPages={totalPages} 
-                                                onPageChange={handlePageChange} 
+                                            <CustomPagination
+                                                currentPage={currentPage}
+                                                totalPages={totalPages}
+                                                onPageChange={handlePageChange}
                                             />
                                         </div>
                                     )}

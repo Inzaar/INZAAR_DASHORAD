@@ -37,7 +37,8 @@ export const AuthProvider = ({ children }) => {
             // Using /users/profile to verify the user identity
             const res = await axiosInstance.get('/users/profile');
             if (res.data && res.data.success && res.data.data) {
-                const profile = res.data.data.user || res.data.data;
+                console.log(res);
+                const profile = res.data.data.user;
                 setUser({
                     id: profile._id,
                     name: `${profile.firstname} ${profile.lastname || ''}`.trim(),
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }) => {
                     profileImageUrl: profile.profileImageUrl || null,
                     assignedFeatures: profile.assignedFeatures || [],
                     phone: profile.phone || null,
+                    studentId: profile.studentId || null,
                     loggedIn: true
                 });
             } else {
