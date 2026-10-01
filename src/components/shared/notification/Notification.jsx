@@ -16,15 +16,15 @@ function Notification({ title, message = "Default Notification", time = "Just no
     };
     return (
         <div onClick={onClick} className={`${className} group cursor-pointer w-full`}>
-            <div className={`flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100 transition-all duration-300 ${isUnread ? 'bg-gray-50' : 'bg-white hover:bg-gray-50'}`}>
+            <div className={`flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100 transition-all duration-300 ${isUnread ? 'bg-blue-50/30' : 'bg-white hover:bg-gray-50'}`}>
                 <div className="flex-1 flex items-center gap-4 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
-                    <div className="text-[13px] md:text-[14px] text-gray-500 font-normal leading-snug flex-1 break-words">
-                        {title && <span className="text-gray-600">{title} &ndash; </span>}
+                    <div className={`w-8 h-8 rounded-full shrink-0 ${isUnread ? 'bg-[#3758EE]' : 'bg-gray-200'}`}></div>
+                    <div className={`text-[13px] md:text-[14px] ${isUnread ? 'text-gray-800 font-medium' : 'text-gray-500 font-normal'} leading-snug flex-1 break-words`}>
+                        {title && <span className={`${isUnread ? 'text-gray-900 font-semibold' : 'text-gray-600'}`}>{title} &ndash; </span>}
                         <span>{message}</span>
                     </div>
                 </div>
-                <div className="shrink-0 ml-4 text-[11px] md:text-[12px] font-normal text-gray-400">
+                <div className={`shrink-0 ml-4 text-[11px] md:text-[12px] ${isUnread ? 'font-medium text-[#3758EE]' : 'font-normal text-gray-400'}`}>
                     {translateTime(time)}
                 </div>
             </div>
