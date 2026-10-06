@@ -2048,12 +2048,12 @@ const CourseView = () => {
                                                                     </div>
                                                                     <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
                                                                         <div className="flex items-center justify-between gap-4">
-                                                                            <span className="font-bold text-xs opacity-90">
-                                                                                {comment.senderId?.firstname} {comment.senderId?.lastname}
-                                                                                {!isSenderStudent && <span className="text-[9px] font-bold uppercase bg-white/20 px-2 py-0.5 rounded-full ml-2">{comment.senderId?.role}</span>}
-                                                                                {isSenderStudent && <span className="text-[9px] font-bold uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-2">Student</span>}
+                                                                            <span className={cn("font-bold text-xs opacity-90", !isMe ? "text-gray-800" : "text-white")}>
+                                                                                {comment.senderId?.firstname || "User"} {comment.senderId?.lastname || ""}
+                                                                                {!isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-blue-100 text-blue-700" : "bg-white/20")}>{comment.senderId?.role}</span>}
+                                                                                {isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-gray-100 text-gray-600" : "bg-white/20 text-white")}>Student</span>}
                                                                             </span>
-                                                                            <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                            <span className={cn("text-[10px] opacity-70 font-medium whitespace-nowrap", !isMe ? "text-gray-500" : "text-blue-100")}>{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                                         </div>
 
                                                                         {editingCommentId === comment._id ? (
@@ -2135,18 +2135,19 @@ const CourseView = () => {
                                         <div className="relative mt-auto">
                                             <input
                                                 type="text"
-                                                placeholder={t('add_comment_placeholder', 'Write a comment... (Press Enter to post)')}
+                                                placeholder={(!isAdminView && !courseData?.hasAssignedModerator) ? t('comments_disabled', 'Comments are disabled until a moderator is assigned') : t('add_comment_placeholder', 'Write a comment... (Press Enter to post)')}
                                                 value={newCommentText}
                                                 onChange={(e) => setNewCommentText(e.target.value)}
                                                 onKeyDown={handleAddComment}
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all pl-12 pr-12"
+                                                disabled={!isAdminView && !courseData?.hasAssignedModerator}
+                                                className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all pl-12 pr-12 ${(!isAdminView && !courseData?.hasAssignedModerator) ? 'opacity-70 cursor-not-allowed' : ''}`}
                                             />
                                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                                             </div>
                                             <button
                                                 onClick={handleAddComment}
-                                                disabled={!newCommentText.trim()}
+                                                disabled={(!isAdminView && !courseData?.hasAssignedModerator) || !newCommentText.trim()}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3758EE] hover:text-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Send Comment"
                                             >
