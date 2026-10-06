@@ -578,7 +578,7 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                 <th className="px-6 py-4 text-center w-[15%]">{t('date', 'Date')}</th>
                                 <th className="px-6 py-4 text-center w-[15%]">{t('progress', 'Progress')}</th>
                                 <th className="px-6 py-4 text-center w-[10%]">{t('status', 'Status')}</th>
-                                {!isAdminView && <th className="px-6 py-4 text-center w-[10%]">{t('comments', 'Comments')}</th>}
+                                {!isAdminView && <th className="px-6 py-4 text-center w-[10%]">{t('comments_and_queries', 'Comments and Queries')}</th>}
                                 <th className="px-6 py-4 text-center w-[10%]">{t('action', 'Action')}</th>
                             </tr>
                         </thead>

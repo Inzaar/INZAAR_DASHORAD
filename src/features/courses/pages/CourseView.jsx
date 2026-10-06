@@ -1989,7 +1989,7 @@ const CourseView = () => {
                                             ) : (
                                                 <>
                                                     <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
-                                                        {t('comments', 'Comments')} <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture?.title})</span>
+                                                        {t('comments_and_queries', 'Comments and Queries')} <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture?.title})</span>
                                                     </h3>
                                                     <button
                                                         onClick={() => setIsSelectionMode(true)}
