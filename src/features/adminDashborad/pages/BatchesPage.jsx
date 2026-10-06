@@ -6,7 +6,7 @@ import { getAllBatches } from '@/api/batch';
 import Loader from '@/components/ui/Loader';
 import { CustomPagination } from '@/components/ui/Pagination';
 
-const BatchesPage = ({ filter = 'All' }) => {
+const BatchesPage = ({ filter = 'All', isMyBatches = false }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [batches, setBatches] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +17,7 @@ const BatchesPage = ({ filter = 'All' }) => {
         const fetchBatches = async () => {
             try {
                 setIsLoading(true);
-                const data = await getAllBatches();
+                const data = await getAllBatches(isMyBatches);
                 
                 // Map DB batches to the required format
                 const formattedBatches = data.map(b => {
@@ -44,7 +44,7 @@ const BatchesPage = ({ filter = 'All' }) => {
         };
 
         fetchBatches();
-    }, []);
+    }, [isMyBatches]);
 
     const filteredBatches = filter === 'All' 
         ? batches 
@@ -116,7 +116,7 @@ const BatchesPage = ({ filter = 'All' }) => {
                                             </div>
 
                                             <button 
-                                                onClick={() => navigate(`/admin-batches/details/${batch.id}`)}
+                                                onClick={() => navigate(isMyBatches ? `/my-batches/details/${batch.id}` : `/admin-batches/details/${batch.id}`)}
                                                 className="w-full py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white rounded-xl font-medium shadow-sm hover:opacity-90 transition-opacity"
                                             >
                                                 View Details

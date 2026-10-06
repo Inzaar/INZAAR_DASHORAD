@@ -29,7 +29,7 @@ const AdminRoute = () => {
             '/admin-calendar': 'Calendar',
             '/admin-notifications': 'Notification',
             '/admin-moderators': 'Moderators',
-            '/moderator-details': ['Moderators', 'Reports & Logs', 'Dashboard'],
+            '/moderator-details': ['Moderators', 'Moderator Reports', 'Dashboard'],
             '/student-profiles': 'Student Profiles',
             '/admin-courses': 'Courses Management',
             '/reports': 'Student Reports', 
@@ -37,8 +37,8 @@ const AdminRoute = () => {
             '/course-reports': 'Course Reports',
             '/export-student-reports': 'Export Student Reports',
             '/export-moderator-reports': 'Export Moderator Reports',
-            '/admin/student-details': ['Student Profiles', 'Reports & Logs', 'Student Reports', 'Courses Management', 'Dashboard'],
-            '/admin/moderator-details': ['Moderators', 'Reports & Logs', 'Moderator Reports', 'Dashboard'],
+            '/admin/student-details': ['Student Profiles', 'Student Reports', 'Courses Management', 'Dashboard'],
+            '/admin/moderator-details': ['Moderators', 'Moderator Reports', 'Dashboard'],
             '/admin/course-details': 'Courses Management',
             '/admin-course-view': 'Courses Management',
             '/admin-course-play': 'Courses Management',
@@ -46,7 +46,8 @@ const AdminRoute = () => {
             '/admin-add-course': 'Courses Management',
             '/registered-users': 'Student Profiles',
             '/registered-courses': 'Courses Management',
-            '/admin-management': 'Management'
+            '/admin-management': 'Management',
+            '/admin-batches': 'Batches'
         };
 
         // Try exact match first

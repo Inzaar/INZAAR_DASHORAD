@@ -123,8 +123,12 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const availableFeatures = [
         "Calendar",
         "Courses Management",
-        "Reports & Logs",
-        "Student Profiles"
+        "Student Profiles",
+        "Batches",
+        "Management",
+        "Student Reports",
+        "Moderator Reports",
+        "Course Reports"
     ];
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);

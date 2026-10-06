@@ -48,6 +48,7 @@ function Sidebar({ className, onClose }) {
       'Student Reports': 'student_reports',
       'Moderator Reports': 'moderator_reports',
       'Course Reports': 'course_reports',
+      'My Batches': 'my_batches',
       'Logout': 'logout',
     };
     return map[str] || str;
@@ -92,6 +93,7 @@ function Sidebar({ className, onClose }) {
   if (user?.role === 'moderator' || user?.role === 'management') {
     if (user?.assignedFeatures?.length > 0) {
       moderatorFeatures = user.assignedFeatures.filter(feature => !studentItems.includes(feature) && feature !== 'Reports & Logs');
+
       moderatorFeatures.sort((a, b) => {
         if (a === 'Student Profiles') return -1;
         if (b === 'Student Profiles') return 1;
@@ -101,6 +103,15 @@ function Sidebar({ className, onClose }) {
     
     if (user?.role === 'management') {
       moderatorFeatures.unshift('Dashboard');
+    }
+
+    if (user?.role === 'moderator') {
+      const spIndex = moderatorFeatures.indexOf('Student Profiles');
+      if (spIndex !== -1) {
+        moderatorFeatures.splice(spIndex + 1, 0, 'My Batches');
+      } else {
+        moderatorFeatures.unshift('My Batches');
+      }
     }
   }
 
@@ -133,6 +144,11 @@ function Sidebar({ className, onClose }) {
     '/admin-batches/running': 'Running Batches',
     '/admin-batches/completed': 'Completed Batches',
     '/admin-batches/details': 'Batches',
+    '/my-batches': 'My Batches',
+    '/my-batches/all': 'My Batches',
+    '/my-batches/running': 'My Batches',
+    '/my-batches/completed': 'My Batches',
+    '/my-batches/details': 'My Batches',
     '/student-profiles': 'Student Profiles',
     '/student-profiles/all': 'All Students',
     '/student-profiles/male': 'Male Students',
@@ -240,12 +256,13 @@ function Sidebar({ className, onClose }) {
     }
 
     if (itemName === 'Batches') {
-      if (user?.role === 'moderator') {
-        navigate('/admin-batches');
-        if (onClose) onClose();
-        return;
-      }
       setIsBatchesExpanded(!isBatchesExpanded);
+      return;
+    }
+
+    if (itemName === 'My Batches') {
+      navigate('/my-batches');
+      if (onClose) onClose();
       return;
     }
 
@@ -348,21 +365,25 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isReportsExpanded && (
             <div className="flex flex-col gap-1 transition-all">
-              <button
-                onClick={() => handleItemClick('Student Reports')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
-              >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
-              </button>
-              <button
-                onClick={() => handleItemClick('Export Student Reports')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#4B4F56] hover:text-[#374151] ${activeItem === 'Export Student Reports' ? 'font-bold' : 'font-medium'}`}
-              >
-                <Download size={14} className="shrink-0" />
-                <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
-              </button>
-              {user?.role !== 'moderator' && (
+              {(user?.role === 'admin' || user?.assignedFeatures?.includes('Student Reports')) && (
+                <>
+                  <button
+                    onClick={() => handleItemClick('Student Reports')}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                    <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleItemClick('Export Student Reports')}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#4B4F56] hover:text-[#374151] ${activeItem === 'Export Student Reports' ? 'font-bold' : 'font-medium'}`}
+                  >
+                    <Download size={14} className="shrink-0" />
+                    <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
+                  </button>
+                </>
+              )}
+              {(user?.role === 'admin' || user?.assignedFeatures?.includes('Moderator Reports')) && (
                 <>
                   <button
                     onClick={() => handleItemClick('Moderator Reports')}
@@ -380,13 +401,15 @@ function Sidebar({ className, onClose }) {
                   </button>
                 </>
               )}
-              <button
-                onClick={() => handleItemClick('Course Reports')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
-              >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
-              </button>
+              {(user?.role === 'admin' || user?.assignedFeatures?.includes('Course Reports')) && (
+                <button
+                  onClick={() => handleItemClick('Course Reports')}
+                  className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
+                >
+                  <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
+                  <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -411,8 +434,6 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isModeratorsExpanded && (
             <div className="flex flex-col gap-1 transition-all">
-              {user?.role === 'admin' && (
-                <>
                   <button
                     onClick={() => handleItemClick('All Moderators')}
                     className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
@@ -434,8 +455,6 @@ function Sidebar({ className, onClose }) {
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
                     {t('female_moderators', 'Female Moderators')}
                   </button>
-                </>
-              )}
             </div>
           )}
         </div>
@@ -443,22 +462,6 @@ function Sidebar({ className, onClose }) {
     }
 
     if (item === 'Batches') {
-      if (user?.role === 'moderator') {
-        const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
-        return (
-          <Sideabrbbutton
-            key={item}
-            isActive={isAnyBatchActive}
-            onClick={(e) => {
-              e.preventDefault();
-              handleItemClick('Batches');
-            }}
-          >
-            {t('batches', 'Batches')}
-          </Sideabrbbutton>
-        );
-      }
-
       const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
       return (
         <div key={item} className="w-full flex flex-col gap-1">
@@ -476,8 +479,6 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isBatchesExpanded && (
             <div className="flex flex-col gap-1 transition-all">
-              {user?.role === 'admin' && (
-                <>
                   <button
                     onClick={() => handleItemClick('All Batches')}
                     className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Batches' ? 'font-bold' : 'font-medium'}`}
@@ -499,8 +500,6 @@ function Sidebar({ className, onClose }) {
                     <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#10B981]"></span>
                     {t('completed_batches', 'Completed Batches')}
                   </button>
-                </>
-              )}
             </div>
           )}
         </div>

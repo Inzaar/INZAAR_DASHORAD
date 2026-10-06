@@ -88,6 +88,12 @@ const routes = createRoutesFromElements(
             <Route path="/admin-batches/completed" element={<BatchesPage filter="Completed" />} />
             <Route path="/admin-batches/details/:id" element={<BatchDetailsPage />} />
             <Route path="/admin-batches/groups/:id/students" element={<GroupStudentsPage />} />
+            <Route path="/my-batches" element={<Navigate to="/my-batches/all" replace />} />
+            <Route path="/my-batches/all" element={<BatchesPage filter="All" isMyBatches={true} />} />
+            <Route path="/my-batches/running" element={<BatchesPage filter="Running" isMyBatches={true} />} />
+            <Route path="/my-batches/completed" element={<BatchesPage filter="Completed" isMyBatches={true} />} />
+            <Route path="/my-batches/details/:id" element={<BatchDetailsPage isMyBatches={true} />} />
+            <Route path="/my-batches/groups/:id/students" element={<GroupStudentsPage />} />
             <Route path="/student-profiles" element={<StudentProfilesPage genderFilter="All" />} />
             <Route path="/student-profiles/all" element={<StudentProfilesPage genderFilter="All" />} />
             <Route path="/student-profiles/male" element={<StudentProfilesPage genderFilter="Male" />} />

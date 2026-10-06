@@ -11,7 +11,7 @@ import { getBatchById } from '@/api/batch';
 import { getStudentsByGroup } from '@/api/limit';
 import { CustomPagination } from '@/components/ui/Pagination';
 
-const BatchDetailsPage = () => {
+const BatchDetailsPage = ({ isMyBatches = false }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const BatchDetailsPage = () => {
         const fetchDetails = async () => {
             try {
                 setLoading(true);
-                const res = await getBatchById(id);
+                const res = await getBatchById(id, isMyBatches);
                 setBatchData(res);
             } catch (error) {
                 console.error("Failed to fetch batch details", error);
@@ -39,10 +39,10 @@ const BatchDetailsPage = () => {
             }
         };
         if (id) fetchDetails();
-    }, [id]);
+    }, [id, isMyBatches]);
 
     const handleGroupClick = (group) => {
-        navigate(`/admin-batches/groups/${group._id}/students?name=${encodeURIComponent(group.name)}`);
+        navigate(isMyBatches ? `/my-batches/groups/${group._id}/students?name=${encodeURIComponent(group.name)}` : `/admin-batches/groups/${group._id}/students?name=${encodeURIComponent(group.name)}`);
     };
 
     return (

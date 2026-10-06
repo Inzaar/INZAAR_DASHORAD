@@ -8,18 +8,18 @@ export const createBatch = async (data) => {
         throw error.response?.data || error;
     }
 };
-export const getAllBatches = async () => {
+export const getAllBatches = async (isMyBatches = false) => {
     try {
-        const response = await axiosInstance.get("/batches");
+        const response = await axiosInstance.get(`/batches${isMyBatches ? '?myBatches=true' : ''}`);
         return response.data.data;
     } catch (error) {
         throw error.response?.data || error;
     }
 };
 
-export const getBatchById = async (id) => {
+export const getBatchById = async (id, isMyBatches = false) => {
     try {
-        const response = await axiosInstance.get(`/batches/${id}`);
+        const response = await axiosInstance.get(`/batches/${id}${isMyBatches ? '?myBatches=true' : ''}`);
         return response.data.data;
     } catch (error) {
         throw error.response?.data || error;

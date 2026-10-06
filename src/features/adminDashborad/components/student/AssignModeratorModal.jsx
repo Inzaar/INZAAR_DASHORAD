@@ -19,7 +19,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
           const res = await getModeratorFeatures();
           if (res?.data) {
             const dbFeatures = res.data
-              .filter(f => f.name !== 'Student Profiles' && f.key !== 'Student Profiles')
+              .filter(f => f.name !== 'Student Profiles' && f.key !== 'Student Profiles' && f.name !== 'Reports & Logs' && f.key !== 'Reports & Logs')
               .map(f => ({
                 id: f._id || f.key || f.name,
                 label: f.name,
