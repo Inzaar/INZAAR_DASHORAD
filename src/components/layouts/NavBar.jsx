@@ -8,12 +8,29 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 function Navbar({ onMenuClick, hideMenu = false, title }) {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const { unreadCount } = useNotification();
     const navigate = useNavigate();
     const location = useLocation();
     const { i18n, t } = useTranslation();
     const [isLangOpen, setIsLangOpen] = React.useState(false);
+    const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+    const profileDropdownRef = React.useRef(null);
+    const langDropdownRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+                setIsProfileOpen(false);
+            }
+            if (langDropdownRef.current && !langDropdownRef.current.contains(event.target)) {
+                setIsLangOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const languages = [
         { name: "English", code: "en", flag: "https://flagcdn.com/us.svg", dir: "ltr" },
@@ -150,7 +167,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         )}
                     </div>
 
-                    <div className="relative">
+                    <div className="relative" ref={langDropdownRef}>
                         <div
                             onClick={() => setIsLangOpen(!isLangOpen)}
                             className="bg-white/10 flex items-center justify-center rounded-lg shadow-sm cursor-pointer hover:bg-white/20 transition-all p-1.5 sm:px-3 gap-1.5 sm:gap-2 border border-white/10"
@@ -194,14 +211,56 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         )}
                     </div>
 
-                    <div
-                        onClick={() => user?.role === 'admin' ? navigate('/admin/profile') : navigate('/profile')}
-                        className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
-                    >
-                        {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
-                            <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
-                        ) : (
-                            <span className="text-[#2C2C2C] font-black text-xs sm:text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>
+                    <div className="relative" ref={profileDropdownRef}>
+                        <div
+                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                            className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
+                        >
+                            {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
+                                <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-[#2C2C2C] font-black text-xs sm:text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>
+                            )}
+                        </div>
+
+                        {isProfileOpen && (
+                            <div className="absolute top-full mt-2 right-0 w-[240px] bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+                                    <div className="w-[40px] h-[40px] rounded-full overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                                        {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
+                                            <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-gray-500 font-bold text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-sm font-bold text-gray-900 truncate">
+                                            {user?.firstname || user?.name || "User"} {user?.lastname || ""}
+                                        </span>
+                                        <span className="text-xs text-gray-500 truncate">{user?.email || ""}</span>
+                                    </div>
+                                </div>
+                                <div className="py-1">
+                                    <button
+                                        onClick={() => {
+                                            setIsProfileOpen(false);
+                                            user?.role === 'admin' ? navigate('/admin/profile') : navigate('/profile');
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#5D5FEF] transition-colors font-medium"
+                                    >
+                                        {t('profile', 'Profile')}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsProfileOpen(false);
+                                            if (logout) logout();
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                                    >
+                                        {t('logout', 'Logout')}
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
