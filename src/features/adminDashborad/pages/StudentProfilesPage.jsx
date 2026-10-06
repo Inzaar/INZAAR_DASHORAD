@@ -616,6 +616,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                     <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                                         <thead>
                                             <tr>
+                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Categories</th>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("name", "Name")}</th>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("contact", "Contact")}</th>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("enrollments", "Enrollments")}</th>
@@ -629,7 +630,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             {students.length === 0 ? (
                                                 !isLoading && (
                                                     <tr>
-                                                        <td colSpan="7" className="py-20 text-center bg-[#F8F9FA] rounded-xl">
+                                                        <td colSpan="8" className="py-20 text-center bg-[#F8F9FA] rounded-xl">
                                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                                 <Search size={48} className="opacity-20" />
                                                                 <p className="font-medium text-[16px]">{t("no_students_matching", "No students found matching your criteria")}</p>
@@ -647,6 +648,11 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 students.map((student) => (
                                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                                         <td className="py-4 rounded-l-xl text-center">
+                                                            <span className="text-[14px] text-gray-800">
+                                                                {localStorage.getItem(`studentCategory_${student.id}`) || "-"}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4 text-center">
                                                             <span className="text-[14px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
                                                         </td>
                                                         <td className="py-4 text-center">

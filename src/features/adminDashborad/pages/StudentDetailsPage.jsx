@@ -31,7 +31,18 @@ const StudentDetailsPage = () => {
     const [isModerator, setIsModerator] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(() => {
+        return localStorage.getItem(`studentCategory_${id}`) || "";
+    });
     const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        if (selectedCategory) {
+            localStorage.setItem(`studentCategory_${id}`, selectedCategory);
+        } else {
+            localStorage.removeItem(`studentCategory_${id}`);
+        }
+    }, [selectedCategory, id]);
 
     // outside click close for dropdown
     useEffect(() => {
@@ -153,7 +164,16 @@ const StudentDetailsPage = () => {
                             <div className="bg-white shadow rounded-lg p-4">
                                 {/* Header Title and Back Button */}
                                 <div className="hidden sm:flex sm:flex-row justify-between items-start sm:items-center mb-4">
-                                    <h1 className="text-xl font-semibold text-gray-700">Profile</h1>
+                                    <div className="flex items-center gap-3">
+                                        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                            Profile
+                                            {selectedCategory && (
+                                                <span className="px-2 py-0.5 rounded bg-blue-100 text-[#3758EE] text-sm font-semibold">
+                                                    {selectedCategory}
+                                                </span>
+                                            )}
+                                        </h1>
+                                    </div>
                                     <div className="flex flex-wrap items-center gap-3">
                                         {/* <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
                                             Send Message <BsChatDotsFill className="text-white/90" size={14} />
@@ -201,6 +221,22 @@ const StudentDetailsPage = () => {
                                         <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
                                             Joining: <span className="text-gray-800">10/04/2025</span>
                                         </span>
+
+                                        {user?.role === 'admin' && (
+                                            <div className="flex items-center">
+                                                <select
+                                                    value={selectedCategory}
+                                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                                    className="px-3 py-1.5 border border-gray-200 rounded-[4px] text-sm text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-[#3758EE] focus:border-[#3758EE] bg-white transition-colors cursor-pointer w-40"
+                                                >
+                                                    <option value="" disabled>Set Category</option>
+                                                    <option value="A">Category A</option>
+                                                    <option value="B">Category B</option>
+                                                    <option value="C">Category C</option>
+                                                    <option value="D">Category D</option>
+                                                </select>
+                                            </div>
+                                        )}
 
                                         <div className="hidden xl:flex items-center gap-4">
                                             {!profileData?.user?.isDeleted ? (
