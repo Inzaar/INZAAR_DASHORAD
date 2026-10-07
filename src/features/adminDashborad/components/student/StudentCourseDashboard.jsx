@@ -41,6 +41,7 @@ const StudentCourseDashboard = ({ profileData }) => {
     const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
     const [selectedLectureForComments, setSelectedLectureForComments] = useState(null);
     const [lectureComments, setLectureComments] = useState([]);
+    const [lastViewedCommentsTime, setLastViewedCommentsTime] = useState(null);
     const [loadingComments, setLoadingComments] = useState(false);
     const [newCommentText, setNewCommentText] = useState("");
     const [editingCommentId, setEditingCommentId] = useState(null);
@@ -147,10 +148,12 @@ const StudentCourseDashboard = ({ profileData }) => {
                     setLectureComments([...lectureComments, res.data.data]);
                     setNewCommentText("");
 
+                    const senderRole = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Admin';
+
                     createNotification({
-                        title: `New Reply from Admin`,
+                        title: `New Reply from ${senderRole}`,
                         type: "app",
-                        message: `Admin replied to your comment in ${selectedLectureForComments?.title}`,
+                        message: `${senderRole} replied to your comment in ${selectedLectureForComments?.title}`,
                         link: `/course-view?id=${currentCourse?.courseId}&lectureId=${lectureId}`,
                         sendto: userId,
                         sendfrom: user?._id || user?.id,
@@ -177,7 +180,19 @@ const StudentCourseDashboard = ({ profileData }) => {
         try {
             const res = await getComments(lecture.id, userId);
             if (res?.data?.data) {
-                setLectureComments(res.data.data);
+                const comments = res.data.data;
+                setLectureComments(comments);
+
+                // Track last viewed time for unread messages style
+                const storedTime = localStorage.getItem('lastViewedComments_' + lecture.id);
+                if (storedTime) {
+                    setLastViewedCommentsTime(new Date(storedTime).getTime());
+                } else if (comments.length > 0) {
+                    setLastViewedCommentsTime(Date.now());
+                }
+                
+                // Update to current time so next refresh shows new ones as unread
+                localStorage.setItem('lastViewedComments_' + lecture.id, new Date().toISOString());
             }
         } catch (error) {
             console.error("Error fetching comments:", error);
@@ -572,15 +587,39 @@ const StudentCourseDashboard = ({ profileData }) => {
                                 </div>
                             ) : lectureComments && lectureComments.length > 0 ? (
                                 <div className="flex flex-col gap-4 flex-1">
-                                    {lectureComments.map(comment => {
+                                    {lectureComments.map((comment, index) => {
                                         const senderIdStr = String(comment.senderId?._id || comment.senderId?.id || comment.senderId);
                                         const isStudent = senderIdStr === String(userId);
                                         const isMe = senderIdStr === String(user?._id || user?.id);
                                         const canEdit = isMe || user?.role === 'admin';
                                         const isSelected = selectedComments.includes(comment._id);
                                         
+                                        const commentTime = new Date(comment.createdAt).getTime();
+                                        const isUnread = lastViewedCommentsTime && commentTime > lastViewedCommentsTime && !isMe;
+                                        let showUnreadDivider = false;
+                                        
+                                        if (isUnread) {
+                                            const prevComment = index > 0 ? lectureComments[index - 1] : null;
+                                            const prevCommentTime = prevComment ? new Date(prevComment.createdAt).getTime() : 0;
+                                            const prevSenderStr = prevComment ? String(prevComment.senderId?._id || prevComment.senderId?.id || prevComment.senderId) : null;
+                                            
+                                            if (!prevComment || prevCommentTime <= lastViewedCommentsTime || prevSenderStr === String(user?._id || user?.id)) {
+                                                showUnreadDivider = true;
+                                            }
+                                        }
+
                                         return (
-                                            <div key={comment._id} className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
+                                            <React.Fragment key={comment._id}>
+                                                {showUnreadDivider && (
+                                                    <div className="flex items-center gap-3 my-3 opacity-90">
+                                                        <div className="flex-1 h-px bg-green-500/30"></div>
+                                                        <span className="text-[10px] font-bold text-green-600 uppercase bg-green-50 px-2 py-0.5 rounded-full border border-green-200 shadow-sm">
+                                                            {lectureComments.length - index} Unread Message{lectureComments.length - index > 1 ? 's' : ''}
+                                                        </span>
+                                                        <div className="flex-1 h-px bg-green-500/30"></div>
+                                                    </div>
+                                                )}
+                                                <div className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
                                                 {isSelectionMode && !isMe && (
                                                     <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
                                                         {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
@@ -695,6 +734,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                                 </button>
                                             )}
                                         </div>
+                                        </React.Fragment>
                                     );
                                 })}
                                 </div>
