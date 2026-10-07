@@ -108,9 +108,10 @@ const StudentDetailsPage = () => {
         if (profileData?.user?.isDeleted) return;
 
         if (!isModerator) {
+            console.log("data ...................", profileData?.enrolledCourses);
             const enrolledCourses = profileData?.enrolledCourses || [];
             const requiredCourse = enrolledCourses.find(c =>
-                c.title && c.title.trim().toLowerCase().replace(/\s+/g, ' ') === "quran ka matlob insaan"
+                c.customCourseId && c.customCourseId.startsWith("QKMI")
             );
 
             const isCourseCompleted = requiredCourse && (
