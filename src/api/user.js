@@ -143,3 +143,24 @@ export const adminCreateManagement = async (data) => {
     });
     return res.data;
 };
+
+export const submitModeratorAudit = async (id, data) => {
+    const res = await axiosInstance.post(`/admin/moderators/${id}/audits`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const getModeratorAudits = async (id) => {
+    const res = await axiosInstance.get(`/admin/moderators/${id}/audits`, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const getModeratorMetrics = async (id) => {
+    const res = await axiosInstance.get(`/admin/moderators/${id}/metrics`, {
+        withCredentials: true,
+    });
+    return res.data;
+};

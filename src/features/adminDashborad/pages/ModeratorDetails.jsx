@@ -12,6 +12,7 @@ import ModeratorProfileComponent from "../components/moderator/ModeratorProfileC
 import { BsThreeDotsVertical } from "react-icons/bs";
 import ModeratorBatchesComponent from "../components/moderator/ModeratorBatchesComponent";
 import ModeratorRecordComponent from "../components/moderator/ModeratorRecordComponent";
+import ModeratorUpgradationComponent from "../components/moderator/ModeratorUpgradationComponent";
 import AssignModeratorModal from "../components/student/AssignModeratorModal";
 import { assignUserRole } from "@/api/user";
 import toast from "react-hot-toast";
@@ -89,20 +90,14 @@ const ModeratorDetails = () => {
 
   const handleAssignModalSave = async (data) => {
     try {
-      const isDeactivated = data.features.length === 0;
       await assignUserRole(id, {
-        role: isDeactivated ? "user" : "moderator",
+        role: "moderator",
         assignedFeatures: data.features
       });
 
-      if (isDeactivated) {
-        toast.success("Moderator given 0 features and reverted to student!");
-        navigate('/admin-moderators');
-      } else {
-        toast.success("Moderator updated successfully!");
-        setIsAssignModalOpen(false);
-        fetchProfileData(); // Refresh data
-      }
+      toast.success("Moderator updated successfully!");
+      setIsAssignModalOpen(false);
+      fetchProfileData(); // Refresh data
     } catch (err) {
       toast.error("Failed to update moderator");
       console.error(err);
@@ -183,7 +178,10 @@ const ModeratorDetails = () => {
             <div className="py-4 pr-2">
               <div className="bg-white shadow rounded-lg p-4">
                 <div className="hidden md:flex justify-between items-center mb-4">
-                  <h1 className=" text-xl font-semibold text-gray-700">
+                  <h1 className="flex items-center gap-3 text-xl font-semibold text-gray-700">
+                    <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[13px] font-bold rounded-lg shadow-sm tracking-wide">
+                      {profileData?.user?.moderatorTier || "Junior"}
+                    </span>
                     Profile
                   </h1>
                   <div className="flex flex-wrap items-center gap-3">
@@ -240,6 +238,15 @@ const ModeratorDetails = () => {
                         }`}
                     >
                       Records
+                    </button>
+                    <button
+                      onClick={() => setProfileButton('upgradation')}
+                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'upgradation'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                      Upgradation
                     </button>
                   </div>
 
@@ -372,6 +379,11 @@ const ModeratorDetails = () => {
                     onEditClick={() => setIsAssignModalOpen(true)}
                     initialCourse={selectedBatchCourse}
                   />
+                ) : profileButton === "upgradation" ? (
+                  <ModeratorUpgradationComponent
+                    profileData={profileData}
+                    onUpdate={fetchProfileData}
+                  />
                 ) : null}
 
                 <AssignModeratorModal
@@ -380,6 +392,7 @@ const ModeratorDetails = () => {
                   onSave={handleAssignModalSave}
                   assignedFeatures={profileData?.user?.assignedFeatures || []}
                   initialRole={profileData?.user?.role || ''}
+                  moderatorTier={profileData?.user?.moderatorTier || 'Junior'}
                 />
 
                 {/* Deactivate Confirmation Modal */}

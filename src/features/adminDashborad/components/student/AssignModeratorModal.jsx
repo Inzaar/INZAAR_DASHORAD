@@ -2,9 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { X, Box, Check } from 'lucide-react';
 import { getModeratorFeatures } from '@/api/user';
 
-const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], initialRole = '' }) => {
+const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], initialRole = '', moderatorTier = 'Junior' }) => {
   const [selectedRole, setSelectedRole] = useState(initialRole || '');
   const [features, setFeatures] = useState([]);
+
+  let limit = 0;
+  if (moderatorTier === 'Junior') limit = 0;
+  else if (moderatorTier === 'Standard') limit = 2;
+  else if (moderatorTier === 'Senior') limit = 5;
+  else if (moderatorTier === 'Lead') limit = Infinity;
+
+  const currentSelectedCount = features.filter(f => f.checked).length;
 
   useEffect(() => {
     if (isOpen) {
@@ -19,7 +27,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
           const res = await getModeratorFeatures();
           if (res?.data) {
             const dbFeatures = res.data
-              .filter(f => f.name !== 'Student Profiles' && f.key !== 'Student Profiles' && f.name !== 'Reports & Logs' && f.key !== 'Reports & Logs')
+              .filter(f => !['Student Profiles', 'Reports & Logs', 'My Batches'].includes(f.name))
               .map(f => ({
                 id: f._id || f.key || f.name,
                 label: f.name,
@@ -42,20 +50,25 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
   if (!isOpen) return null;
 
   const toggleFeature = (id) => {
-    setFeatures(features.map(f =>
-      f.id === id ? { ...f, checked: !f.checked } : f
-    ));
+    setFeatures(features.map(f => {
+      if (f.id === id) {
+        if (!f.checked && currentSelectedCount >= limit) {
+          import('react-hot-toast').then(({ default: toast }) => {
+            toast.error(`${moderatorTier} Moderators can only have up to ${limit} extra features.`);
+          });
+          return f;
+        }
+        return { ...f, checked: !f.checked };
+      }
+      return f;
+    }));
   };
 
   const handleSave = () => {
     const selectedFeatures = features.filter(f => f.checked).map(f => f.label);
     
-    if (selectedFeatures.length === 0) {
-      import('react-hot-toast').then(({ default: toast }) => {
-        toast.error("Choose at least one feature");
-      });
-      return;
-    }
+    // Allow empty features for junior etc. since base features are always assigned
+    // if (selectedFeatures.length === 0) { ... }
     
     onSave({ selectedRole, features: selectedFeatures });
   };

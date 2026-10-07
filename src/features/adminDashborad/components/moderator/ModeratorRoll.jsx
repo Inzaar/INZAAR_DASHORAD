@@ -158,7 +158,16 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
               {isStudent ? "Full Name" : "Role"}
             </h6>
             <div className="w-full h-[36px] bg-[#F8F9FA] rounded-[6px] text-gray-900 flex items-center px-[10px] text-sm font-medium capitalize border border-gray-200">
-              {isStudent ? (user.firstname || user.username || "Muhammad Zain") : (user.role || "Junior Moderator")}
+              {isStudent ? (
+                <span>{user.firstname || user.username || "Muhammad Zain"}</span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold rounded-md shadow-sm tracking-wide">
+                    {user.moderatorTier || "Junior"}
+                  </span>
+                  <span className="text-gray-800 font-semibold">{user.role || "Moderator"}</span>
+                </div>
+              )}
             </div>
           </div>
 
