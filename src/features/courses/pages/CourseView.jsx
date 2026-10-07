@@ -123,6 +123,30 @@ const CourseView = () => {
     const [selectedComments, setSelectedComments] = useState([]);
     const [activeReactionPopup, setActiveReactionPopup] = useState(null);
     const [commentToDelete, setCommentToDelete] = useState(null);
+    const [lastViewedCommentsTime, setLastViewedCommentsTime] = useState(null);
+
+    const commentsScrollRef = useRef(null);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const isAtBottomRef = useRef(true);
+    const prevCommentsLengthRef = useRef(0);
+    const initialLoadRef = useRef(true);
+
+    const handleCommentsScroll = () => {
+        if (!commentsScrollRef.current) return;
+        const { scrollTop, scrollHeight, clientHeight } = commentsScrollRef.current;
+        const atBottom = scrollHeight - scrollTop - clientHeight < 50;
+        isAtBottomRef.current = atBottom;
+        if (atBottom && unreadCount > 0) {
+            setUnreadCount(0);
+        }
+    };
+
+    const scrollToBottom = () => {
+        if (commentsScrollRef.current) {
+            commentsScrollRef.current.scrollTop = commentsScrollRef.current.scrollHeight;
+            setUnreadCount(0);
+        }
+    };
 
     const EMOJIS = ['👍', '❤️', '😂', '🔥', '🤔'];
 
@@ -197,12 +221,57 @@ const CourseView = () => {
             if (!lectureId) return;
             try {
                 const res = await getComments(lectureId);
-                setLectureComments(res.data.data);
+                const comments = res.data.data;
+                setLectureComments(comments);
+                
+                // Track last viewed time for unread messages style
+                const storedTime = localStorage.getItem('lastViewedComments_' + lectureId);
+                if (storedTime) {
+                    setLastViewedCommentsTime(new Date(storedTime).getTime());
+                } else if (comments.length > 0) {
+                    setLastViewedCommentsTime(Date.now());
+                }
+                
+                // Update to current time so next refresh shows new ones as unread
+                localStorage.setItem('lastViewedComments_' + lectureId, new Date().toISOString());
             } catch (error) {
                 console.error("Error fetching comments:", error);
             }
         };
         fetchLectureComments();
+    }, [currentLecture?.id || currentLecture?._id]);
+
+    useEffect(() => {
+        if (initialLoadRef.current && lectureComments.length > 0) {
+            initialLoadRef.current = false;
+            prevCommentsLengthRef.current = lectureComments.length;
+            setTimeout(() => {
+                if (commentsScrollRef.current) {
+                    commentsScrollRef.current.scrollTop = commentsScrollRef.current.scrollHeight;
+                }
+            }, 100);
+            return;
+        }
+
+        if (!initialLoadRef.current && lectureComments.length > prevCommentsLengthRef.current) {
+            const newCount = lectureComments.length - prevCommentsLengthRef.current;
+            if (!isAtBottomRef.current) {
+                setUnreadCount(prev => prev + newCount);
+            } else {
+                setTimeout(() => {
+                    if (commentsScrollRef.current) {
+                        commentsScrollRef.current.scrollTop = commentsScrollRef.current.scrollHeight;
+                    }
+                }, 100);
+            }
+        }
+        prevCommentsLengthRef.current = lectureComments.length;
+    }, [lectureComments]);
+
+    useEffect(() => {
+        initialLoadRef.current = true;
+        setUnreadCount(0);
+        isAtBottomRef.current = true;
     }, [currentLecture?.id || currentLecture?._id]);
 
     const handleAddComment = async (e) => {
@@ -1965,7 +2034,7 @@ const CourseView = () => {
                                     </div>
 
                                     {/* Comments Section */}
-                                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-left w-full lg:w-1/2 flex flex-col">
+                                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-left w-full lg:w-1/2 flex flex-col relative">
                                         <div className="flex items-center justify-between mb-4 pt-2 pb-2">
                                             {isSelectionMode ? (
                                                 <div className="flex items-center gap-3 w-full bg-blue-50/50 p-2 rounded-xl border border-blue-100">
@@ -2000,18 +2069,44 @@ const CourseView = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <div className="flex flex-col gap-3 mb-6 flex-1 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+                                        <div 
+                                            ref={commentsScrollRef}
+                                            onScroll={handleCommentsScroll}
+                                            className="flex flex-col gap-3 mb-6 flex-1 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar"
+                                        >
                                             {lectureComments && lectureComments.length > 0 ? (
                                                 <div className="flex flex-col gap-4 flex-1 pb-12">
-                                                    {lectureComments.map(comment => {
+                                                    {lectureComments.map((comment, index) => {
                                                         const senderId = comment.senderId?._id || comment.senderId?.id || comment.senderId;
                                                         // In CourseView, current user is the student.
                                                         const isMe = String(senderId) === String(user?._id || user?.id);
                                                         const isSenderStudent = comment.senderId?.role === 'student' || comment.senderId?.role === 'user';
                                                         const isSelected = selectedComments.includes(comment._id);
 
+                                                        const commentTime = new Date(comment.createdAt).getTime();
+                                                        const isUnread = lastViewedCommentsTime && commentTime > lastViewedCommentsTime && !isMe;
+                                                        let showUnreadDivider = false;
+                                                        
+                                                        if (isUnread) {
+                                                            const prevComment = index > 0 ? lectureComments[index - 1] : null;
+                                                            const prevCommentTime = prevComment ? new Date(prevComment.createdAt).getTime() : 0;
+                                                            if (!prevComment || prevCommentTime <= lastViewedCommentsTime || (prevComment.senderId?._id || prevComment.senderId?.id || prevComment.senderId) === (user?._id || user?.id)) {
+                                                                showUnreadDivider = true;
+                                                            }
+                                                        }
+
                                                         return (
-                                                            <div key={comment._id} className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
+                                                            <React.Fragment key={comment._id}>
+                                                                {showUnreadDivider && (
+                                                                    <div className="flex items-center gap-3 my-3 opacity-90">
+                                                                        <div className="flex-1 h-px bg-green-500/30"></div>
+                                                                        <span className="text-[10px] font-bold text-green-600 uppercase bg-green-50 px-2 py-0.5 rounded-full border border-green-200 shadow-sm">
+                                                                            {lectureComments.length - index} Unread Message{lectureComments.length - index > 1 ? 's' : ''}
+                                                                        </span>
+                                                                        <div className="flex-1 h-px bg-green-500/30"></div>
+                                                                    </div>
+                                                                )}
+                                                                <div className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
                                                                 {isSelectionMode && !isMe && (
                                                                     <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
                                                                         {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
@@ -2125,6 +2220,7 @@ const CourseView = () => {
                                                                     </button>
                                                                 )}
                                                             </div>
+                                                            </React.Fragment>
                                                         );
                                                     })}
                                                 </div>
@@ -2132,6 +2228,19 @@ const CourseView = () => {
                                                 <p className="text-gray-400 text-sm italic py-4">{t('no_comments', 'No comments yet. Start the discussion!')}</p>
                                             )}
                                         </div>
+                                        {unreadCount > 0 && (
+                                            <button
+                                                onClick={scrollToBottom}
+                                                className="absolute bottom-24 right-8 bg-white border border-gray-200 shadow-lg rounded-full p-2 flex items-center justify-center hover:bg-gray-50 transition-all z-50 group"
+                                            >
+                                                <div className="relative">
+                                                    <ChevronDown className="text-gray-600 w-5 h-5 group-hover:text-blue-500" />
+                                                    <span className="absolute -top-3 -right-3 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm">
+                                                        {unreadCount}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        )}
                                         <div className="relative mt-auto">
                                             <input
                                                 type="text"
