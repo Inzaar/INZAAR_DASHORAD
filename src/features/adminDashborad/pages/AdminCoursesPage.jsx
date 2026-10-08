@@ -11,10 +11,12 @@ import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
 import { useTranslation } from 'react-i18next';
 import { CustomPagination } from '@/components/ui/Pagination';
+import DepartmentsModal from '../components/DepartmentsModal';
 
 const AdminCoursesPage = () => {
     const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isDepartmentsModalOpen, setIsDepartmentsModalOpen] = useState(false);
     const [searchParams] = useSearchParams();
     const courseIdParam = searchParams.get('courseId');
     const navigate = useNavigate();
@@ -170,16 +172,30 @@ const AdminCoursesPage = () => {
                                     <h2 className="text-[24px] font-bold text-gray-900 mb-1">{t('courses', 'Courses')}</h2>
                                     <p className="text-gray-500 text-[16px]">{t('manage_all_your_courses', 'Manage All Your Courses')}</p>
                                 </div>
-                                <button
-                                    onClick={() => navigate('/admin-add-course')}
-                                    className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-[#8B5CF6] text-white font-medium rounded-xl sm:rounded-lg hover:bg-purple-600 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
-                                >
-                                    <div className="flex items-center justify-center bg-white rounded-full p-0.5">
-                                        <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
-                                    </div>
-                                    <span className="hidden sm:block text-[14px]">{t('add_new_course', 'Add New Course')}</span>
-                                </button>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => setIsDepartmentsModalOpen(true)}
+                                        className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl sm:rounded-lg hover:bg-gray-50 shadow-sm flex items-center justify-center transition-all active:scale-95"
+                                    >
+                                        <span className="hidden sm:block text-[14px]">Departments</span>
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/admin-add-course')}
+                                        className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-[#8B5CF6] text-white font-medium rounded-xl sm:rounded-lg hover:bg-purple-600 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    >
+                                        <div className="flex items-center justify-center bg-white rounded-full p-0.5">
+                                            <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
+                                        </div>
+                                        <span className="hidden sm:block text-[14px]">{t('add_new_course', 'Add New Course')}</span>
+                                    </button>
+                                </div>
                             </div>
+
+                            {/* Departments Modal */}
+                            <DepartmentsModal 
+                                isOpen={isDepartmentsModalOpen} 
+                                onClose={() => setIsDepartmentsModalOpen(false)} 
+                            />
 
                             {/* Stats Grid */}
                             <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">

@@ -426,7 +426,18 @@ const AddCoursePage = () => {
         certificateFile: '',
         hasSections: false,
         sections: [],
+        departmentId: '',
     });
+    
+    const [departments, setDepartments] = useState([]);
+
+    React.useEffect(() => {
+        import('@/api/department').then(({ getAllDepartments }) => {
+            getAllDepartments().then(res => {
+                if (res?.data) setDepartments(res.data);
+            }).catch(console.error);
+        });
+    }, []);
 
     const handleAddSection = (e) => {
         if (e.key === 'Enter') {
@@ -467,6 +478,7 @@ const AddCoursePage = () => {
                         certificateFile: data.certificateFile || '',
                         hasSections: data.hasSections || false,
                         sections: data.sections || [],
+                        departmentId: data.departmentId?._id || data.departmentId || '',
                     });
 
                     if (data.thumbnail) setThumbnailPreview(data.thumbnail);
@@ -1139,146 +1151,149 @@ const AddCoursePage = () => {
                                                         <p className="text-gray-400 font-medium text-[12px] sm:text-[13px]">Add basic course details including title, release month, duration, batch size, and certificate rules.</p>
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                                                        {/* Left Column */}
-                                                        <div className="space-y-6">
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Title</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter title"
-                                                                    value={courseForm.title}
-                                                                    onChange={e => handleCourseFormChange('title', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                                />
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                                                        {/* Row 1 */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Select Department (Optional)</label>
+                                                            <select
+                                                                value={courseForm.departmentId || ""}
+                                                                onChange={e => handleCourseFormChange('departmentId', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm bg-white"
+                                                            >
+                                                                <option value="">— Select Department —</option>
+                                                                {departments.map(dept => (
+                                                                    <option key={dept._id} value={dept._id}>{dept.name}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
+                                                            <div className="relative group">
+                                                                <select
+                                                                    value={courseForm.duration}
+                                                                    onChange={e => handleCourseFormChange('duration', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                                >
+                                                                    <option value="">Select</option>
+                                                                    {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                                                                </select>
+                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                             </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter name"
-                                                                    value={courseForm.instructor}
-                                                                    onChange={e => handleCourseFormChange('instructor', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Batch Strength</label>
-                                                                <input
-                                                                    type="number"
-                                                                    min="1"
-                                                                    placeholder="Enter students per batch (e.g. 10)"
-                                                                    value={courseForm.batchStrength}
-                                                                    onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Enter"
-                                                                    value={courseForm.certificateCriteria}
-                                                                    onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm placeholder:text-gray-300"
-                                                                />
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
-                                                                <div className="relative group">
-                                                                    <select
-                                                                        value={courseForm.duration}
-                                                                        onChange={e => handleCourseFormChange('duration', e.target.value)}
-                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                                    >
-                                                                        <option value="">Select</option>
-                                                                        {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                                                                    </select>
-                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                                </div>
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 12 Weeks / 24 Weeks / 52 Weeks</p>
-                                                            </div>
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 12 Weeks / 24 Weeks / 52 Weeks</p>
                                                         </div>
 
-                                                        {/* Right Column */}
-                                                        <div className="space-y-6">
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Release Date</label>
-                                                                <div className="relative group">
-                                                                    <input
-                                                                        type="date"
-                                                                        value={courseForm.releaseDate}
-                                                                        onChange={e => handleCourseFormChange('releaseDate', e.target.value)}
-                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:left-0 [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::after]:content-none [&::after]:hidden"
-                                                                    />
-                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">
-                                                                    Add by <span className="text-gray-400 font-normal text-[11px]">(read-only)</span>
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    readOnly
-                                                                    placeholder="Select"
-                                                                    value={user?.name || user?.firstname || 'Select'}
-                                                                    className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Enter total lectures"
-                                                                    value={courseForm.totalLectures}
-                                                                    onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                                />
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Upload Certificate</label>
-                                                                <input
-                                                                    ref={certificateInputRef}
-                                                                    type="file"
-                                                                    accept="image/jpg,image/jpeg,image/png,image/webp"
-                                                                    className="hidden"
-                                                                    onChange={handleCertificateFileChange}
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => !certificateUploading && certificateInputRef.current?.click()}
-                                                                    className="w-full flex items-center px-2 py-1.5 border border-gray-200 rounded-lg bg-white transition-all shadow-sm cursor-pointer min-h-[44px]"
-                                                                >
-                                                                    <div className="flex items-center gap-2.5 min-w-0">
-                                                                        <span className="px-3.5 py-1.5 bg-[#f4f4f5] text-[#52525b] text-[13px] font-bold rounded-md flex-shrink-0">
-                                                                            Browse file
+                                                        {/* Row 2 */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Title</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter title"
+                                                                value={courseForm.title}
+                                                                onChange={e => handleCourseFormChange('title', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">
+                                                                Add by <span className="text-gray-400 font-normal text-[11px]">(read-only)</span>
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                readOnly
+                                                                placeholder="Select"
+                                                                value={user?.name || user?.firstname || 'Select'}
+                                                                className="w-full px-4 py-2.5 border border-gray-150 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                            />
+                                                        </div>
+
+                                                        {/* Row 3 */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter name"
+                                                                value={courseForm.instructor}
+                                                                onChange={e => handleCourseFormChange('instructor', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Enter total lectures"
+                                                                value={courseForm.totalLectures}
+                                                                onChange={e => handleCourseFormChange('totalLectures', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                            />
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 25 Lectures</p>
+                                                        </div>
+
+                                                        {/* Row 4 */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Limit Strength</label>
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                placeholder="Enter students per limit (e.g. 10)"
+                                                                value={courseForm.batchStrength}
+                                                                onChange={e => handleCourseFormChange('batchStrength', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Upload Certificate</label>
+                                                            <input
+                                                                ref={certificateInputRef}
+                                                                type="file"
+                                                                accept="image/jpg,image/jpeg,image/png,image/webp"
+                                                                className="hidden"
+                                                                onChange={handleCertificateFileChange}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => !certificateUploading && certificateInputRef.current?.click()}
+                                                                className="w-full flex items-center px-2 py-1.5 border border-gray-200 rounded-lg bg-white transition-all shadow-sm cursor-pointer min-h-[44px]"
+                                                            >
+                                                                <div className="flex items-center gap-2.5 min-w-0">
+                                                                    <span className="px-3.5 py-1.5 bg-[#f4f4f5] text-[#52525b] text-[13px] font-bold rounded-md flex-shrink-0">
+                                                                        Browse file
+                                                                    </span>
+                                                                    {(certificateUploading || courseForm.certificateFile) && (
+                                                                        <span className="text-[13px] text-gray-600 font-medium truncate">
+                                                                            {certificateUploading ? "Uploading..." : (courseForm.certificateFile.split('/').pop() || "certificate.png")}
                                                                         </span>
-                                                                        {(certificateUploading || courseForm.certificateFile) && (
-                                                                            <span className="text-[13px] text-gray-600 font-medium truncate">
-                                                                                {certificateUploading ? "Uploading..." : (courseForm.certificateFile.split('/').pop() || "certificate.png")}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </button>
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Lecture (%)</label>
-                                                                <div className="relative group">
-                                                                    <select
-                                                                        value={courseForm.unlockCriteria}
-                                                                        onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
-                                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                                    >
-                                                                        <option value="">Enter</option>
-                                                                        {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
-                                                                    </select>
-                                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                                    )}
                                                                 </div>
-                                                                <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Row 5 */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Certificate Eligibility (%)</label>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Enter"
+                                                                value={courseForm.certificateCriteria}
+                                                                onChange={e => handleCourseFormChange('certificateCriteria', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm placeholder:text-gray-300"
+                                                            />
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium leading-tight">How much course progress is required to unlock certificate</p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Unlock Next Lecture (%)</label>
+                                                            <div className="relative group">
+                                                                <select
+                                                                    value={courseForm.unlockCriteria}
+                                                                    onChange={e => handleCourseFormChange('unlockCriteria', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                                >
+                                                                    <option value="">Enter</option>
+                                                                    {UNLOCK_PCT.map(p => <option key={p} value={p}>{p}%</option>)}
+                                                                </select>
+                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                                                             </div>
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
                                                         </div>
                                                     </div>
 
@@ -1461,10 +1476,10 @@ const AddCoursePage = () => {
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
                                                             {[
                                                                 { label: 'Course Title', value: courseForm.title || '—' },
-                                                                { label: 'Release Date', value: courseForm.releaseDate || '—' },
+                                                                { label: 'Select Department', value: departments.find(d => d._id === courseForm.departmentId)?.name || '—' },
                                                                 { label: 'Instructor', value: courseForm.instructor || '—' },
                                                                 { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
-                                                                { label: 'Batch Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per batch` : '—' },
+                                                                { label: 'Limit Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per limit` : '—' },
                                                                 { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
                                                                 { label: 'Course Duration', value: courseForm.duration || '—' },
                                                                 { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria !== '' ? `${courseForm.unlockCriteria}%` : '90% (Default)' },
