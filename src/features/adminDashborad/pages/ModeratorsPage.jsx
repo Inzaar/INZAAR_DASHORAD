@@ -678,6 +678,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                 id={mod.id}
                                                 image={mod.profileImageUrl}
                                                 status={mod.status === 'Deleted' || mod.isDeleted ? "deleted" : (mod.isActive ? "online" : "offline")}
+                                                gender={mod.gender}
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={new Date(mod.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}

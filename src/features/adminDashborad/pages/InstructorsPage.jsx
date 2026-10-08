@@ -155,6 +155,24 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                 } catch (err) {
                     console.error("Failed to fetch courses for count:", err);
                 }
+
+                // Calculate Stats
+                const males = instructorsData.filter(mod => (mod.gender || '').toLowerCase() === 'male');
+                const females = instructorsData.filter(mod => (mod.gender || '').toLowerCase() === 'female');
+
+                setStatsData({
+                    totalInstructors: instructorsData.length,
+                    activeInstructors: instructorsData.filter(m => m.status === 'active' || m.status === undefined || m.isActive).length,
+                    inactiveInstructors: instructorsData.filter(m => m.status === 'in-active' || m.isActive === false).length,
+                    instructorsInPool: instructorsData.filter(m => m.status === 'pending').length,
+                    totalMale: males.length,
+                    activeMale: males.filter(m => m.status === 'active' || m.status === undefined || m.isActive).length,
+                    inactiveMale: males.filter(m => m.status === 'in-active' || m.isActive === false).length,
+                    totalFemale: females.length,
+                    activeFemale: females.filter(f => f.status === 'active' || f.status === undefined || f.isActive).length,
+                    inactiveFemale: females.filter(f => f.status === 'in-active' || f.isActive === false).length,
+                });
+
                 setInstructors(instructorsData);
             }
         } catch (error) {
@@ -631,6 +649,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                                 id={mod._id}
                                                 image={mod.profileImageUrl}
                                                 status={mod.status === 'Deleted' || mod.isDeleted ? "deleted" : (mod.isActive ? "online" : "offline")}
+                                                gender={mod.gender}
                                                 email={mod.email}
                                                 phone={mod.phone}
                                                 joiningDate={null}

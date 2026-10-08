@@ -214,7 +214,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                     <div className="relative" ref={profileDropdownRef}>
                         <div
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
+                            className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-[10px] overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
                         >
                             {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
                                 <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
@@ -226,7 +226,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         {isProfileOpen && (
                             <div className="absolute top-full mt-2 right-0 w-[240px] bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                                 <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-                                    <div className="w-[40px] h-[40px] rounded-full overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                                    <div className="w-[40px] h-[40px] rounded-[10px] overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
                                         {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
                                             <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
                                         ) : (

@@ -177,12 +177,12 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 <div className="w-[300px]">
                     {/* Profile Picture with Circular Progress Ring */}
                     <div
-                        className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full p-[6px] min-[600px]:p-[8px] shadow-xl border border-white absolute top-[40px] ltr:left-2 ltr:min-[500px]:left-[30px] rtl:right-2 rtl:min-[500px]:right-[30px] flex items-center justify-center transition-all"
+                        className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-[10px] p-[6px] min-[600px]:p-[8px] shadow-xl border border-white absolute top-[40px] ltr:left-2 ltr:min-[500px]:left-[30px] rtl:right-2 rtl:min-[500px]:right-[30px] flex items-center justify-center transition-all"
                         style={{
                             background: `conic-gradient(#3758EE ${completionPercentage}%, #E2E8F0 ${completionPercentage}% 100%)`
                         }}
                     >
-                        <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
+                        <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
                             {(userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '') || (userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '') ? (
                                 <img
                                     src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}

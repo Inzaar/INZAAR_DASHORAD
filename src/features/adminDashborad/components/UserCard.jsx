@@ -2,6 +2,9 @@ import React from 'react';
 import { MoreHorizontal, Mail, Phone } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 
+import defaultMaleImg from '@/assets/images/dummy-male.svg';
+import defaultFemaleImg from '@/assets/images/dummy-female.svg';
+
 const UserCard = ({
     name = "Mudassar",
     id,
@@ -13,9 +16,11 @@ const UserCard = ({
     status = "online",
     performanceLabel = "Performance",
     hideJoiningDate = false,
+    gender,
     onViewClick
 }) => {
-    const displayImage = image || "https://randomuser.me/api/portraits/men/32.jpg";
+    const displayImage = image || (gender?.toLowerCase() === 'female' ? defaultFemaleImg : defaultMaleImg);
+
     return (
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 w-full max-w-[450px] relative font-sans">
             {/* Header: Avatar, Name, Menu */}
@@ -25,7 +30,7 @@ const UserCard = ({
                         <img
                             src={displayImage}
                             alt={name}
-                            className="w-full h-full rounded-full object-cover border-2 border-white shadow-sm"
+                            className="w-full h-full rounded-[10px] object-cover border-2 border-white shadow-sm"
                         />
                         <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${status === 'online' ? 'bg-green-500' : status === 'deleted' ? 'bg-red-500' : 'bg-gray-300'}`}></span>
                     </div>

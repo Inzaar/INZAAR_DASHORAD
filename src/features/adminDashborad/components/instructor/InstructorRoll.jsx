@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Profileimg from "@/assets/images/course.png";
 import toast from "react-hot-toast";
 import Cropper from 'react-easy-crop';
+import defaultMaleImg from '@/assets/images/dummy-male.svg';
+import defaultFemaleImg from '@/assets/images/dummy-female.svg';
 
 // Utility to crop image
 const createImage = (url) =>
@@ -50,7 +51,9 @@ function InstructorRoll({ profileData, type = 'instructor', pendingProfileImage,
   const isStudent = type === 'student';
   const assignedBatches = profileData?.assignedBatches || [];
   const fileInputRef = useRef(null);
-  const [currentImage, setCurrentImage] = useState(Profileimg);
+  const getDummyImg = () => (user?.gender || '').toLowerCase() === 'female' ? defaultFemaleImg : defaultMaleImg;
+
+  const [currentImage, setCurrentImage] = useState(getDummyImg());
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -59,7 +62,7 @@ function InstructorRoll({ profileData, type = 'instructor', pendingProfileImage,
   const [isCropping, setIsCropping] = useState(false);
 
   const resolveImageUrl = (url) => {
-    if (!url) return Profileimg;
+    if (!url) return getDummyImg();
     if (url.startsWith('blob:') || url.startsWith('data:')) return url;
     if (url.includes('localhost:8000/uploads')) {
       return url.replace('http://localhost:8000', 'https://inzaar.duckdns.org');
@@ -78,9 +81,9 @@ function InstructorRoll({ profileData, type = 'instructor', pendingProfileImage,
     } else if (user?.profileImageUrl) {
       setCurrentImage(resolveImageUrl(user.profileImageUrl));
     } else {
-      setCurrentImage(Profileimg);
+      setCurrentImage(getDummyImg());
     }
-  }, [user?.profileImageUrl, pendingProfileImage]);
+  }, [user?.profileImageUrl, pendingProfileImage, user?.gender]);
 
   // Build batch-course pairs from API
   const batchCoursePairs = assignedBatches
@@ -131,7 +134,7 @@ function InstructorRoll({ profileData, type = 'instructor', pendingProfileImage,
             src={currentImage}
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = Profileimg;
+              e.target.src = getDummyImg();
             }}
             className="w-full h-full object-cover rounded-[10px] border border-gray-100 transition-all duration-300 shadow-sm"
             alt="ProfilePreview"
