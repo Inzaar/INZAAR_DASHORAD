@@ -23,6 +23,8 @@ import AdminCalendar from "@/features/adminDashborad/pages/AdminCalendar";
 import AdminNotification from "@/features/adminDashborad/pages/AdminNotification";
 import AddCoursePage from "@/features/adminDashborad/pages/AddCoursePage";
 import ModeratorsPage from "@/features/adminDashborad/pages/ModeratorsPage";
+import InstructorsPage from "@/features/adminDashborad/pages/InstructorsPage";
+import InstructorDetails from "@/features/adminDashborad/pages/InstructorDetails";
 import StudentProfilesPage from "@/features/adminDashborad/pages/StudentProfilesPage";
 import AdminCoursesPage from "@/features/adminDashborad/pages/AdminCoursesPage";
 import ReportsPage from "@/features/adminDashborad/pages/ReportsPage";
@@ -79,6 +81,8 @@ const routes = createRoutesFromElements(
             <Route path="/admin-moderators/all" element={<ModeratorsPage genderFilter="All" />} />
             <Route path="/admin-moderators/male" element={<ModeratorsPage genderFilter="Male" />} />
             <Route path="/admin-moderators/female" element={<ModeratorsPage genderFilter="Female" />} />
+            <Route path="/admin-instructors" element={<InstructorsPage />} />
+            <Route path="/instructor-details/:id" element={<InstructorDetails />} />
             <Route path="/admin-management" element={<ManagementPage />} />
             <Route path="/management-dashboard" element={<ManagementDashboard />} />
             <Route path="/management-details/:id" element={<ManagementDetails />} />

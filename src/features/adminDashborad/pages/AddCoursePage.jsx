@@ -10,6 +10,7 @@ import ThumbnailCropper from '../components/ThumbnailCropper';
 import SelectContentTypeModal from '../components/SelectContentTypeModal';
 import CreateQuiz from '../components/CreateQuiz';
 import CreateAssignment from '../components/CreateAssignment';
+import { getInstructors } from '@/api/instructor';
 
 /* ─────────────────────────────────────── helpers ── */
 const DURATIONS = ['8 Weeks', '12 Weeks', '24 Weeks', '52 Weeks'];
@@ -430,11 +431,20 @@ const AddCoursePage = () => {
     });
     
     const [departments, setDepartments] = useState([]);
+    const [instructorsList, setInstructorsList] = useState([]);
 
     React.useEffect(() => {
         import('@/api/department').then(({ getAllDepartments }) => {
             getAllDepartments().then(res => {
                 if (res?.data) setDepartments(res.data);
+            }).catch(console.error);
+        });
+        
+        import('@/api/instructor').then(({ getInstructors }) => {
+            getInstructors().then(res => {
+                if (res.data?.data) {
+                    setInstructorsList(res.data.data);
+                }
             }).catch(console.error);
         });
     }, []);
@@ -1209,13 +1219,25 @@ const AddCoursePage = () => {
                                                         {/* Row 3 */}
                                                         <div>
                                                             <label className="block text-[13px] font-bold text-gray-700 mb-2">Instructor</label>
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Enter name"
-                                                                value={courseForm.instructor}
-                                                                onChange={e => handleCourseFormChange('instructor', e.target.value)}
-                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
-                                                            />
+                                                            <div className="relative">
+                                                                <select
+                                                                    value={courseForm.instructor}
+                                                                    onChange={e => handleCourseFormChange('instructor', e.target.value)}
+                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] shadow-sm appearance-none bg-white text-gray-700"
+                                                                >
+                                                                    <option value="" disabled>Select an instructor</option>
+                                                                    {instructorsList.map((inst) => {
+                                                                        const displayName = inst.firstname && inst.lastname ? `${inst.firstname} ${inst.lastname}` : (inst.firstname || 'Unknown Instructor');
+                                                                        const uniqueKey = inst._id || inst.id || Math.random().toString();
+                                                                        return (
+                                                                            <option key={uniqueKey} value={displayName}>
+                                                                                {displayName}
+                                                                            </option>
+                                                                        );
+                                                                    })}
+                                                                </select>
+                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                            </div>
                                                         </div>
                                                         <div>
                                                             <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Lectures</label>

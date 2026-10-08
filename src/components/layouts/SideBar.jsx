@@ -55,7 +55,7 @@ function Sidebar({ className, onClose }) {
   };
 
   // Define menu items based on role
-  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Management', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
+  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Instructors', 'Management', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   // Determine which items to show based on the active path/context, not strictly user role
@@ -69,6 +69,7 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/export-moderator-reports') ||
     location.pathname.startsWith('/student-profiles') ||
     location.pathname.startsWith('/moderator-details') ||
+    location.pathname.startsWith('/instructor-details') ||
     location.pathname.startsWith('/management-details') ||
     location.pathname.startsWith('/admin-batches') ||
     location.pathname.startsWith('/registered-users') ||
@@ -135,6 +136,8 @@ function Sidebar({ className, onClose }) {
     '/admin-moderators/all': 'All Moderators',
     '/admin-moderators/male': 'Male Moderators',
     '/admin-moderators/female': 'Female Moderators',
+    '/admin-instructors': 'Instructors',
+    '/instructor-details': 'Instructors',
     '/admin-management': 'Management',
     '/management-details': 'Management',
     '/moderator-details': 'Moderators',
@@ -246,6 +249,13 @@ function Sidebar({ className, onClose }) {
 
     if (itemName === 'Moderators') {
       setIsModeratorsExpanded(!isModeratorsExpanded);
+      return;
+    }
+    
+    if (itemName === 'Instructors') {
+      navigate('/admin-instructors');
+      setActiveItem('Instructors');
+      if (window.innerWidth < 1024) setIsOpen(false);
       return;
     }
 

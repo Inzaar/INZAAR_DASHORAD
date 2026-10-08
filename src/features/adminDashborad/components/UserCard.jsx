@@ -11,6 +11,8 @@ const UserCard = ({
     email = "Mudassar123@gmail.com",
     phone = "(229) 555-0109",
     status = "online",
+    performanceLabel = "Performance",
+    hideJoiningDate = false,
     onViewClick
 }) => {
     const displayImage = image || "https://randomuser.me/api/portraits/men/32.jpg";
@@ -41,13 +43,15 @@ const UserCard = ({
             <div className="bg-[#EFF2FF] rounded-xl p-4 mb-5">
                 <div className="flex justify-between items-center mb-3">
                     <div className="flex flex-col">
-                        <span className="text-xs font-medium text-blue-500 mb-0.5">Performance</span>
+                        <span className="text-xs font-medium text-blue-500 mb-0.5">{performanceLabel}</span>
                         <span className="text-sm font-bold text-blue-700">{performance}</span>
                     </div>
-                    <div className="flex flex-col text-right">
-                        <span className="text-xs font-medium text-blue-500 mb-0.5">Joining Date</span>
-                        <span className="text-sm font-bold text-blue-700">{joiningDate}</span>
-                    </div>
+                    {!hideJoiningDate && (
+                        <div className="flex flex-col text-right">
+                            <span className="text-xs font-medium text-blue-500 mb-0.5">Joining Date</span>
+                            <span className="text-sm font-bold text-blue-700">{joiningDate}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-2">
