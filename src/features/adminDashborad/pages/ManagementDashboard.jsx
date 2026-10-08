@@ -13,13 +13,17 @@ import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import { getAllUsers } from '@/api/user';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
+import { useAuth } from '@/context/AuthContext';
 import axiosInstance from '@/api/axiosInstance';
 import NewBatchAlert from '@/components/layouts/ManageBatches/NewBatchAlert';
+import { useTranslation } from 'react-i18next';
 
 const ManagementDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const firstName = localStorage.getItem('firstName');
+    const firstName = user?.firstname || user?.name || "Moderator";
     const [studentCount, setStudentCount] = useState(0);
     const [moderatorCount, setModeratorCount] = useState(0);
     const [courseCount, setCourseCount] = useState(0);
@@ -128,8 +132,8 @@ const ManagementDashboard = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-medium text-gray-500 mb-1">Aslam Alaikum {firstName}</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Here is your management overview!</p>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-medium text-gray-500 mb-1">{t('welcome_user', 'Welcome, ')} {firstName}</h2>
+                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">{t('management_overview', 'Here is your management overview!')}</p>
                                 </div>
                             </div>
 

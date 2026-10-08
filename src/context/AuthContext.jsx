@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
         // Remove JWT token and Guest flag
         localStorage.removeItem('token');
         localStorage.removeItem('isGuest');
+        localStorage.removeItem('firstName');
         sessionStorage.clear();
 
         // Expire all cookies to guarantee a clean slate

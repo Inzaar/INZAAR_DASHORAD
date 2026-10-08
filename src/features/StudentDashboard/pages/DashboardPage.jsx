@@ -158,7 +158,7 @@ const DashboardPage = () => {
                             <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
                                     <h2 className="text-[15px] min-[430px]:text-[19px] min-[641px]:text-2xl font-bold text-gray-900 mb-1 leading-tight pt-2 pb-1 flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
-                                        <span>{t('aslam_o_alaikum', 'Aslam o Alaikum')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')}</span>
+                                        <span>{t('welcome_user', 'Welcome, ')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')}</span>
                                         <span>👋🏻</span>
                                     </h2>
                                     <p className="text-gray-500 text-xs min-[430px]:text-sm min-[641px]:text-base leading-relaxed pb-3">
@@ -166,7 +166,7 @@ const DashboardPage = () => {
                                     </p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    {t('enrolled_new_course', 'Enrolled New Course')}
+                                    {t('enroll_new_course', 'Enroll New Course')}
                                 </GradiantButton>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:flex hidden items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     +

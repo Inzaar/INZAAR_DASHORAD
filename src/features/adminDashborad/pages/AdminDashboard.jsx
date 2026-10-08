@@ -15,11 +15,15 @@ import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
 import axiosInstance from '@/api/axiosInstance';
 import NewBatchAlert from '@/components/layouts/ManageBatches/NewBatchAlert';
+import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const firstName = localStorage.getItem('firstName');
+    const firstName = user?.firstname || user?.name || "Admin";
     const [studentCount, setStudentCount] = useState(0);
     const [moderatorCount, setModeratorCount] = useState(0);
     const [courseCount, setCourseCount] = useState(0);
@@ -120,8 +124,8 @@ const AdminDashboard = () => {
                         <div className="py-4 pr-2">
                             <div className="flex justify-between items-start mb-8 gap-4">
                                 <div>
-                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-medium text-gray-500 mb-1">Aslam Alaikum {firstName}</h2>
-                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">Let's learn something new today!</p>
+                                    <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-medium text-gray-500 mb-1">{t('welcome_user', 'Welcome, ')} {firstName}</h2>
+                                    <p className="text-gray-500 text-[11px] min-[641px]:text-[16px]">{t('learn_something_new', "Let's learn something new today!")}</p>
                                 </div>
                                 <GradiantButton
                                     onClick={() => navigate('/admin-add-course')}

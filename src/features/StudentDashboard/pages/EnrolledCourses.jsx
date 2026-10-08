@@ -71,14 +71,14 @@ const EnrolledCourses = () => {
                             {/* <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1 leading-[1.8] pt-4 pb-2">
-                                        {t('aslam_o_alaikum', 'Aslam o Alaikum')} {t(userCourses?.user?.firstname || 'Student')} 👋
+                                        {t('welcome_user', 'Welcome, ')} {t(userCourses?.user?.firstname || 'Student')} 👋
                                     </h2>
                                     <p className="text-gray-500 text-[11px] min-[641px]:text-[16px] leading-[1.8]">
                                         {t('learn_something_new', "Let's learn something new today!")}
                                     </p>
                                 </div>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    {t('enrolled_new_course', 'Enrolled New Course')}
+                                    {t('enroll_new_course', 'Enroll New Course')}
                                 </GradiantButton>
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:block hidden text-[24px] px-4 py-1 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
                                     +
