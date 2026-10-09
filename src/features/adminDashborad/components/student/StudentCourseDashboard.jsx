@@ -363,7 +363,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                 <div className="xl:w-[400px] shrink-0">
                     <PerformanceCard
                         name="Overall Performance"
-                        percentageOverride={stats.overallPerformance}
+                        percentageOverride={parseInt(stats.progress) || 0}
                         trendOverride={stats.improvement?.replace('%', '')}
                         className="border rounded-[16px] h-full w-full"
                     />

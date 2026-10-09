@@ -41,7 +41,10 @@ const EnrolledCourses = () => {
         fetchUserCourses();
     }, [])
 
-    const progressPercentage = userCourses?.stats?.overallProgress || 0;
+    const enrolledCoursesList = userCourses?.enrolledCourses || [];
+    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + (course.completedLecturesCount || course.completedLectures || 0), 0);
+    const totalLectures = enrolledCoursesList.reduce((sum, course) => sum + (course.totalLectures || 0), 0);
+    const progressPercentage = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
@@ -63,6 +66,7 @@ const EnrolledCourses = () => {
                         fixed left-0 top-0 shadow-2xl
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
+
                     <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
@@ -87,7 +91,7 @@ const EnrolledCourses = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics userCourses={{ stats: userCourses?.stats }} />
+                                    <Analytics userCourses={{ stats: userCourses?.stats }} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
