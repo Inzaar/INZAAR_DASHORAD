@@ -175,7 +175,7 @@ const DashboardPage = () => {
 
                             <div className="gap-6">
                                 <div className=" flex flex-col gap-6">
-                                    <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} />
+                                    <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>
                                         <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">

@@ -27,7 +27,7 @@ const CourseReportsPage = () => {
     const [courses, setCourses] = useState([]);
     const [totalCourses, setTotalCourses] = useState({ count: 0, trend: '+2.7%' });
     const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-    const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 5.2 });
+    const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
     const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
     // Top Filter State
@@ -75,7 +75,7 @@ const CourseReportsPage = () => {
             setCourses(data.coursesList || []);
             setTotalCourses(data.totalCourses || { count: 0, trend: '+2.7%' });
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-            setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 5.2 });
+            setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
             setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
             if (data.sessionActivity) {
                 setSessionData(data.sessionActivity);

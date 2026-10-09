@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 // Analytics renders differently depending on context:
 //  - Dashboard view: pass userCourses (shows total enrolled, completed/inProgress/timeSpent, overallProgress)
 //  - Course detail view: pass courseData (shows Progress%, quizScore/lectureCompleted/timeSpent, overallPerformance)
-function Analytics({ userCourses, courseData, name, courseTitle, className }) {
+function Analytics({ userCourses, courseData, name, courseTitle, className, percentageOverride }) {
     const { t } = useTranslation();
 
     // Build course-detail overrides from courseData when present
@@ -31,9 +31,11 @@ function Analytics({ userCourses, courseData, name, courseTitle, className }) {
     } : undefined;
 
     const coursePerformanceProps = courseData ? {
-        percentageOverride: courseData.overallPerformance?.percentage ?? courseData.progress ?? 0,
+        percentageOverride: percentageOverride !== undefined ? percentageOverride : (courseData.overallPerformance?.percentage ?? courseData.progress ?? 0),
         trendOverride: courseData.overallPerformance?.trendingUp ?? 0,
-    } : {};
+    } : {
+        percentageOverride: percentageOverride,
+    };
 
     return (
         <div className={`grid grid-cols-1 xl:grid-cols-3 gap-6 ${className} pb-4`}>

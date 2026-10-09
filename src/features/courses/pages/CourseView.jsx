@@ -1483,6 +1483,7 @@ const CourseView = () => {
                                     } : courseData}
                                     courseTitle={courseData?.title}
                                     name={isModeratorViewingStudent ? "Lecture Performance" : (courseData?.title ? `Overall Performance in ${courseData.title}` : "Overall Performance")}
+                                    percentageOverride={progress || 0}
                                 />
                             )}
 
