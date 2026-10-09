@@ -378,13 +378,14 @@ const StudentDetailsPage = () => {
 
                                 <AssignModeratorModal
                                     isOpen={isAssignModalOpen}
-                                    initialRole={profileData?.user?.role === 'moderator' ? 'moderator' : ''}
+                                    initialTier={profileData?.user?.role === 'moderator' ? profileData?.user?.moderatorTier : ''}
                                     assignedFeatures={profileData?.user?.assignedFeatures || []}
                                     onClose={() => setIsAssignModalOpen(false)}
                                     onSave={async (data) => {
                                         try {
                                             await assignUserRole(id, {
                                                 role: data.selectedRole || "moderator",
+                                                moderatorTier: data.moderatorTier,
                                                 assignedFeatures: data.features
                                             });
                                             toast.success("Moderator assigned successfully!");

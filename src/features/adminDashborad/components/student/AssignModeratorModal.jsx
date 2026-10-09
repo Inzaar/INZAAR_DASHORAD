@@ -2,23 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { X, Box, Check } from 'lucide-react';
 import { getModeratorFeatures } from '@/api/user';
 
-const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], initialRole = '', moderatorTier = 'Junior' }) => {
-  const [selectedRole, setSelectedRole] = useState(initialRole || '');
+const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], initialTier = '' }) => {
+  const [selectedTier, setSelectedTier] = useState(initialTier || '');
   const [features, setFeatures] = useState([]);
 
   let limit = 0;
-  if (moderatorTier === 'Junior') limit = 0;
-  else if (moderatorTier === 'Standard') limit = 2;
-  else if (moderatorTier === 'Senior') limit = 5;
-  else if (moderatorTier === 'Lead') limit = Infinity;
+  if (selectedTier === 'Junior') limit = 0;
+  else if (selectedTier === 'Standard') limit = 2;
+  else if (selectedTier === 'Senior') limit = 5;
+  else if (selectedTier === 'Lead') limit = Infinity;
 
   const currentSelectedCount = features.filter(f => f.checked).length;
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedRole(initialRole || '');
+      setSelectedTier(initialTier || '');
     }
-  }, [initialRole, isOpen]);
+  }, [initialTier, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +54,7 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
       if (f.id === id) {
         if (!f.checked && currentSelectedCount >= limit) {
           import('react-hot-toast').then(({ default: toast }) => {
-            toast.error(`${moderatorTier} Moderators can only have up to ${limit} extra features.`);
+            toast.error(`${selectedTier || 'Selected'} Moderators can only have up to ${limit} extra features.`);
           });
           return f;
         }
@@ -66,11 +66,25 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
 
   const handleSave = () => {
     const selectedFeatures = features.filter(f => f.checked).map(f => f.label);
-    
-    // Allow empty features for junior etc. since base features are always assigned
-    // if (selectedFeatures.length === 0) { ... }
-    
-    onSave({ selectedRole, features: selectedFeatures });
+    onSave({ selectedRole: 'moderator', moderatorTier: selectedTier, features: selectedFeatures });
+  };
+
+  const handleTierChange = (e) => {
+    const tier = e.target.value;
+    setSelectedTier(tier);
+
+    let defaultFeatures = [];
+    if (tier === 'Standard') defaultFeatures = ['Batches', 'Courses Management'];
+    else if (tier === 'Senior') defaultFeatures = ['Batches', 'Courses Management', 'Management', 'Student Reports', 'Course Reports'];
+
+    setFeatures(features.map(f => {
+      if (tier === 'Lead') return { ...f, checked: true };
+      if (tier === 'Junior' || !tier) return { ...f, checked: false };
+      return {
+        ...f,
+        checked: defaultFeatures.includes(f.label)
+      };
+    }));
   };
 
   return (
@@ -91,12 +105,15 @@ const AssignModeratorModal = ({ isOpen, onClose, onSave, assignedFeatures = [], 
             <label className="block text-sm font-bold text-gray-700 mb-2">Assign Role</label>
             <div className="relative">
               <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
+                value={selectedTier}
+                onChange={handleTierChange}
                 className="w-full bg-[#FAFAFA] border border-gray-100 rounded-[12px] px-4 py-3 text-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none cursor-pointer"
               >
                 <option value="">Select Available Roles</option>
-                <option value="moderator">Moderator</option>
+                <option value="Junior">Junior Moderator</option>
+                <option value="Standard">Standard Moderator</option>
+                <option value="Senior">Senior Moderator</option>
+                <option value="Lead">Lead Moderator</option>
               </select>
               <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
