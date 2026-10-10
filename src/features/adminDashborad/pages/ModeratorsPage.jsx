@@ -279,6 +279,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
             const moderatorData = {
                 ...newModerator,
                 role: data.selectedRole || 'moderator',
+                moderatorTier: data.moderatorTier,
                 assignedFeatures: data.features
             };
             await adminCreateModerator(moderatorData);

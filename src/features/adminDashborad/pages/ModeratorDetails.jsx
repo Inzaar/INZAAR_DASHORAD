@@ -92,6 +92,7 @@ const ModeratorDetails = () => {
     try {
       await assignUserRole(id, {
         role: "moderator",
+        moderatorTier: data.moderatorTier,
         assignedFeatures: data.features
       });
 
