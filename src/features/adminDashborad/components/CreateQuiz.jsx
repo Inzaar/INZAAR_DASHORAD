@@ -464,7 +464,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
     }
 
     return (
-        <div className="flex-1 flex flex-col w-full min-h-full overflow-hidden font-sans bg-white border border-gray-100/80 shadow-sm relative">
+        <div className="flex-1 flex flex-col w-full min-h-full overflow-y-auto custom-scrollbar font-sans bg-white border border-gray-100/80 shadow-sm relative">
             {/* SVG Gradient Definition */}
             <svg width="0" height="0" className="absolute">
                 <defs>
@@ -524,8 +524,8 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                 ))}
             </div>
 
-            {/* Scrollable Content Wrapper */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-6 mb-4">
+            {/* Form Content Wrapper */}
+            <div className="flex-1 px-4 sm:px-6 mb-4">
                 {/* Form Content - Step 1: Setup */}
                 {currentStep === 1 && (
                     <div className="flex-1 max-w-[1000px] mx-auto w-full px-4 md:px-0">

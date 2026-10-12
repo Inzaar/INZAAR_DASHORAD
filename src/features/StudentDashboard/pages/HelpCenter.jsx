@@ -220,7 +220,7 @@ const HelpCenter = () => {
                             {/* Content Section */}
                             {activeTab === 'contact' && (
                                 <div className="animate-in fade-in duration-300">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">support@email.com</h3>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">inzaar.edu.support@gmail.com</h3>
 
                                     <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
                                         <div className="mb-8">
