@@ -1924,7 +1924,7 @@ const CourseView = () => {
                                     <div className="w-full lg:w-[30%] flex flex-col gap-2 sm:gap-4">
                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                         <div className="flex-1 relative lg:min-h-0">
-                                            <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-y-auto no-scrollbar scroll-smooth snap-y">
+                                            <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-y-auto custom-scrollbar scroll-smooth snap-y">
                                                 <div className="flex flex-col gap-3">
                                                     {groupedLectures.map((group, groupIdx) => (
                                                         <div key={group.id || groupIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
