@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { X, Box, Check } from 'lucide-react';
+import { Box, Check } from 'lucide-react';
 
 const AssignManagementAccessModal = ({ isOpen, onClose, onSave, assignedFeatures = [] }) => {
   const [features, setFeatures] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
-      const dbFeatures = [
-        "Student Reports",
-        "Moderator Reports",
-        "Course Reports",
+      // Remaining assignable features (Student Reports, Moderator Reports, and Course Reports are automatically assigned)
+      const assignableList = [
         "Export Student Reports",
         "Export Moderator Reports"
-      ].map(f => ({
+      ];
+
+      const dbFeatures = assignableList.map(f => ({
         id: f,
         label: f,
         checked: (assignedFeatures || []).includes(f)
@@ -32,15 +32,8 @@ const AssignManagementAccessModal = ({ isOpen, onClose, onSave, assignedFeatures
   };
 
   const handleSave = () => {
+    // Zero additional features is valid and can continue without error
     const selectedFeatures = features.filter(f => f.checked).map(f => f.label);
-    
-    if (selectedFeatures.length === 0) {
-      import('react-hot-toast').then(({ default: toast }) => {
-        toast.error("Choose at least one feature");
-      });
-      return;
-    }
-    
     onSave({ features: selectedFeatures });
   };
 
@@ -56,11 +49,29 @@ const AssignManagementAccessModal = ({ isOpen, onClose, onSave, assignedFeatures
           <h2 className="text-[22px] font-bold text-gray-800">Update Management Access</h2>
         </div>
 
-        <div className="px-8 py-6 overflow-y-auto flex-1 custom-scrollbar">
+        <div className="px-8 py-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+          {/* Automatically Assigned Features Info */}
+          <div className="bg-emerald-50/70 border border-emerald-100 rounded-[16px] p-4">
+            <div className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">
+              Default Features (Automatically Assigned)
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-emerald-200 text-emerald-700 text-xs font-medium rounded-full shadow-2xs">
+                <Check size={12} strokeWidth={3} /> Student Reports
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-emerald-200 text-emerald-700 text-xs font-medium rounded-full shadow-2xs">
+                <Check size={12} strokeWidth={3} /> Moderator Reports
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-emerald-200 text-emerald-700 text-xs font-medium rounded-full shadow-2xs">
+                <Check size={12} strokeWidth={3} /> Course Reports
+              </span>
+            </div>
+          </div>
 
-          {/* Features List */}
+          {/* Additional Assignable Features List */}
           <div>
-            <h3 className="text-sm font-bold text-gray-700 mb-4">Assigned Features</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-1">Additional Assignable Features</h3>
+            <p className="text-xs text-gray-400 mb-3">Optional. You can continue with zero additional features selected.</p>
             <div className="bg-gray-50/50 rounded-[20px] p-2 space-y-2">
               {features.map((feature) => (
                 <div

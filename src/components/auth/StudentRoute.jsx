@@ -20,6 +20,11 @@ const StudentRoute = () => {
         return <Navigate to="/admin-dashboard" replace />;
     }
 
+    // If user is management trying to access student routes, redirect to management dashboard
+    if (user.role === 'management') {
+        return <Navigate to="/management-dashboard" replace />;
+    }
+
     return <Outlet />;
 };
 

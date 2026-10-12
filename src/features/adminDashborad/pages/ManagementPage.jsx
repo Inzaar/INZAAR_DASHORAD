@@ -259,7 +259,12 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
             const managementData = {
                 ...newManagement,
                 role: 'management',
-                assignedFeatures: ['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports']
+                assignedFeatures: [
+                    'Student Reports',
+                    'Moderator Reports',
+                    'Course Reports',
+                    'Reports & Logs'
+                ]
             };
             await adminCreateManagement(managementData);
             toast.success("Management created successfully!");

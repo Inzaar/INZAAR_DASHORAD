@@ -86,9 +86,18 @@ const ManagementDetails = () => {
 
   const handleAssignModalSave = async (data) => {
     try {
+      const defaultFeatures = [
+        "Student Reports",
+        "Moderator Reports",
+        "Course Reports",
+        "Reports & Logs"
+      ];
+      const additionalFeatures = data.features || [];
+      const combinedFeatures = [...new Set([...defaultFeatures, ...additionalFeatures])];
+
       await assignUserRole(id, {
         role: "management",
-        assignedFeatures: data.features
+        assignedFeatures: combinedFeatures
       });
 
       toast.success("Management access updated successfully!");

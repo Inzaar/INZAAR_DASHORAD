@@ -83,6 +83,8 @@ const LoginPage = () => {
           navigate('/admin-dashboard', { replace: true });
         } else if (userData.role === 'moderator') {
           navigate('/student-profiles', { replace: true });
+        } else if (userData.role === 'management') {
+          navigate('/management-dashboard', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
         }

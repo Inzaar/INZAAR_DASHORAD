@@ -21,6 +21,11 @@ const AdminRoute = () => {
         return <Navigate to="/dashboard" replace />;
     }
 
+    // If management visits /admin-dashboard, redirect to /management-dashboard
+    if (user.role === 'management' && location.pathname === '/admin-dashboard') {
+        return <Navigate to="/management-dashboard" replace />;
+    }
+
     // Protect moderator and management routes selectively based on their assigned features
     if (user.role === 'moderator' || user.role === 'management') {
         // Map paths to feature names to match against user.assignedFeatures
@@ -73,8 +78,11 @@ const AdminRoute = () => {
                                                  (feat === 'Courses Management' && f === 'Courses'))
             );
             
-            // If they lack the required feature, firmly bounce them back to dashboard
+            // If they lack the required feature, bounce them back to their appropriate dashboard
             if (!hasFeature) {
+                if (user.role === 'management') {
+                    return <Navigate to="/management-dashboard" replace />;
+                }
                 return <Navigate to="/dashboard" replace />;
             }
         }
