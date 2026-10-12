@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from '@/components/layouts/NavBar';
 import Sidebar from '@/components/layouts/SideBar';
 import {
@@ -59,6 +59,200 @@ const CustomDonutTooltip = ({ active, payload, total }) => {
         );
     }
     return null;
+};
+
+// Interactive & Responsive Horizontal Bar Chart showing 5 items comfortably with a custom scrollbar for excess items
+const ScrollableHorizontalBarChart = ({
+    title,
+    data = [],
+    maxX = 4,
+    ticks = [0, 1, 2, 3, 4],
+    unit = 'Registrations',
+    gradientClass = 'from-[#8B9CF1] to-[#4E60FF]',
+    bottomLabel = 'Total Registrations',
+    emptyMessage = 'No data available.'
+}) => {
+    const [hoveredIdx, setHoveredIdx] = useState(null);
+    const [tooltipPlacement, setTooltipPlacement] = useState('bottom');
+    const scrollContainerRef = useRef(null);
+    const effectiveMaxX = Math.max(maxX, 1);
+
+    const updatePlacement = (idx, targetEl) => {
+        setHoveredIdx(idx);
+        if (scrollContainerRef.current && targetEl) {
+            const containerRect = scrollContainerRef.current.getBoundingClientRect();
+            const rowRect = targetEl.getBoundingClientRect();
+            // If the row is within 50px of the container's visible top, show below to prevent clipping
+            if (rowRect.top - containerRect.top < 50) {
+                setTooltipPlacement('bottom');
+            } else {
+                setTooltipPlacement('top');
+            }
+        } else {
+            setTooltipPlacement(idx === 0 ? 'bottom' : 'top');
+        }
+    };
+
+    const handleMouseEnter = (idx, e) => {
+        updatePlacement(idx, e.currentTarget);
+    };
+
+    const handleScroll = () => {
+        if (hoveredIdx !== null && scrollContainerRef.current) {
+            const rowEl = scrollContainerRef.current.querySelector(`[data-chart-row="${hoveredIdx}"]`);
+            if (rowEl) {
+                updatePlacement(hoveredIdx, rowEl);
+            }
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[380px] h-full">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2 mb-3">
+                <h3 className="text-[16px] sm:text-[18px] font-bold text-[#18181B] truncate" title={title}>
+                    {title}
+                </h3>
+                {data.length > 5 && (
+                    <span className="text-[11px] font-semibold text-[#3758EE] bg-[#EAEFFF] px-2.5 py-0.5 rounded-full shrink-0">
+                        Top 5 shown • Scroll for more ({data.length})
+                    </span>
+                )}
+            </div>
+
+            {/* Content Area */}
+            {data && data.length > 0 ? (
+                <div className="flex-1 flex flex-col justify-between min-h-0">
+                    {/* Rows Area: Max 240px displays exactly 5 rows (48px each). If > 5, cleanly scrolls with sleek scrollbar */}
+                    <div
+                        ref={scrollContainerRef}
+                        onScroll={handleScroll}
+                        className="relative flex-1 max-h-[240px] overflow-y-auto dashboard-scrollbar pr-1"
+                    >
+                        {/* Background Vertical Grid Lines */}
+                        <div className="absolute inset-0 left-[130px] sm:left-[170px] md:left-[200px] pointer-events-none">
+                            {ticks.map((tick, i) => {
+                                const pct = (tick / effectiveMaxX) * 100;
+                                return (
+                                    <div
+                                        key={i}
+                                        className="absolute top-0 bottom-0 w-[1px] bg-[#F1F5F9]"
+                                        style={{ left: `${pct}%` }}
+                                    />
+                                );
+                            })}
+                        </div>
+
+                        {/* Chart Rows */}
+                        <div className="flex flex-col">
+                            {data.map((item, idx) => {
+                                const pct = Math.min(100, (item.value / effectiveMaxX) * 100);
+                                const isHovered = hoveredIdx === idx;
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        data-chart-row={idx}
+                                        onMouseEnter={(e) => handleMouseEnter(idx, e)}
+                                        onMouseLeave={() => setHoveredIdx(null)}
+                                        className={`relative flex items-center h-[48px] py-1 gap-2.5 hover:bg-gray-50/70 rounded-xl px-1.5 transition-colors group cursor-default ${
+                                            isHovered ? 'z-30' : 'z-0'
+                                        }`}
+                                    >
+                                        {/* Label (Course/Qualification Name) */}
+                                        <div
+                                            className="w-[130px] sm:w-[170px] md:w-[200px] shrink-0 text-right text-xs sm:text-[13px] font-medium text-gray-700 truncate pr-2 select-none"
+                                            title={item.name}
+                                        >
+                                            {item.name}
+                                        </div>
+
+                                        {/* Bar Track */}
+                                        <div className="flex-1 relative h-6 flex items-center">
+                                            {/* Animated Bar */}
+                                            <div
+                                                className={`h-[18px] rounded-r-md bg-gradient-to-r ${gradientClass} transition-all duration-300 relative flex items-center justify-end group-hover:brightness-110 shadow-xs`}
+                                                style={{
+                                                    width: item.value > 0 ? `${Math.max(pct, 5)}%` : '0%',
+                                                }}
+                                            >
+                                                {/* Inside Bar Value Badge (if wide enough) */}
+                                                {item.value > 0 && pct >= 12 && (
+                                                    <span className="text-[10px] font-bold text-white px-1.5 drop-shadow-xs">
+                                                        {item.value}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Outside Bar Value Badge (if bar is small but > 0) */}
+                                            {item.value > 0 && pct < 12 && (
+                                                <span className="ml-1.5 text-[11px] font-bold text-gray-700">
+                                                    {item.value}
+                                                </span>
+                                            )}
+
+                                            {/* Hover Floating Tooltip */}
+                                            {isHovered && (
+                                                <div
+                                                    className={`absolute left-1/2 -translate-x-1/2 z-40 pointer-events-none bg-gray-900/95 text-white text-xs px-3 py-1.5 rounded-lg shadow-xl whitespace-nowrap transition-all duration-150 ${
+                                                        tooltipPlacement === 'bottom'
+                                                            ? 'top-full mt-2'
+                                                            : 'bottom-full mb-2'
+                                                    }`}
+                                                >
+                                                    {/* Pointer Arrow */}
+                                                    <div
+                                                        className={`absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900/95 rotate-45 pointer-events-none ${
+                                                            tooltipPlacement === 'bottom' ? '-top-1' : '-bottom-1'
+                                                        }`}
+                                                    />
+                                                    <div className="relative z-10 font-semibold text-[11px] max-w-[240px] truncate">{item.name}</div>
+                                                    <div className="relative z-10 text-[#8B9CF1] font-bold text-[12px] mt-0.5">
+                                                        {item.value.toLocaleString()} {unit}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Pinned Bottom Scale & X-Axis */}
+                    <div className="pt-2 mt-2 border-t border-gray-100 flex flex-col">
+                        <div className="flex items-center gap-2.5">
+                            {/* Left Spacer matching label width */}
+                            <div className="w-[130px] sm:w-[170px] md:w-[200px] shrink-0" />
+                            {/* Ticks */}
+                            <div className="flex-1 relative h-4 text-xs text-[#64748B]">
+                                {ticks.map((tick, i) => {
+                                    const pct = (tick / effectiveMaxX) * 100;
+                                    return (
+                                        <span
+                                            key={i}
+                                            className="absolute -translate-x-1/2 font-medium"
+                                            style={{ left: `${pct}%` }}
+                                        >
+                                            {tick}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        {/* Bottom Label */}
+                        <div className="text-center text-xs font-medium text-gray-400 mt-1">
+                            {bottomLabel}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+                    {emptyMessage}
+                </div>
+            )}
+        </div>
+    );
 };
 
 const ManagementDashboard = () => {
@@ -282,112 +476,28 @@ const ManagementDashboard = () => {
                             {/* 4. Four Interactive Visual Charts (2x2 Grid) */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {/* Top-Left: Course Demand & Intake Volume (Filtered) */}
-                                <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col">
-                                    <h3 className="text-[16px] sm:text-[18px] font-bold text-[#18181B] mb-3">
-                                        Course Demand &amp; Intake Volume (Filtered)
-                                    </h3>
-                                    <div className="w-full h-[320px] min-w-0">
-                                        {cohortData.courseDemand && cohortData.courseDemand.length > 0 ? (
-                                            <ResponsiveContainer width="100%" height={295}>
-                                                <BarChart
-                                                    layout="vertical"
-                                                    data={cohortData.courseDemand}
-                                                    margin={{ top: 5, right: 30, left: 25, bottom: 5 }}
-                                                >
-                                                    <defs>
-                                                        <linearGradient id="courseBarGradient" x1="0" y1="0" x2="1" y2="0">
-                                                            <stop offset="0%" stopColor="#8B9CF1" />
-                                                            <stop offset="100%" stopColor="#4E60FF" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                    <CartesianGrid horizontal={false} vertical={true} stroke="#F1F5F9" />
-                                                    <XAxis
-                                                        type="number"
-                                                        domain={[0, cohortData.courseMaxX || 4]}
-                                                        ticks={cohortData.courseTicks}
-                                                        tick={{ fill: '#64748B', fontSize: 11 }}
-                                                        allowDecimals={false}
-                                                    />
-                                                    <YAxis
-                                                        type="category"
-                                                        dataKey="name"
-                                                        width={140}
-                                                        tick={{ fill: '#334155', fontSize: 11 }}
-                                                        interval={0}
-                                                    />
-                                                    <Tooltip content={<CustomBarTooltip unit="Registrations" />} />
-                                                    <Bar
-                                                        dataKey="value"
-                                                        fill="url(#courseBarGradient)"
-                                                        barSize={18}
-                                                        radius={[0, 6, 6, 0]}
-                                                    />
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        ) : (
-                                            <div className="h-full flex items-center justify-center text-sm text-gray-400">
-                                                No course demand data found for this filter.
-                                            </div>
-                                        )}
-                                        <div className="text-center text-xs font-medium text-gray-400 mt-1">
-                                            Total Registrations
-                                        </div>
-                                    </div>
-                                </div>
+                                <ScrollableHorizontalBarChart
+                                    title="Course Demand & Intake Volume (Filtered)"
+                                    data={cohortData.courseDemand}
+                                    maxX={cohortData.courseMaxX || 4}
+                                    ticks={cohortData.courseTicks || [0, 1, 2, 3, 4]}
+                                    unit="Registrations"
+                                    gradientClass="from-[#8B9CF1] to-[#4E60FF]"
+                                    bottomLabel="Total Registrations"
+                                    emptyMessage="No course demand data found for this filter."
+                                />
 
                                 {/* Top-Right: Volunteer Qualification Breakdown (Filtered) */}
-                                <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col">
-                                    <h3 className="text-[16px] sm:text-[18px] font-bold text-[#18181B] mb-3">
-                                        Volunteer Qualification Breakdown (Filtered)
-                                    </h3>
-                                    <div className="w-full h-[320px] min-w-0">
-                                        {cohortData.qualifications && cohortData.qualifications.length > 0 ? (
-                                            <ResponsiveContainer width="100%" height={295}>
-                                                <BarChart
-                                                    layout="vertical"
-                                                    data={cohortData.qualifications}
-                                                    margin={{ top: 5, right: 30, left: 30, bottom: 5 }}
-                                                >
-                                                    <defs>
-                                                        <linearGradient id="qualBarGradient" x1="0" y1="0" x2="1" y2="0">
-                                                            <stop offset="0%" stopColor="#B9A0EF" />
-                                                            <stop offset="100%" stopColor="#8E6BFF" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                    <CartesianGrid horizontal={false} vertical={true} stroke="#F1F5F9" />
-                                                    <XAxis
-                                                        type="number"
-                                                        domain={[0, cohortData.qualMaxX || 4]}
-                                                        ticks={cohortData.qualTicks}
-                                                        tick={{ fill: '#64748B', fontSize: 11 }}
-                                                        allowDecimals={false}
-                                                    />
-                                                    <YAxis
-                                                        type="category"
-                                                        dataKey="name"
-                                                        width={145}
-                                                        tick={{ fill: '#334155', fontSize: 11 }}
-                                                        interval={0}
-                                                    />
-                                                    <Tooltip content={<CustomBarTooltip unit="Volunteers" />} />
-                                                    <Bar
-                                                        dataKey="value"
-                                                        fill="url(#qualBarGradient)"
-                                                        barSize={18}
-                                                        radius={[0, 6, 6, 0]}
-                                                    />
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        ) : (
-                                            <div className="h-full flex items-center justify-center text-sm text-gray-400">
-                                                No qualification data found for this filter.
-                                            </div>
-                                        )}
-                                        <div className="text-center text-xs font-medium text-gray-400 mt-1">
-                                            Willing Volunteers (Count)
-                                        </div>
-                                    </div>
-                                </div>
+                                <ScrollableHorizontalBarChart
+                                    title="Volunteer Qualification Breakdown (Filtered)"
+                                    data={cohortData.qualifications}
+                                    maxX={cohortData.qualMaxX || 4}
+                                    ticks={cohortData.qualTicks || [0, 1, 2, 3, 4]}
+                                    unit="Volunteers"
+                                    gradientClass="from-[#B9A0EF] to-[#8E6BFF]"
+                                    bottomLabel="Willing Volunteers (Count)"
+                                    emptyMessage="No qualification data found for this filter."
+                                />
 
                                 {/* Bottom-Left: Student Acquisition Channels (Filtered) */}
                                 <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 flex flex-col">

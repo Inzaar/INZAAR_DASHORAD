@@ -42,7 +42,25 @@
       0 0 10px #B666E7,
       0 0 20px #B666E7,
       0 0 40px #B666E7;
-    /* HYPER GLOW */
+  }
+
+  .dashboard-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .dashboard-scrollbar::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 8px;
+  }
+
+  .dashboard-scrollbar::-webkit-scrollbar-thumb {
+    background: #C7D2FE;
+    border-radius: 8px;
+  }
+
+  .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #8B9CF1;
   }
 }
 
