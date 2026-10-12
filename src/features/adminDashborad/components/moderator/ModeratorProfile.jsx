@@ -8,18 +8,24 @@ import { uploadImage } from "@/api/course";
 import { updateUser } from "@/api/user";
 import axiosInstance from "@/api/axiosInstance";
 import PhoneInput from "@/components/ui/inputs/PhoneInput";
+import EducationalQualificationInput from "@/components/shared/EducationalQualificationInput";
 
 function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage, setPendingProfileImage, onEditClick }) {
   const isStudent = type === 'student';
   const user = profileData?.user || {};
   const [isSaving, setIsSaving] = useState(false);
   const [phone, setPhone] = useState(user.phone || '');
+  const [educationQualification, setEducationQualification] = useState(user.educationQualification || '');
   const [cnicFrontPreview, setCnicFrontPreview] = useState(user.cnicFrontImage || null);
   const [cnicBackPreview, setCnicBackPreview] = useState(user.cnicBackImage || null);
 
   useEffect(() => {
     setPhone(user.phone || '');
   }, [user.phone]);
+
+  useEffect(() => {
+    setEducationQualification(user.educationQualification || '');
+  }, [user.educationQualification]);
 
 
   // Password Modal State
@@ -96,7 +102,7 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
         permanentAddress: form.get("permanentAddress"),
         nationality: form.get("nationality"),
         city: form.get("city"),
-        educationQualification: form.get("educationQualification"),
+        educationQualification: form.get("educationQualification") !== null ? form.get("educationQualification") : educationQualification,
         attendedReligiousCourseDetails: form.get("attendedReligiousCourseDetails"),
         dob: form.get("dob"),
         profileImageUrl: pendingProfileImage ? null : user.profileImageUrl || ""
@@ -423,19 +429,19 @@ function ModeratorProfile({ profileData, type = 'moderator', pendingProfileImage
               />
             </div>
 
-            {/* Higher Education */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-8 lg:order-8">
-              <label className="font-medium text-[14px]">
-                Higher Education
-              </label>
-              <input
-                type="text"
-                name="educationQualification"
-                placeholder="Enter Your Education"
-                defaultValue={user.educationQualification || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
-              />
-            </div>
+            {/* Educational Qualification */}
+            <EducationalQualificationInput
+              value={educationQualification}
+              onChange={setEducationQualification}
+              label="Educational Qualification"
+              labelClassName="font-medium text-[14px]"
+              containerClassName="flex flex-col gap-[8px] w-full lg:w-[48%] order-8 lg:order-8"
+              selectClassName="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none bg-white"
+              inputClassName="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none mt-2"
+              placeholder="Select Educational Qualification"
+              otherPlaceholder="Specify your qualification"
+              name="educationQualification"
+            />
 
 
 

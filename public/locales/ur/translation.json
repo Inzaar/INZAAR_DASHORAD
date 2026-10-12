@@ -479,8 +479,12 @@
     "loading_countries": "ممالک لوڈ ہو رہے ہیں...",
     "no_countries_found": "کوئی ملک نہیں ملا",
     "enter_phone_number": "فون نمبر درج کریں",
-    "invalid_phone_number": "غلط فون نمبر برائے"
+    "invalid_phone_number": "غلط فون نمبر برائے",
+    "educational_qualification_req": "تعلیمی قابلیت"
   },
+  "select_educational_qualification": "تعلیمی قابلیت منتخب کریں",
+  "specify_qualification": "اپنی قابلیت کی وضاحت کریں",
+  "educational_qualification": "تعلیمی قابلیت",
   "unsavedChangesTitle": "غیر محفوظ شدہ تبدیلیاں",
   "unsavedChangesMessage": "آپ کے پاس غیر محفوظ شدہ تبدیلیاں ہیں۔ اگر آپ یہ صفحہ چھوڑ دیتے ہیں تو آپ کی تبدیلیاں ضائع ہو جائیں گی۔",
   "leavePage": "صفحہ چھوڑ دیں",

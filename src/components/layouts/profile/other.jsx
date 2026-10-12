@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import EducationalQualificationInput from "@/components/shared/EducationalQualificationInput";
 
 const countries = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", 
@@ -68,19 +69,19 @@ function Other({ setUserPayload, userPayload, userInfo }) {
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row">
+                <div className="w-full gap-4 flex flex-col sm:flex-row sm:items-start">
                     {/* Educational qualification */}
-                    <div className=" gap-2 flex flex-col mt-6 w-full sm:w-[50%]">
-                        <label className="leading-[1.8]">{t('education_required', 'Educational Qualification*')} </label>
-
-                        <input
-                             type="text"
-                             placeholder={t('enter_education', 'Enter Your Educational Qualification')}
-                             value={userPayload?.educationQualification || ''}
-                             onChange={(e) => setUserPayload({ ...userPayload, educationQualification: e.target.value })}
-                             className="w-full h-[52px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 "
-                        />
-                    </div>
+                    <EducationalQualificationInput
+                        value={userPayload?.educationQualification || ''}
+                        onChange={(val) => setUserPayload({ ...userPayload, educationQualification: val })}
+                        label={t('education_required', 'Educational Qualification*')}
+                        labelClassName="leading-[1.8]"
+                        containerClassName="gap-2 flex flex-col mt-6 w-full sm:w-[50%]"
+                        selectClassName="w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] opacity-100 rotate-0 bg-white outline-none"
+                        inputClassName="w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] opacity-100 rotate-0 outline-none mt-2"
+                        placeholder="Select Educational Qualification"
+                        otherPlaceholder="Specify your qualification"
+                    />
                     {/* national */}
                     <div className="w-full sm:w-[50%] gap-2 flex flex-col mt-6">
                         <label className="leading-[1.8]">{t('nationality_required', 'Nationality*')} </label>

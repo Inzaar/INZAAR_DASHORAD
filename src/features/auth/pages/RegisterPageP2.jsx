@@ -15,6 +15,7 @@ import { useRegister } from '../context/RegisterContext'
 import { register as registerUser, sendRegisterOtp } from '../../../api/auth'
 import { useAuth } from '../../../context/AuthContext'
 import { useTranslation } from 'react-i18next'
+import EducationalQualificationInput from '@/components/shared/EducationalQualificationInput'
 
 function RegisterPageP2() {
   const { t } = useTranslation();
@@ -191,11 +192,16 @@ function RegisterPageP2() {
             </div>
 
             <div className='max-w-[500px] w-full'>
-              <Input1
-                name="Educational Qualification"
-                placeholder={t('auth.your_educational_qualification', 'Your Educational Qualification')}
-                value={formData.educationQualification}
-                onChange={handleChange}
+              <EducationalQualificationInput
+                value={formData.educationQualification || ''}
+                onChange={(val) => updateFormData({ educationQualification: val })}
+                label={t('auth.educational_qualification_req', 'Educational Qualification')}
+                labelClassName="text-[#18181B] text-[16px]"
+                containerClassName="flex flex-col gap-1 w-full"
+                selectClassName="w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2 bg-white"
+                inputClassName="w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#18181B] text-[14px] rounded px-3 mt-1"
+                placeholder="Select Educational Qualification"
+                otherPlaceholder="Specify your qualification"
               />
             </div>
 

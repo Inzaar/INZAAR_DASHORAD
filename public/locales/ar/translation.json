@@ -479,6 +479,10 @@
     "loading_countries": "جاري تحميل البلدان...",
     "no_countries_found": "لم يتم العثور على بلدان",
     "enter_phone_number": "أدخل رقم الهاتف",
-    "invalid_phone_number": "رقم هاتف غير صالح لـ"
-  }
+    "invalid_phone_number": "رقم هاتف غير صالح لـ",
+    "educational_qualification_req": "المؤهل التعليمي"
+  },
+  "select_educational_qualification": "حدد المؤهل التعليمي",
+  "specify_qualification": "حدد مؤهلك التعليمي",
+  "educational_qualification": "المؤهل التعليمي"
 }

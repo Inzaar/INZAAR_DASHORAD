@@ -222,8 +222,12 @@
     "loading_countries": "Loading countries...",
     "no_countries_found": "No countries found",
     "enter_phone_number": "enter phone number",
-    "invalid_phone_number": "Invalid phone number for"
+    "invalid_phone_number": "Invalid phone number for",
+    "educational_qualification_req": "Educational Qualification"
   },
+  "select_educational_qualification": "Select Educational Qualification",
+  "specify_qualification": "Specify your qualification",
+  "educational_qualification": "Educational Qualification",
   "unsavedChangesTitle": "Unsaved Changes",
   "unsavedChangesMessage": "You have unsaved changes. If you leave this page, your modifications will be lost.",
   "leavePage": "Leave Page",

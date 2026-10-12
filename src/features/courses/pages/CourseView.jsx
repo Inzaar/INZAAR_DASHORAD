@@ -2679,45 +2679,77 @@ const CourseView = () => {
             )}
 
             {/* Inline Audio Player Overlay */}
-            {activeAudioUrl && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md animate-in slide-in-from-bottom-4 duration-300">
-                    <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100 p-4 flex flex-col gap-3">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                                    <Volume2 size={18} className="text-white animate-pulse" />
+            {activeAudioUrl && (() => {
+                const isDrive = Boolean(
+                    activeAudioUrl &&
+                    (activeAudioUrl.includes('drive.google.com') ||
+                     activeAudioUrl.includes('drive.usercontent.google.com') ||
+                     activeAudioUrl.includes('docs.google.com'))
+                );
+
+                const getDriveEmbedSrc = (url) => {
+                    if (!url) return '';
+                    const matchD = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                    if (matchD && matchD[1]) {
+                        return `https://drive.google.com/file/d/${matchD[1]}/preview`;
+                    }
+                    const matchId = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                    if (matchId && matchId[1]) {
+                        return `https://drive.google.com/file/d/${matchId[1]}/preview`;
+                    }
+                    return url;
+                };
+
+                return (
+                    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 animate-in slide-in-from-bottom-4 ${
+                        isDrive ? 'w-[95%] sm:w-[540px] max-w-xl' : 'w-[90%] max-w-md'
+                    }`}>
+                        <div className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100 flex flex-col gap-3 transition-all ${
+                            isDrive ? 'p-4 sm:p-5' : 'p-4'
+                        }`}>
+                            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm">
+                                        <Volume2 size={18} className="text-white animate-pulse" />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-800">Playing Audio Resource</span>
                                 </div>
-                                <span className="text-sm font-bold text-gray-800">Playing Audio Resource</span>
+                                <button
+                                    onClick={() => setActiveAudioUrl(null)}
+                                    className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-all shrink-0"
+                                    aria-label="Close audio player"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <button
-                                onClick={() => setActiveAudioUrl(null)}
-                                className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-all"
-                            >
-                                <X size={20} />
-                            </button>
+                            {isDrive ? (
+                                <div className="w-full h-44 sm:h-48 min-h-[160px] rounded-xl overflow-hidden bg-gray-50 border border-gray-200/60 shadow-inner">
+                                    <iframe
+                                        src={getDriveEmbedSrc(activeAudioUrl)}
+                                        className="w-full h-full border-none"
+                                        title="Google Drive Audio Player"
+                                        allow="autoplay"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full">
+                                    <audio
+                                        src={getAudioSrc(activeAudioUrl)}
+                                        controls
+                                        autoPlay
+                                        onPlay={() => {
+                                            if (playerRef.current) {
+                                                playerRef.current.pauseVideo();
+                                            }
+                                        }}
+                                        className="w-full h-10 custom-audio-player"
+                                    />
+                                </div>
+                            )}
                         </div>
-                        {activeAudioUrl && activeAudioUrl.includes('drive.google.com') ? (
-                            <iframe
-                                src={`https://drive.google.com/file/d/${activeAudioUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1]}/preview`}
-                                className="w-full h-16 border-none rounded"
-                                title="Audio Player"
-                            />
-                        ) : (
-                            <audio
-                                src={getAudioSrc(activeAudioUrl)}
-                                controls
-                                autoPlay
-                                onPlay={() => {
-                                    if (playerRef.current) {
-                                        playerRef.current.pauseVideo();
-                                    }
-                                }}
-                                className="w-full h-10 custom-audio-player"
-                            />
-                        )}
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             <style dangerouslySetInnerHTML={{
                 __html: `
