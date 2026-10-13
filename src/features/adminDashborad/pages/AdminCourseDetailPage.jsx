@@ -16,6 +16,7 @@ import { getAdminCourseById, deleteCourse, updateCourse } from '@/api/course';
 import { createBatch, updateBatch, deleteBatch } from '@/api/batch';
 import toast from 'react-hot-toast';
 import DeleteCourseModal from '../components/DeleteCourseModal';
+import DeleteBatchModal from '../components/DeleteBatchModal';
 import ScheduleBatchModal from '@/features/courses/components/ScheduleBatchModal';
 import SemesterBatchesListModal from '@/features/courses/components/SemesterBatchesListModal';
 import { CustomPagination } from '@/components/ui/Pagination';
@@ -80,6 +81,9 @@ const AdminCourseDetailPage = () => {
     };
 
     const [batchToEdit, setBatchToEdit] = useState(null);
+    const [batchToDelete, setBatchToDelete] = useState(null);
+    const [isDeleteBatchModalOpen, setIsDeleteBatchModalOpen] = useState(false);
+    const [deletingBatch, setDeletingBatch] = useState(false);
 
     const handleEditBatch = (batch) => {
         setBatchToEdit(batch);
@@ -87,17 +91,29 @@ const AdminCourseDetailPage = () => {
         setIsScheduleModalOpen(true);
     };
 
-    const handleDeleteBatch = async (batchId) => {
-        if (!window.confirm("Are you sure you want to delete this batch?")) return;
+    const handleDeleteBatch = (batch) => {
+        const target = typeof batch === 'object' ? batch : courseData?.batches?.find(b => b._id === batch);
+        setBatchToDelete(target || { _id: batch });
+        setIsDeleteBatchModalOpen(true);
+    };
+
+    const handleConfirmDeleteBatch = async () => {
+        const batchId = batchToDelete?._id || batchToDelete?.id;
+        if (!batchId) return;
         try {
+            setDeletingBatch(true);
             await deleteBatch(batchId);
-            toast.success('Batch deleted successfully');
+            toast.success('Batch and its associated groups deleted successfully');
+            setIsDeleteBatchModalOpen(false);
+            setBatchToDelete(null);
             // Refresh course data
             const res = await getAdminCourseById(id);
             setCourseData(res?.data?.data);
         } catch (error) {
             console.error("Error deleting batch:", error);
-            toast.error(error.response?.data?.message || 'Failed to delete batch');
+            toast.error(error.response?.data?.message || error.message || 'Failed to delete batch');
+        } finally {
+            setDeletingBatch(false);
         }
     };
 
@@ -515,6 +531,16 @@ const AdminCourseDetailPage = () => {
                 courseId={courseData?._id}
                 courseTitle={courseData?.title}
                 loading={deleting}
+            />
+            <DeleteBatchModal
+                isOpen={isDeleteBatchModalOpen}
+                onClose={() => {
+                    setIsDeleteBatchModalOpen(false);
+                    setBatchToDelete(null);
+                }}
+                onConfirm={handleConfirmDeleteBatch}
+                batch={batchToDelete}
+                loading={deletingBatch}
             />
         </div>
     );
