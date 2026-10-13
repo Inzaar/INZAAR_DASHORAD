@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle, X } from 'lucide-react';
+import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle, X, Minus, Plus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -421,7 +421,7 @@ const AddCoursePage = () => {
         totalLectures: '',
         certificateCriteria: '',
         unlockCriteria: '',
-        duration: '',
+        duration: '4 Weeks',
         releaseDate: '',
         thumbnail: '',
         certificateFile: '',
@@ -429,7 +429,7 @@ const AddCoursePage = () => {
         sections: [],
         departmentId: '',
     });
-    
+
     const [departments, setDepartments] = useState([]);
     const [instructorsList, setInstructorsList] = useState([]);
 
@@ -439,7 +439,7 @@ const AddCoursePage = () => {
                 if (res?.data) setDepartments(res.data);
             }).catch(console.error);
         });
-        
+
         import('@/api/instructor').then(({ getInstructors }) => {
             getInstructors().then(res => {
                 if (res.data?.data) {
@@ -1178,18 +1178,56 @@ const AddCoursePage = () => {
                                                         </div>
                                                         <div>
                                                             <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Duration</label>
-                                                            <div className="relative group">
-                                                                <select
-                                                                    value={courseForm.duration}
-                                                                    onChange={e => handleCourseFormChange('duration', e.target.value)}
-                                                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
-                                                                >
-                                                                    <option value="">Select</option>
-                                                                    {DURATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                                                                </select>
-                                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                            <div className="flex items-center border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden h-[42px] focus-within:border-blue-500 transition-all">
+                                                                <div className="flex-1 flex items-center px-4">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={courseForm.duration ? courseForm.duration.replace(/[^0-9]/g, '') : '4'}
+                                                                        onChange={(e) => {
+                                                                            const raw = e.target.value.replace(/[^0-9]/g, '');
+                                                                            handleCourseFormChange('duration', raw ? `${raw} Weeks` : '');
+                                                                        }}
+                                                                        onBlur={() => {
+                                                                            const num = parseInt(courseForm.duration, 10);
+                                                                            if (!num || num < 4) {
+                                                                                handleCourseFormChange('duration', '4 Weeks');
+                                                                            } else {
+                                                                                handleCourseFormChange('duration', `${num} Weeks`);
+                                                                            }
+                                                                        }}
+                                                                        className="w-10 text-left font-bold text-[15px] text-gray-800 outline-none bg-transparent"
+                                                                    />
+                                                                    <span className="text-[14px] font-semibold text-gray-600 select-none">Weeks</span>
+                                                                </div>
+                                                                <div className="flex items-center h-full border-l border-gray-200">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const current = parseInt(courseForm.duration, 10) || 4;
+                                                                            const next = Math.max(4, current - 1);
+                                                                            handleCourseFormChange('duration', `${next} Weeks`);
+                                                                        }}
+                                                                        disabled={(parseInt(courseForm.duration, 10) || 4) <= 4}
+                                                                        className="w-11 h-full flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all border-r border-gray-200 cursor-pointer"
+                                                                        title="Subtract week"
+                                                                    >
+                                                                        <Minus size={18} />
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const current = parseInt(courseForm.duration, 10) || 4;
+                                                                            const next = current + 1;
+                                                                            handleCourseFormChange('duration', `${next} Weeks`);
+                                                                        }}
+                                                                        className="w-11 h-full flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-gray-50 active:bg-gray-100 transition-all cursor-pointer"
+                                                                        title="Add week"
+                                                                    >
+                                                                        <Plus size={18} />
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 12 Weeks / 24 Weeks / 52 Weeks</p>
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Minimum 4 Weeks (Click - / + or type duration)</p>
                                                         </div>
 
                                                         {/* Row 2 */}
@@ -1731,143 +1769,143 @@ const AddCoursePage = () => {
 
                                     {/* Upload Video Lecture Section */}
                                     {(!newItem.mediaType || newItem.mediaType === 'Video' || newItem.type === 'Assignment') && (
-                                    <div>
-                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
-                                        <input
-                                            ref={videoInputRef}
-                                            type="file"
-                                            accept="video/*"
-                                            className="hidden"
-                                            onChange={handleVideoFileChange}
-                                        />
-                                        <div
-                                            onClick={() => !isVideoUploading && videoInputRef.current?.click()}
-                                            onMouseEnter={() => setIsModalVideoHovered(true)}
-                                            onMouseLeave={() => setIsModalVideoHovered(false)}
-                                            className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
+                                            <input
+                                                ref={videoInputRef}
+                                                type="file"
+                                                accept="video/*"
+                                                className="hidden"
+                                                onChange={handleVideoFileChange}
+                                            />
+                                            <div
+                                                onClick={() => !isVideoUploading && videoInputRef.current?.click()}
+                                                onMouseEnter={() => setIsModalVideoHovered(true)}
+                                                onMouseLeave={() => setIsModalVideoHovered(false)}
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
                                             ${isVideoUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
-                                            style={{
-                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalVideoHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                                                borderRadius: '12px'
-                                            }}
-                                        >
-                                            {newItem.videoUrl && !isVideoUploading ? (
-                                                <div className="w-full flex flex-col items-center gap-3 px-4">
-                                                    <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
-                                                        <CheckCircle size={12} /> Video Attached Successfully
-                                                    </span>
-                                                    <span className="text-[12px] text-indigo-600 font-bold hover:underline truncate max-w-[80%]">{newItem.videoUrl.split('/').pop()}</span>
-                                                    <span className="text-[11px] text-gray-400 font-medium">Click to change video</span>
-                                                </div>
-                                            ) : isVideoUploading ? (
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Loader2 size={24} className="animate-spin text-indigo-600" />
-                                                    <span className="text-[12px] text-gray-500 font-bold">Uploading video...</span>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
-                                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                                                        <path d="M12 12v9" />
-                                                        <path d="m16 16-4-4-4 4" />
-                                                    </svg>
-                                                    <button
-                                                        type="button"
-                                                        className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
-                                                    >
-                                                        Browse file
-                                                    </button>
-                                                    <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
-                                                </>
-                                            )}
+                                                style={{
+                                                    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalVideoHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                    borderRadius: '12px'
+                                                }}
+                                            >
+                                                {newItem.videoUrl && !isVideoUploading ? (
+                                                    <div className="w-full flex flex-col items-center gap-3 px-4">
+                                                        <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
+                                                            <CheckCircle size={12} /> Video Attached Successfully
+                                                        </span>
+                                                        <span className="text-[12px] text-indigo-600 font-bold hover:underline truncate max-w-[80%]">{newItem.videoUrl.split('/').pop()}</span>
+                                                        <span className="text-[11px] text-gray-400 font-medium">Click to change video</span>
+                                                    </div>
+                                                ) : isVideoUploading ? (
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                        <span className="text-[12px] text-gray-500 font-bold">Uploading video...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                            <path d="M12 12v9" />
+                                                            <path d="m16 16-4-4-4 4" />
+                                                        </svg>
+                                                        <button
+                                                            type="button"
+                                                            className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                        >
+                                                            Browse file
+                                                        </button>
+                                                        <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
 
                                     )}
 
                                     {/* Upload Audio Lecture Section (Main) */}
                                     {newItem.mediaType === 'Audio' && (
-                                    <div>
-                                        <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Audio Lecture</label>
-                                        <input
-                                            ref={mainAudioInputRef}
-                                            type="file"
-                                            accept="audio/*"
-                                            className="hidden"
-                                            onChange={handleAudioFileChange}
-                                        />
-                                        <div
-                                            onClick={() => !isAudioUploading && mainAudioInputRef.current?.click()}
-                                            onMouseEnter={() => setIsModalAudioHovered(true)}
-                                            onMouseLeave={() => setIsModalAudioHovered(false)}
-                                            className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                        <div>
+                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Audio Lecture</label>
+                                            <input
+                                                ref={mainAudioInputRef}
+                                                type="file"
+                                                accept="audio/*"
+                                                className="hidden"
+                                                onChange={handleAudioFileChange}
+                                            />
+                                            <div
+                                                onClick={() => !isAudioUploading && mainAudioInputRef.current?.click()}
+                                                onMouseEnter={() => setIsModalAudioHovered(true)}
+                                                onMouseLeave={() => setIsModalAudioHovered(false)}
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
                                             ${isAudioUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
-                                            style={{
-                                                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                                                borderRadius: '12px'
-                                            }}
-                                        >
-                                            {isAudioUploading ? (
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Loader2 size={24} className="animate-spin text-indigo-600" />
-                                                    <span className="text-[12px] text-gray-500 font-bold">Uploading audio...</span>
+                                                style={{
+                                                    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                                                    borderRadius: '12px'
+                                                }}
+                                            >
+                                                {isAudioUploading ? (
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Loader2 size={24} className="animate-spin text-indigo-600" />
+                                                        <span className="text-[12px] text-gray-500 font-bold">Uploading audio...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                                            <path d="M12 12v9" />
+                                                            <path d="m16 16-4-4-4 4" />
+                                                        </svg>
+                                                        <button
+                                                            type="button"
+                                                            className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                        >
+                                                            Browse file
+                                                        </button>
+                                                        <span className="text-[11px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* List of Audios */}
+                                            {newItem.audioUrl?.length > 0 && (
+                                                <div className="mt-3 space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
+                                                    {newItem.audioUrl.map((item, idx) => {
+                                                        const isObj = typeof item === 'object' && item !== null;
+                                                        const title = isObj ? item.title : `Audio ${idx + 1}`;
+                                                        const url = isObj ? item.url : item;
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-4 py-3 shadow-sm">
+                                                                <div className="flex items-center justify-between">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={title}
+                                                                        onChange={(e) => {
+                                                                            const newAudio = [...newItem.audioUrl];
+                                                                            newAudio[idx] = { title: e.target.value, url };
+                                                                            setNewItem({ ...newItem, audioUrl: newAudio });
+                                                                        }}
+                                                                        className="text-[13px] font-bold text-gray-700 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 bg-transparent flex-1 mr-3 pb-0.5"
+                                                                        placeholder="Audio Title..."
+                                                                    />
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
+                                                                        }}
+                                                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="text-[11px] text-gray-400 font-medium truncate flex-1">{url}</div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
-                                                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                                                        <path d="M12 12v9" />
-                                                        <path d="m16 16-4-4-4 4" />
-                                                    </svg>
-                                                    <button
-                                                        type="button"
-                                                        className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
-                                                    >
-                                                        Browse file
-                                                    </button>
-                                                    <span className="text-[11px] text-gray-400 font-medium">MP3 / WAV</span>
-                                                </>
                                             )}
                                         </div>
-
-                                        {/* List of Audios */}
-                                        {newItem.audioUrl?.length > 0 && (
-                                            <div className="mt-3 space-y-2 max-h-[150px] overflow-y-auto no-scrollbar">
-                                                {newItem.audioUrl.map((item, idx) => {
-                                                    const isObj = typeof item === 'object' && item !== null;
-                                                    const title = isObj ? item.title : `Audio ${idx + 1}`;
-                                                    const url = isObj ? item.url : item;
-                                                    return (
-                                                        <div key={idx} className="flex flex-col gap-2 bg-white border border-gray-100 rounded-lg px-4 py-3 shadow-sm">
-                                                            <div className="flex items-center justify-between">
-                                                                <input
-                                                                    type="text"
-                                                                    value={title}
-                                                                    onChange={(e) => {
-                                                                        const newAudio = [...newItem.audioUrl];
-                                                                        newAudio[idx] = { title: e.target.value, url };
-                                                                        setNewItem({ ...newItem, audioUrl: newAudio });
-                                                                    }}
-                                                                    className="text-[13px] font-bold text-gray-700 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 bg-transparent flex-1 mr-3 pb-0.5"
-                                                                    placeholder="Audio Title..."
-                                                                />
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setNewItem({ ...newItem, audioUrl: newItem.audioUrl.filter((_, i) => i !== idx) });
-                                                                    }}
-                                                                    className="text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                            <div className="text-[11px] text-gray-400 font-medium truncate flex-1">{url}</div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
                                     )}
 
                                     {/* Or Upload URL */}
@@ -2054,7 +2092,7 @@ const AddCoursePage = () => {
                                                         >
                                                             Browse file
                                                         </button>
-                                                        <span className="text-[10px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium">PDF / Image</span>
                                                     </>
                                                 )}
                                             </div>

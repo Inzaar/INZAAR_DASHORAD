@@ -93,12 +93,14 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
             </span>
             <div className="space-y-1.5 text-left">
                 {urls.map((url, idx) => {
-                    const resourceName = `Resource ${idx + 1}`;
+                    const isObj = typeof url === 'object' && url !== null;
+                    const resourceUrl = isObj ? (url.url || '') : url;
+                    const resourceName = isObj ? (url.title || `Resource ${idx + 1}`) : `Resource ${idx + 1}`;
                     return (
                         <div
                             key={idx}
                             onClick={() => {
-                                onSelectResource(url, resourceName);
+                                onSelectResource(resourceUrl, resourceName);
                                 onClose();
                             }}
                             className="flex items-center gap-2.5 p-1.5 -mx-1.5 rounded-xl hover:bg-gray-200/50 cursor-pointer transition-colors group"
@@ -107,7 +109,7 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
                                 <FileText size={12} />
                             </div>
                             <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900 truncate">
-                                {t('resource', 'Resource')} {idx + 1}
+                                {resourceName}
                             </span>
                         </div>
                     );
@@ -367,21 +369,24 @@ const ResourcesModal = ({ activeResources, onClose }) => {
                 {/* Resource List */}
                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 no-scrollbar text-left">
                     {urls.map((url, idx) => {
-                        let filename = url.split('/').pop()?.split('?')[0] || `${type}_resource_${idx + 1}`;
+                        const isObj = typeof url === 'object' && url !== null;
+                        const resourceUrl = isObj ? (url.url || '') : url;
+                        const adminTitle = isObj ? url.title : null;
+                        let filename = resourceUrl.split('/').pop()?.split('?')[0] || `${type}_resource_${idx + 1}`;
                         if (isPdf && !filename.toLowerCase().endsWith('.pdf')) {
                             filename += '.pdf';
                         } else if (!isPdf && !filename.toLowerCase().endsWith('.mp3')) {
                             filename += '.mp3';
                         }
                         const isDownloading = downloadingIdx === idx;
-                        const resourceDisplayName = isPdf 
+                        const resourceDisplayName = adminTitle || (isPdf 
                             ? `${t('handout_note_part', 'Handout Note Part')} ${idx + 1}`
-                            : `${t('audio_lecture_part', 'Audio Lecture Part')} ${idx + 1}`;
+                            : `${t('audio_lecture_part', 'Audio Lecture Part')} ${idx + 1}`);
 
                         return (
                             <div 
                                 key={idx}
-                                onClick={() => window.open(url, '_blank')}
+                                onClick={() => window.open(resourceUrl, '_blank')}
                                 className={`flex items-center justify-between p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 group active:scale-[0.99] ${
                                     isPdf 
                                         ? 'bg-slate-50 hover:bg-red-50/40 border-slate-100 hover:border-red-100' 
@@ -649,7 +654,8 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                         e.stopPropagation();
                                                         const pdfUrls = Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : []);
                                                         if (pdfUrls.length === 1) {
-                                                            window.open(pdfUrls[0], '_blank');
+                                                            const pdfItem = pdfUrls[0];
+                                                            window.open(typeof pdfItem === 'object' ? pdfItem.url : pdfItem, '_blank');
                                                         } else if (pdfUrls.length > 1) {
                                                             const rect = e.currentTarget.getBoundingClientRect();
                                                             setPdfPopover({
@@ -675,7 +681,8 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                         e.stopPropagation();
                                                         const audioUrls = Array.isArray(lecture.audioUrl) ? lecture.audioUrl : (lecture.audioUrl ? [lecture.audioUrl] : []);
                                                         if (audioUrls.length === 1) {
-                                                            window.open(audioUrls[0], '_blank');
+                                                            const audioItem = audioUrls[0];
+                                                            window.open(typeof audioItem === 'object' ? audioItem.url : audioItem, '_blank');
                                                         } else if (audioUrls.length > 1) {
                                                             setActiveResources({
                                                                 lectureNo: displayLectureNo,

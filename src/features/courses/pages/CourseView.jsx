@@ -223,7 +223,7 @@ const CourseView = () => {
                 const res = await getComments(lectureId);
                 const comments = res.data.data;
                 setLectureComments(comments);
-                
+
                 // Track last viewed time for unread messages style
                 const storedTime = localStorage.getItem('lastViewedComments_' + lectureId);
                 if (storedTime) {
@@ -231,7 +231,7 @@ const CourseView = () => {
                 } else if (comments.length > 0) {
                     setLastViewedCommentsTime(Date.now());
                 }
-                
+
                 // Update to current time so next refresh shows new ones as unread
                 localStorage.setItem('lastViewedComments_' + lectureId, new Date().toISOString());
             } catch (error) {
@@ -336,7 +336,9 @@ const CourseView = () => {
     const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
     const [newAudioLink, setNewAudioLink] = useState("");
+    const [newAudioTitle, setNewAudioTitle] = useState("");
     const [newPdfLink, setNewPdfLink] = useState("");
+    const [newPdfTitle, setNewPdfTitle] = useState("");
     const [editLectureData, setEditLectureData] = useState({
         id: "",
         title: "",
@@ -1085,11 +1087,11 @@ const CourseView = () => {
                                             fromDate: courseData?.batchStartDate ? fmtDate(courseData.batchStartDate) : 'N/A',
                                             toDate: courseData?.batchEndDate ? fmtDate(courseData.batchEndDate) : 'N/A'
                                         };
-                                        
+
                                         console.log("Certificate Data Sent from API in CourseView:");
                                         console.log("courseData object:", courseData);
                                         console.log("req.user.studentId fetched from backend?:", courseData?.studentId);
-                                        
+
                                         setCertData(newCertData);
                                         await new Promise(r => setTimeout(r, 300));
                                         const { toBlob } = await import('html-to-image');
@@ -2070,7 +2072,7 @@ const CourseView = () => {
                                                 </>
                                             )}
                                         </div>
-                                        <div 
+                                        <div
                                             ref={commentsScrollRef}
                                             onScroll={handleCommentsScroll}
                                             className="flex flex-col gap-3 mb-6 flex-1 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar"
@@ -2087,7 +2089,7 @@ const CourseView = () => {
                                                         const commentTime = new Date(comment.createdAt).getTime();
                                                         const isUnread = lastViewedCommentsTime && commentTime > lastViewedCommentsTime && !isMe;
                                                         let showUnreadDivider = false;
-                                                        
+
                                                         if (isUnread) {
                                                             const prevComment = index > 0 ? lectureComments[index - 1] : null;
                                                             const prevCommentTime = prevComment ? new Date(prevComment.createdAt).getTime() : 0;
@@ -2108,119 +2110,119 @@ const CourseView = () => {
                                                                     </div>
                                                                 )}
                                                                 <div className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
-                                                                {isSelectionMode && !isMe && (
-                                                                    <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
-                                                                        {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
-                                                                    </button>
-                                                                )}
-                                                                <div className={cn("flex flex-col max-w-[90%]", !isMe ? "items-start" : "items-end")}>
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        {(!isSelectionMode && isMe) && (
-                                                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                                <div className="relative z-50">
-                                                                                    <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                        <Smile size={14} />
-                                                                                    </button>
-                                                                                    {activeReactionPopup === comment._id && (
-                                                                                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
-                                                                                            {EMOJIS.map(emoji => (
-                                                                                                <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
-                                                                                                    {emoji}
-                                                                                                </button>
-                                                                                            ))}
-                                                                                        </div>
+                                                                    {isSelectionMode && !isMe && (
+                                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                                            {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                                        </button>
+                                                                    )}
+                                                                    <div className={cn("flex flex-col max-w-[90%]", !isMe ? "items-start" : "items-end")}>
+                                                                        <div className="flex items-center gap-2 mb-1">
+                                                                            {(!isSelectionMode && isMe) && (
+                                                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                                    <div className="relative z-50">
+                                                                                        <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                            <Smile size={14} />
+                                                                                        </button>
+                                                                                        {activeReactionPopup === comment._id && (
+                                                                                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                                                {EMOJIS.map(emoji => (
+                                                                                                    <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                                        {emoji}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    {isMe && (
+                                                                                        <button onClick={() => { setEditingCommentId(comment._id); setEditingCommentText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                            <Edit2 size={14} />
+                                                                                        </button>
                                                                                     )}
-                                                                                </div>
-                                                                                {isMe && (
-                                                                                    <button onClick={() => { setEditingCommentId(comment._id); setEditingCommentText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                        <Edit2 size={14} />
+                                                                                    <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                        <Trash2 size={14} />
                                                                                     </button>
-                                                                                )}
-                                                                                <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                    <Trash2 size={14} />
-                                                                                </button>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
+                                                                            <div className="flex items-center justify-between gap-4">
+                                                                                <span className={cn("font-bold text-xs opacity-90", !isMe ? "text-gray-800" : "text-white")}>
+                                                                                    {comment.senderId?.firstname || "User"} {comment.senderId?.lastname || ""}
+                                                                                    {!isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-blue-100 text-blue-700" : "bg-white/20")}>{comment.senderId?.role}</span>}
+                                                                                    {isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-gray-100 text-gray-600" : "bg-white/20 text-white")}>Student</span>}
+                                                                                </span>
+                                                                                <span className={cn("text-[10px] opacity-70 font-medium whitespace-nowrap", !isMe ? "text-gray-500" : "text-blue-100")}>{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                                             </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
-                                                                        <div className="flex items-center justify-between gap-4">
-                                                                            <span className={cn("font-bold text-xs opacity-90", !isMe ? "text-gray-800" : "text-white")}>
-                                                                                {comment.senderId?.firstname || "User"} {comment.senderId?.lastname || ""}
-                                                                                {!isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-blue-100 text-blue-700" : "bg-white/20")}>{comment.senderId?.role}</span>}
-                                                                                {isSenderStudent && <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ml-2", !isMe ? "bg-gray-100 text-gray-600" : "bg-white/20 text-white")}>Student</span>}
-                                                                            </span>
-                                                                            <span className={cn("text-[10px] opacity-70 font-medium whitespace-nowrap", !isMe ? "text-gray-500" : "text-blue-100")}>{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+
+                                                                            {editingCommentId === comment._id ? (
+                                                                                <div className="mt-2 flex flex-col gap-2">
+                                                                                    <textarea
+                                                                                        className="w-full text-sm text-gray-800 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px]"
+                                                                                        value={editingCommentText}
+                                                                                        onChange={(e) => setEditingCommentText(e.target.value)}
+                                                                                        onKeyDown={(e) => {
+                                                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                                e.preventDefault();
+                                                                                                handleEditComment(comment._id);
+                                                                                            } else if (e.key === 'Escape') {
+                                                                                                setEditingCommentId(null);
+                                                                                            }
+                                                                                        }}
+                                                                                        autoFocus
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <p className="text-sm leading-relaxed mt-1">{comment.content}</p>
+                                                                            )}
+
+                                                                            {comment.reactions && comment.reactions.length > 0 && (
+                                                                                <div className={cn("absolute -bottom-3 flex items-center gap-1", !isMe ? "right-2" : "left-2")}>
+                                                                                    <div className="bg-white border border-gray-100 shadow-sm rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1">
+                                                                                        {Array.from(new Set(comment.reactions.map(r => r.emoji))).map(e => (
+                                                                                            <span key={e}>{e}</span>
+                                                                                        ))}
+                                                                                        <span className="text-gray-500 font-bold ml-0.5">{comment.reactions.length}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
 
-                                                                        {editingCommentId === comment._id ? (
-                                                                            <div className="mt-2 flex flex-col gap-2">
-                                                                                <textarea
-                                                                                    className="w-full text-sm text-gray-800 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px]"
-                                                                                    value={editingCommentText}
-                                                                                    onChange={(e) => setEditingCommentText(e.target.value)}
-                                                                                    onKeyDown={(e) => {
-                                                                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                                                                            e.preventDefault();
-                                                                                            handleEditComment(comment._id);
-                                                                                        } else if (e.key === 'Escape') {
-                                                                                            setEditingCommentId(null);
-                                                                                        }
-                                                                                    }}
-                                                                                    autoFocus
-                                                                                />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <p className="text-sm leading-relaxed mt-1">{comment.content}</p>
-                                                                        )}
-
-                                                                        {comment.reactions && comment.reactions.length > 0 && (
-                                                                            <div className={cn("absolute -bottom-3 flex items-center gap-1", !isMe ? "right-2" : "left-2")}>
-                                                                                <div className="bg-white border border-gray-100 shadow-sm rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1">
-                                                                                    {Array.from(new Set(comment.reactions.map(r => r.emoji))).map(e => (
-                                                                                        <span key={e}>{e}</span>
-                                                                                    ))}
-                                                                                    <span className="text-gray-500 font-bold ml-0.5">{comment.reactions.length}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-
-                                                                    <div className="flex items-center gap-2 mt-1">
-                                                                        {(!isSelectionMode && !isMe) && (
-                                                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                                <div className="relative z-50">
-                                                                                    <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                        <Smile size={14} />
-                                                                                    </button>
-                                                                                    {activeReactionPopup === comment._id && (
-                                                                                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
-                                                                                            {EMOJIS.map(emoji => (
-                                                                                                <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
-                                                                                                    {emoji}
-                                                                                                </button>
-                                                                                            ))}
-                                                                                        </div>
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            {(!isSelectionMode && !isMe) && (
+                                                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                                    <div className="relative z-50">
+                                                                                        <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                            <Smile size={14} />
+                                                                                        </button>
+                                                                                        {activeReactionPopup === comment._id && (
+                                                                                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                                                {EMOJIS.map(emoji => (
+                                                                                                    <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                                        {emoji}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    {isMe && (
+                                                                                        <button onClick={() => { setEditingCommentId(comment._id); setEditingCommentText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                            <Edit2 size={14} />
+                                                                                        </button>
                                                                                     )}
-                                                                                </div>
-                                                                                {isMe && (
-                                                                                    <button onClick={() => { setEditingCommentId(comment._id); setEditingCommentText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                        <Edit2 size={14} />
+                                                                                    <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                        <Trash2 size={14} />
                                                                                     </button>
-                                                                                )}
-                                                                                <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                                    <Trash2 size={14} />
-                                                                                </button>
-                                                                            </div>
-                                                                        )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
 
-                                                                {isSelectionMode && isMe && (
-                                                                    <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
-                                                                        {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
-                                                                    </button>
-                                                                )}
-                                                            </div>
+                                                                    {isSelectionMode && isMe && (
+                                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                                            {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             </React.Fragment>
                                                         );
                                                     })}
@@ -2448,8 +2450,8 @@ const CourseView = () => {
                                                     const { uploadAudio } = await import('@/api/course');
                                                     const res = await uploadAudio(file);
                                                     setEditLectureData(prev => {
-                                                        if (prev.audioUrl?.includes(res.url)) return prev;
-                                                        return { ...prev, audioUrl: [...prev.audioUrl, res.url] };
+                                                        if (prev.audioUrl?.some(a => (typeof a === 'object' ? a.url : a) === res.url)) return prev;
+                                                        return { ...prev, audioUrl: [...prev.audioUrl, { title: file.name, url: res.url }] };
                                                     });
                                                 } catch (err) {
                                                     console.error("Audio upload failed:", err);
@@ -2461,6 +2463,13 @@ const CourseView = () => {
                                     </div>
                                     <div className="mt-2">
                                         <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Audio Title (e.g. Background Track)"
+                                            value={newAudioTitle}
+                                            onChange={e => setNewAudioTitle(e.target.value)}
+                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm mb-2"
+                                        />
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
@@ -2471,8 +2480,9 @@ const CourseView = () => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
                                                         if (newAudioLink.trim()) {
-                                                            setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()] }));
+                                                            setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, { title: newAudioTitle.trim() || `Audio ${prev.audioUrl.length + 1}`, url: newAudioLink.trim() }] }));
                                                             setNewAudioLink('');
+                                                            setNewAudioTitle('');
                                                         }
                                                     }
                                                 }}
@@ -2482,8 +2492,9 @@ const CourseView = () => {
                                                 type="button"
                                                 onClick={() => {
                                                     if (newAudioLink.trim()) {
-                                                        setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, newAudioLink.trim()] }));
+                                                        setEditLectureData(prev => ({ ...prev, audioUrl: [...prev.audioUrl, { title: newAudioTitle.trim() || `Audio ${prev.audioUrl.length + 1}`, url: newAudioLink.trim() }] }));
                                                         setNewAudioLink('');
+                                                        setNewAudioTitle('');
                                                     }
                                                 }}
                                                 className="px-4 py-2 bg-[#F8F9FA] border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
@@ -2493,14 +2504,18 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
-                                        {editLectureData.audioUrl.map((url, idx) => (
-                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
-                                                <span className="truncate flex-1 pr-4">Audio {idx + 1}</span>
-                                                <button onClick={() => setEditLectureData(prev => ({ ...prev, audioUrl: prev.audioUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        ))}
+                                        {editLectureData.audioUrl.map((audio, idx) => {
+                                            const isObj = typeof audio === 'object' && audio !== null;
+                                            const audioTitle = isObj ? (audio.title || `Audio ${idx + 1}`) : `Audio ${idx + 1}`;
+                                            return (
+                                                <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
+                                                    <span className="truncate flex-1 pr-4">{audioTitle}</span>
+                                                    <button onClick={() => setEditLectureData(prev => ({ ...prev, audioUrl: prev.audioUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
@@ -2543,8 +2558,8 @@ const CourseView = () => {
                                                     const { uploadPdf } = await import('@/api/course');
                                                     const res = await uploadPdf(file);
                                                     setEditLectureData(prev => {
-                                                        if (prev.pdfUrl?.includes(res.url)) return prev;
-                                                        return { ...prev, pdfUrl: [...prev.pdfUrl, res.url] };
+                                                        if (prev.pdfUrl?.some(p => (typeof p === 'object' ? p.url : p) === res.url)) return prev;
+                                                        return { ...prev, pdfUrl: [...prev.pdfUrl, { title: file.name, url: res.url }] };
                                                     });
                                                 } catch (err) {
                                                     console.error("PDF upload failed:", err);
@@ -2556,6 +2571,13 @@ const CourseView = () => {
                                     </div>
                                     <div className="mt-2">
                                         <label className="text-[11px] font-bold text-gray-500 block mb-1 uppercase tracking-wider">Or Upload URL</label>
+                                        <input
+                                            type="text"
+                                            placeholder="PDF Title (e.g. Chapter 1 Notes)"
+                                            value={newPdfTitle}
+                                            onChange={e => setNewPdfTitle(e.target.value)}
+                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm mb-2"
+                                        />
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
@@ -2566,8 +2588,9 @@ const CourseView = () => {
                                                     if (e.key === 'Enter') {
                                                         e.preventDefault();
                                                         if (newPdfLink.trim()) {
-                                                            setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()] }));
+                                                            setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, { title: newPdfTitle.trim() || `PDF ${prev.pdfUrl.length + 1}`, url: newPdfLink.trim() }] }));
                                                             setNewPdfLink('');
+                                                            setNewPdfTitle('');
                                                         }
                                                     }
                                                 }}
@@ -2577,8 +2600,9 @@ const CourseView = () => {
                                                 type="button"
                                                 onClick={() => {
                                                     if (newPdfLink.trim()) {
-                                                        setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, newPdfLink.trim()] }));
+                                                        setEditLectureData(prev => ({ ...prev, pdfUrl: [...prev.pdfUrl, { title: newPdfTitle.trim() || `PDF ${prev.pdfUrl.length + 1}`, url: newPdfLink.trim() }] }));
                                                         setNewPdfLink('');
+                                                        setNewPdfTitle('');
                                                     }
                                                 }}
                                                 className="px-4 py-2 bg-[#F8F9FA] border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors shadow-sm"
@@ -2588,14 +2612,18 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2 max-h-32 overflow-y-auto no-scrollbar">
-                                        {editLectureData.pdfUrl.map((url, idx) => (
-                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
-                                                <span className="truncate flex-1 pr-4">PDF {idx + 1}</span>
-                                                <button onClick={() => setEditLectureData(prev => ({ ...prev, pdfUrl: prev.pdfUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        ))}
+                                        {editLectureData.pdfUrl.map((pdf, idx) => {
+                                            const isObj = typeof pdf === 'object' && pdf !== null;
+                                            const pdfTitle = isObj ? (pdf.title || `PDF ${idx + 1}`) : `PDF ${idx + 1}`;
+                                            return (
+                                                <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-medium text-gray-600">
+                                                    <span className="truncate flex-1 pr-4">{pdfTitle}</span>
+                                                    <button onClick={() => setEditLectureData(prev => ({ ...prev, pdfUrl: prev.pdfUrl.filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 transition-colors">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
