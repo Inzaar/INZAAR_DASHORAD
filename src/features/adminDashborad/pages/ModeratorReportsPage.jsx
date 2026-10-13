@@ -512,13 +512,15 @@ const ModeratorReportsPage = () => {
                                             <table className="w-full min-w-[1000px]">
                                                 <thead>
                                                     <tr className="border-b border-gray-100">
-                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 w-[15%]">{t("name", "Name")}</th>
-                                                        <th className="text-left font-bold text-[13px] text-gray-800 pb-4 w-[20%]">{t("contact", "Contact")}</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[15%]">{t("manage_batchs", "Manage Batch's")}</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">{t("progress", "Progress")}</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[12%]">{t("last_login", "Last Login")}</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[10%]">{t("status", "Status")}</th>
-                                                        <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">{t("action", "Action")}</th>
+                                                        <th className={`text-left font-bold text-[13px] text-gray-800 pb-4 pl-4 ${user?.role === 'management' ? 'w-[18%]' : 'w-[15%]'}`}>{t("name", "Name")}</th>
+                                                        <th className={`text-left font-bold text-[13px] text-gray-800 pb-4 ${user?.role === 'management' ? 'w-[22%]' : 'w-[20%]'}`}>{t("contact", "Contact")}</th>
+                                                        <th className={`text-center font-bold text-[13px] text-gray-800 pb-4 ${user?.role === 'management' ? 'w-[18%]' : 'w-[15%]'}`}>{t("manage_batchs", "Manage Batch's")}</th>
+                                                        <th className={`text-center font-bold text-[13px] text-gray-800 pb-4 ${user?.role === 'management' ? 'w-[14%]' : 'w-[10%]'}`}>{t("progress", "Progress")}</th>
+                                                        <th className={`text-center font-bold text-[13px] text-gray-800 pb-4 ${user?.role === 'management' ? 'w-[14%]' : 'w-[12%]'}`}>{t("last_login", "Last Login")}</th>
+                                                        <th className={`text-center font-bold text-[13px] text-gray-800 pb-4 ${user?.role === 'management' ? 'w-[14%]' : 'w-[10%]'}`}>{t("status", "Status")}</th>
+                                                        {user?.role !== 'management' && (
+                                                            <th className="text-center font-bold text-[13px] text-gray-800 pb-4 w-[13%]">{t("action", "Action")}</th>
+                                                        )}
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-50">
@@ -558,13 +560,15 @@ const ModeratorReportsPage = () => {
                                                                     {t(moderator.status?.trim().toLowerCase(), moderator.status)}
                                                                 </span>
                                                             </td>
-                                                            <td className="py-4">
-                                                                <div className="flex justify-center items-center w-full">
-                                                                    <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto w-max" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
-                                                                        {t("view_profile", "View Profile")}
-                                                                    </GradiantButton>
-                                                                </div>
-                                                            </td>
+                                                            {user?.role !== 'management' && (
+                                                                <td className="py-4">
+                                                                    <div className="flex justify-center items-center w-full">
+                                                                        <GradiantButton className="text-[12px] px-4 py-2 rounded shadow-none font-medium bg-[#6366F1] mx-auto w-max" onClick={() => navigate(`/moderator-details/${moderator.id}`)}>
+                                                                            {t("view_profile", "View Profile")}
+                                                                        </GradiantButton>
+                                                                    </div>
+                                                                </td>
+                                                            )}
                                                         </tr>
                                                     ))}
                                                 </tbody>

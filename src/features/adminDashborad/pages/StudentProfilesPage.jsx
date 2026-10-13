@@ -623,14 +623,16 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("progress", "Progress")}</th>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("last_login", "Last Login")}</th>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("status", "Status")}</th>
-                                                <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("action", "Action")}</th>
+                                                {user?.role !== 'management' && (
+                                                    <th className="text-center font-bold text-[14px] text-gray-800 pb-2">{t("action", "Action")}</th>
+                                                )}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {students.length === 0 ? (
                                                 !isLoading && (
                                                     <tr>
-                                                        <td colSpan="8" className="py-20 text-center bg-[#F8F9FA] rounded-xl">
+                                                        <td colSpan={user?.role === 'management' ? 7 : 8} className="py-20 text-center bg-[#F8F9FA] rounded-xl">
                                                             <div className="flex flex-col items-center gap-2 text-gray-400">
                                                                 <Search size={48} className="opacity-20" />
                                                                 <p className="font-medium text-[16px]">{t("no_students_matching", "No students found matching your criteria")}</p>
@@ -687,21 +689,23 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                         <td className="py-4 text-center">
                                                             <span className="text-[14px] text-gray-800">{student.lastLogin || '-'}</span>
                                                         </td>
-                                                        <td className="py-4 text-center">
+                                                        <td className={`py-4 text-center ${user?.role === 'management' ? 'rounded-r-xl' : ''}`}>
                                                             <span className={`text-[14px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                                                                 {student.status === 'In-active' ? 'In-active' : student.status}
                                                             </span>
                                                         </td>
-                                                        <td className="py-4 text-center rounded-r-xl">
-                                                            <div className="flex justify-center items-center w-full">
-                                                                <button
-                                                                    onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
-                                                                >
-                                                                    View Profile
-                                                                </button>
-                                                            </div>
-                                                        </td>
+                                                        {user?.role !== 'management' && (
+                                                            <td className="py-4 text-center rounded-r-xl">
+                                                                <div className="flex justify-center items-center w-full">
+                                                                    <button
+                                                                        onClick={() => navigate(`/admin/student-details/${student.id}`)}
+                                                                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
+                                                                    >
+                                                                        View Profile
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        )}
                                                     </tr>
                                                 ))
                                             )}

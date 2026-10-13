@@ -42,9 +42,11 @@ const EnrolledCourses = () => {
     }, [])
 
     const enrolledCoursesList = userCourses?.enrolledCourses || [];
-    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + (course.completedLecturesCount || course.completedLectures || 0), 0);
+    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + Math.min(course.completedLecturesCount || course.completedLectures || 0, course.totalLectures || 0), 0);
     const totalLectures = enrolledCoursesList.reduce((sum, course) => sum + (course.totalLectures || 0), 0);
-    const progressPercentage = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
+    const progressPercentage = userCourses?.stats?.overallProgress !== undefined
+        ? Math.min(100, Math.max(0, userCourses.stats.overallProgress))
+        : (totalLectures > 0 ? Math.min(100, Math.round((totalCompleted / totalLectures) * 100)) : 0);
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">

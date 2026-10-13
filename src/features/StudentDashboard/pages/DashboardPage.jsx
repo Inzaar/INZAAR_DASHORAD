@@ -26,9 +26,11 @@ const DashboardPage = () => {
     const [userCourses, setUserCourses] = useState([]);
 
     const enrolledCoursesList = userCourses?.enrolledCourses || [];
-    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + (course.completedLecturesCount || course.completedLectures || 0), 0);
+    const totalCompleted = enrolledCoursesList.reduce((sum, course) => sum + Math.min(course.completedLecturesCount || course.completedLectures || 0, course.totalLectures || 0), 0);
     const totalLectures = enrolledCoursesList.reduce((sum, course) => sum + (course.totalLectures || 0), 0);
-    const progressPercentage = totalLectures > 0 ? Math.round((totalCompleted / totalLectures) * 100) : 0;
+    const progressPercentage = userCourses?.stats?.overallProgress !== undefined
+        ? Math.min(100, Math.max(0, userCourses.stats.overallProgress))
+        : (totalLectures > 0 ? Math.min(100, Math.round((totalCompleted / totalLectures) * 100)) : 0);
 
     // useEffect(() => {
     //     const fetchUserProfile = async () => {
@@ -109,9 +111,11 @@ const DashboardPage = () => {
         course._id === selectedLectureFilter
     );
 
-    const ongoingProgressPercentage = selectedCourseData && selectedCourseData.totalLectures > 0
-        ? Math.round(((selectedCourseData.completedLecturesCount || selectedCourseData.completedLectures || 0) / selectedCourseData.totalLectures) * 100)
-        : 0;
+    const ongoingProgressPercentage = selectedCourseData?.progress !== undefined
+        ? Math.min(100, Math.max(0, selectedCourseData.progress))
+        : (selectedCourseData && selectedCourseData.totalLectures > 0
+            ? Math.min(100, Math.round((Math.min(selectedCourseData.completedLecturesCount || selectedCourseData.completedLectures || 0, selectedCourseData.totalLectures) / selectedCourseData.totalLectures) * 100))
+            : 0);
 
     const filteredLectures = selectedCourseData?.lectures || [];
     const toggleSidebar = () => {

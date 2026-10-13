@@ -268,9 +268,12 @@ const StudentCourseDashboard = ({ profileData }) => {
     const itemsPerPage = 5;
     const totalPages = Math.ceil(lectures.length / itemsPerPage);
     const paginatedLectures = lectures.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const displayLecturesCompleted = lectures.length > 0
+        ? Math.min(Number(stats.lecturesCompleted) || 0, lectures.length)
+        : (Number(stats.lecturesCompleted) || 0);
     const overviewStats = [
         { label: "Quiz Score", value: stats.quizScore, color: "emerald", labelColor: "text-emerald-500", dotColor: "bg-emerald-500", lineColor: "bg-emerald-400" },
-        { label: "lecture Completed", value: stats.lecturesCompleted.toString(), color: "blue", labelColor: "text-blue-600", dotColor: "bg-blue-600", lineColor: "bg-blue-500" },
+        { label: "lecture Completed", value: displayLecturesCompleted.toString(), color: "blue", labelColor: "text-blue-600", dotColor: "bg-blue-600", lineColor: "bg-blue-500" },
         { label: "Time Spent Last week", value: stats.timeSpent, color: "purple", labelColor: "text-violet-500", dotColor: "bg-violet-500", lineColor: "bg-violet-400" }
     ];
 

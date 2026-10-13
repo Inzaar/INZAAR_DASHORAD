@@ -21,8 +21,13 @@ const AdminRoute = () => {
         return <Navigate to="/dashboard" replace />;
     }
 
-    // If management visits /admin-dashboard, redirect to /management-dashboard
-    if (user.role === 'management' && location.pathname === '/admin-dashboard') {
+    // If management visits /admin-dashboard or detail pages they have no access to, redirect to /management-dashboard
+    if (user.role === 'management' && (
+        location.pathname === '/admin-dashboard' ||
+        location.pathname.startsWith('/admin/student-details') ||
+        location.pathname.startsWith('/moderator-details') ||
+        location.pathname.startsWith('/admin/moderator-details')
+    )) {
         return <Navigate to="/management-dashboard" replace />;
     }
 

@@ -7,9 +7,18 @@ function StatusRow({ data }) {
     const { t } = useTranslation();
     return (
         <div className="h-[60px] w-full bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-[12px]">
-            <div className="flex-1 min-w-[120px] flex items-center justify-center">{t(data.course?.trim(), data.course)}</div>
+            <Link 
+                to={`/course-view?id=${data.courseId}&lectureId=${data.lectureId}`}
+                className="flex-1 min-w-[120px] max-w-[220px] px-2 flex items-center justify-center text-gray-800 hover:text-[#3758EE] transition-colors"
+            >
+                <span className="truncate block text-center w-full" title={data.course}>
+                    {t(data.course?.trim(), data.course)}
+                </span>
+            </Link>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.lecture}</div>
-            <div className="flex-1 min-w-[120px] flex items-center justify-center">{t(data.title?.trim(), data.title)}</div>
+            <div className="flex-1 min-w-[120px] px-2 flex items-center justify-center truncate" title={data.title}>
+                <span className="truncate block text-center w-full">{t(data.title?.trim(), data.title)}</span>
+            </div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.date}</div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.progress}</div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">

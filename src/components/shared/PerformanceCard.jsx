@@ -13,10 +13,18 @@ const PerformanceCard = ({
 }) => {
     const { t } = useTranslation();
 
+    const rawPercentage = percentageOverride ?? userCourses?.stats?.overallProgress ?? 0;
+    const parsedPercentage = typeof rawPercentage === 'string' ? parseFloat(rawPercentage) : Number(rawPercentage);
+    const formattedPercentage = isNaN(parsedPercentage) ? 0 : Math.round(parsedPercentage);
+
+    const rawTrend = trendOverride ?? (userCourses?.stats?.weeklyTrendPercentage ? userCourses.stats.weeklyTrendPercentage : 0);
+    const parsedTrend = typeof rawTrend === 'string' ? parseFloat(rawTrend) : Number(rawTrend);
+    const formattedTrend = isNaN(parsedTrend) ? 0 : Math.round(parsedTrend);
+
     const percentageInfo = {
-        percentage: percentageOverride ?? userCourses?.stats?.overallProgress ?? 0,
-        trend: trendOverride ?? (userCourses?.stats?.weeklyTrendPercentage ? userCourses.stats.weeklyTrendPercentage : 0),
-    }
+        percentage: formattedPercentage,
+        trend: formattedTrend,
+    };
 
     const size = 139;
     const strokeWidth = 16;

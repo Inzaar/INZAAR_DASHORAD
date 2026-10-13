@@ -17,21 +17,19 @@ const CourseCard = ({
 }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const progressPercentage = total > 0 ? (completed / total) * 100 : 0;
+    const displayCompleted = Math.min(Number(completed) || 0, Number(total) || 0);
+    const progressPercentage = total > 0 ? Math.min(100, (displayCompleted / total) * 100) : 0;
 
-    const handleClick = (e) => {
-        if (batchStartDate && new Date(batchStartDate) > new Date()) {
-            e.preventDefault();
-            toast("Coming soon! This course batch hasn't started yet.", { icon: "⏳" });
-        } else {
-            const url = enrollmentId ? `/course-view?id=${id}&enrollmentId=${enrollmentId}` : `/course-view?id=${id}`;
-            navigate(url);
-        }
+    const handleClick = () => {
+        const targetId = id || enrollmentId;
+        if (!targetId) return;
+        const url = enrollmentId ? `/course-view?id=${id || targetId}&enrollmentId=${enrollmentId}` : `/course-view?id=${targetId}`;
+        navigate(url);
     };
 
     return (
         <div onClick={handleClick} className={cn(
-            "w-full max-w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px] cursor-pointer",
+            "w-full max-w-[301px] h-[250px] bg-white rounded-[10px] border-[0.8px] border-[#E1E1E1] p-[10px] flex flex-col gap-[10px] cursor-pointer hover:shadow-md transition-shadow",
             className
         )}>
             {/* Image Section */}
@@ -44,15 +42,18 @@ const CourseCard = ({
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-col gap-2">
-                <h3 className="font-bold text-md text-black leading-normal pb-1">
+            <div className="flex flex-col gap-2 min-w-0 w-full overflow-hidden">
+                <h3 
+                    className="font-bold text-md text-black leading-normal pb-1 truncate w-full block"
+                    title={title}
+                >
                     {t(title?.trim(), title)}
                 </h3>
 
                 {/* Progress Section */}
                 <div className="flex flex-col gap-1.5 mt-1">
                     <div className="text-right">
-                        <span className="text-[#3758EE] font-medium text-sm">{completed}</span>
+                        <span className="text-[#3758EE] font-medium text-sm">{displayCompleted}</span>
                         <span className="text-gray-400 text-sm">/{total} {t('lectures', 'Lectures')}</span>
                     </div>
 

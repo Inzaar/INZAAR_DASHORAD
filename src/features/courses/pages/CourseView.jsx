@@ -364,10 +364,11 @@ const CourseView = () => {
 
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
-    const courseId = new URLSearchParams(window.location.search).get("id");
-    const enrollmentId = new URLSearchParams(window.location.search).get("enrollmentId");
-    const targetLectureId = new URLSearchParams(window.location.search).get("lectureId");
-    const userId = new URLSearchParams(window.location.search).get("userId");
+    const searchParams = new URLSearchParams(location.search || window.location.search);
+    const courseId = searchParams.get("id");
+    const enrollmentId = searchParams.get("enrollmentId");
+    const targetLectureId = searchParams.get("lectureId");
+    const userId = searchParams.get("userId");
     const isQuizView = currentLecture?.type === 'Quiz';
     const isNonVideoView = currentLecture?.type === 'Quiz' || currentLecture?.type === 'Assignment';
     const canEdit = (user?.role === 'admin' || (user?.role === 'moderator' && user?.assignedFeatures?.some(f => ['Courses Management', 'Course Management', 'Courses'].includes(f)))) && isAdminView;
@@ -630,7 +631,7 @@ const CourseView = () => {
             }
         };
         fetchCourse(courseId);
-    }, [courseId, location.key]);
+    }, [courseId, enrollmentId, location.search, location.key]);
 
     useEffect(() => {
         const fetchAllNotes = async () => {
@@ -741,12 +742,15 @@ const CourseView = () => {
         setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
+    const allVideoLecturesWatched = lectures.length > 0 && lectures.every(l => l.isCompleted);
+
     const isCourseCompleted = Boolean(
         courseData?.isCompleted ||
         (courseData?.progress !== undefined && Number(courseData.progress) >= 100) ||
-        (lectures.length > 0 && lectures.every(l => l.isCompleted)) ||
         Boolean(certData?.certUrl)
     );
+
+    const showPendingFinalTasksNotice = !isAdminView && allVideoLecturesWatched && !isCourseCompleted;
 
     // Player Handlers
     const onPlayerReady = (event) => {
@@ -963,10 +967,11 @@ const CourseView = () => {
                     if (playerRef.current.isEnded?.()) {
                         percent = 100;
                     }
+                    const roundedPercent = Math.min(100, Math.round(percent));
                     const prevMax = maxWatchedMapRef.current[lectureId] || 0;
-                    const newMaxPercent = Math.max(prevMax, percent);
+                    const newMaxPercent = Math.max(prevMax, roundedPercent);
                     maxWatchedMapRef.current[lectureId] = newMaxPercent;
-                    setProgress(newMaxPercent);
+                    setProgress(Math.round(newMaxPercent));
                     const now = Date.now();
 
                     // Allow anyone to record progress, EXCEPT if admin is viewing a student's progress
@@ -1471,26 +1476,38 @@ const CourseView = () => {
                                 <Analytics
                                     userCourses={userCourses}
                                     courseData={isModeratorViewingStudent ? {
-                                        progress: progress || 0,
+                                        progress: Math.round(progress || 0),
                                         improvementFromLastWeek: 0,
                                         quizScore: undefined,
-                                        lectureCompleted: (progress || 0) >= 90 ? 1 : 0,
+                                        lectureCompleted: Math.round(progress || 0) >= 90 ? 1 : 0,
                                         timeSpentLastWeek: currentLecture?.lastWatchedTime
                                             ? `${Math.floor(currentLecture.lastWatchedTime / 3600)}h ${Math.floor((currentLecture.lastWatchedTime % 3600) / 60)}m`
                                             : "0h 0m",
                                         overallPerformance: {
-                                            percentage: progress || 0,
+                                            percentage: Math.round(progress || 0),
                                             trendingUp: 0
                                         }
                                     } : courseData}
                                     courseTitle={courseData?.title}
                                     name={isModeratorViewingStudent ? "Lecture Performance" : (courseData?.title ? `Overall Performance in ${courseData.title}` : "Overall Performance")}
-                                    percentageOverride={progress || 0}
+                                    percentageOverride={isModeratorViewingStudent ? Math.round(progress || 0) : undefined}
                                 />
                             )}
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
                                 <div ref={videoSectionRef} className={`w-full ${((isEditingQuiz || isEditingAssignment) && isAdminView) || isModeratorViewingStudent ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
+                                    {showPendingFinalTasksNotice && (
+                                        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-900 shadow-sm animate-fadeIn">
+                                            <span className="text-xl leading-none mt-0.5">🎓</span>
+                                            <div>
+                                                <p className="font-semibold text-sm">Course Almost Complete!</p>
+                                                <p className="text-xs text-amber-700 mt-0.5">
+                                                    You have completed all video lectures. To finalize the course and unlock your certificate, please attempt the quiz and assignment for the final lecture.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {!hideSidebarAndCards && currentLecture && (
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
                                             <div>

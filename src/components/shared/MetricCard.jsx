@@ -15,15 +15,26 @@ const MetricCard = ({
     trendLabel: trendLabelProp,
 }) => {
     const { t } = useTranslation();
+    const formatValue = (val) => {
+        if (typeof val === 'string' && val.endsWith('%')) {
+            const num = parseFloat(val);
+            return isNaN(num) ? val : `${Math.round(num)}%`;
+        }
+        if (typeof val === 'number') {
+            return Math.round(val);
+        }
+        return val;
+    };
+
     const metricInfo = {
         title: titleProp ?? t("total_enrolled_courses", "Total Enrolled Courses"),
-        value: valueProp ?? (userCourses?.stats?.totalEnrolled || "0"),
+        value: formatValue(valueProp ?? (userCourses?.stats?.totalEnrolled || "0")),
         trend: {
-            value: trendValueProp ?? (userCourses?.stats?.weeklyTrendPercentage ? Math.abs(userCourses.stats.weeklyTrendPercentage) + "%" : "0%"),
+            value: formatValue(trendValueProp ?? (userCourses?.stats?.weeklyTrendPercentage ? Math.abs(userCourses.stats.weeklyTrendPercentage) + "%" : "0%")),
             label: trendLabelProp ?? t("improvement_from_last_week", "Improvement From last Week"),
         },
         data: [70, 150, 120],
-    }
+    };
 
     return (
         <div className={cn(

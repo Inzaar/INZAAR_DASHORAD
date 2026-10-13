@@ -13,8 +13,8 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
     // Build course-detail overrides from courseData when present
     const courseMetricProps = courseData ? {
         title: courseTitle ? t("progress_in", "Progress in ") + courseTitle : t("progress", "Progress"),
-        value: `${courseData.progress ?? 0}%`,
-        trendValue: `${courseData.improvementFromLastWeek ?? 0}%`,
+        value: `${Math.round(parseFloat(courseData.progress) || 0)}%`,
+        trendValue: `${Math.round(parseFloat(courseData.improvementFromLastWeek) || 0)}%`,
         trendLabel: t("improvement_from_last_week", "Improvement From last Week"),
     } : {};
 
@@ -24,17 +24,23 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
             col2: { value: courseData.overview.inProgress ?? 0, label: t("in_progress_courses", "In Progress Courses"), color: "#3758EE" },
             col3: { value: courseData.overview.timeSpentLastWeek ?? "0h 0m", label: t("time_spent_last_week", "Time Spent Last week"), color: "#B666E7" }
         } : {
-            col1: courseData.quizScore !== undefined ? { value: courseData.quizScore, label: t("quiz_score", "Quiz Score"), color: "#22C55E" } : null,
+            col1: courseData.quizScore !== undefined ? {
+                value: typeof courseData.quizScore === 'string' && courseData.quizScore.includes('%')
+                    ? `${Math.round(parseFloat(courseData.quizScore) || 0)}%`
+                    : `${Math.round(Number(courseData.quizScore) || 0)}%`,
+                label: t("quiz_score", "Quiz Score"),
+                color: "#22C55E"
+            } : null,
             col2: { value: courseData.lectureCompleted ?? 0, label: t("lecture_completed", "Lecture Completed"), color: "#3758EE" },
             col3: { value: courseData.timeSpentLastWeek ?? "N/A", label: t("time_spent", "Time Spent"), color: "#B666E7" }
         })
     } : undefined;
 
     const coursePerformanceProps = courseData ? {
-        percentageOverride: percentageOverride !== undefined ? percentageOverride : (courseData.overallPerformance?.percentage ?? courseData.progress ?? 0),
-        trendOverride: courseData.overallPerformance?.trendingUp ?? 0,
+        percentageOverride: percentageOverride !== undefined ? Math.round(Number(percentageOverride) || 0) : Math.round(parseFloat(courseData.overallPerformance?.percentage ?? courseData.progress ?? 0) || 0),
+        trendOverride: Math.round(Number(courseData.overallPerformance?.trendingUp) || 0),
     } : {
-        percentageOverride: percentageOverride,
+        percentageOverride: percentageOverride !== undefined ? Math.round(Number(percentageOverride) || 0) : undefined,
     };
 
     return (
