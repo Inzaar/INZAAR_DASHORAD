@@ -13,18 +13,18 @@ const SemesterBatchesListModal = ({ isOpen, onClose, batches, onOpenScheduleModa
         const end = new Date(b.endDate);
         return (isBefore(start, now) || isSameDay(start, now)) && (isAfter(end, now) || isSameDay(end, now));
     });
-    
-    const upcomingBatches = batches.filter(b => 
+
+    const upcomingBatches = batches.filter(b =>
         isAfter(new Date(b.startDate), now) && !isSameDay(new Date(b.startDate), now)
     );
 
-    const pastBatches = batches.filter(b => 
+    const pastBatches = batches.filter(b =>
         isBefore(new Date(b.endDate), now) && !isSameDay(new Date(b.endDate), now)
     );
 
     const renderBatchList = (title, list) => {
         if (list.length === 0) return null;
-        
+
         return (
             <div className="mb-6 last:mb-0">
                 <h3 className="text-sm font-bold text-gray-800 mb-3 uppercase tracking-wider">{title}</h3>
@@ -33,52 +33,52 @@ const SemesterBatchesListModal = ({ isOpen, onClose, batches, onOpenScheduleModa
                         const start = new Date(batch.startDate);
                         const end = new Date(batch.endDate);
                         return (
-                        <div key={batch._id || idx} className="p-4 rounded-xl border border-gray-100 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white rounded-lg shadow-sm text-blue-500">
-                                    <CalendarIcon size={18} />
+                            <div key={batch._id || idx} className="p-4 rounded-xl border border-gray-100 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white rounded-lg shadow-sm text-blue-500">
+                                        <CalendarIcon size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">
+                                            {batch.name || "Unnamed Batch"}
+                                        </p>
+                                        <p className="text-xs text-gray-600 mt-1">
+                                            {format(start, "MMM dd, yyyy")} - {format(end, "MMM dd, yyyy")}
+                                        </p>
+                                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                                            <Clock size={12} />
+                                            {differenceInDays(end, start)} days duration
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-bold text-gray-900">
-                                        {batch.name || "Unnamed Batch"}
-                                    </p>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        {format(start, "MMM dd, yyyy")} - {format(end, "MMM dd, yyyy")}
-                                    </p>
-                                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                                        <Clock size={12} />
-                                        {differenceInDays(end, start)} days duration
-                                    </p>
+                                <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                                    <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${title === "Running" ? "bg-emerald-100 text-emerald-700" :
+                                        title === "Upcoming" ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-700"
+                                        }`}>
+                                        {title}
+                                    </span>
+                                    {title !== "Completed" && (
+                                        <>
+                                            <button
+                                                onClick={() => onEditBatch(batch)}
+                                                className="p-1.5 bg-white text-gray-500 hover:text-[#3758EE] hover:bg-blue-50 border border-gray-200 rounded-lg shadow-sm transition-colors"
+                                                title="Edit Batch"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => onDeleteBatch(batch)}
+                                                className="p-1.5 bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 border border-gray-200 rounded-lg shadow-sm transition-colors cursor-pointer"
+                                                title="Delete Batch"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                                <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${
-                                    title === "Running" ? "bg-emerald-100 text-emerald-700" : 
-                                    title === "Upcoming" ? "bg-blue-100 text-blue-700" : "bg-gray-200 text-gray-700"
-                                }`}>
-                                    {title}
-                                </span>
-                                {title !== "Completed" && (
-                                    <>
-                                        <button 
-                                            onClick={() => onEditBatch(batch)}
-                                            className="p-1.5 bg-white text-gray-500 hover:text-[#3758EE] hover:bg-blue-50 border border-gray-200 rounded-lg shadow-sm transition-colors"
-                                            title="Edit Batch"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                        </button>
-                                        <button 
-                                            onClick={() => onDeleteBatch(batch)}
-                                            className="p-1.5 bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 border border-gray-200 rounded-lg shadow-sm transition-colors cursor-pointer"
-                                            title="Delete Batch"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )})}
+                        )
+                    })}
                 </div>
             </div>
         );
@@ -103,7 +103,7 @@ const SemesterBatchesListModal = ({ isOpen, onClose, batches, onOpenScheduleModa
                         </button>
                     </div>
                 </div>
-                
+
                 <div className="p-6 overflow-y-auto flex-1">
                     {batches && batches.length > 0 ? (
                         <>
