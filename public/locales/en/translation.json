@@ -223,7 +223,8 @@
     "no_countries_found": "No countries found",
     "enter_phone_number": "enter phone number",
     "invalid_phone_number": "Invalid phone number for",
-    "educational_qualification_req": "Educational Qualification"
+    "educational_qualification_req": "Educational Qualification",
+    "error_min_age": "You must be at least 10 years old to register."
   },
   "select_educational_qualification": "Select Educational Qualification",
   "specify_qualification": "Specify your qualification",

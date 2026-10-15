@@ -29,6 +29,13 @@ function RegisterPageP2() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
+  // Returns the maximum allowed DOB (today - 10 years) in "YYYY-MM-DD" format
+  const getMaxAllowedDOB = () => {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 10);
+    return today.toISOString().split('T')[0];
+  };
+
   useEffect(() => {
     if (!formData.firstname || !formData.email || !formData.password) {
       navigate('/register', { replace: true });
@@ -66,6 +73,14 @@ function RegisterPageP2() {
       // Final validation (referralSource is optional)
       if (!formData.gender || formData.gender === "Choose" || !formData.dob || !formData.nationality || !formData.permanentAddress) {
         throw new Error(t('auth.error_fill_all_required_p2', 'Kindly fill all the required feilds'));
+      }
+
+      // Age validation — must be at least 10 years old
+      const dobDate = new Date(formData.dob);
+      const minAgeDate = new Date();
+      minAgeDate.setFullYear(minAgeDate.getFullYear() - 10);
+      if (dobDate > minAgeDate) {
+        throw new Error(t('auth.error_min_age', 'You must be at least 10 years old to register.'));
       }
 
       // Call backend to send 6-digit OTP to user's email
@@ -187,6 +202,7 @@ function RegisterPageP2() {
                   placeholder={t('auth.your_age', 'your age')}
                   value={formData.dob}
                   onChange={handleChange}
+                  max={getMaxAllowedDOB()}
                 />
               </div>
             </div>

@@ -480,7 +480,8 @@
     "no_countries_found": "لم يتم العثور على بلدان",
     "enter_phone_number": "أدخل رقم الهاتف",
     "invalid_phone_number": "رقم هاتف غير صالح لـ",
-    "educational_qualification_req": "المؤهل التعليمي"
+    "educational_qualification_req": "المؤهل التعليمي",
+    "error_min_age": "يجب أن يكون عمرك 10 سنوات على الأقل للتسجيل."
   },
   "select_educational_qualification": "حدد المؤهل التعليمي",
   "specify_qualification": "حدد مؤهلك التعليمي",

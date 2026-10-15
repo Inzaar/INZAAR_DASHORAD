@@ -480,7 +480,8 @@
     "no_countries_found": "کوئی ملک نہیں ملا",
     "enter_phone_number": "فون نمبر درج کریں",
     "invalid_phone_number": "غلط فون نمبر برائے",
-    "educational_qualification_req": "تعلیمی قابلیت"
+    "educational_qualification_req": "تعلیمی قابلیت",
+    "error_min_age": "رجسٹریشن کے لیے آپ کی عمر کم از کم 10 سال ہونی چاہیے۔"
   },
   "select_educational_qualification": "تعلیمی قابلیت منتخب کریں",
   "specify_qualification": "اپنی قابلیت کی وضاحت کریں",
