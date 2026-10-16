@@ -54,8 +54,9 @@ export const submitQuiz = async (quizId, payload) => {
 };
 
 // GET /api/v1/quizzes/:id/my-attempt
-export const getLatestQuizAttempt = async (quizId) => {
+export const getLatestQuizAttempt = async (quizId, params = {}) => {
     const res = await axiosInstance.get(`/quizzes/${quizId}/my-attempt`, {
+        params,
         withCredentials: true,
     });
     return res.data;

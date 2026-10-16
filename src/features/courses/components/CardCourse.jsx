@@ -96,7 +96,8 @@ const CardCourse = ({ course, isAdmin = false }) => {
           toast.success("Successfully enrolled. Course batch is coming soon!");
         } else {
           toast.success(t("successfully_enrolled", "You are successfully enrolled"));
-          navigate("/course-view?id=" + course.id);
+          const newEnrollmentId = res.data?.data?._id || res.data?.data?.id;
+          navigate(newEnrollmentId ? `/course-view?id=${course.id}&enrollmentId=${newEnrollmentId}` : `/course-view?id=${course.id}`);
         }
       }
     } catch (error) {

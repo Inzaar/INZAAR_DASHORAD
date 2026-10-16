@@ -13,6 +13,8 @@ const QuizTakePage = () => {
     // Extract query parameters
     const queryParams = new URLSearchParams(location.search);
     const courseId = queryParams.get('courseId') || queryParams.get('id');
+    const enrollmentId = queryParams.get('enrollmentId');
+    const batchId = queryParams.get('batchId');
     const lectureId = queryParams.get('lectureId');
     const isAdminView = location.pathname.includes('admin') || queryParams.get('admin') === 'true';
 
@@ -79,7 +81,11 @@ const QuizTakePage = () => {
                 // Fetch latest attempt if not available in location state
                 if (!result) {
                     try {
-                        const attemptRes = await getLatestQuizAttempt(quizId);
+                        const attemptRes = await getLatestQuizAttempt(quizId, {
+                            courseId,
+                            enrollmentId,
+                            batchId
+                        });
                         if (attemptRes?.data) {
                             setResult(attemptRes.data);
                             if (attemptRes.data.submittedAnswers) {
@@ -145,6 +151,8 @@ const QuizTakePage = () => {
         try {
             const res = await submitQuiz(quizId, {
                 courseId,
+                enrollmentId,
+                batchId,
                 submittedAnswers: finalAnswers
             });
             setResult(res.data);
