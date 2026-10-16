@@ -16,6 +16,7 @@ import { register as registerUser, sendRegisterOtp } from '../../../api/auth'
 import { useAuth } from '../../../context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import EducationalQualificationInput from '@/components/shared/EducationalQualificationInput'
+import NationalitySelect from '@/components/shared/NationalitySelect'
 
 function RegisterPageP2() {
   const { t } = useTranslation();
@@ -222,11 +223,11 @@ function RegisterPageP2() {
             </div>
 
             <div className='max-w-[500px] w-full'>
-              <Input1
+              <NationalitySelect
                 name="Nationality"
                 label={t('auth.nationality_req', 'Nationality*')}
-                placeholder={t('auth.your_nationality', 'your nationality')}
-                value={formData.nationality}
+                placeholder={t('select_nationality', 'Select Nationality')}
+                value={formData.nationality || ''}
                 onChange={handleChange}
               />
             </div>
