@@ -7,6 +7,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { uploadPdf, submitAssignmentProgress } from '@/api/course';
 import toast from 'react-hot-toast';
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 const AssignmentSubmission = () => {
     const location = useLocation();
@@ -20,6 +22,9 @@ const AssignmentSubmission = () => {
     const [showCancelPopup, setShowCancelPopup] = useState(false);
     const fileInputRef = useRef(null);
     const abortControllerRef = useRef(null);
+
+    const isDirty = Boolean(selectedFile && !isUploading);
+    const { showModal, handleLeave, handleStay } = useUnsavedWarning(isDirty);
 
     React.useEffect(() => {
         const handlePopState = (e) => {
@@ -408,6 +413,11 @@ const AssignmentSubmission = () => {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 3px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
             `}} />
+            <UnsavedChangesModal
+                isOpen={showModal}
+                onProceed={handleLeave}
+                onCancel={handleStay}
+            />
         </div>
     );
 };

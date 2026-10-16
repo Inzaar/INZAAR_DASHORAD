@@ -18,6 +18,8 @@ import {
     PaginationLink,
     CustomPagination
 } from "@/components/ui/Pagination";
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -75,6 +77,41 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
     const [passwordError, setPasswordError] = useState('');
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
+
+    const resetModeratorForm = () => {
+        setNewModerator({
+            firstname: '',
+            lastname: '',
+            username: '',
+            email: '',
+            phone: '',
+            password: '',
+            gender: '',
+            role: 'moderator',
+            assignedFeatures: []
+        });
+        setFormError('');
+        setPasswordError('');
+        setUsernameError('');
+        setEmailError('');
+        setShowPassword(false);
+        setIsAddModalOpen(false);
+    };
+
+    const isAddModeratorDirty = isAddModalOpen && Boolean(
+        newModerator.firstname?.trim() ||
+        newModerator.lastname?.trim() ||
+        newModerator.username?.trim() ||
+        newModerator.email?.trim() ||
+        newModerator.phone?.trim() ||
+        newModerator.password?.trim() ||
+        newModerator.gender?.trim()
+    );
+    const { showModal, handleLeave, handleStay, handleAttemptClose } = useUnsavedWarning(
+        isAddModeratorDirty,
+        resetModeratorForm,
+        { isOpen: isAddModalOpen }
+    );
 
     useEffect(() => {
         if (!isAddModalOpen) return;
@@ -714,15 +751,16 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
             {/* Add Moderator Modal - Step 1 */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={handleAttemptClose}>
+                    <div className="bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
                         <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 shrink-0">
                             <div>
                                 <h3 className="text-lg sm:text-xl font-bold text-gray-900">Add New Moderator</h3>
                                 <p className="text-xs sm:text-sm text-gray-500">Step 1: Basic Information</p>
                             </div>
                             <button
-                                onClick={() => setIsAddModalOpen(false)}
+                                type="button"
+                                onClick={handleAttemptClose}
                                 className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
                             >
                                 <X size={20} />
@@ -859,7 +897,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                             <div className="p-4 sm:p-6 border-t border-gray-100 flex gap-3 shrink-0 bg-white">
                                 <button
                                     type="button"
-                                    onClick={() => setIsAddModalOpen(false)}
+                                    onClick={handleAttemptClose}
                                     className="flex-1 py-2.5 sm:py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm sm:text-base"
                                 >
                                     Cancel
@@ -882,6 +920,13 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                 isOpen={isAssignModalOpen}
                 onClose={() => setIsAssignModalOpen(false)}
                 onSave={handleFinalCreate}
+            />
+
+            {/* Unsaved Changes Warning Modal */}
+            <UnsavedChangesModal
+                isOpen={showModal}
+                onProceed={handleLeave}
+                onCancel={handleStay}
             />
         </div>
     );

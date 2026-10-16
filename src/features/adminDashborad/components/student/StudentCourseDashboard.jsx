@@ -104,7 +104,7 @@ const StudentCourseDashboard = ({ profileData }) => {
 
     const handleBulkDelete = async () => {
         if (selectedComments.length === 0) return;
-        
+
         try {
             await Promise.all(selectedComments.map(id => deleteComment(id)));
             setLectureComments(prev => prev.filter(c => !selectedComments.includes(c._id)));
@@ -118,7 +118,7 @@ const StudentCourseDashboard = ({ profileData }) => {
     };
 
     const handleToggleCommentSelection = (commentId) => {
-        setSelectedComments(prev => 
+        setSelectedComments(prev =>
             prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
         );
     };
@@ -158,11 +158,11 @@ const StudentCourseDashboard = ({ profileData }) => {
                         sendto: userId,
                         sendfrom: user?._id || user?.id,
                     })
-                    .then(res => console.log("Notification created:", res))
-                    .catch(err => {
-                        console.error("Notification failed", err);
-                        toast.error(`Notification failed: ${err.message}`);
-                    });
+                        .then(res => console.log("Notification created:", res))
+                        .catch(err => {
+                            console.error("Notification failed", err);
+                            toast.error(`Notification failed: ${err.message}`);
+                        });
                 } else {
                     toast.error("Failed to post comment");
                 }
@@ -190,7 +190,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                 } else if (comments.length > 0) {
                     setLastViewedCommentsTime(Date.now());
                 }
-                
+
                 // Update to current time so next refresh shows new ones as unread
                 localStorage.setItem('lastViewedComments_' + lecture.id, new Date().toISOString());
             }
@@ -210,7 +210,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                 const cId = c.courseId?._id || c.courseId?.id || c.courseId || c.course?._id || c.course?.id || c.course || c.id || c._id;
                 return cId === targetCourseId || c.id === targetCourseId || c._id === targetCourseId;
             })?.id : null;
-            
+
             setSelectedEnrollmentId(targetId || enrolledCourses[0].id);
         }
     }, [enrolledCourses, selectedEnrollmentId]);
@@ -244,7 +244,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                 const newUrl = new URL(window.location);
                 newUrl.searchParams.delete("lectureId");
                 window.history.replaceState({}, "", newUrl);
-                
+
                 handleViewComments({ ...lec, type: 'Lecture', id: lec.id || lec._id });
             }
         }
@@ -505,7 +505,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <button 
+                                        <button
                                             className="text-[#3758EE] underline font-medium text-[12px] hover:text-blue-800 transition-colors whitespace-nowrap"
                                             onClick={() => handleViewComments(lecture)}
                                         >
@@ -513,7 +513,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <GradiantButton 
+                                        <GradiantButton
                                             className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
                                             onClick={() => navigate(`/admin-course-play?id=${currentCourse?.courseId}&userId=${userId}&lectureId=${lecture.id}`)}
                                         >
@@ -551,7 +551,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     </button>
                                     <span className="font-medium text-blue-700">{selectedComments.length} Selected</span>
                                     <div className="flex-1"></div>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             if (window.confirm(`Delete ${selectedComments.length} comments?`)) {
                                                 handleBulkDelete();
@@ -570,7 +570,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         <p className="text-sm text-gray-500 mt-1">{selectedLectureForComments?.title}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => setIsSelectionMode(true)}
                                             className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
                                         >
@@ -596,16 +596,16 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         const isMe = senderIdStr === String(user?._id || user?.id);
                                         const canEdit = isMe || user?.role === 'admin';
                                         const isSelected = selectedComments.includes(comment._id);
-                                        
+
                                         const commentTime = new Date(comment.createdAt).getTime();
                                         const isUnread = lastViewedCommentsTime && commentTime > lastViewedCommentsTime && !isMe;
                                         let showUnreadDivider = false;
-                                        
+
                                         if (isUnread) {
                                             const prevComment = index > 0 ? lectureComments[index - 1] : null;
                                             const prevCommentTime = prevComment ? new Date(prevComment.createdAt).getTime() : 0;
                                             const prevSenderStr = prevComment ? String(prevComment.senderId?._id || prevComment.senderId?.id || prevComment.senderId) : null;
-                                            
+
                                             if (!prevComment || prevCommentTime <= lastViewedCommentsTime || prevSenderStr === String(user?._id || user?.id)) {
                                                 showUnreadDivider = true;
                                             }
@@ -623,123 +623,123 @@ const StudentCourseDashboard = ({ profileData }) => {
                                                     </div>
                                                 )}
                                                 <div className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
-                                                {isSelectionMode && !isMe && (
-                                                    <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
-                                                        {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
-                                                    </button>
-                                                )}
-                                                <div className={cn("flex flex-col max-w-[90%]", !isMe ? "items-start" : "items-end")}>
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        {(!isSelectionMode && isMe) && (
-                                                            <>
-                                                                <div className="relative">
-                                                                    <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                        <Smile size={14} />
-                                                                    </button>
-                                                                    {activeReactionPopup === comment._id && (
-                                                                        <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
-                                                                            {EMOJIS.map(emoji => (
-                                                                                <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
-                                                                                    {emoji}
-                                                                                </button>
-                                                                            ))}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                {canEdit && (
-                                                                    <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                        <Edit2 size={14} />
-                                                                    </button>
-                                                                )}
-                                                                <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                    <Trash2 size={14} />
-                                                                </button>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
-                                                    <div className="flex items-center justify-between gap-4">
-                                                        <span className="font-bold text-xs opacity-90">
-                                                            {comment.senderId?.firstname} {comment.senderId?.lastname}
-                                                            {!isStudent && <span className="text-[9px] font-bold uppercase bg-white/20 px-2 py-0.5 rounded-full ml-2">{comment.senderId?.role}</span>}
-                                                            {isStudent && <span className="text-[9px] font-bold uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-2">Student</span>}
-                                                        </span>
-                                                        <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">{new Date(comment.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                                    </div>
-                                                    
-                                                    {editingCommentId === comment._id ? (
-                                                        <div className="mt-2 flex flex-col gap-2">
-                                                            <textarea 
-                                                                className="w-full text-sm text-gray-800 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px]" 
-                                                                value={editingText} 
-                                                                onChange={(e) => setEditingText(e.target.value)} 
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                                        e.preventDefault();
-                                                                        handleEditComment(comment._id);
-                                                                    } else if (e.key === 'Escape') {
-                                                                        setEditingCommentId(null);
-                                                                    }
-                                                                }}
-                                                                autoFocus
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <p className="text-sm leading-relaxed mt-1">{comment.content}</p>
+                                                    {isSelectionMode && !isMe && (
+                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                            {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                        </button>
                                                     )}
-
-                                                    {comment.reactions && comment.reactions.length > 0 && (
-                                                        <div className={cn("absolute -bottom-3 flex items-center gap-1", !isMe ? "right-2" : "left-2")}>
-                                                            <div className="bg-white border border-gray-100 shadow-sm rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1">
-                                                                {Array.from(new Set(comment.reactions.map(r => r.emoji))).map(e => (
-                                                                    <span key={e}>{e}</span>
-                                                                ))}
-                                                                <span className="text-gray-500 font-bold ml-0.5">{comment.reactions.length}</span>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-                                                    {(!isSelectionMode && !isMe) && (
-                                                        <>
-                                                            <div className="relative">
-                                                                <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                    <Smile size={14} />
-                                                                </button>
-                                                                {activeReactionPopup === comment._id && (
-                                                                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
-                                                                        {EMOJIS.map(emoji => (
-                                                                            <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
-                                                                                {emoji}
+                                                    <div className={cn("flex flex-col max-w-[90%]", !isMe ? "items-start" : "items-end")}>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                {(!isSelectionMode && isMe) && (
+                                                                    <>
+                                                                        <div className="relative">
+                                                                            <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                <Smile size={14} />
                                                                             </button>
-                                                                        ))}
-                                                                    </div>
+                                                                            {activeReactionPopup === comment._id && (
+                                                                                <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                                    {EMOJIS.map(emoji => (
+                                                                                        <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                            {emoji}
+                                                                                        </button>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        {canEdit && (
+                                                                            <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                                <Edit2 size={14} />
+                                                                            </button>
+                                                                        )}
+                                                                        <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                            <Trash2 size={14} />
+                                                                        </button>
+                                                                    </>
                                                                 )}
                                                             </div>
-                                                            {canEdit && (
-                                                                <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                    <Edit2 size={14} />
-                                                                </button>
+                                                        </div>
+                                                        <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <span className="font-bold text-xs opacity-90">
+                                                                    {comment.senderId?.firstname} {comment.senderId?.lastname}
+                                                                    {!isStudent && <span className="text-[9px] font-bold uppercase bg-white/20 px-2 py-0.5 rounded-full ml-2">{comment.senderId?.role}</span>}
+                                                                    {isStudent && <span className="text-[9px] font-bold uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-2">Student</span>}
+                                                                </span>
+                                                                <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            </div>
+
+                                                            {editingCommentId === comment._id ? (
+                                                                <div className="mt-2 flex flex-col gap-2">
+                                                                    <textarea
+                                                                        className="w-full text-sm text-gray-800 p-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px]"
+                                                                        value={editingText}
+                                                                        onChange={(e) => setEditingText(e.target.value)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                e.preventDefault();
+                                                                                handleEditComment(comment._id);
+                                                                            } else if (e.key === 'Escape') {
+                                                                                setEditingCommentId(null);
+                                                                            }
+                                                                        }}
+                                                                        autoFocus
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-sm leading-relaxed mt-1">{comment.content}</p>
                                                             )}
-                                                            <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
-                                                                <Trash2 size={14} />
-                                                            </button>
-                                                        </>
+
+                                                            {comment.reactions && comment.reactions.length > 0 && (
+                                                                <div className={cn("absolute -bottom-3 flex items-center gap-1", !isMe ? "right-2" : "left-2")}>
+                                                                    <div className="bg-white border border-gray-100 shadow-sm rounded-full px-2 py-0.5 text-[10px] flex items-center gap-1">
+                                                                        {Array.from(new Set(comment.reactions.map(r => r.emoji))).map(e => (
+                                                                            <span key={e}>{e}</span>
+                                                                        ))}
+                                                                        <span className="text-gray-500 font-bold ml-0.5">{comment.reactions.length}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                                                            {(!isSelectionMode && !isMe) && (
+                                                                <>
+                                                                    <div className="relative">
+                                                                        <button onClick={() => setActiveReactionPopup(activeReactionPopup === comment._id ? null : comment._id)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                            <Smile size={14} />
+                                                                        </button>
+                                                                        {activeReactionPopup === comment._id && (
+                                                                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 z-10">
+                                                                                {EMOJIS.map(emoji => (
+                                                                                    <button key={emoji} onClick={() => handleReactToComment(comment._id, emoji)} className="text-lg hover:scale-125 transition-transform px-1">
+                                                                                        {emoji}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {canEdit && (
+                                                                        <button onClick={() => { setEditingCommentId(comment._id); setEditingText(comment.content); }} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                            <Edit2 size={14} />
+                                                                        </button>
+                                                                    )}
+                                                                    <button onClick={() => handleDeleteComment(comment._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {isSelectionMode && isMe && (
+                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                            {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
+                                                        </button>
                                                     )}
                                                 </div>
-                                            </div>
-                                            {isSelectionMode && isMe && (
-                                                <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
-                                                    {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
-                                                </button>
-                                            )}
-                                        </div>
-                                        </React.Fragment>
-                                    );
-                                })}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-40 text-gray-400 flex-1">
@@ -757,7 +757,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     onKeyDown={handleAddComment}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all pl-4 pr-12"
                                 />
-                                <button 
+                                <button
                                     onClick={handleAddComment}
                                     disabled={!newCommentText.trim()}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#3758EE] hover:text-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

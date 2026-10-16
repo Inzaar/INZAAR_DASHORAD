@@ -9,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { submitSupportIssue } from '@/api/support';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 const HelpCenter = () => {
     const navigate = useNavigate();
@@ -22,6 +24,9 @@ const HelpCenter = () => {
     const [email, setEmail] = useState('');
     const [issue, setIssue] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    const isDirty = Boolean(issue.trim().length > 0 && !submitting);
+    const { showModal, handleLeave, handleStay } = useUnsavedWarning(isDirty);
 
     useEffect(() => {
         if (user) {
@@ -462,6 +467,11 @@ const HelpCenter = () => {
                         scrollbar-width: none;
                     }
                 `}} />
+                <UnsavedChangesModal
+                    isOpen={showModal}
+                    onProceed={handleLeave}
+                    onCancel={handleStay}
+                />
             </div>
         </div>
     );
