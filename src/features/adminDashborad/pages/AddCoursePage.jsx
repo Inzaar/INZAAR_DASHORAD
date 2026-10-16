@@ -11,6 +11,8 @@ import SelectContentTypeModal from '../components/SelectContentTypeModal';
 import CreateQuiz from '../components/CreateQuiz';
 import CreateAssignment from '../components/CreateAssignment';
 import { getInstructors } from '@/api/instructor';
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 /* ─────────────────────────────────────── helpers ── */
 const DURATIONS = ['8 Weeks', '12 Weeks', '24 Weeks', '52 Weeks'];
@@ -563,6 +565,57 @@ const AddCoursePage = () => {
         section: '',
         mediaType: 'Video',
     });
+
+    const isCourseOrLectureDirty = Boolean(
+        !isSubmitting && !submitSuccess && (
+            courseForm.title?.trim() ||
+            courseForm.instructor?.trim() ||
+            courseItems.length > 0 ||
+            thumbnailPreview ||
+            (isModalOpen && (newItem.title?.trim() || newItem.videoUrl || newItem.audioUrl?.length > 0 || newItem.pdfUrl?.length > 0))
+        )
+    );
+
+    const isLectureDirty = isModalOpen && Boolean(
+        newItem.title?.trim() ||
+        newItem.videoUrl ||
+        (Array.isArray(newItem.audioUrl) && newItem.audioUrl.length > 0) ||
+        (Array.isArray(newItem.pdfUrl) && newItem.pdfUrl.length > 0)
+    );
+
+    const [showLectureCloseWarning, setShowLectureCloseWarning] = useState(false);
+
+    const resetLectureForm = () => {
+        setNewItem({ type: 'Lecture', title: '', videoUrl: '', audioUrl: [], pdfUrl: [], section: '', mediaType: 'Video' });
+        setEditingIndex(null);
+        setIsAudioUploading(false);
+        setIsPdfUploading(false);
+        setIsModalOpen(false);
+        setShowLectureCloseWarning(false);
+    };
+
+    const handleAttemptCloseLecture = () => {
+        if (isLectureDirty) {
+            setShowLectureCloseWarning(true);
+        } else {
+            resetLectureForm();
+        }
+    };
+
+    React.useEffect(() => {
+        if (!isModalOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (!showLectureCloseWarning) {
+                    handleAttemptCloseLecture();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isModalOpen, showLectureCloseWarning, isLectureDirty]);
+
+    const { showModal, handleLeave, handleStay } = useUnsavedWarning(isCourseOrLectureDirty);
 
     const steps = [
         { id: 1, label: 'Course Setup' },
@@ -1673,9 +1726,9 @@ const AddCoursePage = () => {
                 />
 
                 {isModalOpen && modalStep === 'item-form' && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans">
-                        <div className="bg-white w-full max-w-[850px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden">
-                            <div className="px-8 pt-8 pb-4 bg-white">
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans" onClick={handleAttemptCloseLecture}>
+                        <div className="bg-white w-full max-w-[850px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                            <div className="px-8 pt-8 pb-4 bg-white flex justify-between items-start">
                                 <div className="flex items-center gap-4 mb-1">
                                     <div className="w-12 h-12 bg-[#EEF2FF] rounded-full flex items-center justify-center flex-shrink-0">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
@@ -1693,6 +1746,14 @@ const AddCoursePage = () => {
                                         </p>
                                     </div>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAttemptCloseLecture}
+                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 cursor-pointer"
+                                    aria-label="Close"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
 
                             {submitError && (
@@ -2189,7 +2250,8 @@ const AddCoursePage = () => {
                                 {/* Modal Footer */}
                                 <div className="mt-8 flex justify-between items-center bg-white gap-4">
                                     <button
-                                        onClick={handleCloseModal}
+                                        type="button"
+                                        onClick={handleAttemptCloseLecture}
                                         className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-normal rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
                                     >
                                         Cancel
@@ -2370,6 +2432,23 @@ const AddCoursePage = () => {
                 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap');
                 body { font-family: 'Public Sans', sans-serif; }
             `}} />
+                <UnsavedChangesModal
+                    isOpen={showModal || showLectureCloseWarning}
+                    onProceed={() => {
+                        if (showLectureCloseWarning) {
+                            resetLectureForm();
+                        } else {
+                            handleLeave();
+                        }
+                    }}
+                    onCancel={() => {
+                        if (showLectureCloseWarning) {
+                            setShowLectureCloseWarning(false);
+                        } else {
+                            handleStay();
+                        }
+                    }}
+                />
             </div>
         </div>
     );

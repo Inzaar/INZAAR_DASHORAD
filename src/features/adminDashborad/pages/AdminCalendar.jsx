@@ -196,6 +196,8 @@ import { getAllEvents, createEvent, updateEvent, deleteEvent } from '@/api/event
 import { getAllBatches } from '@/api/batch';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 const AdminCalendar = () => {
     const { t, i18n } = useTranslation();
@@ -294,6 +296,25 @@ const AdminCalendar = () => {
     const [eventMonth, setEventMonth] = useState(monthNames[today.getMonth()]);
     const [eventYear, setEventYear] = useState(String(today.getFullYear()));
     const [editingEvent, setEditingEvent] = useState(null);
+
+    const resetEventForm = () => {
+        setIsModalOpen(false);
+        setEditingEvent(null);
+        setEventTitle('');
+        setEventSpeaker('');
+        setEventDescription('');
+    };
+
+    const isAddEventDirty = !isSubmitting && Boolean(
+        eventTitle?.trim() ||
+        eventSpeaker?.trim() ||
+        eventDescription?.trim()
+    );
+    const { showModal, handleLeave, handleStay, handleAttemptClose } = useUnsavedWarning(
+        isAddEventDirty,
+        resetEventForm,
+        { isOpen: isModalOpen }
+    );
 
     const updateModalDateFromDateString = (dateStr) => {
         if (!dateStr) return;
@@ -1156,13 +1177,14 @@ const AdminCalendar = () => {
 
                 {/* Modal Overlay */}
                 {isModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={handleAttemptClose}>
                         <div className="bg-white rounded-[24px] w-full max-w-[600px] flex flex-col overflow-hidden shadow-2xl max-h-[95vh] overflow-y-auto no-scrollbar" onClick={(e) => e.stopPropagation()}>
 
                             {/* Header */}
                             <div className="bg-gradient-to-r from-[#3758EE] to-[#5B75F0] p-6 text-white relative">
                                 <button
-                                    onClick={() => setIsModalOpen(false)}
+                                    type="button"
+                                    onClick={handleAttemptClose}
                                     className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
                                 >
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -1330,7 +1352,8 @@ const AdminCalendar = () => {
                             {/* Footer */}
                             <div className="px-6 py-4 border-t border-gray-100 flex justify-end items-center gap-3 bg-white mt-auto">
                                 <button
-                                    onClick={() => setIsModalOpen(false)}
+                                    type="button"
+                                    onClick={handleAttemptClose}
                                     className="px-6 py-2.5 rounded-[8px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors border border-gray-200"
                                 >
                                     Cancel
@@ -1352,6 +1375,13 @@ const AdminCalendar = () => {
                     </div>
                 )}
             </div>
+
+            {/* Unsaved Changes Warning Modal */}
+            <UnsavedChangesModal
+                isOpen={showModal}
+                onProceed={handleLeave}
+                onCancel={handleStay}
+            />
         </div>
     );
 };
