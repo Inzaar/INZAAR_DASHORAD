@@ -387,6 +387,9 @@ const CourseView = () => {
     }, []);
 
     const renderLectureItem = (lecture, index) => {
+        const displayNo = lecture.lectureId || (typeof lecture.lectureNo === 'string' && lecture.lectureNo.startsWith('#')
+            ? lecture.lectureNo
+            : String(lecture.lectureNo || index + 1).padStart(2, '0'));
         const q = lecture.quizzes || [];
         const a = lecture.assignments || [];
 
@@ -431,7 +434,7 @@ const CourseView = () => {
                                     </h4>
                                 </div>
                                 <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
-                                    {t('lecture', 'Lecture')}:{String(lecture.lectureNo).padStart(2, '0')}
+                                    {t('lecture', 'Lecture')}:{displayNo}
                                 </div>
                                 <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
                                     {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
@@ -660,25 +663,29 @@ const CourseView = () => {
 
     // Build lectures list from API data
     const rawLecturesList = courseData?.lecturePlaylist || courseData?.lectures || [];
-    const lectures = rawLecturesList.map(l => ({
-        id: l._id || l.id,
-        title: l.title,
-        section: l.section,
-        lectureNo: l.lectureNo,
-        date: l.date,
-        watchedPercentage: l.watchedPercentage || (typeof l.progress === 'string' ? parseInt(l.progress) : (l.progress || 0)),
-        videoId: l.videoId || extractYouTubeId(l.videoUrl),
-        isLocked: user?.role === 'admin' ? false : l.isLocked,
-        isCompleted: l.isCompleted,
-        videoUrl: l.videoUrl,
-        audioUrl: l.audioUrl,
-        pdfUrl: l.pdfUrl,
-        status: l.status,
-        type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
-        quizId: l.quizId || null,
-        quizzes: l.quizzes || [],
-        assignments: l.assignments || [],
-    })) || [];
+    const lectures = rawLecturesList.map(l => {
+        const displayLecId = l.lectureId || (typeof l.lectureNo === 'string' && l.lectureNo.startsWith('#') ? l.lectureNo : `#${String(l.lectureNo).padStart(2, '0')}`);
+        return {
+            id: l._id || l.id,
+            title: l.title,
+            section: l.section,
+            lectureId: displayLecId,
+            lectureNo: displayLecId,
+            date: l.date,
+            watchedPercentage: l.watchedPercentage || (typeof l.progress === 'string' ? parseInt(l.progress) : (l.progress || 0)),
+            videoId: l.videoId || extractYouTubeId(l.videoUrl),
+            isLocked: user?.role === 'admin' ? false : l.isLocked,
+            isCompleted: l.isCompleted,
+            videoUrl: l.videoUrl,
+            audioUrl: l.audioUrl,
+            pdfUrl: l.pdfUrl,
+            status: l.status,
+            type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+            quizId: l.quizId || null,
+            quizzes: l.quizzes || [],
+            assignments: l.assignments || [],
+        };
+    }) || [];
 
     const groupedLectures = React.useMemo(() => {
         const groups = [];
@@ -703,28 +710,7 @@ const CourseView = () => {
                 }
             });
         } else {
-            let currentLegacyGroup = null;
-            lectures.forEach((lecture, idx) => {
-                const t = (lecture.title || "").toLowerCase().trim();
-                const isContinuation = t.startsWith("part") || t.startsWith("پارٹ") || t.startsWith("lecture") || t.startsWith("لیکچر") || lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz';
-
-                if (isContinuation && currentLegacyGroup) {
-                    currentLegacyGroup.lectures.push(lecture);
-                } else {
-                    if (currentLegacyGroup) {
-                        groups.push(currentLegacyGroup);
-                    }
-                    let secName = lecture.title || `Section ${groups.length + 1}`;
-                    const match = lecture.title?.match(/(.*?)\s*[\(\-]?\s*(part|پارٹ|lecture|لیکچر)/i);
-                    if (match && match[1].trim()) {
-                        secName = match[1].trim();
-                    }
-                    currentLegacyGroup = { sectionName: secName, id: `sec-${idx}`, isExplicitSection: false, lectures: [lecture] };
-                }
-            });
-            if (currentLegacyGroup) {
-                groups.push(currentLegacyGroup);
-            }
+            groups.push({ sectionName: '', id: 'all-lectures', isExplicitSection: false, lectures });
         }
         return groups;
     }, [lectures]);
@@ -2290,7 +2276,7 @@ const CourseView = () => {
                             {/* Lecture List Table Section */}
                             {!hideSidebarAndCards && !isModeratorViewingStudent && (
                                 <LectureListTable
-                                    lectures={lectures.reduce((acc, lecture) => {
+                                    lectures={groupedLectures.flatMap(g => g.lectures).reduce((acc, lecture) => {
                                         acc.push(lecture);
 
                                         if (lecture.quizzes && lecture.quizzes.length > 0) {
@@ -2298,7 +2284,7 @@ const CourseView = () => {
                                                 acc.push({
                                                     ...quiz,
                                                     id: quiz._id || quiz.id,
-                                                    lectureNo: `${lecture.lectureNo}-Q${index + 1}`,
+                                                    lectureNo: quiz.quizId || `${lecture.lectureId || lecture.lectureNo}-Q${String(index + 1).padStart(2, '0')}`,
                                                     date: lecture.date,
                                                     watchedPercentage: quiz.isCompleted ? 100 : 0,
                                                     isLocked: lecture.isLocked,
@@ -2314,7 +2300,7 @@ const CourseView = () => {
                                                 acc.push({
                                                     ...assignment,
                                                     id: assignment._id || assignment.id,
-                                                    lectureNo: `${lecture.lectureNo}-A${index + 1}`,
+                                                    lectureNo: assignment.assignmentId || `${lecture.lectureId || lecture.lectureNo}-A${String(index + 1).padStart(2, '0')}`,
                                                     date: lecture.date,
                                                     watchedPercentage: assignment.isCompleted ? 100 : 0,
                                                     isLocked: lecture.isLocked,
