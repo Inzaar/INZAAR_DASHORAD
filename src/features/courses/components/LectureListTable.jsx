@@ -5,6 +5,35 @@ import { useTranslation } from 'react-i18next';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { CustomPagination } from '@/components/ui/Pagination';
 
+const formatResourceUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('/')) {
+        const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+        const serverOrigin = apiBase ? apiBase.replace(/\/api\/v1\/?$/, '') : 'https://inzaar.duckdns.org';
+        return `${serverOrigin}${url}`;
+    }
+    return url;
+};
+
+const isImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    const clean = url.split('?')[0].toLowerCase();
+    return clean.endsWith('.jpg') || clean.endsWith('.jpeg') || clean.endsWith('.png') || clean.endsWith('.webp') || clean.endsWith('.gif') || clean.endsWith('.svg');
+};
+
+const getPdfEmbedUrl = (url) => {
+    if (!url) return '';
+    const formattedUrl = formatResourceUrl(url);
+    if (formattedUrl.includes('drive.google.com')) {
+        const matchD = formattedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        const fileId = matchD ? matchD[1] : (formattedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/)?.[1]);
+        if (fileId) {
+            return `https://drive.google.com/file/d/${fileId}/preview`;
+        }
+    }
+    return formattedUrl;
+};
+
 const forceDownload = async (url, filename, setDownloadingIdx, idx) => {
     if (setDownloadingIdx) setDownloadingIdx(idx);
     try {
@@ -123,65 +152,58 @@ const PdfResourcesPopover = ({ popover, onClose, onSelectResource }) => {
 const PdfViewerModal = ({ viewingPdf, onClose }) => {
     const [downloading, setDownloading] = useState(false);
     const [zoom, setZoom] = useState(1.0); // 1.0 = 100%
-    const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
-    const [loadingPdf, setLoadingPdf] = useState(false);
-    const [pdfError, setPdfError] = useState(null);
+    const [loadingPdf, setLoadingPdf] = useState(true);
     const { t } = useTranslation();
 
     const url = viewingPdf?.url;
     const filename = viewingPdf?.filename;
 
     useEffect(() => {
-        if (!url) return;
-        let active = true;
-        let localBlobUrl = null;
-
         setLoadingPdf(true);
-        setPdfError(null);
-        setPdfBlobUrl(null);
-
-        fetch(url)
-            .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch PDF');
-                return res.arrayBuffer();
-            })
-            .then(buffer => {
-                if (!active) return;
-                const blob = new Blob([buffer], { type: 'application/pdf' });
-                localBlobUrl = URL.createObjectURL(blob);
-                setPdfBlobUrl(localBlobUrl);
-                setLoadingPdf(false);
-            })
-            .catch(err => {
-                if (!active) return;
-                console.error('Error fetching PDF:', err);
-                setPdfError('Failed to load PDF preview. Use the Download button to save the file.');
-                setLoadingPdf(false);
-            });
-
-        return () => {
-            active = false;
-            if (localBlobUrl) {
-                URL.revokeObjectURL(localBlobUrl);
-            }
-        };
     }, [url]);
 
     if (!viewingPdf) return null;
 
     const handleDownload = async () => {
+        if (!url) return;
+        const cleanTargetUrl = formatResourceUrl(url);
         setDownloading(true);
         try {
-            if (pdfBlobUrl) {
-                const link = document.createElement('a');
-                link.href = pdfBlobUrl;
-                link.download = filename || 'document.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                await forceDownload(url, filename, () => {}, 0);
+            if (cleanTargetUrl.includes('drive.google.com')) {
+                const matchD = cleanTargetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                const fileId = matchD ? matchD[1] : (cleanTargetUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/)?.[1]);
+                if (fileId) {
+                    window.open(`https://drive.google.com/uc?export=download&id=${fileId}`, '_blank');
+                    return;
+                }
             }
+            const rawName = filename || cleanTargetUrl.split('/').pop()?.split('?')[0] || 'resource';
+            const isImg = isImageUrl(cleanTargetUrl);
+            const finalDownloadName = rawName.includes('.') ? rawName : `${rawName}.${isImg ? 'jpg' : 'pdf'}`;
+
+            const response = await fetch(cleanTargetUrl);
+            if (!response.ok) throw new Error('Fetch failed');
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = finalDownloadName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+        } catch {
+            const rawName = filename || cleanTargetUrl.split('/').pop()?.split('?')[0] || 'resource';
+            const isImg = isImageUrl(cleanTargetUrl);
+            const finalDownloadName = rawName.includes('.') ? rawName : `${rawName}.${isImg ? 'jpg' : 'pdf'}`;
+            const link = document.createElement('a');
+            link.href = cleanTargetUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.download = finalDownloadName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         } finally {
             setDownloading(false);
         }
@@ -240,7 +262,7 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                     </div>
                 </div>
 
-                {/* PDF Container (Dark iframe Area) */}
+                {/* PDF / Resource Container */}
                 <div className="flex-1 bg-[#2D2D2D] p-6 relative overflow-auto flex items-center justify-center">
                     {loadingPdf && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#2D2D2D] z-10 text-white">
@@ -249,41 +271,35 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                         </div>
                     )}
                     
-                    {pdfError ? (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#2D2D2D] z-10 text-white px-6 text-center">
-                             <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center">
-                                 <FileText size={24} />
-                             </div>
-                             <div className="max-w-md">
-                                 <p className="text-sm font-semibold text-gray-200">{pdfError}</p>
-                                 <p className="text-xs text-gray-400 mt-1">{t('download_directly_desc', 'You can still download the document directly using the button above.')}</p>
-                             </div>
-                             <button
-                                 onClick={handleDownload}
-                                 className="flex items-center gap-1.5 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-xs font-semibold text-white transition-colors shadow-sm"
-                             >
-                                 <Download size={12} />
-                                 {t('download_document', 'Download Document')}
-                             </button>
-                         </div>
+                    {isImageUrl(url) ? (
+                        <div 
+                            className="w-full max-w-4xl h-full flex items-center justify-center transition-all duration-150 overflow-auto"
+                            style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+                        >
+                            <img
+                                src={formatResourceUrl(url)}
+                                alt={filename || "Resource"}
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                                onLoad={() => setLoadingPdf(false)}
+                            />
+                        </div>
                     ) : (
-                        pdfBlobUrl && (
-                            <div 
-                                className="w-full max-w-2xl h-full transition-all duration-150"
-                                style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
-                            >
-                                <iframe
-                                    src={`${pdfBlobUrl}#toolbar=0&navpanes=0`}
-                                    className="w-full h-full border-0 rounded-lg shadow-inner bg-white"
-                                    title="PDF Viewer"
-                                />
-                            </div>
-                        )
+                        <div 
+                            className="w-full max-w-4xl h-full transition-all duration-150"
+                            style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+                        >
+                            <iframe
+                                src={getPdfEmbedUrl(url)}
+                                className="w-full h-full border-0 rounded-lg shadow-inner bg-white"
+                                title="PDF Viewer"
+                                onLoad={() => setLoadingPdf(false)}
+                            />
+                        </div>
                     )}
 
                     {/* External Link Button */}
                     <button
-                        onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+                        onClick={() => window.open(formatResourceUrl(url), '_blank', 'noopener,noreferrer')}
                         className="absolute top-8 right-8 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg backdrop-blur-sm transition-all shadow-md"
                         title="Open in new tab"
                     >
@@ -507,7 +523,7 @@ const NotesModal = ({ activeNotes, onClose }) => {
     );
 };
 
-const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminView }) => {
+const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminView, onOpenPdf }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [activeResources, setActiveResources] = useState(null);
@@ -655,7 +671,13 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                                         const pdfUrls = Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : []);
                                                         if (pdfUrls.length === 1) {
                                                             const pdfItem = pdfUrls[0];
-                                                            window.open(typeof pdfItem === 'object' ? pdfItem.url : pdfItem, '_blank');
+                                                            const targetUrl = typeof pdfItem === 'object' ? pdfItem.url : pdfItem;
+                                                            const targetTitle = typeof pdfItem === 'object' ? pdfItem.title : 'document.pdf';
+                                                            if (onOpenPdf) {
+                                                                onOpenPdf(targetUrl);
+                                                            } else {
+                                                                setViewingPdf({ url: targetUrl, filename: targetTitle });
+                                                            }
                                                         } else if (pdfUrls.length > 1) {
                                                             const rect = e.currentTarget.getBoundingClientRect();
                                                             setPdfPopover({
@@ -755,7 +777,12 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                     popover={pdfPopover}
                     onClose={() => setPdfPopover(null)}
                     onSelectResource={(url, name) => {
-                        window.open(url, '_blank');
+                        setPdfPopover(null);
+                        if (onOpenPdf) {
+                            onOpenPdf(url);
+                        } else {
+                            setViewingPdf({ url, filename: name });
+                        }
                     }}
                 />
             )}

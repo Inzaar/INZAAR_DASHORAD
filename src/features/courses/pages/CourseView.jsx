@@ -47,15 +47,33 @@ const extractYouTubeId = (url) => {
     return match ? match[1] : null;
 };
 
+const formatResourceUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+    if (url.startsWith('/')) {
+        const apiBase = import.meta.env.VITE_API_BASE_URL || '';
+        const serverOrigin = apiBase ? apiBase.replace(/\/api\/v1\/?$/, '') : 'https://inzaar.duckdns.org';
+        return `${serverOrigin}${url}`;
+    }
+    return url;
+};
+
+const isImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    const clean = url.split('?')[0].toLowerCase();
+    return clean.endsWith('.jpg') || clean.endsWith('.jpeg') || clean.endsWith('.png') || clean.endsWith('.webp') || clean.endsWith('.gif') || clean.endsWith('.svg');
+};
+
 const getPdfEmbedUrl = (url) => {
     if (!url) return '';
-    if (url.includes('drive.google.com')) {
-        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-            return `https://drive.google.com/file/d/${match[1]}/preview`;
+    const formattedUrl = formatResourceUrl(url);
+    if (formattedUrl.includes('drive.google.com')) {
+        const matchD = formattedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        const fileId = matchD ? matchD[1] : (formattedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/)?.[1]);
+        if (fileId) {
+            return `https://drive.google.com/file/d/${fileId}/preview`;
         }
     }
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+    return formattedUrl;
 };
 
 const getAudioSrc = (url) => {
@@ -97,6 +115,7 @@ const CourseView = () => {
     const [activeAudioUrl, setActiveAudioUrl] = useState(null);
     const [activePdfUrl, setActivePdfUrl] = useState(null);
     const [pdfLoading, setPdfLoading] = useState(true);
+    const [downloadingPdf, setDownloadingPdf] = useState(false);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
     const [expandedSections, setExpandedSections] = useState({});
@@ -104,6 +123,7 @@ const CourseView = () => {
     useEffect(() => {
         if (activePdfUrl) {
             setPdfLoading(true);
+            setDownloadingPdf(false);
         }
     }, [activePdfUrl]);
 
@@ -1072,19 +1092,27 @@ const CourseView = () => {
                                             studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
                                             courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
                                             completedAt: data.certificate?.completedAt,
-                                            templateUrl: courseData?.certificateTemplate || null,
-                                            studentId: courseData?.studentId || 'N/A',
+                                            templateUrl: data.certificate?.certificateTemplate || courseData?.certificateFile || courseData?.certificateTemplate || null,
+                                            studentId: user?.studentId || courseData?.studentId || 'N/A',
                                             batchId: courseData?.batchIdString || 'N/A',
                                             fromDate: courseData?.batchStartDate ? fmtDate(courseData.batchStartDate) : 'N/A',
                                             toDate: courseData?.batchEndDate ? fmtDate(courseData.batchEndDate) : 'N/A'
                                         };
 
-                                        console.log("Certificate Data Sent from API in CourseView:");
-                                        console.log("courseData object:", courseData);
-                                        console.log("req.user.studentId fetched from backend?:", courseData?.studentId);
+                                        console.log("Certificate Data Sent from API in CourseView:", newCertData);
+
+                                        if (newCertData.templateUrl) {
+                                            await new Promise((resolve) => {
+                                                const preImg = new Image();
+                                                preImg.crossOrigin = 'anonymous';
+                                                preImg.onload = resolve;
+                                                preImg.onerror = resolve;
+                                                preImg.src = newCertData.templateUrl;
+                                            });
+                                        }
 
                                         setCertData(newCertData);
-                                        await new Promise(r => setTimeout(r, 300));
+                                        await new Promise(r => setTimeout(r, 400));
                                         const { toBlob } = await import('html-to-image');
                                         const blob = await toBlob(certCardRef.current, { pixelRatio: 2, cacheBust: true });
                                         if (blob) {
@@ -2332,6 +2360,10 @@ const CourseView = () => {
                                         videoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                     }}
                                     currentLectureId={currentLecture?.id || currentLecture?._id}
+                                    onOpenPdf={(url) => {
+                                        const cleanUrl = typeof url === 'object' ? (url?.url || '') : (url || '');
+                                        if (cleanUrl) setActivePdfUrl(cleanUrl);
+                                    }}
                                 />
                             )}
                         </div>
@@ -2670,16 +2702,62 @@ const CourseView = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <a
-                                    href={activePdfUrl}
-                                    download
-                                    className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-all text-sm font-bold"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
-                                    Download
-                                </a>
                                 <button
-                                    onClick={() => setActivePdfUrl(null)}
+                                    disabled={downloadingPdf}
+                                    onClick={async () => {
+                                        if (!activePdfUrl || downloadingPdf) return;
+                                        const cleanTargetUrl = formatResourceUrl(activePdfUrl);
+                                        if (cleanTargetUrl.includes('drive.google.com')) {
+                                            const matchD = cleanTargetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                            const fileId = matchD ? matchD[1] : (cleanTargetUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/)?.[1]);
+                                            if (fileId) {
+                                                window.open(`https://drive.google.com/uc?export=download&id=${fileId}`, '_blank');
+                                                return;
+                                            }
+                                        }
+                                        const rawName = cleanTargetUrl.split('/').pop()?.split('?')[0] || 'resource';
+                                        const isImg = isImageUrl(cleanTargetUrl);
+                                        const finalDownloadName = rawName.includes('.') ? rawName : `${rawName}.${isImg ? 'jpg' : 'pdf'}`;
+                                        setDownloadingPdf(true);
+                                        try {
+                                            const response = await fetch(cleanTargetUrl);
+                                            if (!response.ok) throw new Error('Fetch failed');
+                                            const blob = await response.blob();
+                                            const blobUrl = window.URL.createObjectURL(blob);
+                                            const link = document.createElement('a');
+                                            link.href = blobUrl;
+                                            link.download = finalDownloadName;
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+                                        } catch {
+                                            const link = document.createElement('a');
+                                            link.href = cleanTargetUrl;
+                                            link.target = '_blank';
+                                            link.rel = 'noopener noreferrer';
+                                            link.download = finalDownloadName;
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                        } finally {
+                                            setDownloadingPdf(false);
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-all text-sm font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {downloadingPdf ? (
+                                        <Loader2 size={16} className="animate-spin text-gray-500" />
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
+                                    )}
+                                    {downloadingPdf ? 'Downloading...' : 'Download'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setActivePdfUrl(null);
+                                        setDownloadingPdf(false);
+                                    }}
                                     className="p-2.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all"
                                 >
                                     <X size={24} />
@@ -2687,23 +2765,29 @@ const CourseView = () => {
                             </div>
                         </div>
                         <div className="flex-1 bg-gray-100 relative">
-                            {/* We use an iframe to display the PDF. 
-                                For Cloudinary raw resources, adding fl_attachment:false doesn't work well, 
-                                but most modern browsers will render the PDF if served in an iframe.
-                                We use a viewer fallback for better compatibility.
-                            */}
                             {pdfLoading && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10">
                                     <Loader2 className="w-10 h-10 animate-spin text-red-500 mb-4" />
                                     <p className="text-gray-500 font-medium">Loading document...</p>
                                 </div>
                             )}
-                            <iframe
-                                src={getPdfEmbedUrl(activePdfUrl)}
-                                className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-                                title="PDF Viewer"
-                                onLoad={() => setPdfLoading(false)}
-                            />
+                            {isImageUrl(activePdfUrl) ? (
+                                <div className="w-full h-full flex items-center justify-center p-6 bg-gray-50 overflow-auto">
+                                    <img
+                                        src={formatResourceUrl(activePdfUrl)}
+                                        alt="Document Resource"
+                                        className="max-w-full max-h-full object-contain rounded-xl shadow-md border border-gray-200"
+                                        onLoad={() => setPdfLoading(false)}
+                                    />
+                                </div>
+                            ) : (
+                                <iframe
+                                    src={getPdfEmbedUrl(activePdfUrl)}
+                                    className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                                    title="PDF Viewer"
+                                    onLoad={() => setPdfLoading(false)}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
