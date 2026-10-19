@@ -57,12 +57,11 @@ const Certificates = () => {
         fetchCertificates();
     }, []);
 
-    const downloadAsPDF = async (imgUrl, courseName) => {
+    const downloadAsPDF = async (imgUrl, courseName, item = null) => {
         try {
             const { jsPDF } = await import('jspdf');
             const img = new Image();
             img.crossOrigin = "Anonymous";
-            img.src = imgUrl;
             img.onload = () => {
                 const doc = new jsPDF({
                     orientation: 'landscape',
@@ -72,6 +71,15 @@ const Certificates = () => {
                 doc.addImage(img, 'PNG', 0, 0, 1122, 794);
                 doc.save(`Certificate_${courseName.replace(/\s+/g, '_')}.pdf`);
             };
+            img.onerror = async () => {
+                console.warn('Certificate image not found or failed to load, regenerating...', imgUrl);
+                if (item) {
+                    await handleGenerateCertificate(item);
+                } else {
+                    alert("Certificate image failed to load. Please try again.");
+                }
+            };
+            img.src = imgUrl;
         } catch (e) {
             console.error('PDF Download failed:', e);
             alert("PDF generation failed. Please try again.");
@@ -83,7 +91,6 @@ const Certificates = () => {
             const { jsPDF } = await import('jspdf');
             const img = new Image();
             img.crossOrigin = "Anonymous";
-            img.src = imgUrl;
             img.onload = () => {
                 const doc = new jsPDF({
                     orientation: 'landscape',
@@ -95,6 +102,10 @@ const Certificates = () => {
                 const url = URL.createObjectURL(pdfBlob);
                 window.open(url, '_blank');
             };
+            img.onerror = () => {
+                alert("Failed to open PDF because the certificate image could not be loaded.");
+            };
+            img.src = imgUrl;
         } catch (e) {
             console.error('PDF Open failed:', e);
             alert("Failed to open PDF.");
@@ -107,14 +118,25 @@ const Certificates = () => {
 
         try {
             const studentName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student';
-            console.log(enrollment);
+            
+            const template = enrollment.certificateTemplate;
+            if (template) {
+                await new Promise((resolve) => {
+                    const tImg = new Image();
+                    tImg.crossOrigin = "Anonymous";
+                    tImg.onload = resolve;
+                    tImg.onerror = resolve;
+                    tImg.src = template;
+                });
+            }
+
             setCertData({
                 studentName,
                 courseName: enrollment.course,
                 completedAt: enrollment.endDate !== 'N/A' && enrollment.endDate !== 'In Progress'
                     ? new Date(enrollment.endDate).toISOString()
                     : new Date().toISOString(),
-                templateUrl: enrollment.certificateTemplate,
+                templateUrl: template,
                 studentId: user?.studentId || 'N/A',
                 batchId: enrollment.batchIdString || 'N/A',
                 fromDate: enrollment.batchStartDate || 'N/A',
@@ -122,7 +144,7 @@ const Certificates = () => {
             });
 
             // wait for the hidden card to render
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 400));
 
             const { toBlob } = await import('html-to-image');
             const blob = await toBlob(certCardRef.current, {
@@ -133,11 +155,33 @@ const Certificates = () => {
 
             if (!blob) throw new Error("Failed to generate image blob");
 
+            // 1. Immediately trigger PDF download for the user from the generated blob
+            const { jsPDF } = await import('jspdf');
+            const blobUrl = URL.createObjectURL(blob);
+            await new Promise((resolve) => {
+                const pdfImg = new Image();
+                pdfImg.onload = () => {
+                    const doc = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'px',
+                        format: [1122, 794]
+                    });
+                    doc.addImage(pdfImg, 'PNG', 0, 0, 1122, 794);
+                    doc.save(`Certificate_${enrollment.course.replace(/\s+/g, '_')}.pdf`);
+                    URL.revokeObjectURL(blobUrl);
+                    resolve();
+                };
+                pdfImg.onerror = () => {
+                    URL.revokeObjectURL(blobUrl);
+                    resolve();
+                };
+                pdfImg.src = blobUrl;
+            });
+
+            // 2. Upload and save the certificate image to backend
             try {
-                console.log('Generating certificate for enrollment:', enrollment);
                 const { uploadImage, saveCertificate } = await import('@/api/course');
                 const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
-                console.log('Uploaded certificate image:', uploaded.url);
 
                 await saveCertificate(enrollment.courseId, uploaded.url, enrollment.enrollmentId);
 
@@ -148,16 +192,15 @@ const Certificates = () => {
                         : c
                 ));
 
-                // Update metrics
+                // Update metrics if it wasn't already available
                 setMetrics(prev => ({
                     ...prev,
-                    certificatesAvailable: { count: prev.certificatesAvailable.count + 1 },
-                    lockedCertificates: { count: Math.max(0, prev.lockedCertificates.count - 1) }
+                    certificatesAvailable: { count: prev.certificatesAvailable.count + (enrollment.certificateUrl ? 0 : 1) },
+                    lockedCertificates: { count: Math.max(0, prev.lockedCertificates.count - (enrollment.certificateUrl ? 0 : 1)) }
                 }));
 
             } catch (e) {
                 console.error('Upload/Save side failed:', e);
-                alert(`Failed to save certificate: ${e.response?.data?.message || e.message}`);
             } finally {
                 setGeneratingId(null);
                 setCertData(null);
@@ -406,11 +449,21 @@ const Certificates = () => {
                                                                     {item.isCertEligible ? (
                                                                         item.certificateUrl ? (
                                                                             <button
-                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course)}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer"
+                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
+                                                                                disabled={generatingId === item.enrollmentId}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer disabled:opacity-50"
                                                                             >
-                                                                                <Download className="w-4 h-4 md:w-3 md:h-3" />
-                                                                                {t('download', 'Download')}
+                                                                                {generatingId === item.enrollmentId ? (
+                                                                                    <>
+                                                                                        <Loader className="w-4 h-4 md:w-3 md:h-3 animate-spin text-white" />
+                                                                                        {t('generating', 'Generating...')}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Download className="w-4 h-4 md:w-3 md:h-3" />
+                                                                                        {t('download', 'Download')}
+                                                                                    </>
+                                                                                )}
                                                                             </button>
                                                                         ) : (
                                                                             <button
