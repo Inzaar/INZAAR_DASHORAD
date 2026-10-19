@@ -11,7 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -62,6 +62,8 @@ const isImageUrl = (url) => {
     const clean = url.split('?')[0].toLowerCase();
     return clean.endsWith('.jpg') || clean.endsWith('.jpeg') || clean.endsWith('.png') || clean.endsWith('.webp') || clean.endsWith('.gif') || clean.endsWith('.svg');
 };
+const fmtDate = (d) =>
+    d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-') : 'N/A';
 
 const getPdfEmbedUrl = (url) => {
     if (!url) return '';
@@ -608,6 +610,21 @@ const CourseView = () => {
                     : await getCourseById(courseId, userId, enrollmentId);
                 const data = res.data.data;
                 setCourseData(data);
+
+                if (data.certificateUrl) {
+                    setCertData({
+                        certUrl: data.certificateUrl,
+                        studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
+                        courseName: data.title || 'Course',
+                        templateUrl: data.certificateTemplate || null,
+                        studentId: data.studentId || user?.studentId || 'N/A',
+                        batchId: data.batchIdString || 'N/A',
+                        fromDate: data.batchStartDate ? fmtDate(data.batchStartDate) : 'N/A',
+                        toDate: data.batchEndDate ? fmtDate(data.batchEndDate) : 'N/A'
+                    });
+                } else {
+                    setCertData(null);
+                }
 
                 const rawLectures = data.lecturePlaylist || data.lectures || [];
                 const normalizedLecs = rawLectures.reduce((acc, l) => {
@@ -1276,6 +1293,48 @@ const CourseView = () => {
         }
     };
 
+    const handleGenerateCertificate = async () => {
+        if (generatingCert) return;
+        setGeneratingCert(true);
+        try {
+            const studentName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student';
+            const activeEnrollmentId = enrollmentId || courseData?.enrollmentId;
+            const newCertData = {
+                studentName,
+                courseName: courseData?.title || 'Course',
+                completedAt: courseData?.completedAt || new Date().toISOString(),
+                templateUrl: courseData?.certificateTemplate || null,
+                studentId: courseData?.studentId || user?.studentId || 'N/A',
+                batchId: courseData?.batchIdString || 'N/A',
+                fromDate: courseData?.batchStartDate ? fmtDate(courseData.batchStartDate) : 'N/A',
+                toDate: courseData?.batchEndDate ? fmtDate(courseData.batchEndDate) : 'N/A'
+            };
+
+            setCertData(newCertData);
+            // wait for CertificateCard to render
+            await new Promise(r => setTimeout(r, 400));
+
+            const { toBlob } = await import('html-to-image');
+            const blob = await toBlob(certCardRef.current, { pixelRatio: 2, cacheBust: true });
+            if (!blob) throw new Error("Failed to generate certificate image");
+
+            const { uploadImage } = await import('@/api/course');
+            const uploaded = await uploadImage(new File([blob], 'certificate.png', { type: 'image/png' }));
+
+            await saveCertificate(courseId, uploaded.url, activeEnrollmentId);
+
+            setCertData(prev => ({ ...prev, certUrl: uploaded.url }));
+            setCourseData(prev => prev ? { ...prev, certificateUrl: uploaded.url } : prev);
+            setShowCongrats(true);
+            toast.success("Certificate generated successfully!");
+        } catch (e) {
+            console.error('Certificate generation failed:', e);
+            toast.error("Failed to generate certificate. Please try again.");
+        } finally {
+            setGeneratingCert(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
@@ -1327,7 +1386,12 @@ const CourseView = () => {
                                 🎓 View &amp; Download Certificate
                             </a>
                         ) : (
-                            <p className="text-sm text-gray-400 mb-4">Certificate will be available on the Certificates page shortly.</p>
+                            <button
+                                onClick={handleGenerateCertificate}
+                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-emerald-500 to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3 shadow-md shadow-emerald-500/20"
+                            >
+                                🎓 Generate Certificate
+                            </button>
                         )}
                         <button
                             onClick={() => setShowCongrats(false)}
@@ -1459,22 +1523,62 @@ const CourseView = () => {
                                             <FaWhatsapp size={20} />
                                         </button>
 
-                                        <GradiantButton
-                                            disabled={!isCourseCompleted}
-                                            onClick={() => isCourseCompleted && (certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates'))}
-                                            title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                            className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base"
-                                        >
-                                            Download Certificate
-                                        </GradiantButton>
-                                        <GradiantButton
-                                            disabled={!isCourseCompleted}
-                                            onClick={() => isCourseCompleted && (certData?.certUrl ? window.open(certData.certUrl, '_blank') : navigate('/certificates'))}
-                                            title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                            className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
-                                        >
-                                            <Download className="w-5 h-5" />
-                                        </GradiantButton>
+                                        {certData?.certUrl ? (
+                                            <>
+                                                <GradiantButton
+                                                    onClick={() => window.open(certData.certUrl, '_blank')}
+                                                    title="Download Certificate"
+                                                    className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base flex items-center gap-2"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    Download Certificate
+                                                </GradiantButton>
+                                                <GradiantButton
+                                                    onClick={() => window.open(certData.certUrl, '_blank')}
+                                                    title="Download Certificate"
+                                                    className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
+                                                >
+                                                    <Download className="w-5 h-5" />
+                                                </GradiantButton>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <GradiantButton
+                                                    disabled={!isCourseCompleted || generatingCert}
+                                                    onClick={isCourseCompleted ? handleGenerateCertificate : undefined}
+                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${
+                                                        !isCourseCompleted
+                                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/30 cursor-pointer"
+                                                    }`}
+                                                >
+                                                    {generatingCert ? (
+                                                        <>
+                                                            <Loader className="w-4 h-4 animate-spin" />
+                                                            Generating...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Award className="w-4 h-4" />
+                                                            Generate Certificate
+                                                        </>
+                                                    )}
+                                                </GradiantButton>
+                                                <GradiantButton
+                                                    disabled={!isCourseCompleted || generatingCert}
+                                                    onClick={isCourseCompleted ? handleGenerateCertificate : undefined}
+                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${
+                                                        !isCourseCompleted
+                                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/30 cursor-pointer"
+                                                    }`}
+                                                >
+                                                    {generatingCert ? <Loader className="w-5 h-5 animate-spin" /> : <Award className="w-5 h-5" />}
+                                                </GradiantButton>
+                                            </>
+                                        )}
 
                                         <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
                                             Enrolled New Course

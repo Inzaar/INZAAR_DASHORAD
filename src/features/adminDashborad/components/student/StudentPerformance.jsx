@@ -35,7 +35,7 @@ const StudentPerformance = ({ profileData }) => {
         courseName: e.title,
         moderators: e.moderators || [],
         startDate: "08-Jan-2025", // Placeholder
-        endDate: "05-June-2025", 
+        endDate: "05-June-2025",
         lectures: `${e.completedLectures}/${e.totalLectures}`,
         quizzes: "0-Quizzes",
         assignments: "0-Assignments",
@@ -92,7 +92,7 @@ const StudentPerformance = ({ profileData }) => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* In Progress */}
                                 <div className="flex items-center gap-4">
                                     <div className="flex flex-col items-center h-14 w-2 shrink-0">
@@ -170,7 +170,8 @@ const StudentPerformance = ({ profileData }) => {
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
@@ -228,7 +229,7 @@ const StudentPerformance = ({ profileData }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <GradiantButton 
+                                        <GradiantButton
                                             onClick={() => navigate(`/admin-course-play?id=${row.courseId || row.id}&userId=${user._id || user.id}`)}
                                             className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
                                         >

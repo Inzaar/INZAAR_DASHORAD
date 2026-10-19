@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import LogoutModal from "@/components/shared/LogoutModal";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
+import UnsavedChangesModal from "@/components/shared/UnsavedChangesModal";
 // import profile from "@/assets/images/profile.png"
 
 function Profile({ userInfo, setUserPayload, userPayload }) {
@@ -30,6 +32,48 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
     const { fetchNotifications } = useNotification();
     const navigate = useNavigate();
     const { t } = useTranslation();
+
+    const initialDataRef = React.useRef(null);
+    const [isDirty, setIsDirty] = useState(false);
+
+    React.useEffect(() => {
+        if (userInfo && !initialDataRef.current) {
+            initialDataRef.current = JSON.stringify(userInfo);
+        }
+    }, [userInfo]);
+
+    React.useEffect(() => {
+        if (initialDataRef.current && userPayload) {
+            const currentStr = JSON.stringify(userPayload);
+            if (currentStr !== initialDataRef.current) {
+                setIsDirty(true);
+            }
+        }
+    }, [userPayload]);
+
+    const [showProfileWarning, setShowProfileWarning] = useState(false);
+
+    const handleAttemptCancelProfile = () => {
+        if (isDirty) {
+            setShowProfileWarning(true);
+        }
+    };
+
+    const handleConfirmDiscardProfile = () => {
+        setShowProfileWarning(false);
+        if (initialDataRef.current) {
+            try {
+                setUserPayload(JSON.parse(initialDataRef.current));
+            } catch (e) {
+                setUserPayload(userInfo);
+            }
+        } else {
+            setUserPayload(userInfo);
+        }
+        setIsDirty(false);
+    };
+
+    const { showModal, handleLeave, handleStay } = useUnsavedWarning(isDirty);
 
     const calculateProfileCompletion = (user) => {
         if (!user) return 0;
@@ -124,6 +168,8 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             localStorage.removeItem(`profileDraft_${id}`);
             
             toast.success("Profile updated successfully!");
+            setIsDirty(false);
+            initialDataRef.current = JSON.stringify(payload);
             
             if (payload.password) {
                 setUserPayload(prev => ({...prev, password: '', hasUpdatedPassword: true}));
@@ -241,7 +287,13 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
             </div>
 
             <div className="w-full flex items-center justify-end gap-[15px] pr-10">
-                <button className={"w-[100px] h-[40px] rounded bg-[#B1B1B1] text-white"}>{t('cancel', 'Cancel')}</button>
+                <button
+                    type="button"
+                    onClick={handleAttemptCancelProfile}
+                    className="w-[100px] h-[40px] rounded bg-[#B1B1B1] text-white hover:bg-gray-500 transition-colors cursor-pointer"
+                >
+                    {t('cancel', 'Cancel')}
+                </button>
                 <div onClick={handleSave}>
                     <GradiantButton className={"w-[100px] h-[40px] rounded"}>{t('save', 'Save')}</GradiantButton>
                 </div>
@@ -387,6 +439,24 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 </div>,
                 document.body
             )}
+
+            <UnsavedChangesModal
+                isOpen={showModal || showProfileWarning}
+                onProceed={() => {
+                    if (showProfileWarning) {
+                        handleConfirmDiscardProfile();
+                    } else {
+                        handleLeave();
+                    }
+                }}
+                onCancel={() => {
+                    if (showProfileWarning) {
+                        setShowProfileWarning(false);
+                    } else {
+                        handleStay();
+                    }
+                }}
+            />
         </div>
     )
 }

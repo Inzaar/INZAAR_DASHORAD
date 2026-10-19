@@ -44,7 +44,6 @@ import GroupStudentsPage from '@/features/adminDashborad/pages/GroupStudentsPage
 import ManagementPage from '@/features/adminDashborad/pages/ManagementPage';
 import ManagementDetails from '@/features/adminDashborad/pages/ManagementDetails';
 import ManagementDashboard from '@/features/adminDashborad/pages/ManagementDashboard';
-import GlobalUnsavedChangesTracker from '@/components/shared/GlobalUnsavedChangesTracker';
 import { useAuth } from '@/context/AuthContext';
 import Loader from '@/components/ui/Loader';
 
@@ -59,7 +58,7 @@ const RootRedirect = () => {
 };
 
 const routes = createRoutesFromElements(
-    <Route element={<GlobalUnsavedChangesTracker />}>
+    <Route>
         <Route element={<PublicRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route element={<RegisterProvider />}>

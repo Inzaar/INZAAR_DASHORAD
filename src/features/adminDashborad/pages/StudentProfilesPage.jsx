@@ -17,6 +17,8 @@ import {
     PaginationLink,
     CustomPagination
 } from "@/components/ui/Pagination";
+import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
+import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 
 const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     const { t } = useTranslation();
@@ -60,6 +62,39 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     const [usernameError, setUsernameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
+    const resetStudentForm = () => {
+        setNewStudent({
+            firstname: '',
+            lastname: '',
+            username: '',
+            email: '',
+            phone: '',
+            password: '',
+            gender: ''
+        });
+        setFormError('');
+        setPasswordError('');
+        setUsernameError('');
+        setEmailError('');
+        setShowPassword(false);
+        setIsAddModalOpen(false);
+    };
+
+    const isAddStudentDirty = isAddModalOpen && Boolean(
+        newStudent.firstname?.trim() ||
+        newStudent.lastname?.trim() ||
+        newStudent.username?.trim() ||
+        newStudent.email?.trim() ||
+        newStudent.phone?.trim() ||
+        newStudent.password?.trim() ||
+        newStudent.gender?.trim()
+    );
+    const { showModal, handleLeave, handleStay, handleAttemptClose } = useUnsavedWarning(
+        isAddStudentDirty,
+        resetStudentForm,
+        { isOpen: isAddModalOpen }
+    );
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -737,15 +772,16 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
 
             {/* Add Student Modal */}
             {user?.role !== 'moderator' && isAddModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={handleAttemptClose}>
+                    <div className="bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900">Add New Student</h3>
                                 <p className="text-sm text-gray-500">Create a new student profile</p>
                             </div>
                             <button
-                                onClick={() => setIsAddModalOpen(false)}
+                                type="button"
+                                onClick={handleAttemptClose}
                                 className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
                             >
                                 <X size={20} />
@@ -876,13 +912,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             <div className="pt-4 flex gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setIsAddModalOpen(false);
-                                        setFormError('');
-                                        setPasswordError('');
-                                        setUsernameError('');
-                                        setEmailError('');
-                                    }}
+                                    onClick={handleAttemptClose}
                                     className="flex-1 py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                                 >
                                     Cancel
@@ -906,6 +936,13 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                     </div>
                 </div>
             )}
+
+            {/* Unsaved Changes Warning Modal */}
+            <UnsavedChangesModal
+                isOpen={showModal}
+                onProceed={handleLeave}
+                onCancel={handleStay}
+            />
         </div>
     );
 };
