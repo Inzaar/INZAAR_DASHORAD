@@ -70,7 +70,7 @@ function StatusTable({ userCourses, loading }) {
         return (
             <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
                 <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
-                <div className="overflow-x-auto no-scrollbar">
+                <div className="overflow-x-auto pb-3 custom-scrollbar-thin">
                     <div className="min-w-[1080px]">
                         <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
                             <div className="w-[134px] flex items-center justify-center">{t("courses", "Courses")}</div>
@@ -101,7 +101,7 @@ function StatusTable({ userCourses, loading }) {
     return (
         <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
             <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
-            <div className="overflow-x-auto no-scrollbar">
+            <div className="overflow-x-auto pb-3 custom-scrollbar-thin">
                 <div className="min-w-[1080px]">
                     <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
                         <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("courses", "Courses")}</div>
@@ -130,6 +130,28 @@ function StatusTable({ userCourses, loading }) {
                     />
                 </div>
             )}
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                    .custom-scrollbar-thin {
+                        scrollbar-width: thin;
+                        scrollbar-color: #cbd5e1 #f1f5f9;
+                    }
+                    .custom-scrollbar-thin::-webkit-scrollbar {
+                        height: 6px;
+                    }
+                    .custom-scrollbar-thin::-webkit-scrollbar-track {
+                        background: #f1f5f9;
+                        border-radius: 8px;
+                    }
+                    .custom-scrollbar-thin::-webkit-scrollbar-thumb {
+                        background: #cbd5e1;
+                        border-radius: 8px;
+                    }
+                    .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                        background: #94a3b8;
+                    }
+                `
+            }} />
         </div>
     );
 }
