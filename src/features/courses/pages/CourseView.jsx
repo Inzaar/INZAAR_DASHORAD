@@ -80,10 +80,12 @@ const getPdfEmbedUrl = (url) => {
 
 const getAudioSrc = (url) => {
     if (!url) return '';
-    if (url.includes('drive.google.com')) {
-        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (match && match[1]) {
-            return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    if (url.includes('drive.google.com') || url.includes('drive.usercontent.google.com')) {
+        const matchD = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        const matchId = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const fileId = matchD ? matchD[1] : (matchId ? matchId[1] : null);
+        if (fileId) {
+            return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
         }
     }
     return url;
@@ -120,6 +122,7 @@ const CourseView = () => {
     const [downloadingPdf, setDownloadingPdf] = useState(false);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
+    const [audioError, setAudioError] = useState(false);
     const [expandedSections, setExpandedSections] = useState({});
 
     useEffect(() => {
@@ -954,6 +957,14 @@ const CourseView = () => {
         const lectureId = currentLecture?.id || currentLecture?._id;
         if (!lectureId) return;
 
+        setAudioError(false);
+        // Reset player reference and playback tracking on lecture change so old player's duration never leaks
+        playerRef.current = null;
+        setIsPlaying(false);
+        setCurrentTime(currentLecture?.lastWatchedTime || 0);
+        setDuration(0);
+        prevPlaybackTimeRef.current = currentLecture?.lastWatchedTime || 0;
+
         const lectureInPlaylist = courseData?.lecturePlaylist?.find(l => (l.id === lectureId || l._id === lectureId));
         const playlistProgress = lectureInPlaylist?.watchedPercentage || 0;
         const currentProgress = currentLecture?.watchedPercentage || (typeof currentLecture?.progress === 'string' ? parseInt(currentLecture.progress) : (currentLecture?.progress || 0)) || 0;
@@ -965,28 +976,35 @@ const CourseView = () => {
         lastReportedRef.current = 0;
 
         if (currentLecture?.type === 'Quiz') {
-            playerRef.current = null;
             return;
         }
         const interval = setInterval(() => {
             if (playerRef.current && playerRef.current.getCurrentTime) {
-                // Prevent ghost progress: ensure player is actually playing the current lecture's video
-                let isValidVideo = true;
+                // Prevent ghost progress: ensure player actually belongs to the current lecture
+                let isValidPlayer = true;
                 if (playerRef.current.getVideoData) {
                     const videoData = playerRef.current.getVideoData();
                     const expectedId = currentLecture?.videoId || (currentLecture?.videoUrl ? extractYouTubeId(currentLecture.videoUrl) : null);
-                    if (videoData && videoData.video_id && expectedId && videoData.video_id !== expectedId) {
-                        isValidVideo = false;
+                    if (expectedId) {
+                        // For video lectures, player video_id must match expected YouTube ID
+                        if (videoData && videoData.video_id !== expectedId) {
+                            isValidPlayer = false;
+                        }
+                    } else {
+                        // For audio lectures, player MUST be an audio-lecture player, not a lingering YouTube video player
+                        if (videoData && videoData.video_id !== 'audio-lecture') {
+                            isValidPlayer = false;
+                        }
                     }
                 }
-                if (!isValidVideo) return;
+                if (!isValidPlayer) return;
 
                 const cur = playerRef.current.getCurrentTime();
                 const dur = playerRef.current.getDuration();
                 setCurrentTime(cur);
                 setDuration(dur);
-                if (dur > 0 || playerRef.current.isEnded?.()) {
-                    let percent = (dur > 0 && dur !== Infinity) ? (cur / dur) * 100 : 0;
+                if (dur > 0 && dur !== Infinity) {
+                    let percent = (cur / dur) * 100;
                     if (playerRef.current.isEnded?.()) {
                         percent = 100;
                     }
@@ -1804,102 +1822,37 @@ const CourseView = () => {
                                                             <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl border border-white/10 shadow-2xl">
                                                                 {(() => {
                                                                     const url = currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : currentLecture.videoUrl;
+                                                                    const isDrive = Boolean(url && (url.includes('drive.google.com') || url.includes('drive.usercontent.google.com')));
+                                                                    const matchD = url ? url.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
+                                                                    const matchId = url ? url.match(/[?&]id=([a-zA-Z0-9_-]+)/) : null;
+                                                                    const driveFileId = matchD ? matchD[1] : (matchId ? matchId[1] : null);
 
-                                                                    if (url && url.includes('drive.google.com')) {
-                                                                        const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                                                                        if (match && match[1]) {
-                                                                            return (
-                                                                                <div className="flex flex-col gap-3">
-                                                                                    <iframe
-                                                                                        src={`https://drive.google.com/file/d/${match[1]}/preview`}
-                                                                                        className="w-full h-[150px] border-none rounded-xl bg-black/20"
-                                                                                        title="Audio Player"
-                                                                                        allow="autoplay"
-                                                                                        onLoad={() => {
-                                                                                            // Initialize dummy playerRef so the interval doesn't crash
-                                                                                            if (!playerRef.current) {
-                                                                                                playerRef.current = {
-                                                                                                    getCurrentTime: () => 0,
-                                                                                                    getDuration: () => 1,
-                                                                                                    seekTo: () => { },
-                                                                                                    mute: () => { },
-                                                                                                    unMute: () => { },
-                                                                                                    setVolume: () => { },
-                                                                                                    playVideo: () => { },
-                                                                                                    pauseVideo: () => { },
-                                                                                                    isEnded: () => false,
-                                                                                                    getVideoData: () => ({ video_id: 'audio-lecture' })
-                                                                                                };
-                                                                                            }
-                                                                                        }}
-                                                                                    />
-                                                                                    <button
-                                                                                        onClick={async () => {
-                                                                                            const lectureId = currentLecture?.id || currentLecture?._id;
-                                                                                            const cid = courseId || courseData?.courseId || courseData?._id || courseData?.id;
-                                                                                            if (lectureId && cid && !isAdminView) {
-                                                                                                try {
-                                                                                                    toast.loading("Marking as complete...", { id: "markComplete" });
-                                                                                                    await updateLectureProgress(cid, {
-                                                                                                        lectureId,
-                                                                                                        watchedPercentage: 100,
-                                                                                                        lastWatchedTime: 100,
-                                                                                                        timeSpentDelta: 60,
-                                                                                                        enrollmentId
-                                                                                                    });
-                                                                                                    toast.success("Completed! Unlocking...", { id: "markComplete" });
-
-                                                                                                    // Unlock local state instantly
-                                                                                                    setProgress(100);
-                                                                                                    if (maxWatchedMapRef && maxWatchedMapRef.current) {
-                                                                                                        maxWatchedMapRef.current[lectureId] = 100;
-                                                                                                    }
-
-                                                                                                    setCourseData(prev => {
-                                                                                                        if (!prev) return prev;
-                                                                                                        const newLectures = (prev.lecturePlaylist || prev.lectures || []).map(l => {
-                                                                                                            if ((l.id || l._id) === lectureId) {
-                                                                                                                const unQuizzes = (l.quizzes || []).map(q => ({ ...q, isLocked: false }));
-                                                                                                                const unAssignments = (l.assignments || []).map(a => ({ ...a, isLocked: false }));
-                                                                                                                return { ...l, watchedPercentage: 100, progress: 100, isCompleted: true, quizzes: unQuizzes, assignments: unAssignments };
-                                                                                                            }
-                                                                                                            return l;
-                                                                                                        });
-                                                                                                        return { ...prev, lecturePlaylist: newLectures, lectures: newLectures };
-                                                                                                    });
-
-
-                                                                                                } catch (error) {
-                                                                                                    console.error("Failed to mark complete", error);
-                                                                                                    toast.error("Error marking complete", { id: "markComplete" });
-                                                                                                }
-                                                                                            } else {
-                                                                                                toast.success("Mock completion (Admin View)");
-                                                                                                setProgress(100);
-                                                                                                if (maxWatchedMapRef && maxWatchedMapRef.current) {
-                                                                                                    maxWatchedMapRef.current[lectureId] = 100;
-                                                                                                }
-                                                                                            }
-                                                                                        }}
-                                                                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
-                                                                                    >
-                                                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                                        </svg>
-                                                                                        Mark Audio as Complete
-                                                                                    </button>
-                                                                                </div>
-                                                                            );
-                                                                        }
+                                                                    if (isDrive && audioError && driveFileId) {
+                                                                        return (
+                                                                            <div className="flex flex-col gap-3">
+                                                                                <iframe
+                                                                                    src={`https://drive.google.com/file/d/${driveFileId}/preview`}
+                                                                                    className="w-full h-[150px] border-none rounded-xl bg-black/20"
+                                                                                    title="Audio Player"
+                                                                                    allow="autoplay"
+                                                                                />
+                                                                            </div>
+                                                                        );
                                                                     }
 
                                                                     return (
                                                                         <audio
+                                                                            key={currentLecture.id || currentLecture._id}
                                                                             controls
                                                                             autoPlay={shouldAutoplay}
                                                                             className="w-full h-12 outline-none"
                                                                             src={getAudioSrc(url)}
                                                                             controlsList="nodownload"
+                                                                            onError={() => {
+                                                                                if (isDrive) {
+                                                                                    setAudioError(true);
+                                                                                }
+                                                                            }}
                                                                             onPlay={() => setIsPlaying(true)}
                                                                             onPause={() => setIsPlaying(false)}
                                                                             onLoadedMetadata={(e) => {
