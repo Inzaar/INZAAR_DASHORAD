@@ -1634,7 +1634,7 @@ const CourseView = () => {
                                                 </h2>
                                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 font-medium mt-1">
                                                     {currentLecture?.lectureNo !== undefined && currentLecture?.lectureNo !== null && (
-                                                        <span>Lecture: #{currentLecture.lectureNo}</span>
+                                                        <span>Lecture: {String(currentLecture.lectureNo).startsWith('#') ? currentLecture.lectureNo.replace(/^#+/, '#') : `#${String(currentLecture.lectureNo).padStart(2, '0')}`}</span>
                                                     )}
                                                     {currentLecture?.date && (
                                                         <>
