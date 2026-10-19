@@ -386,6 +386,8 @@ const CourseView = () => {
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
     const videoSectionRef = useRef(null);
+    const activeLectureIdRef = useRef(null);
+    const audioRef = useRef(null);
 
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
@@ -953,27 +955,83 @@ const CourseView = () => {
         }
     };
 
+    const handleMarkComplete = async () => {
+        const lectureId = currentLecture?.id || currentLecture?._id;
+        const cid = courseId || courseData?.courseId || courseData?._id || courseData?.id;
+        if (lectureId && cid && !isAdminView) {
+            try {
+                toast.loading("Marking as complete...", { id: "markComplete" });
+                await updateLectureProgress(cid, {
+                    lectureId,
+                    watchedPercentage: 100,
+                    lastWatchedTime: Math.max(Math.floor(duration || 100), 100),
+                    timeSpentDelta: 60,
+                    enrollmentId
+                });
+                toast.success("Completed! Unlocking...", { id: "markComplete" });
+
+                // Unlock local state instantly
+                setProgress(100);
+                if (maxWatchedMapRef && maxWatchedMapRef.current) {
+                    maxWatchedMapRef.current[lectureId] = 100;
+                }
+
+                setCourseData(prev => {
+                    if (!prev) return prev;
+                    const newLectures = (prev.lecturePlaylist || prev.lectures || []).map(l => {
+                        if ((l.id || l._id) === lectureId) {
+                            const unQuizzes = (l.quizzes || []).map(q => ({ ...q, isLocked: false }));
+                            const unAssignments = (l.assignments || []).map(a => ({ ...a, isLocked: false }));
+                            return { ...l, watchedPercentage: 100, progress: 100, isCompleted: true, quizzes: unQuizzes, assignments: unAssignments };
+                        }
+                        return l;
+                    });
+                    const idx = newLectures.findIndex(l => (l.id === lectureId || l._id === lectureId));
+                    const unlockedPlaylist = newLectures.map((l, i) => {
+                        if (i === idx + 1 && l.isLocked) {
+                            return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                        }
+                        return l;
+                    });
+                    return { ...prev, lecturePlaylist: unlockedPlaylist, lectures: unlockedPlaylist };
+                });
+            } catch (error) {
+                console.error("Failed to mark complete", error);
+                toast.error("Error marking complete", { id: "markComplete" });
+            }
+        } else {
+            toast.success("Mock completion (Admin View)");
+            setProgress(100);
+            if (maxWatchedMapRef && maxWatchedMapRef.current) {
+                maxWatchedMapRef.current[lectureId] = 100;
+            }
+        }
+    };
+
     useEffect(() => {
         const lectureId = currentLecture?.id || currentLecture?._id;
         if (!lectureId) return;
 
-        setAudioError(false);
-        // Reset player reference and playback tracking on lecture change so old player's duration never leaks
-        playerRef.current = null;
-        setIsPlaying(false);
-        setCurrentTime(currentLecture?.lastWatchedTime || 0);
-        setDuration(0);
-        prevPlaybackTimeRef.current = currentLecture?.lastWatchedTime || 0;
+        // Reset player reference and playback tracking ONLY when switching to a DIFFERENT lecture
+        if (activeLectureIdRef.current !== lectureId) {
+            activeLectureIdRef.current = lectureId;
+            setAudioError(false);
+            playerRef.current = null;
+            setIsPlaying(false);
+            setCurrentTime(currentLecture?.lastWatchedTime || 0);
+            setDuration(0);
+            prevPlaybackTimeRef.current = currentLecture?.lastWatchedTime || 0;
 
-        const lectureInPlaylist = courseData?.lecturePlaylist?.find(l => (l.id === lectureId || l._id === lectureId));
-        const playlistProgress = lectureInPlaylist?.watchedPercentage || 0;
-        const currentProgress = currentLecture?.watchedPercentage || (typeof currentLecture?.progress === 'string' ? parseInt(currentLecture.progress) : (currentLecture?.progress || 0)) || 0;
-        const storedMax = maxWatchedMapRef.current[lectureId] || 0;
+            const lectureInPlaylist = courseData?.lecturePlaylist?.find(l => (l.id === lectureId || l._id === lectureId));
+            const playlistProgress = lectureInPlaylist?.watchedPercentage || 0;
+            const currentProgress = currentLecture?.watchedPercentage || (typeof currentLecture?.progress === 'string' ? parseInt(currentLecture.progress) : (currentLecture?.progress || 0)) || 0;
+            const storedMax = maxWatchedMapRef.current[lectureId] || 0;
 
-        const initialProgress = Math.max(playlistProgress, currentProgress, storedMax);
-        maxWatchedMapRef.current[lectureId] = initialProgress;
-        setProgress(initialProgress);
-        lastReportedRef.current = 0;
+            const initialProgress = Math.max(playlistProgress, currentProgress, storedMax);
+            maxWatchedMapRef.current[lectureId] = initialProgress;
+            setProgress(initialProgress);
+            lastReportedRef.current = 0;
+        }
 
         if (currentLecture?.type === 'Quiz') {
             return;
@@ -1015,8 +1073,9 @@ const CourseView = () => {
                     setProgress(Math.round(newMaxPercent));
                     const now = Date.now();
 
+                    const effectiveCourseId = courseId || courseData?.courseId || courseData?._id || courseData?.id;
                     // Allow anyone to record progress, EXCEPT if admin is viewing a student's progress
-                    if (lectureId && courseId && (percent > 0 || playerRef.current.isEnded?.()) && now - lastReportedRef.current >= 1000) {
+                    if (lectureId && effectiveCourseId && (percent > 0 || playerRef.current.isEnded?.()) && now - lastReportedRef.current >= 1000) {
                         if (isAdminView && userId) {
                             // Do not record progress when moderator plays video for a student
                         } else {
@@ -1035,7 +1094,7 @@ const CourseView = () => {
                             }
                             prevPlaybackTimeRef.current = cur;
 
-                            updateLectureProgress(courseId, {
+                            updateLectureProgress(effectiveCourseId, {
                                 lectureId,
                                 watchedPercentage: finalPercent,
                                 lastWatchedTime: Math.floor(cur),
@@ -1835,47 +1894,147 @@ const CourseView = () => {
                                                                                     className="w-full h-[150px] border-none rounded-xl bg-black/20"
                                                                                     title="Audio Player"
                                                                                     allow="autoplay"
+                                                                                    onLoad={() => {
+                                                                                        if (!playerRef.current) {
+                                                                                            playerRef.current = {
+                                                                                                getCurrentTime: () => 0,
+                                                                                                getDuration: () => 1,
+                                                                                                seekTo: () => { },
+                                                                                                mute: () => { },
+                                                                                                unMute: () => { },
+                                                                                                setVolume: () => { },
+                                                                                                playVideo: () => { },
+                                                                                                pauseVideo: () => { },
+                                                                                                isEnded: () => false,
+                                                                                                getVideoData: () => ({ video_id: 'audio-lecture' })
+                                                                                            };
+                                                                                        }
+                                                                                    }}
                                                                                 />
+                                                                                <button
+                                                                                    onClick={handleMarkComplete}
+                                                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                                                                >
+                                                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                                    </svg>
+                                                                                    Mark Audio as Complete
+                                                                                </button>
                                                                             </div>
                                                                         );
                                                                     }
 
                                                                     return (
-                                                                        <audio
-                                                                            key={currentLecture.id || currentLecture._id}
-                                                                            controls
-                                                                            autoPlay={shouldAutoplay}
-                                                                            className="w-full h-12 outline-none"
-                                                                            src={getAudioSrc(url)}
-                                                                            controlsList="nodownload"
-                                                                            onError={() => {
-                                                                                if (isDrive) {
-                                                                                    setAudioError(true);
-                                                                                }
-                                                                            }}
-                                                                            onPlay={() => setIsPlaying(true)}
-                                                                            onPause={() => setIsPlaying(false)}
-                                                                            onLoadedMetadata={(e) => {
-                                                                                const audioEl = e.target;
-                                                                                playerRef.current = {
-                                                                                    getCurrentTime: () => audioEl.currentTime,
-                                                                                    getDuration: () => audioEl.duration,
-                                                                                    seekTo: (time) => { audioEl.currentTime = time; },
-                                                                                    mute: () => { audioEl.muted = true; },
-                                                                                    unMute: () => { audioEl.muted = false; },
-                                                                                    setVolume: (vol) => { audioEl.volume = vol / 100; },
-                                                                                    playVideo: () => { audioEl.play(); },
-                                                                                    pauseVideo: () => { audioEl.pause(); },
-                                                                                    isEnded: () => audioEl.ended,
-                                                                                    getVideoData: () => ({ video_id: 'audio-lecture' })
-                                                                                };
-                                                                                if (currentLecture?.lastWatchedTime > 0) {
-                                                                                    audioEl.currentTime = currentLecture.lastWatchedTime;
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            Your browser does not support the audio element.
-                                                                        </audio>
+                                                                        <div className="flex flex-col gap-3 w-full">
+                                                                            <audio
+                                                                                ref={audioRef}
+                                                                                key={currentLecture.id || currentLecture._id}
+                                                                                controls
+                                                                                autoPlay={shouldAutoplay}
+                                                                                className="w-full h-12 outline-none"
+                                                                                src={getAudioSrc(url)}
+                                                                                controlsList="nodownload"
+                                                                                onError={() => {
+                                                                                    if (isDrive) {
+                                                                                        setAudioError(true);
+                                                                                    }
+                                                                                }}
+                                                                                onPlay={() => setIsPlaying(true)}
+                                                                                onPause={() => setIsPlaying(false)}
+                                                                                onLoadedMetadata={(e) => {
+                                                                                    const audioEl = e.target;
+                                                                                    playerRef.current = {
+                                                                                        getCurrentTime: () => audioEl.currentTime,
+                                                                                        getDuration: () => audioEl.duration,
+                                                                                        seekTo: (time) => { audioEl.currentTime = time; },
+                                                                                        mute: () => { audioEl.muted = true; },
+                                                                                        unMute: () => { audioEl.muted = false; },
+                                                                                        setVolume: (vol) => { audioEl.volume = vol / 100; },
+                                                                                        playVideo: () => { audioEl.play(); },
+                                                                                        pauseVideo: () => { audioEl.pause(); },
+                                                                                        isEnded: () => audioEl.ended,
+                                                                                        getVideoData: () => ({ video_id: 'audio-lecture' })
+                                                                                    };
+                                                                                    if (currentLecture?.lastWatchedTime > 0) {
+                                                                                        audioEl.currentTime = currentLecture.lastWatchedTime;
+                                                                                    }
+                                                                                }}
+                                                                                onTimeUpdate={(e) => {
+                                                                                    const audioEl = e.target;
+                                                                                    const cur = audioEl.currentTime;
+                                                                                    const dur = audioEl.duration;
+                                                                                    setCurrentTime(cur);
+                                                                                    if (dur > 0 && dur !== Infinity) {
+                                                                                        setDuration(dur);
+                                                                                        const percent = Math.min(100, (cur / dur) * 100);
+                                                                                        const lectureId = currentLecture?.id || currentLecture?._id;
+                                                                                        if (lectureId) {
+                                                                                            const prevMax = maxWatchedMapRef.current[lectureId] || 0;
+                                                                                            const newMax = Math.max(prevMax, Math.round(percent));
+                                                                                            maxWatchedMapRef.current[lectureId] = newMax;
+                                                                                            setProgress(newMax);
+
+                                                                                            const now = Date.now();
+                                                                                            const cid = courseId || courseData?.courseId || courseData?._id || courseData?.id;
+                                                                                            if (cid && !isAdminView && (now - lastReportedRef.current >= 2000 || percent >= 95)) {
+                                                                                                lastReportedRef.current = now;
+                                                                                                const finalPercent = percent >= 95 ? 100 : newMax;
+                                                                                                const diff = cur - prevPlaybackTimeRef.current;
+                                                                                                let timeSpentDelta = 0;
+                                                                                                if (diff > 0 && diff <= 4) {
+                                                                                                    timeSpentDelta = Math.round(diff);
+                                                                                                }
+                                                                                                prevPlaybackTimeRef.current = cur;
+
+                                                                                                updateLectureProgress(cid, {
+                                                                                                    lectureId,
+                                                                                                    watchedPercentage: finalPercent,
+                                                                                                    lastWatchedTime: Math.floor(cur),
+                                                                                                    timeSpentDelta,
+                                                                                                    enrollmentId
+                                                                                                }).then(() => {
+                                                                                                    if (finalPercent >= 95) {
+                                                                                                        setCourseData(prev => {
+                                                                                                            if (!prev) return prev;
+                                                                                                            const newLectures = (prev.lecturePlaylist || prev.lectures || []).map(l => {
+                                                                                                                if ((l.id || l._id) === lectureId) {
+                                                                                                                    const unQuizzes = (l.quizzes || []).map(q => ({ ...q, isLocked: false }));
+                                                                                                                    const unAssignments = (l.assignments || []).map(a => ({ ...a, isLocked: false }));
+                                                                                                                    return { ...l, watchedPercentage: 100, progress: 100, isCompleted: true, quizzes: unQuizzes, assignments: unAssignments };
+                                                                                                                }
+                                                                                                                return l;
+                                                                                                            });
+                                                                                                            const idx = newLectures.findIndex(l => (l.id === lectureId || l._id === lectureId));
+                                                                                                            const unlockedPlaylist = newLectures.map((l, i) => {
+                                                                                                                if (i === idx + 1 && l.isLocked) {
+                                                                                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
+                                                                                                                }
+                                                                                                                return l;
+                                                                                                            });
+                                                                                                            return { ...prev, lecturePlaylist: unlockedPlaylist, lectures: unlockedPlaylist };
+                                                                                                        });
+                                                                                                    }
+                                                                                                }).catch(console.warn);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }}
+                                                                                onEnded={() => {
+                                                                                    handleMarkComplete();
+                                                                                }}
+                                                                            >
+                                                                                Your browser does not support the audio element.
+                                                                            </audio>
+                                                                            <button
+                                                                                onClick={handleMarkComplete}
+                                                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                                                            >
+                                                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                                </svg>
+                                                                                Mark Audio as Complete
+                                                                            </button>
+                                                                        </div>
                                                                     );
                                                                 })()}
 
