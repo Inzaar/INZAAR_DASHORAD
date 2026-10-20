@@ -386,6 +386,8 @@ const CourseView = () => {
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
     const videoSectionRef = useRef(null);
+    const isUpdatingProgressRef = useRef(false);
+    const initialStartTimeRef = useRef({});
 
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
@@ -987,7 +989,7 @@ const CourseView = () => {
                     const expectedId = currentLecture?.videoId || (currentLecture?.videoUrl ? extractYouTubeId(currentLecture.videoUrl) : null);
                     if (expectedId) {
                         // For video lectures, player video_id must match expected YouTube ID
-                        if (videoData && videoData.video_id !== expectedId) {
+                        if (videoData && videoData.video_id && videoData.video_id !== expectedId) {
                             isValidPlayer = false;
                         }
                     } else {
@@ -1020,6 +1022,8 @@ const CourseView = () => {
                         if (isAdminView && userId) {
                             // Do not record progress when moderator plays video for a student
                         } else {
+                            if (isUpdatingProgressRef.current) return;
+                            isUpdatingProgressRef.current = true;
                             lastReportedRef.current = now;
                             let calculatedPercent = Math.min(Math.round(percent), 100);
                             if (calculatedPercent >= 95) calculatedPercent = 100; // Auto-complete near the end
@@ -1029,11 +1033,14 @@ const CourseView = () => {
 
                             let timeSpentDelta = 0;
                             const diff = cur - prevPlaybackTimeRef.current;
-                            // Only record if positive and realistic (e.g., less than 5 seconds jump for normal playback)
-                            if (diff > 0 && diff <= 3) {
-                                timeSpentDelta = Math.round(diff);
+                            // Only record if positive and realistic (e.g., normal playback)
+                            if (diff >= 1 && diff <= 4) {
+                                const secondsPassed = Math.floor(diff);
+                                timeSpentDelta = secondsPassed;
+                                prevPlaybackTimeRef.current += secondsPassed;
+                            } else if (diff < 0 || diff > 4) {
+                                prevPlaybackTimeRef.current = cur;
                             }
-                            prevPlaybackTimeRef.current = cur;
 
                             updateLectureProgress(courseId, {
                                 lectureId,
@@ -1047,7 +1054,10 @@ const CourseView = () => {
                                 setCurrentLecture(prev => {
                                     if (!prev) return prev;
                                     if (prev.id === lectureId || prev._id === lectureId) {
-                                        return { ...prev, watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent) };
+                                        return {
+                                            ...prev,
+                                            watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent)
+                                        };
                                     }
                                     return prev;
                                 });
@@ -1059,8 +1069,19 @@ const CourseView = () => {
                                     setCourseData(prev => {
                                         if (!prev) return prev;
                                         const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                        const newTotal = (prev.totalTimeSpent || 0) + timeSpentDelta;
+                                        const totalHours = Math.floor(newTotal / 3600);
+                                        const totalMins = Math.floor((newTotal % 3600) / 60);
+                                        const formattedTime = `${totalHours}h ${totalMins}m`;
                                         return {
                                             ...prev,
+                                            timeSpentLastWeek: data?.timeSpentLastWeek || formattedTime,
+                                            totalTimeSpent: data?.totalTimeSpent || newTotal,
+                                            progress: data?.progress !== undefined ? data.progress : prev.progress,
+                                            overallPerformance: {
+                                                ...prev.overallPerformance,
+                                                percentage: data?.progress !== undefined ? data.progress : prev.overallPerformance?.percentage
+                                            },
                                             lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
                                                 if (i === idx + 1 && l.isLocked) {
                                                     const prevLec = prev.lecturePlaylist[idx];
@@ -1084,15 +1105,27 @@ const CourseView = () => {
                                         if (!prev) return prev;
                                         const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
                                         const wasAlreadyCompleted = prev.lecturePlaylist[idx]?.isCompleted;
+                                        const newTotal = (prev.totalTimeSpent || 0) + timeSpentDelta;
+                                        const totalHours = Math.floor(newTotal / 3600);
+                                        const totalMins = Math.floor((newTotal % 3600) / 60);
+                                        const formattedTime = `${totalHours}h ${totalMins}m`;
                                         return {
                                             ...prev,
+                                            timeSpentLastWeek: data?.timeSpentLastWeek || formattedTime,
+                                            totalTimeSpent: data?.totalTimeSpent || newTotal,
+                                            progress: data?.progress !== undefined ? data.progress : prev.progress,
+                                            overallPerformance: {
+                                                ...prev.overallPerformance,
+                                                percentage: data?.progress !== undefined ? data.progress : prev.overallPerformance?.percentage
+                                            },
                                             lectureCompleted: wasAlreadyCompleted ? prev.lectureCompleted : (prev.lectureCompleted || 0) + 1,
-                                            lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
+                                            lecturePlaylist: prev.lecturePlaylist.map((l) => {
                                                 if (l._id === lectureId || l.id === lectureId) {
                                                     return {
                                                         ...l,
                                                         isCompleted: true,
                                                         watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
+                                                        lastWatchedTime: Math.floor(cur),
                                                         quizzes: (l.quizzes || []).map(q => ({ ...q, isLocked: false })),
                                                         assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
                                                     };
@@ -1105,11 +1138,26 @@ const CourseView = () => {
                                     // Update watchedPercentage only
                                     setCourseData(prev => {
                                         if (!prev || !prev.lecturePlaylist) return prev;
+                                        const newTotal = (prev.totalTimeSpent || 0) + timeSpentDelta;
+                                        const totalHours = Math.floor(newTotal / 3600);
+                                        const totalMins = Math.floor((newTotal % 3600) / 60);
+                                        const formattedTime = `${totalHours}h ${totalMins}m`;
                                         return {
                                             ...prev,
+                                            timeSpentLastWeek: data?.timeSpentLastWeek || formattedTime,
+                                            totalTimeSpent: data?.totalTimeSpent || newTotal,
+                                            progress: data?.progress !== undefined ? data.progress : prev.progress,
+                                            overallPerformance: {
+                                                ...prev.overallPerformance,
+                                                percentage: data?.progress !== undefined ? data.progress : prev.overallPerformance?.percentage
+                                            },
                                             lecturePlaylist: prev.lecturePlaylist.map(l => {
                                                 if (l._id === lectureId || l.id === lectureId) {
-                                                    return { ...l, watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent) };
+                                                    return {
+                                                        ...l,
+                                                        watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
+                                                        lastWatchedTime: Math.floor(cur)
+                                                    };
                                                 }
                                                 return l;
                                             })
@@ -1163,14 +1211,17 @@ const CourseView = () => {
                                         setShowCongrats(true);
                                     }
                                 }
-                            }).catch(err => console.warn('Progress update failed:', err));
+                            }).catch(err => console.warn('Progress update failed:', err))
+                              .finally(() => {
+                                  isUpdatingProgressRef.current = false;
+                              });
                         }
                     }
                 }
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [currentLecture]);
+    }, [currentLecture?.id || currentLecture?._id]);
 
     // Note Handlers
     const handleAddNote = async (e) => {
@@ -1794,6 +1845,7 @@ const CourseView = () => {
                                                     />
                                                 ) : currentLecture?.videoId ? (
                                                     <YouTube
+                                                        key={currentLecture?.id || currentLecture?._id || currentLecture?.videoId}
                                                         videoId={currentLecture.videoId}
                                                         onReady={onPlayerReady}
                                                         opts={{
@@ -1802,8 +1854,9 @@ const CourseView = () => {
                                                             playerVars: {
                                                                 autoplay: shouldAutoplay ? 1 : 0,
                                                                 rel: 0,
-                                                                start: currentLecture?.lastWatchedTime || 0,
-                                                                startSeconds: currentLecture?.lastWatchedTime || 0,
+                                                                start: initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] !== undefined
+                                                                    ? initialStartTimeRef.current[currentLecture?.id || currentLecture?._id]
+                                                                    : (initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] = currentLecture?.lastWatchedTime || 0),
                                                             },
                                                         }}
                                                         className="w-full h-full"
