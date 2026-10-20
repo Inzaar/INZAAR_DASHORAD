@@ -118,6 +118,7 @@ const CourseView = () => {
     const [showPdfMenu, setShowPdfMenu] = useState(false);
     const [activeAudioUrl, setActiveAudioUrl] = useState(null);
     const [activePdfUrl, setActivePdfUrl] = useState(null);
+    const isPdfModalHistoryPushedRef = useRef(false);
     const [pdfLoading, setPdfLoading] = useState(true);
     const [downloadingPdf, setDownloadingPdf] = useState(false);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
@@ -129,8 +130,27 @@ const CourseView = () => {
         if (activePdfUrl) {
             setPdfLoading(true);
             setDownloadingPdf(false);
+            if (!isPdfModalHistoryPushedRef.current) {
+                window.history.pushState({ ...(window.history.state || {}), pdfModalOpen: true }, '', window.location.href);
+                isPdfModalHistoryPushedRef.current = true;
+            }
         }
     }, [activePdfUrl]);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isPdfModalHistoryPushedRef.current) {
+                isPdfModalHistoryPushedRef.current = false;
+                setActivePdfUrl(null);
+                setDownloadingPdf(false);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
 
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState("");
@@ -3024,6 +3044,10 @@ const CourseView = () => {
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (isPdfModalHistoryPushedRef.current) {
+                                            isPdfModalHistoryPushedRef.current = false;
+                                            window.history.back();
+                                        }
                                         setActivePdfUrl(null);
                                         setDownloadingPdf(false);
                                     }}
