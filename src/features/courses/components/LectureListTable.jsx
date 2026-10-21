@@ -235,7 +235,7 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
                             <h3 className="text-sm font-bold text-gray-900 leading-tight">
                                 {t('document_resource', 'Document Resource')}
                             </h3>
-                            <p className="text-[11px] text-gray-500 font-medium">{t('viewing_lecture_materials', 'Viewing lecture materials')}</p>
+                            <p className="text-[11px] text-gray-500 font-medium">{t('resource', 'Resource')}</p>
                         </div>
                     </div>
                     

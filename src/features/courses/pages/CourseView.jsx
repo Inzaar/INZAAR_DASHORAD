@@ -11,7 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -125,6 +125,24 @@ const CourseView = () => {
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
     const [audioError, setAudioError] = useState(false);
     const [expandedSections, setExpandedSections] = useState({});
+    const [hasPlaybackStarted, setHasPlaybackStarted] = useState(false);
+    const [isVideoBuffering, setIsVideoBuffering] = useState(false);
+    const [thumbnailSrc, setThumbnailSrc] = useState('');
+
+    useEffect(() => {
+        setHasPlaybackStarted(false);
+        setIsVideoBuffering(shouldAutoplay);
+        if (currentLecture) {
+            const src = currentLecture.thumbnail || (currentLecture.videoId ? `https://img.youtube.com/vi/${currentLecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg));
+            setThumbnailSrc(src);
+        }
+    }, [currentLecture?.id, currentLecture?._id, currentLecture?.videoId, currentLecture?.thumbnail, courseData?.thumbnail]);
+
+    useEffect(() => {
+        if (shouldAutoplay && !hasPlaybackStarted) {
+            setIsVideoBuffering(true);
+        }
+    }, [shouldAutoplay]);
 
     useEffect(() => {
         if (activePdfUrl) {
@@ -813,8 +831,22 @@ const CourseView = () => {
             }
             event.target.playVideo();
             setShouldAutoplay(false);
+        }
+    };
+
+    const handlePlayOverlayClick = () => {
+        setIsVideoBuffering(true);
+        if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+            try {
+                if (currentLecture?.lastWatchedTime > 0) {
+                    playerRef.current.seekTo(currentLecture.lastWatchedTime, true);
+                }
+                playerRef.current.playVideo();
+            } catch (err) {
+                console.error("Error playing video:", err);
+            }
         } else {
-            event.target.pauseVideo();
+            setShouldAutoplay(true);
         }
     };
 
@@ -1040,6 +1072,8 @@ const CourseView = () => {
             setAudioError(false);
             playerRef.current = null;
             setIsPlaying(false);
+            setHasPlaybackStarted(false);
+            setIsVideoBuffering(shouldAutoplay);
             setCurrentTime(currentLecture?.lastWatchedTime || 0);
             setDuration(0);
             prevPlaybackTimeRef.current = currentLecture?.lastWatchedTime || 0;
@@ -1923,24 +1957,98 @@ const CourseView = () => {
                                                         }}
                                                     />
                                                 ) : currentLecture?.videoId ? (
-                                                    <YouTube
-                                                        key={currentLecture?.id || currentLecture?._id || currentLecture?.videoId}
-                                                        videoId={currentLecture.videoId}
-                                                        onReady={onPlayerReady}
-                                                        opts={{
-                                                            height: '100%',
-                                                            width: '100%',
-                                                            playerVars: {
-                                                                autoplay: shouldAutoplay ? 1 : 0,
-                                                                rel: 0,
-                                                                start: initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] !== undefined
-                                                                    ? initialStartTimeRef.current[currentLecture?.id || currentLecture?._id]
-                                                                    : (initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] = currentLecture?.lastWatchedTime || 0),
-                                                            },
-                                                        }}
-                                                        className="w-full h-full"
-                                                        iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
-                                                    />
+                                                    <>
+                                                        <YouTube
+                                                            key={currentLecture?.id || currentLecture?._id || currentLecture?.videoId}
+                                                            videoId={currentLecture.videoId}
+                                                            onReady={onPlayerReady}
+                                                            onStateChange={(event) => {
+                                                                // 1 = PLAYING, 2 = PAUSED, 3 = BUFFERING, 0 = ENDED
+                                                                if (event.data === 1) {
+                                                                    setHasPlaybackStarted(true);
+                                                                    setIsVideoBuffering(false);
+                                                                    setIsPlaying(true);
+                                                                } else if (event.data === 2) {
+                                                                    setIsPlaying(false);
+                                                                    setIsVideoBuffering(false);
+                                                                } else if (event.data === 3) {
+                                                                    if (!hasPlaybackStarted) {
+                                                                        setIsVideoBuffering(true);
+                                                                    }
+                                                                } else if (event.data === 0) {
+                                                                    setIsPlaying(false);
+                                                                    setIsVideoBuffering(false);
+                                                                }
+                                                            }}
+                                                            onPlay={() => {
+                                                                setHasPlaybackStarted(true);
+                                                                setIsVideoBuffering(false);
+                                                                setIsPlaying(true);
+                                                            }}
+                                                            onPause={() => {
+                                                                setIsPlaying(false);
+                                                            }}
+                                                            onError={(e) => {
+                                                                console.error("YouTube error:", e);
+                                                                setIsVideoBuffering(false);
+                                                            }}
+                                                            opts={{
+                                                                height: '100%',
+                                                                width: '100%',
+                                                                playerVars: {
+                                                                    autoplay: shouldAutoplay ? 1 : 0,
+                                                                    rel: 0,
+                                                                    start: initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] !== undefined
+                                                                        ? initialStartTimeRef.current[currentLecture?.id || currentLecture?._id]
+                                                                        : (initialStartTimeRef.current[currentLecture?.id || currentLecture?._id] = currentLecture?.lastWatchedTime || 0),
+                                                                },
+                                                            }}
+                                                            className="w-full h-full"
+                                                            iframeClassName="w-full h-full object-cover sm:pointer-events-auto"
+                                                        />
+
+                                                        {/* Thumbnail & Loading Overlay to eliminate black screen when new lecture is opened or loading at 0:00 */}
+                                                        {!hasPlaybackStarted && (
+                                                            <div
+                                                                className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer select-none overflow-hidden group/overlay"
+                                                                onClick={handlePlayOverlayClick}
+                                                            >
+                                                                <img
+                                                                    src={thumbnailSrc || (currentLecture?.thumbnail || (currentLecture?.videoId ? `https://img.youtube.com/vi/${currentLecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg)))}
+                                                                    alt={currentLecture?.title || "Thumbnail"}
+                                                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover/overlay:scale-105"
+                                                                    onError={() => {
+                                                                        if (currentLecture?.videoId && thumbnailSrc?.includes('maxresdefault.jpg')) {
+                                                                            setThumbnailSrc(`https://img.youtube.com/vi/${currentLecture.videoId}/hqdefault.jpg`);
+                                                                        } else {
+                                                                            setThumbnailSrc(courseData?.thumbnail || fallbackImg);
+                                                                        }
+                                                                    }}
+                                                                    onLoad={(e) => {
+                                                                        if (e.target.naturalWidth === 120 && currentLecture?.videoId && thumbnailSrc?.includes('maxresdefault.jpg')) {
+                                                                            setThumbnailSrc(`https://img.youtube.com/vi/${currentLecture.videoId}/hqdefault.jpg`);
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <div className="absolute inset-0 bg-black/40 transition-colors group-hover/overlay:bg-black/30" />
+
+                                                                <div className="relative z-10 flex flex-col items-center justify-center gap-3">
+                                                                    {isVideoBuffering ? (
+                                                                        <div className="flex flex-col items-center gap-3 bg-black/60 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                                                                            <Loader2 className="w-8 h-8 sm:w-10 sm:h-10 text-white animate-spin" />
+                                                                            <span className="text-white text-xs sm:text-sm font-semibold tracking-wide">
+                                                                                Loading Lecture...
+                                                                            </span>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600/90 hover:bg-blue-600 text-white rounded-full flex items-center justify-center shadow-2xl backdrop-blur-sm transition-all duration-300 hover:scale-110 active:scale-95 group-hover/overlay:scale-110">
+                                                                            <Play size={28} className="ml-1 sm:w-8 sm:h-8 fill-white text-white" />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 ) : (currentLecture?.audioUrl?.length > 0 || currentLecture?.videoUrl) && !currentLecture?.videoId ? (
                                                     <div className="w-full h-full flex flex-col items-center justify-center relative bg-[#0f172a] overflow-hidden group min-h-[300px] sm:min-h-0">
                                                         <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
@@ -2987,7 +3095,7 @@ const CourseView = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-900 leading-tight">Document Resource</h3>
-                                    <p className="text-xs text-gray-500 font-medium">Viewing lecture materials</p>
+                                    <p className="text-xs text-gray-500 font-medium">Resource</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
