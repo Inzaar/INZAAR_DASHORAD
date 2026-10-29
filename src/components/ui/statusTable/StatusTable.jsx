@@ -10,8 +10,25 @@ function StatusTable({ userCourses, loading }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    // Use the specially crafted recent activity array from backend
-    const allLectures = userCourses?.recentCourseActivity?.map((activity, index) => ({
+    // Use the specially crafted recent activity array from backend,
+    // deduplicating consecutive identical watches while preserving entries with a gap
+    const rawActivity = userCourses?.recentCourseActivity || [];
+    const dedupedActivity = [];
+    for (const activity of rawActivity) {
+        if (dedupedActivity.length === 0) {
+            dedupedActivity.push(activity);
+            continue;
+        }
+        const last = dedupedActivity[dedupedActivity.length - 1];
+        const sameCourse = String(activity.courseId || activity.course) === String(last.courseId || last.course);
+        const sameLecture = String(activity.lectureId || activity.lecture) === String(last.lectureId || last.lecture);
+        if (sameCourse && sameLecture) {
+            continue; // Skip consecutive duplicate, keep the latest one
+        }
+        dedupedActivity.push(activity);
+    }
+
+    const allLectures = dedupedActivity.map((activity, index) => ({
         id: index,
         course: activity.course,
         courseId: activity.courseId,
@@ -24,7 +41,7 @@ function StatusTable({ userCourses, loading }) {
         comments: activity.comments,
         moderatorName: activity.moderatorName,
         moderatorContact: activity.moderatorContact
-    })) || [];
+    }));
 
     const totalPages = Math.ceil(allLectures.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;

@@ -11,7 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -120,6 +120,7 @@ const CourseView = () => {
     const [activePdfUrl, setActivePdfUrl] = useState(null);
     const isPdfModalHistoryPushedRef = useRef(false);
     const [pdfLoading, setPdfLoading] = useState(true);
+    const [pdfError, setPdfError] = useState(false);
     const [downloadingPdf, setDownloadingPdf] = useState(false);
     const [isEditingQuiz, setIsEditingQuiz] = useState(false);
     const [isEditingAssignment, setIsEditingAssignment] = useState(false);
@@ -147,11 +148,72 @@ const CourseView = () => {
     useEffect(() => {
         if (activePdfUrl) {
             setPdfLoading(true);
+            setPdfError(false);
             setDownloadingPdf(false);
             if (!isPdfModalHistoryPushedRef.current) {
                 window.history.pushState({ ...(window.history.state || {}), pdfModalOpen: true }, '', window.location.href);
                 isPdfModalHistoryPushedRef.current = true;
             }
+
+            const cleanTargetUrl = formatResourceUrl(activePdfUrl);
+            if (cleanTargetUrl.includes('drive.google.com')) {
+                setPdfLoading(false);
+                return;
+            }
+
+            let isCancelled = false;
+            const controller = new AbortController();
+
+            const checkResource = async () => {
+                const isLocalUrl = cleanTargetUrl.includes('localhost') || cleanTargetUrl.includes('127.0.0.1');
+                const isRunningLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+                if (isLocalUrl && !isRunningLocal) {
+                    setPdfError(true);
+                    setPdfLoading(false);
+                    return;
+                }
+
+                try {
+                    let res = await fetch(cleanTargetUrl, { method: 'HEAD', signal: controller.signal });
+                    if (res.status === 405) {
+                        res = await fetch(cleanTargetUrl, { signal: controller.signal });
+                    }
+                    if (!isCancelled) {
+                        const contentType = res.headers.get('content-type') || '';
+                        if (!res.ok || contentType.includes('text/html')) {
+                            setPdfError(true);
+                        }
+                        setPdfLoading(false);
+                    }
+                } catch (err) {
+                    if (!isCancelled && err.name !== 'AbortError') {
+                        try {
+                            const fallbackRes = await fetch(cleanTargetUrl, { signal: controller.signal });
+                            if (!isCancelled) {
+                                const contentType = fallbackRes.headers.get('content-type') || '';
+                                if (!fallbackRes.ok || contentType.includes('text/html')) {
+                                    setPdfError(true);
+                                }
+                                setPdfLoading(false);
+                            }
+                        } catch (fallbackErr) {
+                            if (!isCancelled && fallbackErr.name !== 'AbortError') {
+                                setPdfError(true);
+                                setPdfLoading(false);
+                            }
+                        }
+                    }
+                }
+            };
+
+            checkResource();
+
+            return () => {
+                isCancelled = true;
+                controller.abort();
+            };
+        } else {
+            setPdfError(false);
         }
     }, [activePdfUrl]);
 
@@ -160,6 +222,7 @@ const CourseView = () => {
             if (isPdfModalHistoryPushedRef.current) {
                 isPdfModalHistoryPushedRef.current = false;
                 setActivePdfUrl(null);
+                setPdfError(false);
                 setDownloadingPdf(false);
             }
         };
@@ -3100,9 +3163,9 @@ const CourseView = () => {
                             </div>
                             <div className="flex items-center gap-3">
                                 <button
-                                    disabled={downloadingPdf}
+                                    disabled={downloadingPdf || pdfError}
                                     onClick={async () => {
-                                        if (!activePdfUrl || downloadingPdf) return;
+                                        if (!activePdfUrl || downloadingPdf || pdfError) return;
                                         const cleanTargetUrl = formatResourceUrl(activePdfUrl);
                                         if (cleanTargetUrl.includes('drive.google.com')) {
                                             const matchD = cleanTargetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -3157,6 +3220,7 @@ const CourseView = () => {
                                             window.history.back();
                                         }
                                         setActivePdfUrl(null);
+                                        setPdfError(false);
                                         setDownloadingPdf(false);
                                     }}
                                     className="p-2.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all"
@@ -3166,29 +3230,95 @@ const CourseView = () => {
                             </div>
                         </div>
                         <div className="flex-1 bg-gray-100 relative">
-                            {pdfLoading && (
+                            {pdfLoading && !pdfError && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10">
                                     <Loader2 className="w-10 h-10 animate-spin text-red-500 mb-4" />
                                     <p className="text-gray-500 font-medium">Loading document...</p>
                                 </div>
                             )}
-                            {isImageUrl(activePdfUrl) ? (
+                            {pdfError ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gray-50/90 overflow-auto">
+                                    <div className="w-20 h-20 rounded-3xl bg-red-50 border border-red-100 flex items-center justify-center text-red-500 shadow-sm mb-5 transition-transform duration-300 hover:scale-105">
+                                        <FileQuestion size={40} strokeWidth={1.8} className="text-red-500" />
+                                    </div>
+                                    <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                                        PDF Not Found
+                                    </h4>
+                                    <p className="text-sm sm:text-base text-gray-500 max-w-md leading-relaxed mb-6 font-medium">
+                                        The requested document was not found or could not be loaded. Please check back later or contact support.
+                                    </p>
+                                    {activePdfUrl && (
+                                        <div className="mb-6 px-4 py-2 bg-white rounded-xl border border-gray-200/80 shadow-xs flex items-center gap-2.5 max-w-md text-xs text-gray-600 font-mono">
+                                            <FileText size={15} className="text-gray-400 shrink-0" />
+                                            <span className="truncate">
+                                                {decodeURIComponent(formatResourceUrl(activePdfUrl).split('/').pop()?.split('?')[0] || 'document.pdf')}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setPdfError(false);
+                                                setPdfLoading(true);
+                                                const cleanTargetUrl = formatResourceUrl(activePdfUrl);
+                                                fetch(cleanTargetUrl)
+                                                    .then((res) => {
+                                                        const contentType = res.headers.get('content-type') || '';
+                                                        if (res.ok && !contentType.includes('text/html')) {
+                                                            setPdfError(false);
+                                                        } else {
+                                                            setPdfError(true);
+                                                        }
+                                                    })
+                                                    .catch(() => setPdfError(true))
+                                                    .finally(() => setPdfLoading(false));
+                                            }}
+                                            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 rounded-xl font-semibold text-sm shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            <RefreshCw size={15} />
+                                            Try Again
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (isPdfModalHistoryPushedRef.current) {
+                                                    isPdfModalHistoryPushedRef.current = false;
+                                                    window.history.back();
+                                                }
+                                                setActivePdfUrl(null);
+                                                setPdfError(false);
+                                            }}
+                                            className="flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold text-sm shadow-sm hover:shadow transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : isImageUrl(activePdfUrl) ? (
                                 <div className="w-full h-full flex items-center justify-center p-6 bg-gray-50 overflow-auto">
                                     <img
                                         src={formatResourceUrl(activePdfUrl)}
                                         alt="Document Resource"
                                         className="max-w-full max-h-full object-contain rounded-xl shadow-md border border-gray-200"
                                         onLoad={() => setPdfLoading(false)}
+                                        onError={() => {
+                                            setPdfError(true);
+                                            setPdfLoading(false);
+                                        }}
                                     />
                                 </div>
-                            ) : (
+                            ) : !pdfLoading ? (
                                 <iframe
                                     src={getPdfEmbedUrl(activePdfUrl)}
-                                    className={`w-full h-full border-none ${pdfLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                                    className="w-full h-full border-none transition-opacity duration-300 opacity-100"
                                     title="PDF Viewer"
-                                    onLoad={() => setPdfLoading(false)}
+                                    onError={() => {
+                                        setPdfError(true);
+                                        setPdfLoading(false);
+                                    }}
                                 />
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </div>
