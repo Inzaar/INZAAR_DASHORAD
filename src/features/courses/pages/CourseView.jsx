@@ -523,6 +523,16 @@ const CourseView = () => {
         const q = lecture.quizzes || [];
         const a = lecture.assignments || [];
 
+        const isAudioLecture = lecture.type === 'Audio' ||
+            lecture.mediaType?.toLowerCase() === 'audio' ||
+            (!lecture.videoId && Boolean(
+                (Array.isArray(lecture.audioUrl) && lecture.audioUrl.length > 0) ||
+                (typeof lecture.audioUrl === 'string' && lecture.audioUrl.trim() !== '') ||
+                !lecture.videoUrl ||
+                lecture.videoUrl.trim() === '' ||
+                lecture.videoUrl.includes('drive.google.com')
+            ));
+
         return (
             <React.Fragment key={lecture.id}>
                 {/* Main Lecture Card */}
@@ -549,52 +559,35 @@ const CourseView = () => {
                                                         ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
                                                     `}
                 >
-                    <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
-                        <div className={`relative w-full h-full overflow-hidden shrink-0`}>
-                            <img
-                                src={lecture.thumbnail || (lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg))}
-                                alt={lecture.title}
-                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
-                            <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                    {isAudioLecture ? (
+                        <div className="relative w-full h-[84px] rounded-lg overflow-hidden group flex flex-col bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF] transition-all">
+                            {/* Minimal White Shadow Overlay like Navbar */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
+
+                            {/* Content Container */}
+                            <div className="absolute top-0 left-0 p-3 pr-11 w-full h-full text-white flex flex-col justify-center z-20 pointer-events-none">
                                 <div className="flex justify-between items-start">
-                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-sm line-clamp-1 ${currentLecture?.id === lecture.id ? 'text-white font-extrabold' : 'text-white'}`}>
                                         {lecture.title}
                                     </h4>
                                 </div>
-                                <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                <div className="text-[10px] text-white/90 drop-shadow-sm mt-0.5 opacity-90">
                                     {t('lecture', 'Lecture')}:{displayNo}
                                 </div>
-                                <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                <div className="text-[10px] text-white/90 drop-shadow-sm opacity-90">
                                     {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
                                 </div>
                             </div>
-                            {lecture.isLocked ? (
+
+                            {lecture.isLocked && (
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
-                                    <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                    </div>
-                                </div>
-                            ) : lecture.type === 'Assignment' ? (
-                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                    <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                        <span className="text-white text-lg">📋</span>
-                                    </div>
-                                </div>
-                            ) : lecture.type === 'Quiz' ? (
-                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                    <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                        <GraduationCap className="text-white w-5 h-5" />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
-                                    <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                    <div className="bg-black/50 p-2.5 rounded-full backdrop-blur-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                                     </div>
                                 </div>
                             )}
+
+                            {/* Instructor Profile Picture in Top Corner */}
                             <div className="absolute top-2 right-2 z-20">
                                 <img
                                     src={instructorImg}
@@ -603,7 +596,63 @@ const CourseView = () => {
                                 />
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden group flex flex-col">
+                            <div className={`relative w-full h-full overflow-hidden shrink-0`}>
+                                <img
+                                    src={lecture.thumbnail || (lecture.videoId ? `https://img.youtube.com/vi/${lecture.videoId}/maxresdefault.jpg` : (courseData?.thumbnail || fallbackImg))}
+                                    alt={lecture.title}
+                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
+                                <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
+                                    <div className="flex justify-between items-start">
+                                        <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                            {lecture.title}
+                                        </h4>
+                                    </div>
+                                    <div className="text-[10px] text-gray-200 drop-shadow-md mt-0.5 opacity-90">
+                                        {t('lecture', 'Lecture')}:{displayNo}
+                                    </div>
+                                    <div className="text-[10px] text-gray-200 drop-shadow-md opacity-90">
+                                        {t('date', 'Date')}: {new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}
+                                    </div>
+                                </div>
+                                {lecture.isLocked ? (
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                        <div className="bg-black/50 p-3 rounded-full backdrop-blur-sm mt-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                        </div>
+                                    </div>
+                                ) : lecture.type === 'Assignment' ? (
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                        <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                            <span className="text-white text-lg">📋</span>
+                                        </div>
+                                    </div>
+                                ) : lecture.type === 'Quiz' ? (
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                        <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                            <GraduationCap className="text-white w-5 h-5" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                        <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="absolute top-2 right-2 z-20">
+                                    <img
+                                        src={instructorImg}
+                                        alt="Instructor"
+                                        className="w-7 h-7 rounded-full border-2 border-white shadow-md bg-white"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {currentLecture?.id === lecture.id && (
                         <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
                     )}
@@ -826,6 +875,7 @@ const CourseView = () => {
             pdfUrl: l.pdfUrl,
             status: l.status,
             type: l.type || (l.status === 'Quiz' ? 'Quiz' : 'Lecture'),
+            mediaType: l.mediaType,
             quizId: l.quizId || null,
             quizzes: l.quizzes || [],
             assignments: l.assignments || [],
