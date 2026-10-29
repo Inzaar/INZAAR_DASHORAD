@@ -19,6 +19,8 @@ const DashboardPage = () => {
     const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
     const [selectedLectureFilter, setSelectedLectureFilter] = useState("");
     const lectureDropdownRef = useRef(null);
+    const lecturesContainerRef = useRef(null);
+    const ongoingCardRef = useRef(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     // const userId = localStorage.getItem('userId');
@@ -117,7 +119,81 @@ const DashboardPage = () => {
             ? Math.min(100, Math.round((Math.min(selectedCourseData.completedLecturesCount || selectedCourseData.completedLectures || 0, selectedCourseData.totalLectures) / selectedCourseData.totalLectures) * 100))
             : 0);
 
-    const filteredLectures = selectedCourseData?.lectures || [];
+    const rawLectures = selectedCourseData?.lectures || [];
+
+    const processedLectures = React.useMemo(() => {
+        if (!rawLectures || rawLectures.length === 0) return [];
+        let previousCompleted = true;
+        return rawLectures.map((lecture, index) => {
+            const prog = typeof lecture.lectureProgress === 'string'
+                ? parseInt(lecture.lectureProgress) || 0
+                : (lecture.progress || 0);
+            const isCompleted = !!lecture.isCompleted || prog >= (selectedCourseData?.unlockCriteria || 100);
+
+            let isLocked = false;
+            if (index > 0) {
+                if (!previousCompleted && prog === 0 && !isCompleted) {
+                    isLocked = true;
+                }
+            }
+
+            previousCompleted = isCompleted;
+
+            return {
+                ...lecture,
+                isLocked,
+                isCompleted
+            };
+        });
+    }, [selectedCourseData]);
+
+    const ongoingIndex = React.useMemo(() => {
+        if (!processedLectures || processedLectures.length === 0) return 0;
+
+        // 1. First priority: any lecture partially in-progress
+        const inProgressIdx = processedLectures.findIndex(l => {
+            const prog = typeof l.lectureProgress === 'string'
+                ? parseInt(l.lectureProgress) || 0
+                : (l.progress || 0);
+            return !l.isCompleted && prog > 0;
+        });
+        if (inProgressIdx !== -1) return inProgressIdx;
+
+        // 2. Second priority: first unlocked lecture that is not completed
+        const firstIncompleteIdx = processedLectures.findIndex(l => !l.isCompleted && !l.isLocked);
+        if (firstIncompleteIdx !== -1) return firstIncompleteIdx;
+
+        // 3. Fallback: first uncompleted lecture
+        const anyIncompleteIdx = processedLectures.findIndex(l => !l.isCompleted);
+        if (anyIncompleteIdx !== -1) return anyIncompleteIdx;
+
+        return 0;
+    }, [processedLectures]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (ongoingCardRef.current && lecturesContainerRef.current) {
+                const isRtl = document.documentElement.dir === 'rtl';
+                if (isRtl) {
+                    ongoingCardRef.current.scrollIntoView({
+                        behavior: 'smooth',
+                        inline: 'start',
+                        block: 'nearest'
+                    });
+                } else {
+                    const container = lecturesContainerRef.current;
+                    const card = ongoingCardRef.current;
+                    container.scrollTo({
+                        left: card.offsetLeft,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }, 150);
+        return () => clearTimeout(timer);
+    }, [selectedLectureFilter, ongoingIndex]);
+
+    const filteredLectures = processedLectures;
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
@@ -260,21 +336,32 @@ const DashboardPage = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
+                                            <div ref={lecturesContainerRef} className="flex gap-4 overflow-x-auto pb-2 no-scrollbar relative" style={{ scrollbarWidth: 'none' }}>
                                                 {loading ? (
                                                     <div className="w-full h-[160px] flex items-center justify-center">
                                                         <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
                                                     </div>
                                                 ) : filteredLectures.length > 0 ? (
-                                                    filteredLectures.map((lecture) => (
-                                                        <LectureCard
-                                                            key={lecture._id}
-                                                            title={lecture.name}
-                                                            image={selectedCourseData?.thumbnail}
-                                                            lecture={String(lecture.lectureNo).padStart(2, '0')}
-                                                            className="shadow-sm"
-                                                            onClick={() => navigate(`/course-view?id=${selectedCourseData._id}&lectureId=${lecture._id}`)}
-                                                        />
+                                                    filteredLectures.map((lecture, index) => (
+                                                        <div
+                                                            key={lecture._id || index}
+                                                            ref={index === ongoingIndex ? ongoingCardRef : null}
+                                                            className="shrink-0"
+                                                        >
+                                                            <LectureCard
+                                                                title={lecture.name || lecture.title}
+                                                                image={selectedCourseData?.thumbnail}
+                                                                lecture={String(lecture.lectureNo).padStart(2, '0')}
+                                                                date={lecture.date}
+                                                                isLocked={lecture.isLocked}
+                                                                className="shadow-sm"
+                                                                onClick={() => {
+                                                                    if (!lecture.isLocked) {
+                                                                        navigate(`/course-view?id=${selectedCourseData._id}&lectureId=${lecture._id}`);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
                                                     ))
                                                 ) : (
                                                     <div className="w-full h-[160px] text-center py-8 text-gray-500 flex items-center justify-center">
