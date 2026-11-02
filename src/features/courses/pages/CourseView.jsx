@@ -491,6 +491,7 @@ const CourseView = () => {
     const initialStartTimeRef = useRef({});
     const activeLectureIdRef = useRef(null);
     const audioRef = useRef(null);
+    const resourceAudioRef = useRef(null);
 
     const location = useLocation();
     const isAdminView = location.pathname.startsWith('/admin');
@@ -933,12 +934,34 @@ const CourseView = () => {
 
     const showPendingFinalTasksNotice = !isAdminView && allVideoLecturesWatched && !isCourseCompleted;
 
+    // Helpers for mutual exclusivity between main player (audio/video) and resource audio
+    const pauseResourceAudio = () => {
+        if (resourceAudioRef.current) {
+            resourceAudioRef.current.pause();
+        }
+    };
+
+    const pauseMainPlayer = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+        if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
+            try {
+                playerRef.current.pauseVideo();
+            } catch (err) {
+                console.warn("Error pausing main video:", err);
+            }
+        }
+        setIsPlaying(false);
+    };
+
     // Player Handlers
     const onPlayerReady = (event) => {
         playerRef.current = event.target;
         setDuration(event.target.getDuration());
         setVolume(event.target.getVolume());
         if (shouldAutoplay) {
+            pauseResourceAudio();
             if (currentLecture?.lastWatchedTime > 0) {
                 event.target.seekTo(currentLecture.lastWatchedTime, true);
             }
@@ -948,6 +971,7 @@ const CourseView = () => {
     };
 
     const handlePlayOverlayClick = () => {
+        pauseResourceAudio();
         setIsVideoBuffering(true);
         if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
             try {
@@ -2081,6 +2105,7 @@ const CourseView = () => {
                                                                     setHasPlaybackStarted(true);
                                                                     setIsVideoBuffering(false);
                                                                     setIsPlaying(true);
+                                                                    pauseResourceAudio();
                                                                 } else if (event.data === 2) {
                                                                     setIsPlaying(false);
                                                                     setIsVideoBuffering(false);
@@ -2097,6 +2122,7 @@ const CourseView = () => {
                                                                 setHasPlaybackStarted(true);
                                                                 setIsVideoBuffering(false);
                                                                 setIsPlaying(true);
+                                                                pauseResourceAudio();
                                                             }}
                                                             onPause={() => {
                                                                 setIsPlaying(false);
@@ -2168,7 +2194,7 @@ const CourseView = () => {
                                                         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
 
                                                         <div className="relative z-10 w-full px-6 sm:px-12 flex flex-col items-center justify-center flex-1 py-12">
-                                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-[3px] border-white/20 overflow-hidden mb-8 shadow-2xl relative">
+                                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-none border-[3px] border-white/20 overflow-hidden mb-8 shadow-2xl relative">
                                                                 <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="w-full h-full object-cover" />
                                                             </div>
 
@@ -2233,7 +2259,10 @@ const CourseView = () => {
                                                                                         setAudioError(true);
                                                                                     }
                                                                                 }}
-                                                                                onPlay={() => setIsPlaying(true)}
+                                                                                onPlay={() => {
+                                                                                    setIsPlaying(true);
+                                                                                    pauseResourceAudio();
+                                                                                }}
                                                                                 onPause={() => setIsPlaying(false)}
                                                                                 onLoadedMetadata={(e) => {
                                                                                     const audioEl = e.target;
@@ -2436,7 +2465,11 @@ const CourseView = () => {
                                                                         {currentLecture.audioUrl.map((url, i) => (
                                                                             <button
                                                                                 key={i}
-                                                                                onClick={() => { setActiveAudioUrl(typeof url === 'object' ? (url.url || '') : (url || '')); setShowAudioMenu(false); }}
+                                                                                onClick={() => {
+                                                                                    pauseMainPlayer();
+                                                                                    setActiveAudioUrl(typeof url === 'object' ? (url.url || '') : (url || ''));
+                                                                                    setShowAudioMenu(false);
+                                                                                }}
                                                                                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left"
                                                                             >
                                                                                 <Volume2 size={14} className="text-blue-400" />
@@ -3430,13 +3463,13 @@ const CourseView = () => {
                             ) : (
                                 <div className="w-full">
                                     <audio
+                                        ref={resourceAudioRef}
+                                        key={activeAudioUrl}
                                         src={getAudioSrc(activeAudioUrl)}
                                         controls
                                         autoPlay
                                         onPlay={() => {
-                                            if (playerRef.current) {
-                                                playerRef.current.pauseVideo();
-                                            }
+                                            pauseMainPlayer();
                                         }}
                                         className="w-full h-10 custom-audio-player"
                                     />
