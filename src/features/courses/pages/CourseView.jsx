@@ -7,11 +7,11 @@ import Sidebar from "@/components/layouts/SideBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import GradiantButton from "@/components/ui/buttons/GradiantButton";
 import YouTube from "react-youtube";
-import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate } from "@/api/course";
+import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLectureProgress, saveCertificate, uploadVideo, uploadAudio } from "@/api/course";
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, CheckCircle, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -458,6 +458,7 @@ const CourseView = () => {
     const [isEditLectureModalOpen, setIsEditLectureModalOpen] = useState(false);
     const [isSavingLecture, setIsSavingLecture] = useState(false);
     const [loadingLecture, setLoadingLecture] = useState(false);
+    const [isLectureMediaUploading, setIsLectureMediaUploading] = useState(false);
     const [isAudioUploading, setIsAudioUploading] = useState(false);
     const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
@@ -484,6 +485,7 @@ const CourseView = () => {
     const completedIdsRef = useRef(new Set()); // For unlocking NEXT lecture
     const fullyCompletedIdsRef = useRef(new Set()); // For unlocking CURRENT lecture's quizzes/assignments/certificate
     const adminMenuRef = useRef(null);
+    const lectureMediaInputRef = useRef(null);
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
     const videoSectionRef = useRef(null);
@@ -1593,7 +1595,7 @@ const CourseView = () => {
             id: id,
             title: currentLecture.title || '',
             type: currentLecture.type || 'Lecture',
-            videoUrl: currentLecture.videoUrl || '',
+            videoUrl: currentLecture.videoUrl || (currentLecture.type === 'Audio' && currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0]?.url) : '') || '',
             audioUrl: Array.isArray(currentLecture.audioUrl) ? currentLecture.audioUrl : (currentLecture.audioUrl ? [currentLecture.audioUrl] : []),
             pdfUrl: Array.isArray(currentLecture.pdfUrl) ? currentLecture.pdfUrl : (currentLecture.pdfUrl ? [currentLecture.pdfUrl] : []),
         });
@@ -1602,6 +1604,7 @@ const CourseView = () => {
 
     const closeEditModal = () => {
         setIsEditLectureModalOpen(false);
+        setIsLectureMediaUploading(false);
         setIsAudioUploading(false);
         setIsPdfUploading(false);
     };
@@ -2218,6 +2221,47 @@ const CourseView = () => {
                                                             </div>
                                                         )}
                                                     </>
+                                                ) : currentLecture?.type === 'Lecture' && currentLecture?.videoUrl && !currentLecture?.videoId ? (
+                                                    (() => {
+                                                        const isDrive = Boolean(currentLecture.videoUrl && (currentLecture.videoUrl.includes('drive.google.com') || currentLecture.videoUrl.includes('drive.usercontent.google.com')));
+                                                        const matchD = currentLecture.videoUrl ? currentLecture.videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
+                                                        const matchId = currentLecture.videoUrl ? currentLecture.videoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) : null;
+                                                        const driveFileId = matchD ? matchD[1] : (matchId ? matchId[1] : null);
+
+                                                        if (isDrive && driveFileId) {
+                                                            return (
+                                                                <div className="w-full h-full bg-black flex items-center justify-center">
+                                                                    <iframe
+                                                                        src={`https://drive.google.com/file/d/${driveFileId}/preview`}
+                                                                        className="w-full h-full border-none"
+                                                                        title="Lecture Video"
+                                                                        allow="autoplay"
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <div className="w-full h-full bg-black flex items-center justify-center relative">
+                                                                <video
+                                                                    key={currentLecture?.id || currentLecture?._id || currentLecture?.videoUrl}
+                                                                    src={currentLecture.videoUrl}
+                                                                    controls
+                                                                    autoPlay={shouldAutoplay}
+                                                                    className="w-full h-full object-contain"
+                                                                    poster={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg}
+                                                                    onPlay={() => {
+                                                                        setIsPlaying(true);
+                                                                        pauseResourceAudio();
+                                                                    }}
+                                                                    onPause={() => setIsPlaying(false)}
+                                                                    onEnded={() => {
+                                                                        handleMarkComplete();
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })()
                                                 ) : (currentLecture?.audioUrl?.length > 0 || currentLecture?.videoUrl) && !currentLecture?.videoId ? (
                                                     <div className="w-full h-full flex flex-col items-center justify-center relative bg-[#0f172a] overflow-hidden group min-h-[300px] sm:min-h-0">
                                                         <img src={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
@@ -2230,7 +2274,7 @@ const CourseView = () => {
 
                                                             <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl border border-white/10 shadow-2xl">
                                                                 {(() => {
-                                                                    const url = currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : currentLecture.videoUrl;
+                                                                    const url = currentLecture.videoUrl || (currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : '');
                                                                     const isDrive = Boolean(url && (url.includes('drive.google.com') || url.includes('drive.usercontent.google.com')));
                                                                     const matchD = url ? url.match(/\/d\/([a-zA-Z0-9_-]+)/) : null;
                                                                     const matchId = url ? url.match(/[?&]id=([a-zA-Z0-9_-]+)/) : null;
@@ -2988,10 +3032,88 @@ const CourseView = () => {
                                 </div>
                             </div>
 
+                            {/* Main Lecture Media Upload (Video or Audio) */}
+                            <div className="space-y-2">
+                                <label className="text-[13px] font-bold text-gray-700 block uppercase tracking-wider">
+                                    {editLectureData.type === 'Audio' ? 'Upload Audio Lecture' : 'Upload Video Lecture'}
+                                </label>
+                                <div
+                                    onClick={() => {
+                                        if (!isLectureMediaUploading && !loadingLecture) {
+                                            lectureMediaInputRef.current?.click();
+                                        }
+                                    }}
+                                    className={`w-full py-5 px-4 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
+                                        isLectureMediaUploading
+                                            ? 'border-blue-400/50 bg-blue-50/20 cursor-wait'
+                                            : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
+                                    }`}
+                                >
+                                    {isLectureMediaUploading ? (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Loader2 size={24} className="text-blue-600 animate-spin" />
+                                            <span className="text-xs font-semibold text-blue-600">
+                                                {editLectureData.type === 'Audio' ? 'Uploading audio file...' : 'Uploading video file...'}
+                                            </span>
+                                        </div>
+                                    ) : editLectureData.videoUrl ? (
+                                        <div className="flex flex-col items-center gap-1.5 text-center px-4 w-full">
+                                            <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                                                <CheckCircle size={20} />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 truncate max-w-xs sm:max-w-md">
+                                                {editLectureData.videoUrl.split('/').pop() || (editLectureData.type === 'Audio' ? 'Audio file attached' : 'Video file attached')}
+                                            </span>
+                                            <span className="text-[11px] text-blue-600 font-medium hover:underline">
+                                                Click to browse and change file
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-1 text-center">
+                                            <Upload size={24} className="text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                            <span className="text-xs font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                                                {editLectureData.type === 'Audio' ? 'Add Audio File' : 'Add Video File'}
+                                            </span>
+                                            <span className="text-[11px] text-gray-400 font-medium">
+                                                {editLectureData.type === 'Audio' ? 'MP3, WAV, AAC, M4A' : 'MP4, MOV, WEBM'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <input
+                                        ref={lectureMediaInputRef}
+                                        type="file"
+                                        accept={editLectureData.type === 'Audio' ? "audio/*" : "video/*"}
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+                                            e.target.value = '';
+                                            setIsLectureMediaUploading(true);
+                                            try {
+                                                const uploadFn = editLectureData.type === 'Audio' ? uploadAudio : uploadVideo;
+                                                const res = await uploadFn(file);
+                                                if (res?.url) {
+                                                    setEditLectureData(prev => ({
+                                                        ...prev,
+                                                        videoUrl: res.url
+                                                    }));
+                                                    toast.success(`${editLectureData.type === 'Audio' ? 'Audio' : 'Video'} uploaded successfully!`);
+                                                }
+                                            } catch (err) {
+                                                console.error("Lecture upload failed:", err);
+                                                toast.error(`Failed to upload ${editLectureData.type === 'Audio' ? 'audio' : 'video'}.`);
+                                            } finally {
+                                                setIsLectureMediaUploading(false);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
                             {/* URL */}
                             <div>
                                 <label className="text-[13px] font-bold text-gray-700 block mb-2 uppercase tracking-wider">
-                                    {editLectureData.type === 'Audio' ? 'Audio URL' : 'Video URL'} <span className="text-gray-400 font-normal lowercase">(youtube/drive)</span>
+                                    Or {editLectureData.type === 'Audio' ? 'Audio URL' : 'Video URL'} <span className="text-gray-400 font-normal lowercase">(youtube/drive)</span>
                                 </label>
                                 <input
                                     type="text"
@@ -3231,13 +3353,18 @@ const CourseView = () => {
                             </button>
                             <GradiantButton
                                 onClick={handleSaveLecture}
-                                disabled={isSavingLecture}
+                                disabled={isSavingLecture || isLectureMediaUploading || isAudioUploading || isPdfUploading}
                                 className="flex-[1.5] sm:flex-[2] py-2.5 sm:py-3 px-4 sm:px-6 font-bold rounded-xl shadow-lg shadow-blue-500/20 text-sm sm:text-base whitespace-nowrap"
                             >
                                 {isSavingLecture ? (
                                     <div className="flex items-center justify-center gap-2">
                                         <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                                         <span>Saving...</span>
+                                    </div>
+                                ) : isLectureMediaUploading || isAudioUploading || isPdfUploading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                                        <span>Uploading...</span>
                                     </div>
                                 ) : "Save Changes"}
                             </GradiantButton>
