@@ -65,8 +65,9 @@ const LoginPage = () => {
 
         authLogin({
           id: userData._id,
-          name: `${userData.firstname} ${userData.lastname}`,
+          name: `${userData.firstname || ''} ${userData.lastname || ''}`.trim(),
           firstname: userData.firstname,
+          lastname: userData.lastname || '',
           email: userData.email,
           role: userData.role || 'student',
           assignedFeatures: userData.assignedFeatures || [],

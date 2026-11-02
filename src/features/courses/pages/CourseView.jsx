@@ -551,7 +551,7 @@ const CourseView = () => {
                     className={`
                                                         relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
                                                         w-[260px] sm:w-[300px] lg:w-full flex flex-col
-                                                        ${currentLecture?.id === lecture.id
+                                                        ${(currentLecture?.id === lecture.id || currentLecture?._id === lecture.id || currentLecture?.id === lecture._id || currentLecture?._id === lecture._id)
                             ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                             : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
                         }
@@ -772,7 +772,7 @@ const CourseView = () => {
                 if (data.certificateUrl) {
                     setCertData({
                         certUrl: data.certificateUrl,
-                        studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
+                        studentName: (user?.firstname && user?.lastname) ? `${user.firstname} ${user.lastname}`.trim() : (user?.name?.trim() || `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student'),
                         courseName: data.title || 'Course',
                         templateUrl: data.certificateTemplate || null,
                         studentId: data.studentId || user?.studentId || 'N/A',
@@ -806,8 +806,16 @@ const CourseView = () => {
                     return acc;
                 }, []);
                 const videoLecs = normalizedLecs.filter(l => l.type !== 'Quiz');
-                const targetLec = targetLectureId ? normalizedLecs.find(l => l.id === targetLectureId) : null;
-                const rawStart = targetLec || videoLecs[0] || data.ongoingLecture || normalizedLecs[0] || null;
+
+                const storageKey = `active_lecture_${courseId}${enrollmentId ? `_${enrollmentId}` : ''}`;
+                const savedLectureId = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+
+                const targetLec = targetLectureId ? normalizedLecs.find(l => String(l.id) === String(targetLectureId) || String(l._id) === String(targetLectureId)) : null;
+                const savedLec = savedLectureId ? normalizedLecs.find(l => String(l.id) === String(savedLectureId) || String(l._id) === String(savedLectureId)) : null;
+                const ongoingLecId = data.ongoingLecture ? (data.ongoingLecture.id || data.ongoingLecture._id) : null;
+                const ongoingLec = ongoingLecId ? (normalizedLecs.find(l => String(l.id) === String(ongoingLecId) || String(l._id) === String(ongoingLecId)) || data.ongoingLecture) : null;
+
+                const rawStart = targetLec || savedLec || ongoingLec || videoLecs[0] || normalizedLecs[0] || null;
 
                 if (rawStart) {
                     setCurrentLecture({
@@ -830,6 +838,30 @@ const CourseView = () => {
         };
         fetchCourse(courseId);
     }, [courseId, enrollmentId, location.search, location.key]);
+
+    // Persist current active lecture to URL query and localStorage so it survives page refresh
+    useEffect(() => {
+        const lectureId = currentLecture?.id || currentLecture?._id;
+        if (lectureId && courseId) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('lectureId') !== String(lectureId)) {
+                    params.set('lectureId', String(lectureId));
+                    const newUrl = `${window.location.pathname}?${params.toString()}`;
+                    window.history.replaceState(null, '', newUrl);
+                }
+            } catch (err) {
+                console.warn("Could not sync lectureId to URL:", err);
+            }
+
+            try {
+                const storageKey = `active_lecture_${courseId}${enrollmentId ? `_${enrollmentId}` : ''}`;
+                localStorage.setItem(storageKey, String(lectureId));
+            } catch (err) {
+                console.warn("Could not sync lectureId to localStorage:", err);
+            }
+        }
+    }, [currentLecture?.id, currentLecture?._id, courseId, enrollmentId]);
 
     useEffect(() => {
         const fetchAllNotes = async () => {
@@ -1422,7 +1454,7 @@ const CourseView = () => {
                                             d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-') : 'N/A';
 
                                         const newCertData = {
-                                            studentName: `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student',
+                                            studentName: (user?.firstname && user?.lastname) ? `${user.firstname} ${user.lastname}`.trim() : (user?.name?.trim() || `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student'),
                                             courseName: data.certificate?.courseTitle || courseData?.title || 'Course',
                                             completedAt: data.certificate?.completedAt,
                                             templateUrl: data.certificate?.certificateTemplate || courseData?.certificateFile || courseData?.certificateTemplate || null,
@@ -1616,7 +1648,7 @@ const CourseView = () => {
         if (generatingCert) return;
         setGeneratingCert(true);
         try {
-            const studentName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student';
+            const studentName = (user?.firstname && user?.lastname) ? `${user.firstname} ${user.lastname}`.trim() : (user?.name?.trim() || `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student');
             const activeEnrollmentId = enrollmentId || courseData?.enrollmentId;
             const newCertData = {
                 studentName,
@@ -1954,12 +1986,6 @@ const CourseView = () => {
                                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 font-medium mt-1">
                                                     {currentLecture?.lectureNo !== undefined && currentLecture?.lectureNo !== null && (
                                                         <span>Lecture: {String(currentLecture.lectureNo).startsWith('#') ? currentLecture.lectureNo.replace(/^#+/, '#') : `#${String(currentLecture.lectureNo).padStart(2, '0')}`}</span>
-                                                    )}
-                                                    {currentLecture?.date && (
-                                                        <>
-                                                            <span className="text-gray-300">•</span>
-                                                            <span>Date: {currentLecture.date}</span>
-                                                        </>
                                                     )}
                                                 </div>
                                             </div>

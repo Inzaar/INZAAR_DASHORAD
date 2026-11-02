@@ -85,7 +85,9 @@ const StudentCertificates = ({ profileData }) => {
         setGeneratingId(enrollment.enrollmentId);
 
         try {
-            const studentName = `${profileData?.user?.firstname || ''} ${profileData?.user?.lastname || ''}`.trim() || 'Student';
+            const studentName = (profileData?.user?.firstname && profileData?.user?.lastname)
+                ? `${profileData.user.firstname} ${profileData.user.lastname}`.trim()
+                : (profileData?.user?.name?.trim() || `${profileData?.user?.firstname || ''} ${profileData?.user?.lastname || ''}`.trim() || 'Student');
 
             const template = enrollment.certificateTemplate;
             if (template) {
