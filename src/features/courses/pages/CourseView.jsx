@@ -2190,12 +2190,12 @@ const CourseView = () => {
                                                     </>
                                                 ) : (currentLecture?.audioUrl?.length > 0 || currentLecture?.videoUrl) && !currentLecture?.videoId ? (
                                                     <div className="w-full h-full flex flex-col items-center justify-center relative bg-[#0f172a] overflow-hidden group min-h-[300px] sm:min-h-0">
-                                                        <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
+                                                        <img src={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
 
-                                                        <div className="relative z-10 w-full px-6 sm:px-12 flex flex-col items-center justify-center flex-1 py-12">
-                                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-none border-[3px] border-white/20 overflow-hidden mb-8 shadow-2xl relative">
-                                                                <img src={courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="w-full h-full object-cover" />
+                                                        <div className="relative z-10 w-full px-6 sm:px-12 flex flex-col items-center justify-center flex-1 py-6 sm:py-8">
+                                                            <div className="w-56 sm:w-72 md:w-80 aspect-video rounded-xl border-2 border-white/20 overflow-hidden mb-6 shadow-2xl relative shrink-0">
+                                                                <img src={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="w-full h-full object-cover" />
                                                             </div>
 
                                                             <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl border border-white/10 shadow-2xl">
@@ -2348,15 +2348,17 @@ const CourseView = () => {
                                                                             >
                                                                                 Your browser does not support the audio element.
                                                                             </audio>
-                                                                            <button
-                                                                                onClick={handleMarkComplete}
-                                                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                                                            >
-                                                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                                </svg>
-                                                                                Mark Audio as Complete
-                                                                            </button>
+                                                                            {isDrive && (
+                                                                                <button
+                                                                                    onClick={handleMarkComplete}
+                                                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                                                                >
+                                                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                                    </svg>
+                                                                                    Mark Audio as Complete
+                                                                                </button>
+                                                                            )}
                                                                         </div>
                                                                     );
                                                                 })()}
