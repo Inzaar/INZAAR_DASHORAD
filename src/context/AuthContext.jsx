@@ -41,8 +41,9 @@ export const AuthProvider = ({ children }) => {
                 const profile = res.data.data.user;
                 setUser({
                     id: profile._id,
-                    name: `${profile.firstname} ${profile.lastname || ''}`.trim(),
+                    name: `${profile.firstname || ''} ${profile.lastname || ''}`.trim(),
                     firstname: profile.firstname,
+                    lastname: profile.lastname || '',
                     email: profile.email,
                     role: profile.role || 'student',
                     profileImageUrl: profile.profileImageUrl || null,

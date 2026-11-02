@@ -58,6 +58,10 @@ const Certificates = () => {
     }, []);
 
     const downloadAsPDF = async (imgUrl, courseName, item = null) => {
+        if (item) {
+            await handleGenerateCertificate(item);
+            return;
+        }
         try {
             const { jsPDF } = await import('jspdf');
             const img = new Image();
@@ -117,7 +121,9 @@ const Certificates = () => {
         setGeneratingId(enrollment.enrollmentId);
 
         try {
-            const studentName = `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student';
+            const studentName = (user?.firstname && user?.lastname)
+                ? `${user.firstname} ${user.lastname}`.trim()
+                : (user?.name?.trim() || `${user?.firstname || ''} ${user?.lastname || ''}`.trim() || 'Student');
             
             const template = enrollment.certificateTemplate;
             if (template) {
