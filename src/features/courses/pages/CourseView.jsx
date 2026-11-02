@@ -1267,16 +1267,20 @@ const CourseView = () => {
                 let isValidPlayer = true;
                 if (playerRef.current.getVideoData) {
                     const videoData = playerRef.current.getVideoData();
-                    const expectedId = currentLecture?.videoId || (currentLecture?.videoUrl ? extractYouTubeId(currentLecture.videoUrl) : null);
-                    if (expectedId) {
-                        // For video lectures, player video_id must match expected YouTube ID
-                        if (videoData && videoData.video_id && videoData.video_id !== expectedId) {
-                            isValidPlayer = false;
-                        }
+                    if (videoData && videoData.video_id === 'audio-lecture') {
+                        isValidPlayer = true;
                     } else {
-                        // For audio lectures, player MUST be an audio-lecture player, not a lingering YouTube video player
-                        if (videoData && videoData.video_id !== 'audio-lecture') {
-                            isValidPlayer = false;
+                        const expectedId = currentLecture?.videoId || (currentLecture?.videoUrl ? extractYouTubeId(currentLecture.videoUrl) : null);
+                        if (expectedId) {
+                            // For video lectures, player video_id must match expected YouTube ID
+                            if (videoData && videoData.video_id && videoData.video_id !== expectedId) {
+                                isValidPlayer = false;
+                            }
+                        } else {
+                            // For audio lectures, player MUST be an audio-lecture player, not a lingering YouTube video player
+                            if (videoData && videoData.video_id !== 'audio-lecture') {
+                                isValidPlayer = false;
+                            }
                         }
                     }
                 }
@@ -1754,7 +1758,7 @@ const CourseView = () => {
                 </div>
             )}
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
-                <Navbar onMenuClick={toggleSidebar} hideMenu={hideSidebarAndCards} title={courseData?.title || "Course View"} />
+                <Navbar onMenuClick={toggleSidebar} hideMenu={hideSidebarAndCards} />
                 <div className={`flex flex-col ${!hideSidebarAndCards ? 'lg:flex-row' : ''} px-4 gap-4 flex-1 overflow-hidden relative pb-4`}>
 
                     {!hideSidebarAndCards && (
@@ -2279,13 +2283,25 @@ const CourseView = () => {
                                                                                 autoPlay={shouldAutoplay}
                                                                                 className="w-full h-12 outline-none"
                                                                                 src={getAudioSrc(url)}
-                                                                                controlsList="nodownload"
-                                                                                onError={() => {
+                                                                                                                                                         onError={() => {
                                                                                     if (isDrive) {
                                                                                         setAudioError(true);
                                                                                     }
                                                                                 }}
-                                                                                onPlay={() => {
+                                                                                onPlay={(e) => {
+                                                                                    const audioEl = e.target;
+                                                                                    playerRef.current = {
+                                                                                        getCurrentTime: () => audioEl.currentTime || 0,
+                                                                                        getDuration: () => audioEl.duration || 0,
+                                                                                        seekTo: (time) => { audioEl.currentTime = time; },
+                                                                                        mute: () => { audioEl.muted = true; },
+                                                                                        unMute: () => { audioEl.muted = false; },
+                                                                                        setVolume: (vol) => { audioEl.volume = vol / 100; },
+                                                                                        playVideo: () => { audioEl.play(); },
+                                                                                        pauseVideo: () => { audioEl.pause(); },
+                                                                                        isEnded: () => audioEl.ended || false,
+                                                                                        getVideoData: () => ({ video_id: 'audio-lecture' })
+                                                                                    };
                                                                                     setIsPlaying(true);
                                                                                     pauseResourceAudio();
                                                                                 }}
@@ -2293,15 +2309,15 @@ const CourseView = () => {
                                                                                 onLoadedMetadata={(e) => {
                                                                                     const audioEl = e.target;
                                                                                     playerRef.current = {
-                                                                                        getCurrentTime: () => audioEl.currentTime,
-                                                                                        getDuration: () => audioEl.duration,
+                                                                                        getCurrentTime: () => audioEl.currentTime || 0,
+                                                                                        getDuration: () => audioEl.duration || 0,
                                                                                         seekTo: (time) => { audioEl.currentTime = time; },
                                                                                         mute: () => { audioEl.muted = true; },
                                                                                         unMute: () => { audioEl.muted = false; },
                                                                                         setVolume: (vol) => { audioEl.volume = vol / 100; },
                                                                                         playVideo: () => { audioEl.play(); },
                                                                                         pauseVideo: () => { audioEl.pause(); },
-                                                                                        isEnded: () => audioEl.ended,
+                                                                                        isEnded: () => audioEl.ended || false,
                                                                                         getVideoData: () => ({ video_id: 'audio-lecture' })
                                                                                     };
                                                                                     if (currentLecture?.lastWatchedTime > 0) {
@@ -2310,6 +2326,20 @@ const CourseView = () => {
                                                                                 }}
                                                                                 onTimeUpdate={(e) => {
                                                                                     const audioEl = e.target;
+                                                                                    if (!playerRef.current) {
+                                                                                        playerRef.current = {
+                                                                                            getCurrentTime: () => audioEl.currentTime || 0,
+                                                                                            getDuration: () => audioEl.duration || 0,
+                                                                                            seekTo: (time) => { audioEl.currentTime = time; },
+                                                                                            mute: () => { audioEl.muted = true; },
+                                                                                            unMute: () => { audioEl.muted = false; },
+                                                                                            setVolume: (vol) => { audioEl.volume = vol / 100; },
+                                                                                            playVideo: () => { audioEl.play(); },
+                                                                                            pauseVideo: () => { audioEl.pause(); },
+                                                                                            isEnded: () => audioEl.ended || false,
+                                                                                            getVideoData: () => ({ video_id: 'audio-lecture' })
+                                                                                        };
+                                                                                    }
                                                                                     const cur = audioEl.currentTime;
                                                                                     const dur = audioEl.duration;
                                                                                     setCurrentTime(cur);
@@ -2322,49 +2352,6 @@ const CourseView = () => {
                                                                                             const newMax = Math.max(prevMax, Math.round(percent));
                                                                                             maxWatchedMapRef.current[lectureId] = newMax;
                                                                                             setProgress(newMax);
-
-                                                                                            const now = Date.now();
-                                                                                            const cid = courseId || courseData?.courseId || courseData?._id || courseData?.id;
-                                                                                            if (cid && !isAdminView && (now - lastReportedRef.current >= 2000 || percent >= 95)) {
-                                                                                                lastReportedRef.current = now;
-                                                                                                const finalPercent = percent >= 95 ? 100 : newMax;
-                                                                                                const diff = cur - prevPlaybackTimeRef.current;
-                                                                                                let timeSpentDelta = 0;
-                                                                                                if (diff > 0 && diff <= 4) {
-                                                                                                    timeSpentDelta = Math.round(diff);
-                                                                                                }
-                                                                                                prevPlaybackTimeRef.current = cur;
-
-                                                                                                updateLectureProgress(cid, {
-                                                                                                    lectureId,
-                                                                                                    watchedPercentage: finalPercent,
-                                                                                                    lastWatchedTime: Math.floor(cur),
-                                                                                                    timeSpentDelta,
-                                                                                                    enrollmentId
-                                                                                                }).then(() => {
-                                                                                                    if (finalPercent >= 95) {
-                                                                                                        setCourseData(prev => {
-                                                                                                            if (!prev) return prev;
-                                                                                                            const newLectures = (prev.lecturePlaylist || prev.lectures || []).map(l => {
-                                                                                                                if ((l.id || l._id) === lectureId) {
-                                                                                                                    const unQuizzes = (l.quizzes || []).map(q => ({ ...q, isLocked: false }));
-                                                                                                                    const unAssignments = (l.assignments || []).map(a => ({ ...a, isLocked: false }));
-                                                                                                                    return { ...l, watchedPercentage: 100, progress: 100, isCompleted: true, quizzes: unQuizzes, assignments: unAssignments };
-                                                                                                                }
-                                                                                                                return l;
-                                                                                                            });
-                                                                                                            const idx = newLectures.findIndex(l => (l.id === lectureId || l._id === lectureId));
-                                                                                                            const unlockedPlaylist = newLectures.map((l, i) => {
-                                                                                                                if (i === idx + 1 && l.isLocked) {
-                                                                                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
-                                                                                                                }
-                                                                                                                return l;
-                                                                                                            });
-                                                                                                            return { ...prev, lecturePlaylist: unlockedPlaylist, lectures: unlockedPlaylist };
-                                                                                                        });
-                                                                                                    }
-                                                                                                }).catch(console.warn);
-                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }}
