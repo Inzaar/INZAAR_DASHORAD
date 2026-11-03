@@ -961,8 +961,11 @@ const CourseView = () => {
     const isCourseCompleted = Boolean(
         courseData?.isCompleted ||
         (courseData?.progress !== undefined && Number(courseData.progress) >= 100) ||
-        Boolean(certData?.certUrl)
+        Boolean(certData?.certUrl || courseData?.certificateUrl)
     );
+
+    const allLecturesCompleted = Boolean(allVideoLecturesWatched || isCourseCompleted);
+    const certificateUrl = certData?.certUrl || courseData?.certificateUrl;
 
     const showPendingFinalTasksNotice = !isAdminView && allVideoLecturesWatched && !isCourseCompleted;
 
@@ -1690,6 +1693,71 @@ const CourseView = () => {
         }
     };
 
+    const handleDownloadCertificate = async () => {
+        const certUrl = certData?.certUrl || courseData?.certificateUrl;
+        if (!certUrl) return;
+        try {
+            let blob;
+            try {
+                const res = await fetch(certUrl);
+                if (res.ok) {
+                    blob = await res.blob();
+                }
+            } catch (fetchErr) {
+                console.warn('Direct fetch failed, falling back to direct load:', fetchErr);
+            }
+
+            const targetSrc = blob ? URL.createObjectURL(blob) : certUrl;
+            const { jsPDF } = await import('jspdf');
+            const img = new Image();
+            if (!blob) {
+                img.crossOrigin = "Anonymous";
+            }
+            img.onload = () => {
+                try {
+                    const doc = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'px',
+                        format: [1122, 794]
+                    });
+                    doc.addImage(img, 'PNG', 0, 0, 1122, 794);
+                    doc.save(`Certificate_${(courseData?.title || certData?.courseName || 'Course').replace(/\s+/g, '_')}.pdf`);
+                    if (blob) URL.revokeObjectURL(targetSrc);
+                } catch {
+                    const link = document.createElement('a');
+                    link.href = targetSrc;
+                    link.download = `Certificate_${(courseData?.title || certData?.courseName || 'Course').replace(/\s+/g, '_')}.png`;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            };
+            img.onerror = () => {
+                const link = document.createElement('a');
+                link.href = targetSrc;
+                link.download = `Certificate_${(courseData?.title || certData?.courseName || 'Course').replace(/\s+/g, '_')}.png`;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            img.src = targetSrc;
+        } catch (e) {
+            console.error('Download certificate failed:', e);
+            const link = document.createElement('a');
+            link.href = certUrl;
+            link.download = `Certificate_${(courseData?.title || certData?.courseName || 'Course').replace(/\s+/g, '_')}.png`;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
     if (loading) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
@@ -1731,19 +1799,17 @@ const CourseView = () => {
                                 <Loader className="w-4 h-4 animate-spin" />
                                 <span className="text-sm">Generating your certificate...</span>
                             </div>
-                        ) : certData?.certUrl ? (
-                            <a
-                                href={certData.certUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3"
+                        ) : certificateUrl ? (
+                            <button
+                                onClick={handleDownloadCertificate}
+                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3 cursor-pointer"
                             >
                                 🎓 View &amp; Download Certificate
-                            </a>
+                            </button>
                         ) : (
                             <button
-                                onClick={handleGenerateCertificate}
-                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-emerald-500 to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3 shadow-md shadow-emerald-500/20"
+                                onClick={() => navigate('/certificates')}
+                                className="inline-block w-full py-3 px-6 bg-gradient-to-r from-emerald-500 to-[#3758EE] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity mb-3 shadow-md shadow-emerald-500/20 cursor-pointer"
                             >
                                 🎓 Generate Certificate
                             </button>
@@ -1878,20 +1944,20 @@ const CourseView = () => {
                                             <FaWhatsapp size={20} />
                                         </button>
 
-                                        {certData?.certUrl ? (
+                                        {certificateUrl ? (
                                             <>
                                                 <GradiantButton
-                                                    onClick={() => window.open(certData.certUrl, '_blank')}
+                                                    onClick={handleDownloadCertificate}
                                                     title="Download Certificate"
-                                                    className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base flex items-center gap-2"
+                                                    className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base flex items-center gap-2 cursor-pointer"
                                                 >
                                                     <Download className="w-4 h-4" />
                                                     Download Certificate
                                                 </GradiantButton>
                                                 <GradiantButton
-                                                    onClick={() => window.open(certData.certUrl, '_blank')}
+                                                    onClick={handleDownloadCertificate}
                                                     title="Download Certificate"
-                                                    className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
+                                                    className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center cursor-pointer"
                                                 >
                                                     <Download className="w-5 h-5" />
                                                 </GradiantButton>
@@ -1899,38 +1965,29 @@ const CourseView = () => {
                                         ) : (
                                             <>
                                                 <GradiantButton
-                                                    disabled={!isCourseCompleted || generatingCert}
-                                                    onClick={isCourseCompleted ? handleGenerateCertificate : undefined}
-                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                    disabled={!allLecturesCompleted}
+                                                    onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
+                                                    title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
                                                     className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${
-                                                        !isCourseCompleted
+                                                        !allLecturesCompleted
                                                             ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/30 cursor-pointer"
+                                                            : "cursor-pointer"
                                                     }`}
                                                 >
-                                                    {generatingCert ? (
-                                                        <>
-                                                            <Loader className="w-4 h-4 animate-spin" />
-                                                            Generating...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Award className="w-4 h-4" />
-                                                            Generate Certificate
-                                                        </>
-                                                    )}
+                                                    <GraduationCap className="w-4 h-4" />
+                                                    Generate Certificate
                                                 </GradiantButton>
                                                 <GradiantButton
-                                                    disabled={!isCourseCompleted || generatingCert}
-                                                    onClick={isCourseCompleted ? handleGenerateCertificate : undefined}
-                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                    disabled={!allLecturesCompleted}
+                                                    onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
+                                                    title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
                                                     className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${
-                                                        !isCourseCompleted
+                                                        !allLecturesCompleted
                                                             ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/30 cursor-pointer"
+                                                            : "cursor-pointer"
                                                     }`}
                                                 >
-                                                    {generatingCert ? <Loader className="w-5 h-5 animate-spin" /> : <Award className="w-5 h-5" />}
+                                                    <GraduationCap className="w-5 h-5" />
                                                 </GradiantButton>
                                             </>
                                         )}

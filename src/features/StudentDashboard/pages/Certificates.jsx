@@ -58,35 +58,78 @@ const Certificates = () => {
     }, []);
 
     const downloadAsPDF = async (imgUrl, courseName, item = null) => {
-        if (item) {
-            await handleGenerateCertificate(item);
-            return;
-        }
         try {
+            let blob;
+            try {
+                const res = await fetch(imgUrl);
+                if (res.ok) {
+                    blob = await res.blob();
+                }
+            } catch (fetchErr) {
+                console.warn('Direct fetch failed, falling back to direct load:', fetchErr);
+            }
+
+            const targetSrc = blob ? URL.createObjectURL(blob) : imgUrl;
             const { jsPDF } = await import('jspdf');
             const img = new Image();
-            img.crossOrigin = "Anonymous";
+            if (!blob) {
+                img.crossOrigin = "Anonymous";
+            }
             img.onload = () => {
-                const doc = new jsPDF({
-                    orientation: 'landscape',
-                    unit: 'px',
-                    format: [1122, 794]
-                });
-                doc.addImage(img, 'PNG', 0, 0, 1122, 794);
-                doc.save(`Certificate_${courseName.replace(/\s+/g, '_')}.pdf`);
-            };
-            img.onerror = async () => {
-                console.warn('Certificate image not found or failed to load, regenerating...', imgUrl);
-                if (item) {
-                    await handleGenerateCertificate(item);
-                } else {
-                    alert("Certificate image failed to load. Please try again.");
+                try {
+                    const doc = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'px',
+                        format: [1122, 794]
+                    });
+                    doc.addImage(img, 'PNG', 0, 0, 1122, 794);
+                    doc.save(`Certificate_${(courseName || 'Course').replace(/\s+/g, '_')}.pdf`);
+                    if (blob) URL.revokeObjectURL(targetSrc);
+                } catch {
+                    const link = document.createElement('a');
+                    link.href = targetSrc;
+                    link.download = `Certificate_${(courseName || 'Course').replace(/\s+/g, '_')}.png`;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 }
             };
-            img.src = imgUrl;
+            img.onerror = async () => {
+                if (blob) {
+                    const link = document.createElement('a');
+                    link.href = targetSrc;
+                    link.download = `Certificate_${(courseName || 'Course').replace(/\s+/g, '_')}.png`;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else if (item) {
+                    await handleGenerateCertificate(item);
+                } else {
+                    const link = document.createElement('a');
+                    link.href = imgUrl;
+                    link.download = `Certificate_${(courseName || 'Course').replace(/\s+/g, '_')}.png`;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            };
+            img.src = targetSrc;
         } catch (e) {
             console.error('PDF Download failed:', e);
-            alert("PDF generation failed. Please try again.");
+            const link = document.createElement('a');
+            link.href = imgUrl;
+            link.download = `Certificate_${(courseName || 'Course').replace(/\s+/g, '_')}.png`;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
 
