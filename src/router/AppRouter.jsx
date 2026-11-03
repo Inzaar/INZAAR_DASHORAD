@@ -139,7 +139,7 @@ const routes = createRoutesFromElements(
     </Route>
 );
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes, { basename: "/app" });
 
 const AppRouter = () => {
     return <RouterProvider router={router} />;
