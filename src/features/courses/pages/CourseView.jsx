@@ -678,8 +678,27 @@ const CourseView = () => {
                                 toast.error(`Please complete the ${isAudio ? 'audio' : 'video'} lecture first to unlock this quiz.`);
                                 return;
                             }
-                            const adminQuery = isAdminView ? (window.location.search ? `${window.location.search}&admin=true` : '?admin=true') : window.location.search;
-                            navigate(`/quiz-take/${quiz._id || quiz.id}${adminQuery}`);
+                            const currentLecId = currentLecture?.id || currentLecture?._id || lecture?.id || lecture?._id;
+                            const searchParamsObj = new URLSearchParams(window.location.search);
+                            if (courseId && !searchParamsObj.get('id')) {
+                                searchParamsObj.set('id', courseId);
+                            }
+                            if (courseId && !searchParamsObj.get('courseId')) {
+                                searchParamsObj.set('courseId', courseId);
+                            }
+                            if (currentLecId && !searchParamsObj.get('lectureId')) {
+                                searchParamsObj.set('lectureId', currentLecId);
+                            }
+
+                            const cleanParams = new URLSearchParams(searchParamsObj.toString());
+                            cleanParams.delete('returnPath');
+                            const returnPath = encodeURIComponent(`${window.location.pathname}?${cleanParams.toString()}`);
+                            searchParamsObj.set('returnPath', returnPath);
+
+                            if (isAdminView) {
+                                searchParamsObj.set('admin', 'true');
+                            }
+                            navigate(`/quiz-take/${quiz._id || quiz.id}?${searchParamsObj.toString()}`);
                         }}
                         className={`relative bg-white p-3 rounded-xl border border-gray-100 hover:border-purple-300 shadow-sm hover:shadow-md transition-all cursor-pointer group shrink-0 snap-start w-[240px] sm:w-[280px] lg:w-full flex items-center gap-3 ${quiz.isLocked ? 'opacity-70' : ''}`}
                     >
@@ -1996,11 +2015,23 @@ const CourseView = () => {
                                         )}
 
                                         <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
-                                            Enrolled New Course
+                                            {t('enroll_new_course', 'Enroll New Course')}
                                         </GradiantButton>
-                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center">
-                                            <Plus className="w-5 h-5" />
-                                        </GradiantButton>
+                                        <div className="relative group max-[600px]:inline-flex hidden">
+                                            <GradiantButton 
+                                                onClick={() => navigate('/courses')} 
+                                                className="text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
+                                            >
+                                                <Plus className="w-5 h-5" />
+                                            </GradiantButton>
+                                            {/* Hover White Tooltip / Toaster on bottom */}
+                                            <div className="absolute top-full right-0 mt-2 pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-50 transform -translate-y-1 group-hover:translate-y-0">
+                                                <div className="bg-white text-gray-800 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center relative border border-gray-200">
+                                                    <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                                                    <span className="relative z-10">{t('enroll_new_course', 'Enroll New Course')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -2154,14 +2185,21 @@ const CourseView = () => {
                                                                     setIsEditingQuiz(true);
                                                                 }
                                                             } else {
-                                                                const cleanParams = new URLSearchParams(window.location.search);
-                                                                cleanParams.delete('returnPath');
-                                                                cleanParams.delete('lectureId');
-                                                                const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
-                                                                const cleanPath = window.location.pathname + cleanSearch;
-                                                                const returnPath = encodeURIComponent(cleanPath);
-                                                                const query = `?courseId=${courseId}&lectureId=${currentLecture.id}&returnPath=${returnPath}`;
-                                                                const adminQuery = isAdminView ? (query ? `${query}&admin=true` : '?admin=true') : query;
+                                                                const queryParams = new URLSearchParams(window.location.search);
+                                                                if (courseId) {
+                                                                    queryParams.set('id', courseId);
+                                                                    queryParams.set('courseId', courseId);
+                                                                }
+                                                                if (currentLecture?.id) {
+                                                                    queryParams.set('lectureId', currentLecture.id);
+                                                                }
+                                                                queryParams.delete('returnPath');
+                                                                const returnPath = encodeURIComponent(`${window.location.pathname}?${queryParams.toString()}`);
+                                                                queryParams.set('returnPath', returnPath);
+                                                                if (isAdminView) {
+                                                                    queryParams.set('admin', 'true');
+                                                                }
+                                                                const adminQuery = `?${queryParams.toString()}`;
                                                                 if (currentLecture.quizId) {
                                                                     navigate(`/quiz-take/${currentLecture.quizId}${adminQuery}`);
                                                                 } else {

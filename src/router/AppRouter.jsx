@@ -120,6 +120,7 @@ const routes = createRoutesFromElements(
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/enrolled-courses" element={<EnrolledCourses />} />
             <Route path="/course-view" element={<CourseView />} />
+            <Route path="/course-play" element={<CourseView />} />
             <Route path="/certificates" element={<Certificates />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/courses" element={<Courses />} />
