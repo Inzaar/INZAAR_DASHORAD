@@ -248,9 +248,21 @@ const DashboardPage = () => {
                                 <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
                                     {t('enroll_new_course', 'Enroll New Course')}
                                 </GradiantButton>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:flex hidden items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-                                    +
-                                </GradiantButton>
+                                <div className="relative group max-[600px]:inline-flex hidden">
+                                    <GradiantButton 
+                                        onClick={() => navigate('/courses')} 
+                                        className="items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+                                    >
+                                        +
+                                    </GradiantButton>
+                                    {/* Hover White Tooltip / Toaster on bottom */}
+                                    <div className="absolute top-full right-0 mt-2 pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-50 transform -translate-y-1 group-hover:translate-y-0">
+                                        <div className="bg-white text-gray-800 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center relative border border-gray-200">
+                                            <div className="absolute -top-1 right-3 w-2 h-2 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                                            <span className="relative z-10">{t('enroll_new_course', 'Enroll New Course')}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="gap-6">

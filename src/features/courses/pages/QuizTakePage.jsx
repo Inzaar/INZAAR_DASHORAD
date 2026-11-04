@@ -187,23 +187,60 @@ const QuizTakePage = () => {
         setShowCancelModal(false);
         const returnPath = queryParams.get('returnPath');
         if (returnPath) {
-            navigate(decodeURIComponent(returnPath));
-        } else if (courseId) {
-            navigate(`/course-view?id=${courseId}`);
+            let decoded = decodeURIComponent(returnPath);
+            if (decoded.includes('/course-play')) {
+                decoded = decoded.replace('/course-play', '/course-view');
+            }
+            navigate(decoded);
+            return;
+        }
+
+        const targetCourseId = courseId || (quizData?.courseId?._id || quizData?.courseId);
+        const targetLectureId = lectureId || (quizData?.lectureId?._id || quizData?.lectureId);
+
+        if (targetCourseId) {
+            if (isAdminView) {
+                navigate(`/admin-course-play?id=${targetCourseId}${targetLectureId ? `&lectureId=${targetLectureId}` : ''}`);
+            } else {
+                const params = new URLSearchParams();
+                params.set('id', targetCourseId);
+                if (enrollmentId) params.set('enrollmentId', enrollmentId);
+                if (targetLectureId) params.set('lectureId', targetLectureId);
+                if (batchId) params.set('batchId', batchId);
+                navigate(`/course-view?${params.toString()}`);
+            }
         } else {
-            navigate(-1);
+            navigate('/course-view');
         }
     };
 
     const handleContinue = () => {
         const returnPath = queryParams.get('returnPath');
         if (returnPath) {
-            navigate(decodeURIComponent(returnPath));
-        } else if (courseId && lectureId) {
-            // Safe fallback if returnPath is completely missing
-            navigate(`/course-play?id=${courseId}&lectureId=${lectureId}`);
+            let decoded = decodeURIComponent(returnPath);
+            if (decoded.includes('/course-play')) {
+                decoded = decoded.replace('/course-play', '/course-view');
+            }
+            navigate(decoded);
+            return;
+        }
+
+        const targetCourseId = courseId || (quizData?.courseId?._id || quizData?.courseId);
+        const targetLectureId = lectureId || (quizData?.lectureId?._id || quizData?.lectureId);
+
+        if (targetCourseId) {
+            if (isAdminView) {
+                navigate(`/admin-course-play?id=${targetCourseId}${targetLectureId ? `&lectureId=${targetLectureId}` : ''}`);
+            } else {
+                const params = new URLSearchParams();
+                params.set('id', targetCourseId);
+                if (enrollmentId) params.set('enrollmentId', enrollmentId);
+                if (targetLectureId) params.set('lectureId', targetLectureId);
+                if (batchId) params.set('batchId', batchId);
+                navigate(`/course-view?${params.toString()}`);
+            }
         } else {
-            navigate(-1);
+            navigate('/course-view');
         }
     };
 
