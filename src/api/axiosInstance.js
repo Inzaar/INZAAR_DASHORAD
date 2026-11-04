@@ -19,4 +19,26 @@ axiosInstance.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 );
+
+// Intercept 401 Unauthorized responses (token expiration)
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            const isLoginRequest = error.config?.url?.includes('/users/login');
+            if (!isLoginRequest) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("isGuest");
+                localStorage.removeItem("firstName");
+                localStorage.removeItem("userId");
+                sessionStorage.clear();
+
+                window.location.replace('/');
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default axiosInstance;

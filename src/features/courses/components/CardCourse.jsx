@@ -235,8 +235,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
               <button
                 onClick={() => {
                   setShowGuestModal(false);
-                  logout();
-                  navigate('/login');
+                  logout('/app/login');
                 }}
                 className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
               >
