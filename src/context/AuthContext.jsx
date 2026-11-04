@@ -90,14 +90,16 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
-    const logout = async () => {
+    const logout = async (redirectUrl = '/') => {
         // Clear frontend state
         setUser(null);
 
-        // Remove JWT token and Guest flag
+        // Remove JWT token, user info and cached session items
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         localStorage.removeItem('isGuest');
         localStorage.removeItem('firstName');
+        localStorage.removeItem('userId');
         sessionStorage.clear();
 
         // Expire all cookies to guarantee a clean slate
@@ -109,6 +111,11 @@ export const AuthProvider = ({ children }) => {
 
         // Notify backend to clear httpOnly cookie
         try { await axiosInstance.post('/users/logout'); } catch (_) { }
+
+        // Redirect directly to landing page root (not /app/login) using replace
+        if (redirectUrl) {
+            window.location.replace(redirectUrl);
+        }
     };
 
     const value = {

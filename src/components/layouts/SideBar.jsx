@@ -227,8 +227,7 @@ function Sidebar({ className, onClose }) {
     } catch (error) {
       console.error("Logout API failed:", error);
     } finally {
-      contextLogout();
-      navigate('/login');
+      contextLogout('/');
     }
   };
 
