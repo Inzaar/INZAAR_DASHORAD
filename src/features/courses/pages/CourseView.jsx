@@ -692,7 +692,8 @@ const CourseView = () => {
 
                             const cleanParams = new URLSearchParams(searchParamsObj.toString());
                             cleanParams.delete('returnPath');
-                            const returnPath = encodeURIComponent(`${window.location.pathname}?${cleanParams.toString()}`);
+                            const currentPath = window.location.pathname.replace(/^\/app/, '') || '/course-view';
+                            const returnPath = encodeURIComponent(`${currentPath}?${cleanParams.toString()}`);
                             searchParamsObj.set('returnPath', returnPath);
 
                             if (isAdminView) {
@@ -981,14 +982,11 @@ const CourseView = () => {
 
     const isCourseCompleted = Boolean(
         courseData?.isCompleted ||
-        (courseData?.progress !== undefined && Number(courseData.progress) >= 100) ||
-        Boolean(certData?.certUrl || courseData?.certificateUrl)
+        (courseData?.progress !== undefined && Number(courseData.progress) >= 100)
     );
 
-    const allLecturesCompleted = Boolean(allVideoLecturesWatched || isCourseCompleted);
+    const allLecturesCompleted = Boolean(isCourseCompleted);
     const certificateUrl = certData?.certUrl || courseData?.certificateUrl;
-
-    const showPendingFinalTasksNotice = !isAdminView && allVideoLecturesWatched && !isCourseCompleted;
 
     // Helpers for mutual exclusivity between main player (audio/video) and resource audio
     const pauseResourceAudio = () => {
@@ -1969,17 +1967,27 @@ const CourseView = () => {
                                         {certificateUrl ? (
                                             <>
                                                 <GradiantButton
-                                                    onClick={handleDownloadCertificate}
-                                                    title="Download Certificate"
-                                                    className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base flex items-center gap-2 cursor-pointer"
+                                                    disabled={!isCourseCompleted}
+                                                    onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
+                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${
+                                                        !isCourseCompleted
+                                                            ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
+                                                    }`}
                                                 >
                                                     <Download className="w-4 h-4" />
                                                     Download Certificate
                                                 </GradiantButton>
                                                 <GradiantButton
-                                                    onClick={handleDownloadCertificate}
-                                                    title="Download Certificate"
-                                                    className="max-[600px]:flex hidden text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center cursor-pointer"
+                                                    disabled={!isCourseCompleted}
+                                                    onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
+                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${
+                                                        !isCourseCompleted
+                                                            ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
+                                                    }`}
                                                 >
                                                     <Download className="w-5 h-5" />
                                                 </GradiantButton>
@@ -2060,18 +2068,6 @@ const CourseView = () => {
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
                                 <div ref={videoSectionRef} className={`w-full ${((isEditingQuiz || isEditingAssignment) && isAdminView) || isModeratorViewingStudent ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
-                                    {showPendingFinalTasksNotice && (
-                                        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-900 shadow-sm animate-fadeIn">
-                                            <span className="text-xl leading-none mt-0.5">🎓</span>
-                                            <div>
-                                                <p className="font-semibold text-sm">Course Almost Complete!</p>
-                                                <p className="text-xs text-amber-700 mt-0.5">
-                                                    You have completed all video lectures. To finalize the course and unlock your certificate, please attempt the quiz and assignment for the final lecture.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-
                                     {!hideSidebarAndCards && currentLecture && (
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
                                             <div>
@@ -2164,7 +2160,8 @@ const CourseView = () => {
                                                                         cleanParams.delete('returnPath');
                                                                         cleanParams.delete('lectureId');
                                                                         const cleanSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
-                                                                        const cleanPath = window.location.pathname + cleanSearch;
+                                                                        const currentPath = window.location.pathname.replace(/^\/app/, '') || '/course-view';
+                                                                        const cleanPath = currentPath + cleanSearch;
                                                                         const returnPath = encodeURIComponent(cleanPath);
                                                                         navigate(`/quiz-take/${currentLecture.quizId || currentLecture.id}?courseId=${courseId}&returnPath=${returnPath}&admin=true&viewStudent=true`, {
                                                                             state: {
@@ -2194,7 +2191,8 @@ const CourseView = () => {
                                                                     queryParams.set('lectureId', currentLecture.id);
                                                                 }
                                                                 queryParams.delete('returnPath');
-                                                                const returnPath = encodeURIComponent(`${window.location.pathname}?${queryParams.toString()}`);
+                                                                const currentPath = window.location.pathname.replace(/^\/app/, '') || '/course-view';
+                                                                const returnPath = encodeURIComponent(`${currentPath}?${queryParams.toString()}`);
                                                                 queryParams.set('returnPath', returnPath);
                                                                 if (isAdminView) {
                                                                     queryParams.set('admin', 'true');

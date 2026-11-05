@@ -5,6 +5,13 @@ import { Link } from "react-router-dom";
 
 function StatusRow({ data }) {
     const { t } = useTranslation();
+    let displayStatus = data.status;
+    if (displayStatus === 'Completed') {
+        displayStatus = 'Last Lecture';
+    } else if (displayStatus === 'InProgress') {
+        displayStatus = 'Locked';
+    }
+
     return (
         <div className="h-[60px] w-full bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-[12px]">
             <Link 
@@ -22,7 +29,7 @@ function StatusRow({ data }) {
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.date}</div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">{data.progress}</div>
             <div className="flex-1 min-w-[120px] flex items-center justify-center">
-                {data.status === 'Locked' && '🔒'} {data.status ? t(data.status.toLowerCase(), data.status) : ''}
+                {displayStatus === 'Locked' && '🔒'} {displayStatus ? t(displayStatus.toLowerCase(), displayStatus) : ''}
             </div>
             {/* <div className="flex-1 min-w-[120px] flex flex-col items-center justify-center text-center gap-1">
                 {data.moderatorName !== "N/A" && data.moderatorContact !== "N/A" ? (
