@@ -191,6 +191,11 @@ const QuizTakePage = () => {
             if (decoded.includes('/course-play')) {
                 decoded = decoded.replace('/course-play', '/course-view');
             }
+            if (decoded.startsWith('/app/')) {
+                decoded = decoded.replace(/^\/app/, '');
+            } else if (decoded === '/app') {
+                decoded = '/';
+            }
             navigate(decoded);
             return;
         }
@@ -220,6 +225,11 @@ const QuizTakePage = () => {
             let decoded = decodeURIComponent(returnPath);
             if (decoded.includes('/course-play')) {
                 decoded = decoded.replace('/course-play', '/course-view');
+            }
+            if (decoded.startsWith('/app/')) {
+                decoded = decoded.replace(/^\/app/, '');
+            } else if (decoded === '/app') {
+                decoded = '/';
             }
             navigate(decoded);
             return;
@@ -514,15 +524,13 @@ const QuizTakePage = () => {
                                 Back to Summary
                             </button>
                             <div className="flex gap-3 w-full sm:w-auto">
-                                {quizData.allowRetry && (!quizData.maximumAttempts || result?.attemptNumber < quizData.maximumAttempts) && (
-                                    <button
-                                        onClick={() => { setShowReview(false); handleRetry(); }}
-                                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 border-2 border-[#3758EE] text-[#3758EE] font-bold text-sm rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
-                                    >
-                                        <RotateCcw size={16} />
-                                        <span>Retry Quiz</span>
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => { setShowReview(false); handleRetry(); }}
+                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 border-2 border-[#3758EE] text-[#3758EE] font-bold text-sm rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap"
+                                >
+                                    <RotateCcw size={16} />
+                                    <span>Retry Quiz</span>
+                                </button>
                                 <button
                                     onClick={handleContinue}
                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#3758EE] to-[#9333EA] text-white font-bold text-sm rounded-xl hover:opacity-90 transition-opacity shadow-md whitespace-nowrap"
@@ -588,24 +596,20 @@ const QuizTakePage = () => {
                             <span>Review Quiz Answers & Attempt</span>
                         </button>
 
-                        {quizData.allowRetry && (!quizData.maximumAttempts || result?.attemptNumber < quizData.maximumAttempts) && (
-                            <div className="w-full bg-[#F8F9FA] rounded-xl py-3 px-4 md:py-4 md:px-6 mb-8 md:mb-10 text-center border border-gray-100/50">
-                                <p className="text-[#64748B] text-xs md:text-sm leading-relaxed">
-                                    You can retry the quiz to improve your score.
-                                </p>
-                            </div>
-                        )}
+                        <div className="w-full bg-[#F8F9FA] rounded-xl py-3 px-4 md:py-4 md:px-6 mb-8 md:mb-10 text-center border border-gray-100/50">
+                            <p className="text-[#64748B] text-xs md:text-sm leading-relaxed">
+                                You can retry the quiz to improve your score.
+                            </p>
+                        </div>
 
                         <div className="w-full flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-                            {quizData.allowRetry && (!quizData.maximumAttempts || result?.attemptNumber < quizData.maximumAttempts) && (
-                                <button
-                                    onClick={handleRetry}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 border-2 border-[#3758EE] text-[#3758EE] font-bold text-sm md:text-[15px] rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[140px]"
-                                >
-                                    <RotateCcw size={16} />
-                                    <span>Retry Quiz</span>
-                                </button>
-                            )}
+                            <button
+                                onClick={handleRetry}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 border-2 border-[#3758EE] text-[#3758EE] font-bold text-sm md:text-[15px] rounded-xl hover:bg-blue-50 transition-colors whitespace-nowrap min-w-[140px]"
+                            >
+                                <RotateCcw size={16} />
+                                <span>Retry Quiz</span>
+                            </button>
                             <button
                                 onClick={handleContinue}
                                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-[#3758EE] to-[#9333EA] text-white font-bold text-sm md:text-[15px] rounded-xl hover:opacity-90 transition-opacity shadow-md whitespace-nowrap"
