@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, ChevronRight, Trash2, ChevronDown } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronRight, Trash2, ChevronDown, Info } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -17,6 +17,7 @@ import { createBatch, updateBatch, deleteBatch } from '@/api/batch';
 import toast from 'react-hot-toast';
 import DeleteCourseModal from '../components/DeleteCourseModal';
 import DeleteBatchModal from '../components/DeleteBatchModal';
+import CourseInfoModal from '../components/CourseInfoModal';
 import ScheduleBatchModal from '@/features/courses/components/ScheduleBatchModal';
 import SemesterBatchesListModal from '@/features/courses/components/SemesterBatchesListModal';
 import { CustomPagination } from '@/components/ui/Pagination';
@@ -31,6 +32,7 @@ const AdminCourseDetailPage = () => {
     const [courseData, setCourseData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+    const [isCourseInfoModalOpen, setIsCourseInfoModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [isScheduleListModalOpen, setIsScheduleListModalOpen] = useState(false);
@@ -260,11 +262,22 @@ const AdminCourseDetailPage = () => {
                                             <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
                                                 <button
                                                     onClick={() => {
+                                                        setIsCourseInfoModalOpen(true);
+                                                        setIsAdminMenuOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                >
+                                                    <Info size={16} className="text-[#3758EE]" />
+                                                    Course Info
+                                                </button>
+                                                <button
+                                                    onClick={() => {
                                                         navigate(`/admin-add-course?edit=true&id=${id}`);
                                                         setIsAdminMenuOpen(false);
                                                     }}
-                                                    className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
                                                 >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#8B5CF6]"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                                                     Edit
                                                 </button>
                                                 <button
@@ -272,9 +285,10 @@ const AdminCourseDetailPage = () => {
                                                         setIsDeleteModalOpen(true);
                                                         setIsAdminMenuOpen(false);
                                                     }}
-                                                    className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
                                                 >
-                                                    <Trash2 size={16} /> Delete
+                                                    <Trash2 size={16} className="text-red-500" />
+                                                    Delete
                                                 </button>
                                             </div>
                                         )}
@@ -292,6 +306,16 @@ const AdminCourseDetailPage = () => {
 
                                     {isAdminMenuOpen && (
                                         <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-2 animate-in fade-in zoom-in-95 duration-200">
+                                            <button
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
+                                                onClick={() => {
+                                                    setIsCourseInfoModalOpen(true);
+                                                    setIsAdminMenuOpen(false);
+                                                }}
+                                            >
+                                                <Info size={16} className="text-[#3758EE]" />
+                                                Course Info
+                                            </button>
                                             <button
                                                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-[#3758EE] transition-colors"
                                                 onClick={() => {
@@ -523,6 +547,7 @@ const AdminCourseDetailPage = () => {
                 onSchedule={handleSchedule}
                 loading={scheduling}
                 initialData={batchToEdit}
+                courseDuration={courseData?.duration}
             />
             <DeleteCourseModal
                 isOpen={isDeleteModalOpen}
@@ -541,6 +566,11 @@ const AdminCourseDetailPage = () => {
                 onConfirm={handleConfirmDeleteBatch}
                 batch={batchToDelete}
                 loading={deletingBatch}
+            />
+            <CourseInfoModal
+                isOpen={isCourseInfoModalOpen}
+                onClose={() => setIsCourseInfoModalOpen(false)}
+                courseData={courseData}
             />
         </div>
     );
