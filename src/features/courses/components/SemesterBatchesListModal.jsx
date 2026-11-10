@@ -45,9 +45,15 @@ const SemesterBatchesListModal = ({ isOpen, onClose, batches, onOpenScheduleModa
                                         <p className="text-xs text-gray-600 mt-1">
                                             {format(start, "MMM dd, yyyy")} - {format(end, "MMM dd, yyyy")}
                                         </p>
-                                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                                            <Clock size={12} />
-                                            {differenceInDays(end, start)} days duration
+                                        <p className="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                            <span className="flex items-center gap-1">
+                                                <Clock size={12} />
+                                                {differenceInDays(end, start)} days duration
+                                            </span>
+                                            <span>•</span>
+                                            <span className="font-medium text-gray-600">
+                                                Limit: {batch.batchGroupLimit || 50} students/group
+                                            </span>
                                         </p>
                                     </div>
                                 </div>

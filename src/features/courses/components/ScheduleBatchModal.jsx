@@ -39,12 +39,13 @@ export const calculateEndDateFromDuration = (startDateStr, durationStr) => {
     return `${y}-${m}-${d}`;
 };
 
-const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData, courseDuration }) => {
+const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData, courseDuration, courseBatchStrength }) => {
     const [name, setName] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [enrollmentStartDate, setEnrollmentStartDate] = useState("");
     const [enrollmentEndDate, setEnrollmentEndDate] = useState("");
+    const [batchGroupLimit, setBatchGroupLimit] = useState("");
 
     const todayStr = useMemo(() => {
         const today = new Date();
@@ -78,6 +79,14 @@ const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData,
             const initialEnrStart = formatDate(initialData?.enrollmentStartDate);
             const initialEnrEnd = formatDate(initialData?.enrollmentEndDate);
 
+            if (initialData?.batchGroupLimit) {
+                setBatchGroupLimit(initialData.batchGroupLimit);
+            } else if (courseBatchStrength) {
+                setBatchGroupLimit(courseBatchStrength);
+            } else {
+                setBatchGroupLimit(50);
+            }
+
             // If course end date is today or past, clear enrollment start date
             if (computedEnd && computedEnd <= todayStr) {
                 setEnrollmentStartDate("");
@@ -87,7 +96,7 @@ const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData,
                 setEnrollmentEndDate(initialEnrEnd);
             }
         }
-    }, [isOpen, initialData, courseDuration, todayStr]);
+    }, [isOpen, initialData, courseDuration, courseBatchStrength, todayStr]);
 
     const handleStartDateChange = (val) => {
         setStartDate(val);
@@ -185,7 +194,15 @@ const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData,
             return;
         }
         if (name && startDate && endDate && enrollmentStartDate) {
-            onSchedule({ name, startDate, endDate, enrollmentStartDate, enrollmentEndDate, id: initialData?._id });
+            onSchedule({
+                name,
+                startDate,
+                endDate,
+                enrollmentStartDate,
+                enrollmentEndDate,
+                batchGroupLimit: batchGroupLimit ? Number(batchGroupLimit) : (courseBatchStrength || 50),
+                id: initialData?._id
+            });
         }
     };
 
@@ -300,6 +317,24 @@ const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData,
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Batch Group Limit (Max Students per Group)
+                        </label>
+                        <input
+                            type="number"
+                            min="1"
+                            required
+                            placeholder="e.g. 50"
+                            value={batchGroupLimit}
+                            onChange={(e) => setBatchGroupLimit(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#3758EE] focus:border-[#3758EE] text-sm"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Pre-filled from course limit ({courseBatchStrength || 50} students/group). If you change the course limit later, this batch will maintain its own set limit.
+                        </p>
+                    </div>
+
                     <div className="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
                         <button
                             type="button"
@@ -311,7 +346,7 @@ const ScheduleBatchModal = ({ isOpen, onClose, onSchedule, loading, initialData,
                         </button>
                         <button
                             type="submit"
-                            disabled={loading || !name || !startDate || !endDate || !enrollmentStartDate || isCourseEndTodayOrPast}
+                            disabled={loading || !name || !startDate || !endDate || !enrollmentStartDate || isCourseEndTodayOrPast || !batchGroupLimit || Number(batchGroupLimit) <= 0}
                             className="px-6 py-2 rounded-xl bg-[#3758EE] text-white font-medium text-sm hover:bg-blue-700 shadow-sm disabled:opacity-50"
                         >
                             {loading ? (initialData ? "Updating..." : "Scheduling...") : (initialData ? "Update" : "Schedule")}
