@@ -941,35 +941,46 @@ const CourseView = () => {
 
     const groupedLectures = React.useMemo(() => {
         const groups = [];
+        const sectionMap = {};
 
-        const hasExplicitSections = lectures.some(l => l.section && l.section.trim() !== "");
+        lectures.forEach((lecture, idx) => {
+            const sec = (lecture.section || "").trim();
 
-        if (hasExplicitSections) {
-            const sectionMap = {};
-            lectures.forEach((lecture, idx) => {
-                const sec = (lecture.section || "").trim();
-                if (sec) {
-                    if (!sectionMap[sec]) {
-                        const newGroup = { sectionName: sec, id: `sec-${sec}`, isExplicitSection: true, lectures: [] };
-                        sectionMap[sec] = newGroup;
-                        groups.push(newGroup);
-                    }
-                    sectionMap[sec].lectures.push(lecture);
-                } else if ((lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz') && groups.length > 0) {
-                    groups[groups.length - 1].lectures.push(lecture);
-                } else {
-                    groups.push({ sectionName: lecture.title, id: `single-${idx}`, isExplicitSection: false, lectures: [lecture] });
+            if (sec) {
+                if (!sectionMap[sec]) {
+                    const newGroup = {
+                        type: 'section',
+                        sectionName: sec,
+                        id: `sec-${sec}`,
+                        isExplicitSection: true,
+                        lectures: []
+                    };
+                    sectionMap[sec] = newGroup;
+                    groups.push(newGroup);
                 }
-            });
-        } else {
-            groups.push({ sectionName: '', id: 'all-lectures', isExplicitSection: false, lectures });
-        }
+                sectionMap[sec].lectures.push(lecture);
+            } else if ((lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz') && groups.length > 0 && groups[groups.length - 1].type === 'section') {
+                groups[groups.length - 1].lectures.push(lecture);
+            } else {
+                groups.push({
+                    type: 'lecture',
+                    id: `lecture-${lecture.id || idx}`,
+                    isExplicitSection: false,
+                    lecture: lecture,
+                    index: idx
+                });
+            }
+        });
+
         return groups;
     }, [lectures]);
 
     useEffect(() => {
         if (currentLecture && groupedLectures.length > 0) {
-            const activeGroup = groupedLectures.find(g => g.lectures.some(l => l.id === currentLecture.id));
+            const activeGroup = groupedLectures.find(g =>
+                g.type === 'section' &&
+                g.lectures?.some(l => l.id === currentLecture.id || l._id === currentLecture.id || l.id === currentLecture._id || l._id === currentLecture._id)
+            );
             if (activeGroup && !expandedSections[activeGroup.id]) {
                 setExpandedSections(prev => ({ ...prev, [activeGroup.id]: true }));
             }
@@ -2647,48 +2658,59 @@ const CourseView = () => {
                                         <div className="flex-1 relative lg:min-h-0">
                                             <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-y-auto custom-scrollbar scroll-smooth snap-y">
                                                 <div className="flex flex-col gap-3">
-                                                    {groupedLectures.map((group, groupIdx) => (
-                                                        <div key={group.id || groupIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
-                                                            <div className="w-full group">
-                                                                <button
-                                                                    onClick={() => toggleSection(group.id)}
-                                                                    className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${expandedSections[group.id]
-                                                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
-                                                                        : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
-                                                                        }`}
-                                                                >
-                                                                    <div className="flex items-center gap-4">
-                                                                        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${expandedSections[group.id]
-                                                                            ? 'bg-blue-600 text-white border-blue-500'
-                                                                            : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
-                                                                            }`}>
-                                                                            <span className="font-black text-lg">{groupIdx + 1}</span>
-                                                                        </div>
-                                                                        <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${expandedSections[group.id] ? 'text-blue-900' : 'text-gray-800'
-                                                                            }`}>
-                                                                            {group.sectionName}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${expandedSections[group.id]
-                                                                        ? 'bg-blue-100/80 text-blue-700'
-                                                                        : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
-                                                                        }`}>
-                                                                        {expandedSections[group.id] ? (
-                                                                            <ChevronDown size={22} strokeWidth={2.5} />
-                                                                        ) : (
-                                                                            <ChevronRight size={22} strokeWidth={2.5} />
-                                                                        )}
-                                                                    </div>
-                                                                </button>
+                                                    {(() => {
+                                                        let sectionCounter = 0;
+                                                        return groupedLectures.map((item, itemIdx) => {
+                                                            if (item.type === 'section') {
+                                                                sectionCounter++;
+                                                                const isExpanded = Boolean(expandedSections[item.id]);
+                                                                return (
+                                                                    <div key={item.id || itemIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
+                                                                        <div className="w-full group">
+                                                                            <button
+                                                                                onClick={() => toggleSection(item.id)}
+                                                                                className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${isExpanded
+                                                                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
+                                                                                    : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
+                                                                                    }`}
+                                                                            >
+                                                                                <div className="flex items-center gap-4">
+                                                                                    <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${isExpanded
+                                                                                        ? 'bg-blue-600 text-white border-blue-500'
+                                                                                        : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
+                                                                                        }`}>
+                                                                                        <span className="font-black text-lg">{sectionCounter}</span>
+                                                                                    </div>
+                                                                                    <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${isExpanded ? 'text-blue-900' : 'text-gray-800'
+                                                                                        }`}>
+                                                                                        {item.sectionName}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${isExpanded
+                                                                                    ? 'bg-blue-100/80 text-blue-700'
+                                                                                    : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                                                                    }`}>
+                                                                                    {isExpanded ? (
+                                                                                        <ChevronDown size={22} strokeWidth={2.5} />
+                                                                                    ) : (
+                                                                                        <ChevronRight size={22} strokeWidth={2.5} />
+                                                                                    )}
+                                                                                </div>
+                                                                            </button>
 
-                                                                {expandedSections[group.id] && (
-                                                                    <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
-                                                                        {group.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
+                                                                            {isExpanded && (
+                                                                                <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
+                                                                                    {item.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                                                );
+                                                            } else {
+                                                                return renderLectureItem(item.lecture, item.index ?? itemIdx);
+                                                            }
+                                                        });
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>
@@ -2992,7 +3014,7 @@ const CourseView = () => {
                             {/* Lecture List Table Section */}
                             {!hideSidebarAndCards && !isModeratorViewingStudent && (
                                 <LectureListTable
-                                    lectures={groupedLectures.flatMap(g => g.lectures).reduce((acc, lecture) => {
+                                    lectures={lectures.reduce((acc, lecture) => {
                                         acc.push(lecture);
 
                                         if (lecture.quizzes && lecture.quizzes.length > 0) {
