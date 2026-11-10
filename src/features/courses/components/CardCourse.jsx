@@ -12,6 +12,8 @@ import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const CardCourse = ({ course, isAdmin = false }) => {
+  const [enrolledLocally, setEnrolledLocally] = useState(false);
+  const isEnrolled = Boolean(course?.isEnrolled || enrolledLocally);
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -38,6 +40,15 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
     if (isAdmin) {
       navigate(`/admin-course-view/${course.id}`);
+      return;
+    }
+
+    if (isEnrolled) {
+      if (course?.enrollmentId) {
+        navigate(`/course-view?id=${course.id}&enrollmentId=${course.enrollmentId}`);
+      } else {
+        navigate(`/course-view?id=${course.id}`);
+      }
       return;
     }
 
@@ -88,6 +99,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
     try {
       const res = await enrollCourse(course.id, batchId);
       if (res.data.success === true) {
+        setEnrolledLocally(true);
         // Find if the selected batch is upcoming
         const selectedBatch = availableBatches.find(b => b._id === batchId);
         const isUpcoming = selectedBatch && new Date(selectedBatch.startDate) > new Date();
@@ -163,7 +175,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
             onClick={handleEnrollClick}
             disabled={isEnrolling || isLoadingBatches}
           >
-            {isAdmin ? t("view_details", "View Details") : t("enroll_now", "Enroll now")}
+            {isAdmin ? t("view_details", "View Details") : isEnrolled ? t("already_enrolled", "Already Enrolled") : t("enroll_now", "Enroll now")}
           </GradiantButton>
         </div>
       </div>

@@ -13,9 +13,38 @@ import CardCourse from '../components/CardCourse';
 import course from "../../../assets/images/course2.png"
 import icon from "../../../assets/logos/Abu_Yahya.png"
 
+const CourseCardSkeleton = () => (
+    <div className="w-full max-w-[340px] flex flex-col gap-3 animate-pulse">
+        {/* Image Section Skeleton */}
+        <div className="w-full aspect-[16/10] rounded-[15px] bg-gray-200 relative overflow-hidden">
+            <div className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-gray-300" />
+        </div>
+
+        {/* Content Section Skeleton */}
+        <div className="flex flex-col gap-2 px-1">
+            <div className="flex justify-between items-start gap-3">
+                <div className="h-5 bg-gray-200 rounded w-2/3" />
+                <div className="h-3.5 bg-gray-200 rounded w-1/4" />
+            </div>
+
+            <div className="flex flex-col gap-1.5 mt-1">
+                <div className="h-3 bg-gray-200 rounded w-1/3" />
+                <div className="h-3 bg-gray-200 rounded w-full" />
+                <div className="h-3 bg-gray-200 rounded w-4/5" />
+            </div>
+        </div>
+
+        {/* Button Skeleton */}
+        <div className="mt-1">
+            <div className="h-10 bg-gray-200 rounded-lg w-[140px]" />
+        </div>
+    </div>
+);
+
 const Courses = () => {
     const { user } = useAuth();
     const [enrolledCourseIds, setEnrolledCourseIds] = React.useState([]);
+    const [enrolledCourseMap, setEnrolledCourseMap] = React.useState({});
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [searchParams] = useSearchParams();
     const tabParam = searchParams.get('tab');
@@ -38,9 +67,18 @@ const Courses = () => {
             if (user?.role === 'guest' || !user) return;
             try {
                 const res = await getEnrolledCoursesByUserId();
-                if (res.data?.success) {
-                    const ids = res.data.data.map(c => c.courseId || c._id);
+                if (res.data?.success && Array.isArray(res.data.data)) {
+                    const ids = [];
+                    const map = {};
+                    res.data.data.forEach(c => {
+                        const cId = String(c.courseId?._id || c.courseId || c._id);
+                        ids.push(cId);
+                        if (c.enrollmentId) {
+                            map[cId] = c.enrollmentId;
+                        }
+                    });
                     setEnrolledCourseIds(ids);
+                    setEnrolledCourseMap(map);
                 }
             } catch (error) {
                 console.error("Failed to fetch enrolled courses:", error);
@@ -120,18 +158,23 @@ const Courses = () => {
     }, []);
 
     // Helper to format course data for Card
-    const formatCourseForCard = (courseData) => ({
-        id: courseData._id,
-        title: courseData.title,
-        time: `${courseData.totalLectures || 0} ${t('lectures', 'Lectures')} (${courseData.duration || 'N/A'})`,
-        description: courseData.description || "Course description unavailable",
-        thumbnail: courseData.thumbnail || course, // Fallback image if needed
-        icon: icon, // Using static icon for now as per design
-        date: new Date(courseData.createdAt).toLocaleDateString(),
-        isNew: courseData.isNewCourse,
-        link: `/course-details/${courseData._id}`,
-        isEnrolled: enrolledCourseIds.includes(courseData._id)
-    });
+    const formatCourseForCard = (courseData) => {
+        const cId = String(courseData._id);
+        const isEnrolled = enrolledCourseIds.some(id => String(id) === cId);
+        return {
+            id: courseData._id,
+            title: courseData.title,
+            time: `${courseData.totalLectures || 0} ${t('lectures', 'Lectures')} (${courseData.duration || 'N/A'})`,
+            description: courseData.description || "Course description unavailable",
+            thumbnail: courseData.thumbnail || course, // Fallback image if needed
+            icon: icon, // Using static icon for now as per design
+            date: new Date(courseData.createdAt).toLocaleDateString(),
+            isNew: courseData.isNewCourse,
+            link: `/course-details/${courseData._id}`,
+            isEnrolled: isEnrolled,
+            enrollmentId: enrolledCourseMap[cId] || null
+        };
+    };
 
     const filteredCourses = (activeTab === 'new'
         ? [...courses]
@@ -268,14 +311,26 @@ const Courses = () => {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 items-start justify-items-center">
-                                {currentCourses.map((course) => (
-                                    <div key={course.id} id={`course-${course.id}`} className="w-full max-w-[340px] transition-all duration-500">
-                                        <CardCourse course={course} />
+                                {loading ? (
+                                    Array.from({ length: itemsPerPage || 8 }).map((_, idx) => (
+                                        <div key={`skeleton-${idx}`} className="w-full max-w-[340px]">
+                                            <CourseCardSkeleton />
+                                        </div>
+                                    ))
+                                ) : currentCourses.length === 0 ? (
+                                    <div className="col-span-full py-16 text-center text-gray-400 font-medium">
+                                        {t('no_courses_found', 'No courses found')}
                                     </div>
-                                ))}
+                                ) : (
+                                    currentCourses.map((course) => (
+                                        <div key={course.id} id={`course-${course.id}`} className="w-full max-w-[340px] transition-all duration-500">
+                                            <CardCourse course={course} />
+                                        </div>
+                                    ))
+                                )}
                             </div>
 
-                            {totalPages > 1 && (
+                            {!loading && totalPages > 1 && (
                                 <div className="w-full flex items-center justify-end lg:justify-end mt-auto pt-6 pb-2 gap-1">
                                     <CustomPagination 
                                         currentPage={currentPage} 

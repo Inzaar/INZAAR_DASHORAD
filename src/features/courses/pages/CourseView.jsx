@@ -2605,7 +2605,7 @@ const CourseView = () => {
                                                                 {showAudioMenu && currentLecture?.audioUrl?.length > 0 && (
                                                                     <div className="absolute right-full mr-3 top-0 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-right-2 duration-200 z-50">
                                                                         <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Audio Files</span>
+                                                                            <span className="text-[10px] font-bold text-gray-400 tracking-wider">Audio file</span>
                                                                         </div>
                                                                         {currentLecture.audioUrl.map((url, i) => (
                                                                             <button

@@ -110,6 +110,8 @@ const QuizTakePage = () => {
     const totalQuestions = questions.length;
     const progress = totalQuestions > 0 ? ((currentQuestionIndex) / totalQuestions) * 100 : 0;
     const currentQuestion = questions[currentQuestionIndex];
+    const isFullScore = (result?.percentage !== undefined ? Number(result.percentage) >= 100 : false) || 
+        (result?.totalPossibleScore > 0 && Number(result?.score) >= Number(result?.totalPossibleScore));
 
     // Load saved option if navigating backward? We only go forward for now.
     useEffect(() => {
@@ -566,7 +568,6 @@ const QuizTakePage = () => {
                             </div>
 
                             <div className="relative w-full flex flex-col items-center">
-                                <p className="text-gray-400 text-xs md:text-sm font-medium mb-4 uppercase tracking-wider text-center">Correct Percentage</p>
                                 <div className="relative flex items-center justify-center">
                                     <svg className="w-32 h-32 md:w-40 md:h-40 transform -rotate-90">
                                         <circle cx="50%" cy="50%" r="45%" stroke="#EEEFF1" strokeWidth="8" fill="transparent" />
@@ -596,11 +597,13 @@ const QuizTakePage = () => {
                             <span>Review Quiz Answers & Attempt</span>
                         </button>
 
-                        <div className="w-full bg-[#F8F9FA] rounded-xl py-3 px-4 md:py-4 md:px-6 mb-8 md:mb-10 text-center border border-gray-100/50">
-                            <p className="text-[#64748B] text-xs md:text-sm leading-relaxed">
-                                You can retry the quiz to improve your score.
-                            </p>
-                        </div>
+                        {!isFullScore && (
+                            <div className="w-full bg-[#F8F9FA] rounded-xl py-3 px-4 md:py-4 md:px-6 mb-8 md:mb-10 text-center border border-gray-100/50">
+                                <p className="text-[#64748B] text-xs md:text-sm leading-relaxed">
+                                    You can retry the quiz to improve your score.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="w-full flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                             <button
