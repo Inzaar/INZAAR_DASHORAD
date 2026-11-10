@@ -30,6 +30,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const [showBatchSelectionModal, setShowBatchSelectionModal] = useState(false);
   const [availableBatches, setAvailableBatches] = useState([]);
   const [enrolledBatchIds, setEnrolledBatchIds] = useState([]);
+  const [enrolledBatchMap, setEnrolledBatchMap] = useState({});
   const [isLoadingBatches, setIsLoadingBatches] = useState(false);
 
   const handleEnrollClick = async () => {
@@ -39,20 +40,13 @@ const CardCourse = ({ course, isAdmin = false }) => {
     }
 
     if (isAdmin) {
-      navigate(`/admin-course-view/${course.id}`);
+      navigate(`/admin-course-view/${course.id || course._id}`);
       return;
     }
 
-    if (isEnrolled) {
-      if (course?.enrollmentId) {
-        navigate(`/course-view?id=${course.id}&enrollmentId=${course.enrollmentId}`);
-      } else {
-        navigate(`/course-view?id=${course.id}`);
-      }
-      return;
-    }
+    const courseId = course.id || course._id;
 
-    if (!user?.phone || user?.phone.trim() === '') {
+    if (!isEnrolled && (!user?.phone || user?.phone.trim() === '')) {
       setShowWhatsappModal(true);
       return;
     }
@@ -60,24 +54,51 @@ const CardCourse = ({ course, isAdmin = false }) => {
     setIsLoadingBatches(true);
     try {
       const [batches, myCoursesRes] = await Promise.all([
-        getBatchesByCourse(course.id),
+        getBatchesByCourse(courseId),
         getMyCourses()
       ]);
       
-      // Filter out completed batches
-      const activeBatches = batches.filter(b => new Date(b.endDate) > new Date());
+      // Determine which batches the user is already enrolled in
+      const myCourses = myCoursesRes?.data || [];
+      const enrolledInThisCourse = myCourses.filter(c => String(c.courseId) === String(courseId));
+      const enrolledIds = enrolledInThisCourse.map(c => String(c.batchId)).filter(Boolean);
       
+      const batchMap = {};
+      enrolledInThisCourse.forEach(c => {
+        if (c.batchId) {
+          batchMap[String(c.batchId)] = c.enrollmentId;
+        }
+      });
+
+      const allBatches = Array.isArray(batches) ? batches : [];
+      // Filter out completed batches (unless student is enrolled in that batch)
+      const activeBatches = allBatches.filter(b => 
+        new Date(b.endDate) > new Date() || enrolledIds.includes(String(b._id))
+      );
+
+      // If user is enrolled but enrolledIds is empty (e.g. legacy enrollment without batchId)
+      if (isEnrolled && enrolledIds.length === 0 && activeBatches.length > 0) {
+        const fallbackEnrollmentId = enrolledInThisCourse[0]?.enrollmentId || course?.enrollmentId;
+        enrolledIds.push(String(activeBatches[0]._id));
+        batchMap[String(activeBatches[0]._id)] = fallbackEnrollmentId;
+      }
+      
+      setEnrolledBatchMap(batchMap);
+      setEnrolledBatchIds(enrolledIds);
+
       if (activeBatches.length === 0) {
+        if (isEnrolled) {
+          if (course?.enrollmentId) {
+            navigate(`/course-view?id=${courseId}&enrollmentId=${course.enrollmentId}`);
+          } else {
+            navigate(`/course-view?id=${courseId}`);
+          }
+          return;
+        }
         toast.error("No upcoming or running batches available for this course.");
         return;
       }
       
-      // Determine which batches the user is already enrolled in
-      const myCourses = myCoursesRes?.data || [];
-      const enrolledInThisCourse = myCourses.filter(c => c.courseId === course.id);
-      const enrolledIds = enrolledInThisCourse.map(c => c.batchId).filter(Boolean);
-      
-      setEnrolledBatchIds(enrolledIds);
       setAvailableBatches(activeBatches);
       setShowBatchSelectionModal(true);
     } catch (error) {
@@ -89,7 +110,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
   };
 
   const proceedWithEnrollment = async (batchId) => {
-    if (enrolledBatchIds.includes(batchId)) {
+    if (enrolledBatchIds.some(id => String(id) === String(batchId))) {
       toast("You have already enrolled in it and it will be coming soon", { icon: "⏳" });
       return;
     }
@@ -97,11 +118,12 @@ const CardCourse = ({ course, isAdmin = false }) => {
     setShowBatchSelectionModal(false);
     setIsEnrolling(true);
     try {
-      const res = await enrollCourse(course.id, batchId);
+      const courseId = course.id || course._id;
+      const res = await enrollCourse(courseId, batchId);
       if (res.data.success === true) {
         setEnrolledLocally(true);
         // Find if the selected batch is upcoming
-        const selectedBatch = availableBatches.find(b => b._id === batchId);
+        const selectedBatch = availableBatches.find(b => String(b._id) === String(batchId));
         const isUpcoming = selectedBatch && new Date(selectedBatch.startDate) > new Date();
         
         if (isUpcoming) {
@@ -109,7 +131,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
         } else {
           toast.success(t("successfully_enrolled", "You are successfully enrolled"));
           const newEnrollmentId = res.data?.data?._id || res.data?.data?.id;
-          navigate(newEnrollmentId ? `/course-view?id=${course.id}&enrollmentId=${newEnrollmentId}` : `/course-view?id=${course.id}`);
+          navigate(newEnrollmentId ? `/course-view?id=${courseId}&enrollmentId=${newEnrollmentId}` : `/course-view?id=${courseId}`);
         }
       }
     } catch (error) {
@@ -313,7 +335,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
                 {availableBatches.map(batch => {
                   const now = new Date();
                   const isUpcoming = new Date(batch.startDate) > now;
-                  const isEnrolled = enrolledBatchIds.includes(batch._id);
+                  const isBatchEnrolled = enrolledBatchIds.some(id => String(id) === String(batch._id));
                   
                   const enrollmentStart = batch.enrollmentStartDate ? new Date(batch.enrollmentStartDate) : null;
                   const enrollmentEnd = batch.enrollmentEndDate ? new Date(batch.enrollmentEndDate) : null;
@@ -322,7 +344,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
                   const isEnrollmentClosed = enrollmentEnd && now > enrollmentEnd;
                   const isEnrollmentOpen = !isEnrollmentUpcoming && !isEnrollmentClosed;
                   
-                  const isDisabled = isEnrolled || isEnrollmentUpcoming || isEnrollmentClosed;
+                  const isDisabled = !isBatchEnrolled && (isEnrollmentUpcoming || isEnrollmentClosed);
 
                   return (
                     <div 
@@ -333,8 +355,15 @@ const CardCourse = ({ course, isAdmin = false }) => {
                           : 'border-gray-200 hover:border-[#3758EE] bg-gray-50 hover:bg-white cursor-pointer'
                       }`}
                       onClick={() => {
-                        if (isEnrolled) {
-                          toast("You are already enrolled in this batch.", { icon: "⏳" });
+                        if (isBatchEnrolled) {
+                          setShowBatchSelectionModal(false);
+                          const courseId = course.id || course._id;
+                          const enrollmentId = enrolledBatchMap[String(batch._id)] || course?.enrollmentId;
+                          if (enrollmentId) {
+                            navigate(`/course-view?id=${courseId}&enrollmentId=${enrollmentId}`);
+                          } else {
+                            navigate(`/course-view?id=${courseId}`);
+                          }
                         } else if (isEnrollmentUpcoming) {
                           toast(`Enrollment starts on ${enrollmentStart.toLocaleDateString()}`, { icon: "⏳" });
                         } else if (isEnrollmentClosed) {
@@ -346,17 +375,17 @@ const CardCourse = ({ course, isAdmin = false }) => {
                     >
                       <div className="flex justify-between items-center mb-2">
                         <span className="font-bold text-gray-900">
-                          {isEnrolled 
+                          {isBatchEnrolled 
                             ? (batch.name ? `${batch.name} (Enrolled)` : 'Already Enrolled') 
                             : (batch.name || (isUpcoming ? 'Upcoming Batch' : 'Running Batch'))}
                         </span>
                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                          isEnrolled ? 'bg-gray-200 text-gray-700' :
+                          isBatchEnrolled ? 'bg-gray-200 text-gray-700' :
                           (isEnrollmentClosed ? 'bg-red-100 text-red-600' :
                            isEnrollmentUpcoming ? 'bg-orange-100 text-orange-600' :
                            'bg-green-100 text-green-600')
                         }`}>
-                          {isEnrolled ? 'Enrolled' : 
+                          {isBatchEnrolled ? 'Enrolled' : 
                            (isEnrollmentClosed ? 'Enrollment Closed' : 
                             isEnrollmentUpcoming ? 'Enrollment Starts Soon' : 
                             'Enrollment Open')}
