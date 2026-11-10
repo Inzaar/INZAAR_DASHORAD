@@ -548,6 +548,8 @@ const CourseView = () => {
                                 setShouldAutoplay(false);
                                 setCurrentLecture(lecture);
                             }
+                        } else if (!isAdminView) {
+                            toast.error("This lecture is locked. Please complete previous lectures, quizzes, and assignments to unlock it.");
                         }
                     }}
                     className={`
@@ -978,11 +980,14 @@ const CourseView = () => {
         setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
+    const certPercent = (typeof courseData?.certificateCriteria === 'number') ? courseData.certificateCriteria : 90;
+    const unlockPercent = (typeof courseData?.unlockCriteria === 'number') ? courseData.unlockCriteria : 90;
+
     const allVideoLecturesWatched = lectures.length > 0 && lectures.every(l => l.isCompleted);
 
     const isCourseCompleted = Boolean(
         courseData?.isCompleted ||
-        (courseData?.progress !== undefined && Number(courseData.progress) >= 100)
+        (courseData?.progress !== undefined && Number(courseData.progress) >= certPercent)
     );
 
     const allLecturesCompleted = Boolean(isCourseCompleted);
@@ -1223,17 +1228,20 @@ const CourseView = () => {
 
                 setCourseData(prev => {
                     if (!prev) return prev;
-                    const newLectures = (prev.lecturePlaylist || prev.lectures || []).map(l => {
+                    const playlist = prev.lecturePlaylist || prev.lectures || [];
+                    const idx = playlist.findIndex(l => (l.id === lectureId || l._id === lectureId));
+                    const currentL = playlist[idx];
+                    const unQuizzes = (currentL?.quizzes || []).map(q => ({ ...q, isLocked: false }));
+                    const unAssignments = (currentL?.assignments || []).map(a => ({ ...a, isLocked: false }));
+                    const allQuizzesDone = unQuizzes.length === 0 || unQuizzes.every(q => q.isCompleted);
+                    const allAssignmentsDone = unAssignments.length === 0 || unAssignments.every(a => a.isCompleted);
+                    const canUnlockNext = allQuizzesDone && allAssignmentsDone;
+
+                    const unlockedPlaylist = playlist.map((l, i) => {
                         if ((l.id || l._id) === lectureId) {
-                            const unQuizzes = (l.quizzes || []).map(q => ({ ...q, isLocked: false }));
-                            const unAssignments = (l.assignments || []).map(a => ({ ...a, isLocked: false }));
-                            return { ...l, watchedPercentage: 100, progress: 100, isCompleted: true, quizzes: unQuizzes, assignments: unAssignments };
+                            return { ...l, watchedPercentage: 100, progress: 100, isCompleted: canUnlockNext, quizzes: unQuizzes, assignments: unAssignments };
                         }
-                        return l;
-                    });
-                    const idx = newLectures.findIndex(l => (l.id === lectureId || l._id === lectureId));
-                    const unlockedPlaylist = newLectures.map((l, i) => {
-                        if (i === idx + 1 && l.isLocked) {
+                        if (i === idx + 1 && l.isLocked && canUnlockNext) {
                             return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
                         }
                         return l;
@@ -1359,59 +1367,40 @@ const CourseView = () => {
                             }).then(async (data) => {
                                 maxWatchedMapRef.current[lectureId] = Math.max(maxWatchedMapRef.current[lectureId] || 0, finalPercent);
 
+                                const unlockPercent = (typeof courseData?.unlockCriteria === 'number') ? courseData.unlockCriteria : 90;
+
                                 setCurrentLecture(prev => {
                                     if (!prev) return prev;
                                     if (prev.id === lectureId || prev._id === lectureId) {
+                                        const unQuizzes = (prev.quizzes || []).map(q => ({ ...q, isLocked: finalPercent >= unlockPercent ? false : q.isLocked }));
+                                        const unAssignments = (prev.assignments || []).map(a => ({ ...a, isLocked: finalPercent >= unlockPercent ? false : a.isLocked }));
                                         return {
                                             ...prev,
-                                            watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent)
+                                            watchedPercentage: Math.max(prev.watchedPercentage || 0, finalPercent),
+                                            quizzes: unQuizzes,
+                                            assignments: unAssignments
                                         };
                                     }
                                     return prev;
                                 });
 
-                                const unlockPercent = courseData?.unlockCriteria || 100;
-                                // 1. Unlock NEXT lecture if finalPercent >= unlockPercent
-                                if (finalPercent >= unlockPercent && !completedIdsRef.current.has(lectureId)) {
+                                // Unlock CURRENT lecture's quizzes/assignments AND unlock NEXT lecture when all requirements are met
+                                if (finalPercent >= unlockPercent && (!completedIdsRef.current.has(lectureId) || !fullyCompletedIdsRef.current.has(lectureId))) {
                                     completedIdsRef.current.add(lectureId);
                                     setCourseData(prev => {
                                         if (!prev) return prev;
                                         const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
-                                        const newTotal = (prev.totalTimeSpent || 0) + timeSpentDelta;
-                                        const totalHours = Math.floor(newTotal / 3600);
-                                        const totalMins = Math.floor((newTotal % 3600) / 60);
-                                        const formattedTime = `${totalHours}h ${totalMins}m`;
-                                        return {
-                                            ...prev,
-                                            timeSpentLastWeek: data?.timeSpentLastWeek || formattedTime,
-                                            totalTimeSpent: data?.totalTimeSpent || newTotal,
-                                            progress: data?.progress !== undefined ? data.progress : prev.progress,
-                                            overallPerformance: {
-                                                ...prev.overallPerformance,
-                                                percentage: data?.progress !== undefined ? data.progress : prev.overallPerformance?.percentage
-                                            },
-                                            lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
-                                                if (i === idx + 1 && l.isLocked) {
-                                                    const prevLec = prev.lecturePlaylist[idx];
-                                                    const allQ = (prevLec.quizzes || []).every(q => q.isCompleted);
-                                                    const allA = (prevLec.assignments || []).every(a => a.isCompleted);
-                                                    if (allQ && allA) {
-                                                        return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
-                                                    }
-                                                    return l;
-                                                }
-                                                return l;
-                                            }),
-                                        };
-                                    });
-                                }
+                                        const currentL = prev.lecturePlaylist[idx];
+                                        const unQuizzes = (currentL?.quizzes || []).map(q => ({ ...q, isLocked: false }));
+                                        const unAssignments = (currentL?.assignments || []).map(a => ({ ...a, isLocked: false }));
+                                        const allQuizzesDone = unQuizzes.length === 0 || unQuizzes.every(q => q.isCompleted);
+                                        const allAssignmentsDone = unAssignments.length === 0 || unAssignments.every(a => a.isCompleted);
+                                        const canUnlockNext = allQuizzesDone && allAssignmentsDone;
 
-                                // 2. Unlock CURRENT lecture's quizzes/assignments/certificate ONLY at 99%
-                                if (finalPercent >= 99 && !fullyCompletedIdsRef.current.has(lectureId)) {
-                                    fullyCompletedIdsRef.current.add(lectureId);
-                                    setCourseData(prev => {
-                                        if (!prev) return prev;
-                                        const idx = prev.lecturePlaylist.findIndex(l => l.id === lectureId || l._id === lectureId);
+                                        if (canUnlockNext) {
+                                            fullyCompletedIdsRef.current.add(lectureId);
+                                        }
+
                                         const wasAlreadyCompleted = prev.lecturePlaylist[idx]?.isCompleted;
                                         const newTotal = (prev.totalTimeSpent || 0) + timeSpentDelta;
                                         const totalHours = Math.floor(newTotal / 3600);
@@ -1426,17 +1415,21 @@ const CourseView = () => {
                                                 ...prev.overallPerformance,
                                                 percentage: data?.progress !== undefined ? data.progress : prev.overallPerformance?.percentage
                                             },
-                                            lectureCompleted: wasAlreadyCompleted ? prev.lectureCompleted : (prev.lectureCompleted || 0) + 1,
-                                            lecturePlaylist: prev.lecturePlaylist.map((l) => {
+                                            lectureCompleted: wasAlreadyCompleted ? prev.lectureCompleted : (prev.lectureCompleted || 0) + (canUnlockNext ? 1 : 0),
+                                            lecturePlaylist: prev.lecturePlaylist.map((l, i) => {
                                                 if (l._id === lectureId || l.id === lectureId) {
                                                     return {
                                                         ...l,
-                                                        isCompleted: true,
+                                                        isCompleted: canUnlockNext,
                                                         watchedPercentage: Math.max(l.watchedPercentage || 0, finalPercent),
                                                         lastWatchedTime: Math.floor(cur),
-                                                        quizzes: (l.quizzes || []).map(q => ({ ...q, isLocked: false })),
-                                                        assignments: (l.assignments || []).map(a => ({ ...a, isLocked: false }))
+                                                        quizzes: unQuizzes,
+                                                        assignments: unAssignments
                                                     };
+                                                }
+                                                // Unlock next lecture immediately ONLY IF current lecture has no pending quizzes/assignments
+                                                if (i === idx + 1 && l.isLocked && canUnlockNext) {
+                                                    return { ...l, isLocked: false, status: "Unlocked", action: "Watch Now" };
                                                 }
                                                 return l;
                                             }),
@@ -3010,7 +3003,7 @@ const CourseView = () => {
                                                     lectureNo: quiz.quizId || `${lecture.lectureId || lecture.lectureNo}-Q${String(index + 1).padStart(2, '0')}`,
                                                     date: lecture.date,
                                                     watchedPercentage: quiz.isCompleted ? 100 : 0,
-                                                    isLocked: lecture.isLocked,
+                                                    isLocked: quiz.isLocked !== undefined ? quiz.isLocked : lecture.isLocked,
                                                     isCompleted: quiz.isCompleted || false,
                                                     type: 'Quiz',
                                                     quizId: quiz._id || quiz.id,
@@ -3026,7 +3019,7 @@ const CourseView = () => {
                                                     lectureNo: assignment.assignmentId || `${lecture.lectureId || lecture.lectureNo}-A${String(index + 1).padStart(2, '0')}`,
                                                     date: lecture.date,
                                                     watchedPercentage: assignment.isCompleted ? 100 : 0,
-                                                    isLocked: lecture.isLocked,
+                                                    isLocked: assignment.isLocked !== undefined ? assignment.isLocked : lecture.isLocked,
                                                     isCompleted: assignment.isCompleted || false,
                                                     type: 'Assignment',
                                                     instructions: assignment.instructions,
@@ -3041,9 +3034,38 @@ const CourseView = () => {
                                     notes={notes}
                                     isAdminView={isAdminView}
                                     onWatch={(lecture) => {
-                                        if (lecture.isLocked) return;
+                                        if (lecture.isLocked) {
+                                            if (!isAdminView) {
+                                                toast.error("This item is locked. Please complete previous lectures, quizzes, and assignments to unlock it.");
+                                            }
+                                            return;
+                                        }
                                         if (lecture.type === 'Assignment') {
                                             handleOpenAssignment(lecture);
+                                            return;
+                                        }
+                                        if (lecture.type === 'Quiz') {
+                                            const currentLecId = currentLecture?.id || currentLecture?._id || lecture?.id || lecture?._id;
+                                            const searchParamsObj = new URLSearchParams(window.location.search);
+                                            if (courseId && !searchParamsObj.get('id')) {
+                                                searchParamsObj.set('id', courseId);
+                                            }
+                                            if (courseId && !searchParamsObj.get('courseId')) {
+                                                searchParamsObj.set('courseId', courseId);
+                                            }
+                                            if (currentLecId && !searchParamsObj.get('lectureId')) {
+                                                searchParamsObj.set('lectureId', currentLecId);
+                                            }
+                                            const cleanParams = new URLSearchParams(searchParamsObj.toString());
+                                            cleanParams.delete('returnPath');
+                                            const currentPath = window.location.pathname.replace(/^\/app/, '') || '/course-view';
+                                            const returnPath = encodeURIComponent(`${currentPath}?${cleanParams.toString()}`);
+                                            searchParamsObj.set('returnPath', returnPath);
+
+                                            if (isAdminView) {
+                                                searchParamsObj.set('admin', 'true');
+                                            }
+                                            navigate(`/quiz-take/${lecture.quizId || lecture._id || lecture.id}?${searchParamsObj.toString()}`);
                                             return;
                                         }
                                         const isSameVideo = (currentLecture?.id === lecture.id || currentLecture?._id === lecture.id);

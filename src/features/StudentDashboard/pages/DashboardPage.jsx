@@ -128,7 +128,7 @@ const DashboardPage = () => {
             const prog = typeof lecture.lectureProgress === 'string'
                 ? parseInt(lecture.lectureProgress) || 0
                 : (lecture.progress || 0);
-            const isCompleted = !!lecture.isCompleted || prog >= (selectedCourseData?.unlockCriteria || 100);
+            const isCompleted = !!lecture.isCompleted || prog >= ((typeof selectedCourseData?.unlockCriteria === 'number') ? selectedCourseData.unlockCriteria : 90);
 
             let isLocked = false;
             if (index > 0) {
