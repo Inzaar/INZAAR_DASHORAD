@@ -126,7 +126,10 @@ const AdminCourseDetailPage = () => {
                 await updateBatch(scheduleData.id, {
                     name: scheduleData.name,
                     startDate: scheduleData.startDate,
-                    endDate: scheduleData.endDate
+                    endDate: scheduleData.endDate,
+                    enrollmentStartDate: scheduleData.enrollmentStartDate,
+                    enrollmentEndDate: scheduleData.enrollmentEndDate,
+                    batchGroupLimit: scheduleData.batchGroupLimit
                 });
                 toast.success('Batch updated successfully');
             } else {
@@ -548,6 +551,7 @@ const AdminCourseDetailPage = () => {
                 loading={scheduling}
                 initialData={batchToEdit}
                 courseDuration={courseData?.duration}
+                courseBatchStrength={courseData?.batchStrength}
             />
             <DeleteCourseModal
                 isOpen={isDeleteModalOpen}
