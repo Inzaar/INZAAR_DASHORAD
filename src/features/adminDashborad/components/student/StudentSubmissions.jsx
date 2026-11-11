@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FiSearch, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { getUserSubmissions, gradeSubmission } from '@/api/user';
+import { getUserSubmissions, gradeSubmission, grantExtraAttempt, extendSubmissionDueDate } from '@/api/user';
 import toast from 'react-hot-toast';
 import { PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationEllipsis, PaginationLink } from '@/components/ui/Pagination';
 
@@ -58,6 +59,35 @@ const StudentSubmissions = ({ profileData }) => {
     const [scoreInput, setScoreInput] = useState('');
     const [feedbackInput, setFeedbackInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const [searchParams] = useSearchParams();
+    const submissionIdParam = searchParams.get('submissionId');
+
+    // Auto-select submission if submissionId is in search params (deep linked from notification)
+    useEffect(() => {
+        if (submissionIdParam && submissionsData.length > 0 && !selectedSubmission) {
+            for (const courseData of submissionsData) {
+                const found = courseData.submissions?.find(
+                    s => s.id === submissionIdParam || s.submissionId === submissionIdParam || s.assignmentId === submissionIdParam
+                );
+                if (found) {
+                    handleView(found);
+                    break;
+                }
+            }
+        }
+    }, [submissionIdParam, submissionsData]);
+
+    const studentFullName = React.useMemo(() => {
+        const first = profileData?.user?.firstname || profileData?.user?.firstName || '';
+        const last = profileData?.user?.lastname || profileData?.user?.lastName || '';
+        const full = `${first} ${last}`.trim();
+        if (full) return full;
+        return profileData?.user?.username || profileData?.user?.name || 'Student';
+    }, [profileData]);
+
+    const studentAvatarUrl = profileData?.user?.profileImageUrl || profileData?.user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(studentFullName)}&background=random`;
 
     const handleView = (sub) => {
         setSelectedSubmission(sub);
@@ -67,6 +97,66 @@ const StudentSubmissions = ({ profileData }) => {
 
     const handleBack = () => {
         setSelectedSubmission(null);
+    };
+
+    const handleGrantAttempt = async (increment = 1) => {
+        if (!selectedSubmission || !profileData?.user?._id) return;
+        try {
+            setActionLoading(true);
+            const subId = selectedSubmission.submissionId || selectedSubmission.id;
+            await grantExtraAttempt(profileData.user._id, subId, { increment });
+            toast.success(`Granted +${increment} attempt to student!`);
+
+            // Refetch submissions
+            const res = await getUserSubmissions(profileData.user._id);
+            if (res?.data?.submissions) {
+                setSubmissionsData(res.data.submissions);
+                for (const c of res.data.submissions) {
+                    const found = c.submissions?.find(s => s.id === selectedSubmission.id || s.submissionId === subId);
+                    if (found) {
+                        setSelectedSubmission(found);
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to grant attempt", error);
+            toast.error(error?.response?.data?.message || "Failed to grant extra attempt");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleExtendDueDate = async ({ days, extendedDueDate, allowLateSubmission }) => {
+        if (!selectedSubmission || !profileData?.user?._id) return;
+        try {
+            setActionLoading(true);
+            const subId = selectedSubmission.submissionId || selectedSubmission.id;
+            await extendSubmissionDueDate(profileData.user._id, subId, {
+                days,
+                extendedDueDate,
+                allowLateSubmission
+            });
+            toast.success("Submission due date policy updated!");
+
+            // Refetch submissions
+            const res = await getUserSubmissions(profileData.user._id);
+            if (res?.data?.submissions) {
+                setSubmissionsData(res.data.submissions);
+                for (const c of res.data.submissions) {
+                    const found = c.submissions?.find(s => s.id === selectedSubmission.id || s.submissionId === subId);
+                    if (found) {
+                        setSelectedSubmission(found);
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to update due date", error);
+            toast.error(error?.response?.data?.message || "Failed to extend due date");
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const handleGradeSubmit = async () => {
@@ -90,12 +180,16 @@ const StudentSubmissions = ({ profileData }) => {
                 setSubmissionsData(res.data.submissions);
 
                 // Update currently viewed submission if it's still open
-                const updatedCourse = res.data.submissions.find(c => c.courseId === selectedCourseId) || res.data.submissions[0];
-                if (updatedCourse) {
-                    const updatedSub = updatedCourse.submissions.find(s => s.id === selectedSubmission.id);
-                    if (updatedSub) {
-                        setSelectedSubmission(updatedSub);
+                let updatedSub = null;
+                for (const c of res.data.submissions) {
+                    const found = c.submissions?.find(s => s.id === selectedSubmission.id);
+                    if (found) {
+                        updatedSub = found;
+                        break;
                     }
+                }
+                if (updatedSub) {
+                    setSelectedSubmission(updatedSub);
                 }
             }
         } catch (error) {
@@ -106,17 +200,74 @@ const StudentSubmissions = ({ profileData }) => {
         }
     };
 
+    const coursesList = React.useMemo(() => {
+        const list = [];
+        const seenTitles = new Set();
+        
+        // 1. From enrolledCourses
+        (enrolledCourses || []).forEach(c => {
+            const rawTitle = (c.title || '').trim();
+            if (rawTitle && !seenTitles.has(rawTitle.toLowerCase())) {
+                seenTitles.add(rawTitle.toLowerCase());
+                list.push({
+                    courseId: c.courseId || c.id,
+                    id: c.id || c.courseId,
+                    title: rawTitle
+                });
+            }
+        });
+
+        // 2. From submissionsData
+        (submissionsData || []).forEach(s => {
+            const rawTitle = (s.courseTitle || s.fullTitle || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+            if (rawTitle && !seenTitles.has(rawTitle.toLowerCase())) {
+                seenTitles.add(rawTitle.toLowerCase());
+                list.push({
+                    courseId: s.courseId || s.realCourseId || s.enrollmentId,
+                    id: s.enrollmentId || s.courseId,
+                    title: rawTitle
+                });
+            }
+        });
+
+        return list;
+    }, [enrolledCourses, submissionsData]);
+
     // Filter submissions based on course, type, status, and search query
     let filteredSubmissions = [];
-    if (selectedCourseId === 'all') {
+    if (selectedCourseId === 'all' || selectedCourse === 'All Courses') {
         submissionsData.forEach(courseData => {
-            filteredSubmissions = [...filteredSubmissions, ...courseData.submissions];
+            filteredSubmissions = [...filteredSubmissions, ...(courseData.submissions || [])];
         });
     } else {
-        const courseData = submissionsData.find(c => c.courseId === selectedCourseId);
-        if (courseData) {
-            filteredSubmissions = courseData.submissions;
-        }
+        const targetTitle = selectedCourse.trim().toLowerCase();
+        const targetId = String(selectedCourseId);
+
+        submissionsData.forEach(courseData => {
+            const courseDataTitle = (courseData.courseTitle || '').trim().toLowerCase();
+            const courseDataFullTitle = (courseData.fullTitle || '').trim().toLowerCase();
+
+            const isTitleMatch = courseDataTitle === targetTitle ||
+                (courseDataFullTitle && courseDataFullTitle.includes(targetTitle)) ||
+                targetTitle.includes(courseDataTitle);
+
+            const isIdMatch = (courseData.courseId && String(courseData.courseId) === targetId) ||
+                (courseData.realCourseId && String(courseData.realCourseId) === targetId) ||
+                (courseData.enrollmentId && String(courseData.enrollmentId) === targetId) ||
+                (courseData.id && String(courseData.id) === targetId);
+
+            if (isIdMatch || isTitleMatch) {
+                filteredSubmissions = [...filteredSubmissions, ...(courseData.submissions || [])];
+            } else if (courseData.submissions && courseData.submissions.length > 0) {
+                const matchedSubs = courseData.submissions.filter(sub => {
+                    const subTitle = (sub.courseTitle || '').trim().toLowerCase();
+                    return (sub.courseId && String(sub.courseId) === targetId) ||
+                        (sub.enrollmentId && String(sub.enrollmentId) === targetId) ||
+                        (subTitle && (subTitle === targetTitle || targetTitle.includes(subTitle)));
+                });
+                filteredSubmissions = [...filteredSubmissions, ...matchedSubs];
+            }
+        });
     }
 
     filteredSubmissions = filteredSubmissions.filter(sub => {
@@ -201,26 +352,26 @@ const StudentSubmissions = ({ profileData }) => {
                         {selectedCourse} <FiChevronDown size={16} />
                     </button>
                     {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border border-gray-100 py-1">
+                        <div className="absolute right-0 mt-2 w-64 max-h-72 overflow-y-auto bg-white rounded-md shadow-lg z-10 border border-gray-100 py-1">
                             <button
                                 onClick={() => {
                                     setSelectedCourse('All Courses');
                                     setSelectedCourseId('all');
                                     setIsDropdownOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 font-medium"
                             >
                                 All Courses
                             </button>
-                            {enrolledCourses.map(course => (
+                            {coursesList.map((course, idx) => (
                                 <button
-                                    key={course.courseId}
+                                    key={course.courseId || course.id || idx}
                                     onClick={() => {
                                         setSelectedCourse(course.title);
-                                        setSelectedCourseId(course.courseId);
+                                        setSelectedCourseId(course.courseId || course.id);
                                         setIsDropdownOpen(false);
                                     }}
-                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 truncate"
                                 >
                                     {course.title}
                                 </button>
@@ -392,13 +543,13 @@ const StudentSubmissions = ({ profileData }) => {
                         <div className="flex justify-between items-start w-full">
                             <div className="flex items-center gap-4">
                                 <img
-                                    src={profileData?.user?.profileImage || "https://ui-avatars.com/api/?name=Mudassar&background=random"}
-                                    alt="Student"
+                                    src={studentAvatarUrl}
+                                    alt={studentFullName}
                                     className="w-14 h-14 rounded-full object-cover"
                                 />
                                 <div className="flex flex-col">
-                                    <h3 className="text-[17px] font-bold text-gray-800">{profileData?.user?.firstName || 'Mudassar'}</h3>
-                                    <p className="text-[13px] text-gray-500 font-medium mt-0.5">Course: {selectedCourse}</p>
+                                    <h3 className="text-[17px] font-bold text-gray-800">{studentFullName}</h3>
+                                    <p className="text-[13px] text-gray-500 font-medium mt-0.5">Course: {selectedSubmission.courseTitle || (selectedCourse !== 'All Courses' ? selectedCourse : 'N/A')}</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -415,6 +566,53 @@ const StudentSubmissions = ({ profileData }) => {
                             <p className="text-[13px] text-gray-500 font-medium">Submitted: <span className="text-gray-800 font-bold ml-1">{selectedSubmission.date}</span></p>
                         </div>
                     </div>
+
+                    {/* Student Exception Request Card */}
+                    {selectedSubmission.extensionRequest?.hasRequested && selectedSubmission.extensionRequest?.status === 'pending' && (
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-5 shadow-sm flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                                        🔔
+                                    </span>
+                                    <h4 className="text-sm font-bold text-amber-900">
+                                        Student Exception Request ({selectedSubmission.extensionRequest.requestType === 'both' ? 'Extra Attempt & Due Date Extension' : (selectedSubmission.extensionRequest.requestType === 'due_date' ? 'Due Date Extension' : 'Extra Attempt')})
+                                    </h4>
+                                </div>
+                                <span className="text-[11px] font-medium text-amber-700 bg-amber-100/70 px-2.5 py-0.5 rounded-full">
+                                    Pending Review
+                                </span>
+                            </div>
+
+                            <p className="text-xs text-amber-950 font-medium bg-white/80 p-3 rounded-lg border border-amber-200/60 leading-relaxed">
+                                "{selectedSubmission.extensionRequest.message || 'No additional explanation provided.'}"
+                            </p>
+
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                                <span className="text-[11px] text-amber-700">
+                                    Requested: {new Date(selectedSubmission.extensionRequest.requestedAt).toLocaleString()}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        disabled={actionLoading}
+                                        onClick={() => handleGrantAttempt(1)}
+                                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-[4px] text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
+                                    >
+                                        Grant +1 Attempt
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={actionLoading}
+                                        onClick={() => handleExtendDueDate({ days: 3 })}
+                                        className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[4px] text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
+                                    >
+                                        Extend +3 Days
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Submission Content Card */}
                     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-5">
@@ -438,44 +636,146 @@ const StudentSubmissions = ({ profileData }) => {
                         )}
                     </div>
 
-                    {/* Grading Card */}
-                    <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-6">
-                        <h3 className="text-[16px] font-bold text-gray-800">Grading</h3>
+                    {/* Attempts & Submission Policy Exceptions Card */}
+                    {selectedSubmission.type === 'Assignment' && (
+                        <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-5">
+                            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                                <h3 className="text-[15px] font-bold text-gray-800">Attempts & Deadline Exceptions</h3>
+                                <div className="flex items-center gap-3 text-xs">
+                                    <span className="text-gray-500 font-medium">
+                                        Attempts Used: <strong className="text-gray-800">{selectedSubmission.attemptCount || 0} / {selectedSubmission.maxAttempts || 3}</strong>
+                                    </span>
+                                    {selectedSubmission.extraAttempts > 0 && (
+                                        <span className="bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded text-[11px]">
+                                            +{selectedSubmission.extraAttempts} extra granted
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
 
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[13px] font-bold text-gray-800">Score / Marks</label>
-                            <input
-                                type="number"
-                                placeholder="— / 100"
-                                value={scoreInput}
-                                onChange={(e) => setScoreInput(e.target.value)}
-                                className="w-40 px-4 py-2.5 bg-[#F8F9FA] border border-gray-100 rounded-md text-[13px] font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
-                            />
-                        </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Attempt Controls */}
+                                <div className="p-4 bg-[#F8F9FA] rounded-xl border border-gray-100 flex flex-col justify-between gap-3">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                                            Grant Extra Attempts
+                                        </h4>
+                                        <p className="text-xs text-gray-500 leading-relaxed">
+                                            Grant additional submission attempts so the student can re-upload their assignment file.
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            disabled={actionLoading}
+                                            onClick={() => handleGrantAttempt(1)}
+                                            className="px-4 py-2 bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded-[4px] text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                                        >
+                                            + Grant 1 Attempt
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={actionLoading}
+                                            onClick={() => handleGrantAttempt(2)}
+                                            className="px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-[4px] text-xs font-semibold transition-all disabled:opacity-50"
+                                        >
+                                            +2
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[13px] font-bold text-gray-800">Feedback to Student</label>
-                            <textarea
-                                placeholder="Enter your feedback here..."
-                                value={feedbackInput}
-                                onChange={(e) => setFeedbackInput(e.target.value)}
-                                className="w-full h-32 px-4 py-3 bg-[#F8F9FA] border border-gray-100 rounded-lg text-[13px] text-gray-700 font-medium resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/20"
-                            ></textarea>
+                                {/* Due Date Controls */}
+                                <div className="p-4 bg-[#F8F9FA] rounded-xl border border-gray-100 flex flex-col justify-between gap-3">
+                                    <div>
+                                        <div className="flex justify-between items-center mb-1">
+                                            <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                Extend Due Date
+                                            </h4>
+                                            {selectedSubmission.extendedDueDate && (
+                                                <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                                    Extended: {new Date(selectedSubmission.extendedDueDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-gray-500 leading-relaxed">
+                                            Extend the deadline for this student or toggle late submission permission.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <button
+                                            type="button"
+                                            disabled={actionLoading}
+                                            onClick={() => handleExtendDueDate({ days: 3 })}
+                                            className="px-3 py-2 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 rounded-[4px] text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                                        >
+                                            +3 Days
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={actionLoading}
+                                            onClick={() => handleExtendDueDate({ days: 7 })}
+                                            className="px-3 py-2 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 rounded-[4px] text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                                        >
+                                            +7 Days
+                                        </button>
+                                        <button
+                                            type="button"
+                                            disabled={actionLoading}
+                                            onClick={() => handleExtendDueDate({ allowLateSubmission: !selectedSubmission.allowLateSubmission })}
+                                            className={`px-3 py-2 rounded-[4px] text-xs font-bold transition-all border shadow-sm disabled:opacity-50 ${
+                                                selectedSubmission.allowLateSubmission
+                                                    ? 'bg-green-50 text-green-700 border-green-300'
+                                                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            {selectedSubmission.allowLateSubmission ? '✓ Late Allowed' : 'Allow Late'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    )}
 
-                        <div className="flex justify-end items-center gap-4 mt-2">
-                            <button className="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-[4px] text-[13px] font-bold transition-colors shadow-sm">
-                                Save as Draft
-                            </button>
-                            <button
-                                onClick={handleGradeSubmit}
-                                disabled={isSubmitting}
-                                className="px-6 py-2.5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[4px] text-[13px] font-bold transition-colors shadow-sm disabled:opacity-50"
-                            >
-                                {isSubmitting ? 'Submitting...' : 'Submit Grade'}
-                            </button>
+                    {/* Grading Card (Only for Assignments) */}
+                    {selectedSubmission.type === 'Assignment' && (
+                        <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-6">
+                            <h3 className="text-[16px] font-bold text-gray-800">Grading</h3>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[13px] font-bold text-gray-800">Score / Marks</label>
+                                <input
+                                    type="number"
+                                    placeholder="— / 100"
+                                    value={scoreInput}
+                                    onChange={(e) => setScoreInput(e.target.value)}
+                                    className="w-40 px-4 py-2.5 bg-[#F8F9FA] border border-gray-100 rounded-md text-[13px] font-bold text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                                />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[13px] font-bold text-gray-800">Feedback to Student</label>
+                                <textarea
+                                    placeholder="Enter your feedback here..."
+                                    value={feedbackInput}
+                                    onChange={(e) => setFeedbackInput(e.target.value)}
+                                    className="w-full h-32 px-4 py-3 bg-[#F8F9FA] border border-gray-100 rounded-lg text-[13px] text-gray-700 font-medium resize-none focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                                ></textarea>
+                            </div>
+
+                            <div className="flex justify-end items-center gap-4 mt-2">
+                                <button className="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-[4px] text-[13px] font-bold transition-colors shadow-sm">
+                                    Save as Draft
+                                </button>
+                                <button
+                                    onClick={handleGradeSubmit}
+                                    disabled={isSubmitting}
+                                    className="px-6 py-2.5 bg-[#3B82F6] hover:bg-blue-600 text-white rounded-[4px] text-[13px] font-bold transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Submit Grade'}
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                 </div>
             )}

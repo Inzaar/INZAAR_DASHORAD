@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/layouts/SideBar";
 import Navbar from "@/components/layouts/NavBar";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getUserProfileById, assignUserRole, deleteUser, restoreUser } from "@/api/user";
 import { RiDeleteBin6Fill, RiAlertFill, RiInformationFill } from "react-icons/ri";
@@ -23,9 +23,16 @@ const StudentDetailsPage = () => {
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab');
+    const [activeTab, setActiveTab] = useState(() => {
+        if (tabParam && ['Profile', 'Performance', 'Courses', 'Certificates', 'Submissions'].includes(tabParam)) {
+            return tabParam;
+        }
+        return 'Profile';
+    });
     const { user } = useAuth();
     const [open, setOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState('Profile');
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [isIncompleteCourseModalOpen, setIsIncompleteCourseModalOpen] = useState(false);
     const [isModerator, setIsModerator] = useState(false);

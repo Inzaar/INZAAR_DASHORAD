@@ -28,6 +28,20 @@ export const gradeSubmission = async (userId, submissionId, data) => {
     return res.data;
 };
 
+export const grantExtraAttempt = async (userId, submissionId, data = { increment: 1 }) => {
+    const res = await axiosInstance.patch(`/users/${userId}/submissions/${submissionId}/grant-attempt`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
+export const extendSubmissionDueDate = async (userId, submissionId, data) => {
+    const res = await axiosInstance.patch(`/users/${userId}/submissions/${submissionId}/extend-due-date`, data, {
+        withCredentials: true,
+    });
+    return res.data;
+};
+
 export const updateUser = async (id, data) => {
     const res = await axiosInstance.patch(`/users/${id}`, data, {
         withCredentials: true,

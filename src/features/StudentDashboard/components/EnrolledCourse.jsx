@@ -1,7 +1,6 @@
 import CourseCard from '@/components/shared/CourseCard'
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader } from 'lucide-react'
 
 function EnrolledCourse({ userCourses = [], loading }) {
     const { t } = useTranslation();
@@ -15,9 +14,30 @@ function EnrolledCourse({ userCourses = [], loading }) {
             style={{ scrollbarWidth: 'none' }}
         >
             {loading ? (
-                <div className="h-[250px] w-full flex items-center justify-center">
-                    <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
-                </div>
+                <>
+                    {[1, 2, 3].map((item) => (
+                        <div 
+                            key={item}
+                            className="w-[301px] h-[250px] bg-white rounded-[10px] border border-gray-200/80 p-[10px] flex flex-col gap-[10px] shadow-sm animate-pulse shrink-0"
+                        >
+                            {/* Image Skeleton */}
+                            <div className="w-full min-h-[140px] flex-1 rounded-[6px] bg-gray-200"></div>
+
+                            {/* Content Skeleton */}
+                            <div className="flex flex-col gap-2 min-w-0 w-full overflow-hidden">
+                                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+
+                                {/* Progress Section Skeleton */}
+                                <div className="flex flex-col gap-1.5 mt-1">
+                                    <div className="flex justify-end">
+                                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                    </div>
+                                    <div className="w-full h-2 bg-gray-200 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </>
             ) : userCourses?.length === 0 ? (
                 <p className="text-gray-500 h-[160px] w-full flex items-center justify-center">{t('no_any_course_enrolled_yet', 'No any course enrolled yet')}</p>
             ) : (

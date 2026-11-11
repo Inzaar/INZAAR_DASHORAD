@@ -2,13 +2,14 @@ import React, { useState, useRef } from 'react';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import GrayButton from '@/components/ui/buttons/GrayButton';
-import { Upload, FileText, X, Info, Loader2 } from 'lucide-react';
+import { Upload, FileText, X, Info, Loader2, Lock, HelpCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { uploadPdf, submitAssignmentProgress } from '@/api/course';
 import toast from 'react-hot-toast';
 import { useUnsavedWarning } from '@/hooks/useUnsavedWarning';
 import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
+import RequestExtensionModal from './RequestExtensionModal';
 
 const AssignmentSubmission = () => {
     const location = useLocation();
@@ -16,10 +17,48 @@ const AssignmentSubmission = () => {
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    const maxAttempts = (() => {
+        if (!assignment?.attempts && !assignment?.maxAttempts) return 3;
+        const raw = String(assignment.maxAttempts || assignment.attempts).trim();
+        if (raw.toLowerCase() === 'unlimited') return Infinity;
+        const parsed = parseInt(raw, 10);
+        return isNaN(parsed) || parsed <= 0 ? 3 : parsed;
+    })();
+
+    const attemptCount = typeof assignment?.attemptCount === 'number' && assignment.attemptCount > 0
+        ? assignment.attemptCount
+        : (assignment?.isCompleted || assignment?.status === 'Submitted' || assignment?.status === 'Completed' ? 1 : 0);
+
+    const isAdminView = location.pathname.includes('admin') || location.search.includes('admin=true') || location.state?.isAdminView;
+
+    const isAttemptsExhausted = !isAdminView && Boolean(
+        location.state?.isAttemptsExhausted ||
+        assignment?.isAttemptsExhausted ||
+        (maxAttempts !== Infinity && attemptCount >= maxAttempts)
+    );
+
+    const displayDueDate = (() => {
+        const raw = assignment?.dueDate || assignment?.computedDueDate;
+        if (raw && raw !== 'See course details' && !isNaN(new Date(raw).getTime())) {
+            return new Date(raw).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-');
+        }
+        if (raw && raw !== 'See course details') {
+            return raw;
+        }
+        if (assignment?.batchEndDate && !isNaN(new Date(assignment.batchEndDate).getTime())) {
+            return new Date(assignment.batchEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-');
+        }
+        return 'End of Course';
+    })();
+
     const [dragOver, setDragOver] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [showCancelPopup, setShowCancelPopup] = useState(false);
+    const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+    const [hasPendingRequest, setHasPendingRequest] = useState(
+        Boolean(assignment?.extensionRequest?.hasRequested && assignment?.extensionRequest?.status === 'pending')
+    );
     const fileInputRef = useRef(null);
     const abortControllerRef = useRef(null);
 
@@ -68,8 +107,6 @@ const AssignmentSubmission = () => {
         };
     }, [isUploading]);
 
-    const isAdminView = location.pathname.includes('admin') || location.search.includes('admin=true') || location.state?.isAdminView;
-
     const handleEditAssignment = () => {
         const queryParams = new URLSearchParams(location.search);
         const courseId = queryParams.get('courseId') || queryParams.get('id') || assignment?.courseId;
@@ -109,6 +146,11 @@ const AssignmentSubmission = () => {
     const handleSubmit = async () => {
         if (!selectedFile) return;
 
+        if (isAttemptsExhausted) {
+            toast.error(t('attempts_exhausted_error', 'You have reached the maximum number of attempts for this assignment.'));
+            return;
+        }
+
         try {
             setIsUploading(true);
             abortControllerRef.current = new AbortController();
@@ -122,9 +164,13 @@ const AssignmentSubmission = () => {
             // Call backend API to mark assignment as completed in user's enrollment
             const targetCourseId = assignment?.courseId;
             const targetAssignmentId = assignment?.id || assignment?._id;
+            let responseAttempts = attemptCount + 1;
             if (targetCourseId && targetAssignmentId) {
                 try {
-                    await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name, { signal }, enrollmentId);
+                    const res = await submitAssignmentProgress(targetCourseId, targetAssignmentId, cloudinaryUrl, selectedFile.name, { signal }, enrollmentId);
+                    if (res?.data?.data?.attemptCount) {
+                        responseAttempts = res.data.data.attemptCount;
+                    }
                 } catch (progressErr) {
                     if (progressErr.name === 'CanceledError' || progressErr.code === 'ERR_CANCELED') throw progressErr;
                     console.error("Failed to update assignment progress in backend:", progressErr);
@@ -137,10 +183,16 @@ const AssignmentSubmission = () => {
             const submittedAt = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                 + ' · ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
+            const newAttemptCount = responseAttempts;
+            const newIsAttemptsExhausted = maxAttempts !== Infinity && newAttemptCount >= maxAttempts;
+
             const updatedAssignment = {
                 ...assignment,
                 status: 'Submitted',
-                isCompleted: true
+                isCompleted: true,
+                attemptCount: newAttemptCount,
+                maxAttempts: maxAttempts === Infinity ? 'Unlimited' : maxAttempts,
+                isAttemptsExhausted: newIsAttemptsExhausted
             };
 
             navigate('/assignment-submitted', {
@@ -152,7 +204,8 @@ const AssignmentSubmission = () => {
                     status: 'Submitted',
                     submittedAt,
                     returnUrl,
-                    isLate: assignment.isLate || false
+                    isLate: assignment.isLate || false,
+                    isAttemptsExhausted: newIsAttemptsExhausted
                 }
             });
         } catch (error) {
@@ -285,63 +338,95 @@ const AssignmentSubmission = () => {
                                     {t('upload_your_file', 'Upload your file')}
                                 </h3>
 
-                                {/* Drop Zone */}
-                                <div
-                                    className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-10 px-4 transition-colors duration-200 cursor-pointer
-                                        ${dragOver
-                                            ? 'border-[#3758EE] bg-blue-50'
-                                            : 'border-gray-200 bg-gray-50 hover:border-[#3758EE] hover:bg-blue-50/30'
-                                        }`}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    onClick={() => !selectedFile && fileInputRef.current?.click()}
-                                >
-                                    {selectedFile ? (
-                                        <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm w-full max-w-xs">
-                                            <FileText className="w-6 h-6 text-[#3758EE] flex-shrink-0" />
-                                            <span className="text-sm text-gray-700 truncate flex-1">{selectedFile.name}</span>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleRemoveFile(); }}
-                                                className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
+                                {isAttemptsExhausted ? (
+                                    <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                                        <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-3 text-amber-700">
+                                            <Lock size={22} />
                                         </div>
-                                    ) : (
-                                        <>
-                                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                                                <Upload className="w-6 h-6 text-[#3758EE]" />
+                                        <h4 className="text-base font-bold text-gray-900 mb-1">
+                                            {t('all_attempts_used_title', 'All Submission Attempts Completed')}
+                                        </h4>
+                                        <p className="text-xs sm:text-sm text-gray-600 max-w-md leading-relaxed mb-4">
+                                            {t('all_attempts_used_msg', `You have reached the maximum limit of ${maxAttempts} submission attempt(s) for this assignment. Additional submissions are not permitted.`)}
+                                        </p>
+
+                                        {hasPendingRequest ? (
+                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-800">
+                                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                                {t('request_pending_review', 'Exception request submitted. Awaiting review.')}
                                             </div>
-                                            <p className="text-sm text-gray-500 mb-3">
-                                                {t('drag_drop', 'Drag & drop or')}
-                                            </p>
+                                        ) : (
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                                                className="border border-[#3758EE] text-[#3758EE] text-sm px-5 py-1.5 rounded-full hover:bg-blue-50 transition-colors font-medium"
+                                                onClick={() => setIsRequestModalOpen(true)}
+                                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2055A5] to-[#8C6DFD] hover:opacity-95 text-white text-xs font-bold rounded-lg shadow-sm transition-all"
                                             >
-                                                {t('browse_file', 'Browse file')}
+                                                <HelpCircle size={15} />
+                                                <span>{t('request_extra_attempt_btn', 'Request Extra Attempt / Extension')}</span>
                                             </button>
-                                            <p className="text-xs text-gray-400 mt-3 text-center">
-                                                {assignment.acceptedFormats.split(',').map(f => f.trim()).join(' / ')} — worksheet or task brief for students
-                                            </p>
-                                        </>
-                                    )}
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept=".pdf,.doc,.docx"
-                                        className="hidden"
-                                        onChange={handleFileChange}
-                                    />
-                                </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* Drop Zone */
+                                    <div
+                                        className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-10 px-4 transition-colors duration-200 cursor-pointer
+                                            ${dragOver
+                                                ? 'border-[#3758EE] bg-blue-50'
+                                                : 'border-gray-200 bg-gray-50 hover:border-[#3758EE] hover:bg-blue-50/30'
+                                            }`}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        onClick={() => !selectedFile && fileInputRef.current?.click()}
+                                    >
+                                        {selectedFile ? (
+                                            <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm w-full max-w-xs">
+                                                <FileText className="w-6 h-6 text-[#3758EE] flex-shrink-0" />
+                                                <span className="text-sm text-gray-700 truncate flex-1">{selectedFile.name}</span>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleRemoveFile(); }}
+                                                    className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                                                    <Upload className="w-6 h-6 text-[#3758EE]" />
+                                                </div>
+                                                <p className="text-sm text-gray-500 mb-3">
+                                                    {t('drag_drop', 'Drag & drop or')}
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                                    className="border border-[#3758EE] text-[#3758EE] text-sm px-5 py-1.5 rounded-full hover:bg-blue-50 transition-colors font-medium"
+                                                >
+                                                    {t('browse_file', 'Browse file')}
+                                                </button>
+                                                <p className="text-xs text-gray-400 mt-3 text-center">
+                                                    {(assignment.acceptedFormats ? assignment.acceptedFormats.split(',').map(f => f.trim()).join(' / ') : 'PDF / DOC / DOCX / Image (JPG/PNG)')} — worksheet or task brief for students
+                                                </p>
+                                            </>
+                                        )}
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept=".pdf,.doc,.docx"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                        />
+                                    </div>
+                                )}
 
                                 {/* Info Note */}
                                 <div className="flex items-center gap-2 text-xs text-gray-400">
                                     <Info className="w-3.5 h-3.5 flex-shrink-0" />
                                     <span>
-                                        {t('max_file_size_note', `Max file size ${assignment.maxFileSizeMB} MB. You can resubmit anytime before the due date.`)}
+                                        {isAttemptsExhausted
+                                            ? t('attempts_exhausted_note', 'All submission attempts have been used.')
+                                            : t('max_file_size_note', `Max file size ${assignment.maxFileSizeMB || assignment.maxFileSize || 25} MB. ${maxAttempts === Infinity ? 'Unlimited attempts' : `${Math.max(0, maxAttempts - attemptCount)} attempt(s) remaining`} before the due date.`)}
                                     </span>
                                 </div>
                             </div>
@@ -353,7 +438,7 @@ const AssignmentSubmission = () => {
                                 <div className="divide-y divide-gray-100">
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('due_date', 'Due date')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{assignment.dueDate}</span>
+                                        <span className="text-sm font-medium text-gray-800">{displayDueDate}</span>
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('status', 'Status')}</span>
@@ -364,11 +449,15 @@ const AssignmentSubmission = () => {
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('accepted_formats', 'Accepted formats')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{assignment.acceptedFormats}</span>
+                                        <span className="text-sm font-medium text-gray-800">{assignment.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'}</span>
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('attempts', 'Attempts')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{assignment.attempts}</span>
+                                        <span className={`text-sm font-medium ${isAttemptsExhausted ? 'text-amber-700 font-semibold' : 'text-gray-800'}`}>
+                                            {maxAttempts === Infinity
+                                                ? `${attemptCount} (${t('unlimited', 'Unlimited')})`
+                                                : `${attemptCount} / ${maxAttempts}${isAttemptsExhausted ? ' (Max reached)' : ''}`}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -392,6 +481,26 @@ const AssignmentSubmission = () => {
                             >
                                 {t('edit_assignment', 'Edit Assignment')}
                             </GradiantButton>
+                        ) : isAttemptsExhausted ? (
+                            <div className="flex items-center gap-2">
+                                <GradiantButton
+                                    disabled={true}
+                                    className="px-5 py-2.5 rounded-lg text-sm font-semibold opacity-50 cursor-not-allowed flex items-center gap-2"
+                                >
+                                    <Lock size={16} />
+                                    {t('no_attempts_left', 'No Attempts Remaining')}
+                                </GradiantButton>
+                                {!hasPendingRequest && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRequestModalOpen(true)}
+                                        className="px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors flex items-center gap-1.5 shadow-sm"
+                                    >
+                                        <HelpCircle size={15} />
+                                        {t('request_exception', 'Request Exception')}
+                                    </button>
+                                )}
+                            </div>
                         ) : (
                             <GradiantButton
                                 onClick={handleSubmit}
@@ -417,6 +526,13 @@ const AssignmentSubmission = () => {
                 isOpen={showModal}
                 onProceed={handleLeave}
                 onCancel={handleStay}
+            />
+            <RequestExtensionModal
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                assignment={assignment}
+                enrollmentId={enrollmentId}
+                onSuccess={() => setHasPendingRequest(true)}
             />
         </div>
     );

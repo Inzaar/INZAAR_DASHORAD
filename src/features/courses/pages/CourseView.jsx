@@ -65,6 +65,43 @@ const isImageUrl = (url) => {
 const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-') : 'N/A';
 
+const formatAssignmentDueDate = (assignment, course) => {
+    // 1. If computedDueDate or dueDate is a valid date (string or Date) and not the fallback phrase
+    const candidateDate = assignment?.computedDueDate || assignment?.dueDate;
+    if (candidateDate && candidateDate !== 'See course details' && !isNaN(new Date(candidateDate).getTime())) {
+        return fmtDate(candidateDate);
+    }
+    // 2. If setDueDate is true and maxDays is provided (e.g. '1-Day', '3-Days', '1-Week')
+    if (assignment?.setDueDate && assignment?.maxDays) {
+        const match = String(assignment.maxDays).trim().match(/^(\d+)\s*(day|week|month)?/i);
+        const val = match ? parseInt(match[1], 10) : 1;
+        const unit = match && match[2] ? match[2].toLowerCase() : 'day';
+        const days = unit.startsWith('week') ? val * 7 : (unit.startsWith('month') ? val * 30 : val);
+        const base = new Date(course?.batchStartDate || course?.startDate || course?.releaseDate || Date.now());
+        if (!isNaN(base.getTime())) {
+            const calculated = new Date(base);
+            calculated.setDate(calculated.getDate() + days);
+            return fmtDate(calculated);
+        }
+    }
+    // 3. Fall back to batch end date
+    if (course?.batchEndDate && !isNaN(new Date(course.batchEndDate).getTime())) {
+        return fmtDate(course.batchEndDate);
+    }
+    // 4. Fall back to course end date
+    if (course?.endDate && !isNaN(new Date(course.endDate).getTime())) {
+        return fmtDate(course.endDate);
+    }
+    // 5. Fall back to 30 days after start or current date
+    const fallbackBase = new Date(course?.batchStartDate || course?.releaseDate || Date.now());
+    if (!isNaN(fallbackBase.getTime())) {
+        const calculated = new Date(fallbackBase);
+        calculated.setDate(calculated.getDate() + 30);
+        return fmtDate(calculated);
+    }
+    return fmtDate(new Date());
+};
+
 const getPdfEmbedUrl = (url) => {
     if (!url) return '';
     const formattedUrl = formatResourceUrl(url);
@@ -1067,6 +1104,7 @@ const CourseView = () => {
             return;
         }
 
+        const dueDateFormatted = formatAssignmentDueDate(assignment, courseData);
         const mappedAssignmentObj = {
             id: assignment.id || assignment._id,
             courseId: courseId || courseData?._id || courseData?.id,
@@ -1074,14 +1112,25 @@ const CourseView = () => {
             title: assignment.title,
             description: assignment.instructions || `Submit your assignment for ${assignment.title}.`,
             instructions: assignment.instructions || 'Please complete and upload your assignment file.',
-            dueDate: assignment.setDueDate ? assignment.maxDays : (assignment.dueDate || 'See course details'),
+            dueDate: dueDateFormatted,
             status: assignment.isCompleted ? 'Submitted' : 'Not submitted',
-            acceptedFormats: assignment.acceptedTypes?.join(', ') || 'PDF, DOC, DOCX',
-            attempts: assignment.maxAttempts || 'Unlimited',
+            acceptedFormats: (Array.isArray(assignment.acceptedTypes) && assignment.acceptedTypes.length > 0)
+                ? assignment.acceptedTypes.join(', ')
+                : (assignment.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'),
+            attempts: assignment.maxAttempts || '3',
+            maxAttempts: assignment.maxAttempts || '3',
+            attemptCount: typeof assignment.attemptCount === 'number' ? assignment.attemptCount : (assignment.isCompleted ? 1 : 0),
+            isAttemptsExhausted: Boolean(assignment.isAttemptsExhausted || (assignment.isCompleted && parseInt(assignment.maxAttempts || '3', 10) <= (assignment.attemptCount || 1))),
             maxFileSizeMB: parseInt(assignment.maxFileSize) || 25,
             pdfUrl: assignment.referenceFileUrl ? [assignment.referenceFileUrl] : (assignment.pdfUrl || []),
             isCompleted: assignment.isCompleted || false,
-            isLate: assignment.isLate || false
+            isLate: assignment.isLate || false,
+            computedDueDate: assignment.computedDueDate || dueDateFormatted,
+            batchEndDate: courseData?.batchEndDate,
+            extraAttempts: assignment.extraAttempts || 0,
+            extendedDueDate: assignment.extendedDueDate || null,
+            allowLateSubmission: !!assignment.allowLateSubmission,
+            extensionRequest: assignment.extensionRequest || null
         };
 
         if (assignment.isCompleted) {
@@ -1095,8 +1144,10 @@ const CourseView = () => {
                     totalScore: assignment.totalScore || 100,
                     feedback: assignment.feedback,
                     isLate: assignment.isLate || false,
+                    isAttemptsExhausted: mappedAssignmentObj.isAttemptsExhausted,
                     submittedAt: assignment.submittedAt ? new Date(assignment.submittedAt).toLocaleString() : new Date().toLocaleString(),
-                    returnUrl: window.location.pathname + window.location.search
+                    returnUrl: window.location.pathname + window.location.search,
+                    enrollmentId
                 }
             });
             return;
@@ -1128,6 +1179,7 @@ const CourseView = () => {
             }
         }
 
+        const dueDateFormatted = formatAssignmentDueDate(lecture, courseData);
         const mappedAssignmentObj = {
             id: lecture.id || lecture._id,
             courseId: courseId || courseData?._id || courseData?.id,
@@ -1135,14 +1187,25 @@ const CourseView = () => {
             title: lecture.title,
             description: `Submit your assignment for ${lecture.title}.`,
             instructions: lecture.instructions || 'Please complete and upload your assignment file.',
-            dueDate: lecture.dueDate || 'See course details',
+            dueDate: dueDateFormatted,
             status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
-            acceptedFormats: 'PDF, DOC, DOCX',
-            attempts: 'Unlimited before due date',
-            maxFileSizeMB: 25,
-            pdfUrl: lecture.pdfUrl,
+            acceptedFormats: (Array.isArray(lecture.acceptedTypes) && lecture.acceptedTypes.length > 0)
+                ? lecture.acceptedTypes.join(', ')
+                : (lecture.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'),
+            attempts: lecture.maxAttempts || '3',
+            maxAttempts: lecture.maxAttempts || '3',
+            attemptCount: typeof lecture.attemptCount === 'number' ? lecture.attemptCount : (lecture.isCompleted ? 1 : 0),
+            isAttemptsExhausted: Boolean(lecture.isAttemptsExhausted || (lecture.isCompleted && parseInt(lecture.maxAttempts || '3', 10) <= (lecture.attemptCount || 1))),
+            maxFileSizeMB: parseInt(lecture.maxFileSize) || 25,
+            pdfUrl: lecture.referenceFileUrl ? [lecture.referenceFileUrl] : (lecture.pdfUrl || []),
             isCompleted: lecture.isCompleted || false,
-            isLate: lecture.isLate || false
+            isLate: lecture.isLate || false,
+            computedDueDate: lecture.computedDueDate || dueDateFormatted,
+            batchEndDate: courseData?.batchEndDate,
+            extraAttempts: lecture.extraAttempts || 0,
+            extendedDueDate: lecture.extendedDueDate || null,
+            allowLateSubmission: !!lecture.allowLateSubmission,
+            extensionRequest: lecture.extensionRequest || null
         };
 
         if (lecture.isCompleted) {
@@ -1156,8 +1219,10 @@ const CourseView = () => {
                     totalScore: lecture.totalScore || 100,
                     feedback: lecture.feedback,
                     isLate: lecture.isLate || false,
+                    isAttemptsExhausted: mappedAssignmentObj.isAttemptsExhausted,
                     submittedAt: lecture.submittedAt ? new Date(lecture.submittedAt).toLocaleString() : new Date().toLocaleString(),
-                    returnUrl: window.location.pathname + window.location.search
+                    returnUrl: window.location.pathname + window.location.search,
+                    enrollmentId
                 }
             });
             return;
@@ -3045,7 +3110,7 @@ const CourseView = () => {
                                                     isCompleted: assignment.isCompleted || false,
                                                     type: 'Assignment',
                                                     instructions: assignment.instructions,
-                                                    dueDate: assignment.dueDate || (assignment.setDueDate && assignment.maxDays),
+                                                    dueDate: formatAssignmentDueDate(assignment, courseData),
                                                     pdfUrl: assignment.referenceFileUrl ? [assignment.referenceFileUrl] : (assignment.pdfUrl || []),
                                                 });
                                             });

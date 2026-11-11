@@ -350,8 +350,25 @@ const DashboardPage = () => {
                                             </div>
                                             <div ref={lecturesContainerRef} className="flex gap-4 overflow-x-auto pb-2 no-scrollbar relative" style={{ scrollbarWidth: 'none' }}>
                                                 {loading ? (
-                                                    <div className="w-full h-[160px] flex items-center justify-center">
-                                                        <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
+                                                    <div className="flex gap-4 overflow-hidden w-full">
+                                                        {[1, 2, 3].map((item) => (
+                                                            <div
+                                                                key={item}
+                                                                className="w-[273px] h-[161px] rounded-[23px] bg-gray-200/90 p-4 flex flex-col justify-between shrink-0 animate-pulse border border-gray-100"
+                                                            >
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex flex-col gap-2 w-3/4">
+                                                                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                                                                        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                                                                        <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                                                                    </div>
+                                                                    <div className="w-8 h-8 rounded-full bg-gray-300 shrink-0"></div>
+                                                                </div>
+                                                                <div className="flex justify-center mt-auto">
+                                                                    <div className="h-7 w-28 bg-gray-300 rounded-lg"></div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 ) : filteredLectures.length > 0 ? (
                                                     filteredLectures.map((lecture, index) => (
@@ -383,8 +400,8 @@ const DashboardPage = () => {
                                             </div>
                                             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${ongoingProgressPercentage}%` }}
+                                                    className={`h-full rounded-full transition-all duration-300 ease-in-out ${loading ? 'bg-gray-200 animate-pulse w-full' : 'bg-[#A892FF]'}`}
+                                                    style={!loading ? { width: `${ongoingProgressPercentage}%` } : undefined}
                                                 />
                                             </div>
                                         </div>
