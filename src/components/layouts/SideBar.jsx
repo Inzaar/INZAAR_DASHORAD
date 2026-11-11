@@ -101,7 +101,7 @@ function Sidebar({ className, onClose }) {
         return 0;
       });
     }
-    
+
     if (user?.role === 'management') {
       moderatorFeatures.unshift('Dashboard');
     }
@@ -250,7 +250,7 @@ function Sidebar({ className, onClose }) {
       setIsModeratorsExpanded(!isModeratorsExpanded);
       return;
     }
-    
+
     if (itemName === 'Instructors') {
       navigate('/admin-instructors');
       setActiveItem('Instructors');
@@ -443,27 +443,27 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isModeratorsExpanded && (
             <div className="flex flex-col gap-1 transition-all">
-                  <button
-                    onClick={() => handleItemClick('All Moderators')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                    {t('all_moderators', 'All Moderators')}
-                  </button>
-                  <button
-                    onClick={() => handleItemClick('Male Moderators')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Moderators' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                    {t('male_moderators', 'Male Moderators')}
-                  </button>
-                  <button
-                    onClick={() => handleItemClick('Female Moderators')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Moderators' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
-                    {t('female_moderators', 'Female Moderators')}
-                  </button>
+              <button
+                onClick={() => handleItemClick('All Moderators')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                {t('all_moderators', 'All Moderators')}
+              </button>
+              <button
+                onClick={() => handleItemClick('Male Moderators')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Moderators' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                {t('male_moderators', 'Male Moderators')}
+              </button>
+              <button
+                onClick={() => handleItemClick('Female Moderators')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Moderators' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
+                {t('female_moderators', 'Female Moderators')}
+              </button>
             </div>
           )}
         </div>
@@ -488,27 +488,27 @@ function Sidebar({ className, onClose }) {
           </Sideabrbbutton>
           {isBatchesExpanded && (
             <div className="flex flex-col gap-1 transition-all">
-                  <button
-                    onClick={() => handleItemClick('All Batches')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Batches' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
-                    {t('all_batches', 'All Batches')}
-                  </button>
-                  <button
-                    onClick={() => handleItemClick('Running Batches')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Running Batches' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
-                    {t('running_batches', 'Running Batches')}
-                  </button>
-                  <button
-                    onClick={() => handleItemClick('Completed Batches')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#10B981] hover:text-[#059669] ${activeItem === 'Completed Batches' ? 'font-bold' : 'font-medium'}`}
-                  >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#10B981]"></span>
-                    {t('completed_batches', 'Completed Batches')}
-                  </button>
+              <button
+                onClick={() => handleItemClick('All Batches')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Batches' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                {t('all_batches', 'All Batches')}
+              </button>
+              <button
+                onClick={() => handleItemClick('Running Batches')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Running Batches' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                {t('running_batches', 'Running Batches')}
+              </button>
+              <button
+                onClick={() => handleItemClick('Completed Batches')}
+                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#10B981] hover:text-[#059669] ${activeItem === 'Completed Batches' ? 'font-bold' : 'font-medium'}`}
+              >
+                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#10B981]"></span>
+                {t('completed_batches', 'Completed Batches')}
+              </button>
             </div>
           )}
         </div>

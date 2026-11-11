@@ -106,6 +106,19 @@ export const submitAssignmentProgress = async (courseId, assignmentId, fileUrl, 
     return res.data.data;
 };
 
+// Request assignment exception (extra attempt or deadline extension)
+export const requestAssignmentExtension = async (courseId, assignmentId, requestType, message, enrollmentId = null) => {
+    const payload = { assignmentId, requestType, message };
+    if (enrollmentId) payload.enrollmentId = enrollmentId;
+
+    const res = await axiosInstance.post(
+        `/enrollments/my-courses/${courseId}/assignment-request`,
+        payload,
+        { withCredentials: true }
+    );
+    return res.data.data;
+};
+
 // Upload an image to Cloudinary via the backend
 // file: File object from <input type="file">
 // Returns { url, public_id }

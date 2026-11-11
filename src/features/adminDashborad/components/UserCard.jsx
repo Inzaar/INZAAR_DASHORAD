@@ -6,12 +6,12 @@ import defaultMaleImg from '@/assets/images/dummy-male.svg';
 import defaultFemaleImg from '@/assets/images/dummy-female.svg';
 
 const UserCard = ({
-    name = "Mudassar",
+    name = "User",
     id,
     image,
     performance = "88%",
     joiningDate = "7/10/2025",
-    email = "Mudassar123@gmail.com",
+    email = "user@example.com",
     phone = "(229) 555-0109",
     status = "online",
     performanceLabel = "Performance",

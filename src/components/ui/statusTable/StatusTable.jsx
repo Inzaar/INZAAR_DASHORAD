@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 // from "react";
 import StatusRow from "./StatusRow";
 import { CustomPagination } from "@/components/ui/Pagination";
-import { Loader } from "lucide-react";
 
 function StatusTable({ userCourses, loading }) {
     const { t } = useTranslation();
@@ -100,14 +99,41 @@ function StatusTable({ userCourses, loading }) {
                             <div className="w-[134px] flex items-center justify-center">{t("comments", "Comments")}</div>
                             <div className="w-[134px] flex items-center justify-center">{t("action", "Action")}</div>
                         </div>
-                        <div className="flex flex-col gap-4">
-                            <div className="flex items-center justify-center h-[100px]">
-                                {loading ? (
-                                    <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
-                                ) : (
+                        <div className="flex flex-col gap-2">
+                            {loading ? (
+                                [1, 2, 3, 4].map((i) => (
+                                    <div key={i} className="h-[52px] w-full flex items-center justify-between border-b border-gray-50 px-2 animate-pulse">
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-4 w-12 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-2 w-20 bg-gray-200 rounded-full"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-6 w-14 bg-gray-200 rounded-full"></div>
+                                        </div>
+                                        <div className="w-[134px] flex items-center justify-center">
+                                            <div className="h-8 w-20 bg-gray-200 rounded-lg"></div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex items-center justify-center h-[100px]">
                                     <p className="text-gray-500">{t("no_enrolled_courses_yet", "You have no enrolled courses yet !")}</p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
