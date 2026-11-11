@@ -285,7 +285,7 @@ const CourseView = () => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [selectedComments, setSelectedComments] = useState([]);
     const [activeReactionPopup, setActiveReactionPopup] = useState(null);
-    const [commentToDelete, setCommentToDelete] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [lastViewedCommentsTime, setLastViewedCommentsTime] = useState(null);
 
     const commentsScrollRef = useRef(null);
@@ -328,35 +328,31 @@ const CourseView = () => {
     };
 
     const handleDeleteComment = (commentId) => {
-        setCommentToDelete(commentId);
+        setIsSelectionMode(true);
+        setSelectedComments([commentId]);
     };
 
-    const confirmDeleteComment = async () => {
-        if (!commentToDelete) return;
-        try {
-            await deleteComment(commentToDelete);
-            setLectureComments(prev => prev.filter(c => c._id !== commentToDelete));
-            toast.success("Comment deleted");
-        } catch (error) {
-            console.error("Failed to delete comment:", error);
-            toast.error(t('failed_delete_comment', 'Failed to delete comment'));
-        } finally {
-            setCommentToDelete(null);
+    const confirmDeleteComments = async () => {
+        if (selectedComments.length === 0) {
+            setIsDeleteModalOpen(false);
+            return;
         }
-    };
-
-    const handleBulkDelete = async () => {
-        if (selectedComments.length === 0) return;
 
         try {
             await Promise.all(selectedComments.map(id => deleteComment(id)));
             setLectureComments(prev => prev.filter(c => !selectedComments.includes(c._id)));
+            toast.success(
+                selectedComments.length > 1
+                    ? `${selectedComments.length} comments deleted successfully`
+                    : "Comment deleted"
+            );
             setSelectedComments([]);
             setIsSelectionMode(false);
-            toast.success(`${selectedComments.length} comments deleted successfully`);
         } catch (error) {
             console.error("Failed to delete comments:", error);
-            toast.error('Failed to delete some comments');
+            toast.error(t('failed_delete_comment', 'Failed to delete comment'));
+        } finally {
+            setIsDeleteModalOpen(false);
         }
     };
 
@@ -1040,6 +1036,28 @@ const CourseView = () => {
 
     const allLecturesCompleted = Boolean(isCourseCompleted);
     const certificateUrl = certData?.certUrl || courseData?.certificateUrl;
+
+    const hasModerator = Boolean(
+        courseData?.hasAssignedModerator ||
+        courseData?.assignedModeratorPhone ||
+        courseData?.assignedModerator ||
+        courseData?.limitId?.assignedModerator
+    );
+    const moderatorPhone = courseData?.assignedModeratorPhone ||
+        courseData?.assignedModerator?.phone ||
+        courseData?.limitId?.assignedModerator?.phone;
+
+    const handleWhatsAppClick = () => {
+        if (!hasModerator) return;
+        if (moderatorPhone) {
+            const phone = String(moderatorPhone).replace(/\D/g, '');
+            if (phone) {
+                window.open(`https://wa.me/${phone}`, '_blank');
+                return;
+            }
+        }
+        toast.error("Moderator phone number is not available");
+    };
 
     // Helpers for mutual exclusivity between main player (audio/video) and resource audio
     const pauseResourceAudio = () => {
@@ -2018,17 +2036,29 @@ const CourseView = () => {
                                 {!isAdminView && user?.role !== 'admin' && (
                                     <div className="flex flex-wrap items-center gap-2">
                                         <button
-                                            disabled={true}
-                                            title="WhatsApp button is disabled"
-                                            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
+                                            type="button"
+                                            disabled={!hasModerator}
+                                            onClick={handleWhatsAppClick}
+                                            title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
+                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${
+                                                hasModerator
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
+                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
+                                            }`}
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
                                         </button>
                                         {/* Mobile icon-only WhatsApp button */}
                                         <button
-                                            disabled={true}
-                                            title="WhatsApp button is disabled"
-                                            className="max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
+                                            type="button"
+                                            disabled={!hasModerator}
+                                            onClick={handleWhatsAppClick}
+                                            title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
+                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${
+                                                hasModerator
+                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
+                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
+                                            }`}
                                         >
                                             <FaWhatsapp size={20} />
                                         </button>
@@ -2847,35 +2877,30 @@ const CourseView = () => {
                                         <div className="flex items-center justify-between mb-4 pt-2 pb-2">
                                             {isSelectionMode ? (
                                                 <div className="flex items-center gap-3 w-full bg-blue-50/50 p-2 rounded-xl border border-blue-100">
-                                                    <button onClick={() => { setIsSelectionMode(false); setSelectedComments([]); }} className="p-1.5 text-gray-500 hover:bg-gray-200 rounded-full transition-colors">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => { setIsSelectionMode(false); setSelectedComments([]); }} 
+                                                        className="p-1.5 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
+                                                        title="Cancel selection"
+                                                    >
                                                         <X size={18} />
                                                     </button>
                                                     <span className="font-medium text-blue-700">{selectedComments.length} Selected</span>
                                                     <div className="flex-1"></div>
-                                                    <button
-                                                        onClick={() => {
-                                                            if (window.confirm(`Delete ${selectedComments.length} comments?`)) {
-                                                                handleBulkDelete();
-                                                            }
-                                                        }}
-                                                        disabled={selectedComments.length === 0}
-                                                        className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 text-sm font-medium"
-                                                    >
-                                                        <Trash2 size={16} /> Delete
-                                                    </button>
+                                                    {selectedComments.length > 0 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setIsDeleteModalOpen(true)}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium cursor-pointer"
+                                                        >
+                                                            <Trash2 size={16} /> Delete
+                                                        </button>
+                                                    )}
                                                 </div>
                                             ) : (
-                                                <>
-                                                    <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
-                                                        {t('comments_and_queries', 'Comments and Queries')} <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture?.title})</span>
-                                                    </h3>
-                                                    <button
-                                                        onClick={() => setIsSelectionMode(true)}
-                                                        className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-                                                    >
-                                                        Select
-                                                    </button>
-                                                </>
+                                                <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
+                                                    {t('comments_and_queries', 'Comments and Queries')} <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture?.title})</span>
+                                                </h3>
                                             )}
                                         </div>
                                         <div
@@ -2915,9 +2940,27 @@ const CourseView = () => {
                                                                         <div className="flex-1 h-px bg-green-500/30"></div>
                                                                     </div>
                                                                 )}
-                                                                <div className={cn("relative flex items-center gap-3 w-full group hover:z-[100]", !isMe ? "justify-start" : "justify-end")}>
+                                                                <div 
+                                                                    onClick={() => {
+                                                                        if (isSelectionMode) {
+                                                                            handleToggleCommentSelection(comment._id);
+                                                                        }
+                                                                    }}
+                                                                    className={cn(
+                                                                        "relative flex items-center gap-3 w-full group hover:z-[100] transition-all", 
+                                                                        !isMe ? "justify-start" : "justify-end",
+                                                                        isSelectionMode && "cursor-pointer"
+                                                                    )}
+                                                                >
                                                                     {isSelectionMode && !isMe && (
-                                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                                        <button 
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleToggleCommentSelection(comment._id);
+                                                                            }} 
+                                                                            className="text-gray-400 hover:text-blue-600 transition-colors shrink-0"
+                                                                        >
                                                                             {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
                                                                         </button>
                                                                     )}
@@ -2950,7 +2993,7 @@ const CourseView = () => {
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                        <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none")}>
+                                                                        <div className={cn("px-4 py-2.5 rounded-2xl shadow-sm flex flex-col gap-0.5 relative transition-all", !isMe ? "bg-white border border-gray-200 rounded-bl-none" : "bg-[#3758EE] text-white rounded-br-none", isSelectionMode && isSelected && "ring-2 ring-blue-400 shadow-md")}>
                                                                             <div className="flex items-center justify-between gap-4">
                                                                                 <span className={cn("font-bold text-xs opacity-90", !isMe ? "text-gray-800" : "text-white")}>
                                                                                     {comment.senderId?.firstname || "User"} {comment.senderId?.lastname || ""}
@@ -3024,7 +3067,14 @@ const CourseView = () => {
                                                                     </div>
 
                                                                     {isSelectionMode && isMe && (
-                                                                        <button onClick={() => handleToggleCommentSelection(comment._id)} className="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
+                                                                        <button 
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleToggleCommentSelection(comment._id);
+                                                                            }} 
+                                                                            className="text-gray-400 hover:text-blue-600 transition-colors shrink-0"
+                                                                        >
                                                                             {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
                                                                         </button>
                                                                     )}
@@ -3861,7 +3911,7 @@ const CourseView = () => {
             />
 
             {/* Delete Confirmation Modal */}
-            {commentToDelete && (
+            {isDeleteModalOpen && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 font-sans text-left">
                     <div className="bg-white w-full max-w-[450px] flex flex-col rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
                         <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-50 flex-shrink-0">
@@ -3871,13 +3921,15 @@ const CourseView = () => {
                             <h2 className="text-[22px] font-bold text-gray-800">Confirm Deletion</h2>
                         </div>
                         <div className="px-8 py-6 flex-1 text-gray-600 text-sm">
-                            Are you sure you want to delete this comment? This action cannot be undone.
+                            {selectedComments.length > 1
+                                ? `Are you sure you want to delete these ${selectedComments.length} comments? This action cannot be undone.`
+                                : "Are you sure you want to delete this comment? This action cannot be undone."}
                         </div>
                         <div className="px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-gray-50 flex-shrink-0 bg-white">
-                            <button onClick={() => setCommentToDelete(null)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
+                            <button onClick={() => setIsDeleteModalOpen(false)} className="w-full sm:w-auto px-10 py-3 bg-[#F5F5F5] text-gray-600 rounded-[12px] font-bold text-sm hover:bg-gray-200 transition-all active:scale-95">
                                 No, Cancel
                             </button>
-                            <button onClick={confirmDeleteComment} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
+                            <button onClick={confirmDeleteComments} className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#FF4E4E] to-[#E52222] text-white rounded-[12px] font-bold text-sm shadow-lg shadow-red-500/30 hover:opacity-90 transition-all active:scale-95">
                                 Yes, Delete
                             </button>
                         </div>
