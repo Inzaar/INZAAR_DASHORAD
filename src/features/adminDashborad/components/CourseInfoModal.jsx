@@ -68,6 +68,12 @@ const CourseInfoModal = ({ isOpen, onClose, courseData }) => {
             value: courseData.duration || "Not specified",
             bgColor: "bg-purple-50/60"
         },
+        ...(courseData.totalTime ? [{
+            icon: <Clock className="text-[#3B82F6]" size={18} />,
+            label: "Total Time of the Course",
+            value: courseData.totalTime,
+            bgColor: "bg-indigo-50/60"
+        }] : []),
         {
             icon: <Video className="text-[#10B981]" size={18} />,
             label: "Total Lectures",

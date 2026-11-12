@@ -59,7 +59,8 @@ const AdminCoursesPage = () => {
                     date: new Date(course.createdAt || Date.now()).toLocaleDateString(),
                     lecturesCount: `${course.totalLectures || 0} Lectures`,
                     duration: course.duration || "N/A",
-                    time: course.duration || "N/A",
+                    totalTime: course.totalTime || "",
+                    time: `${course.totalLectures || 0} Lectures (${course.totalTime || course.duration || "N/A"})`,
                     description: course.description || "Learn the concepts step-by-step.",
                     thumbnail: course.thumbnail || null,
                     status: (course.status || '').toLowerCase() === 'draft' ? 'Draft' : 

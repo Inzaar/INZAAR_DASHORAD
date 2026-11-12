@@ -82,12 +82,8 @@ const ProfilePage = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="">
-                            {isLoading ? (
-                                <div className="w-full h-[70vh] flex justify-center items-center">
-                                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
-                                </div>
-                            ) : userInfo ? (
-                                <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} />
+                            {isLoading || userInfo ? (
+                                <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} isLoading={isLoading} />
                             ) : (
                                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                                     <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center animate-in fade-in zoom-in duration-300">

@@ -161,10 +161,13 @@ const Courses = () => {
     const formatCourseForCard = (courseData) => {
         const cId = String(courseData._id);
         const isEnrolled = enrolledCourseIds.some(id => String(id) === cId);
+        const displayTime = courseData.totalTime || courseData.duration || 'N/A';
         return {
             id: courseData._id,
             title: courseData.title,
-            time: `${courseData.totalLectures || 0} ${t('lectures', 'Lectures')} (${courseData.duration || 'N/A'})`,
+            time: `${courseData.totalLectures || 0} ${t('lectures', 'Lectures')} (${displayTime})`,
+            totalTime: courseData.totalTime,
+            duration: courseData.duration,
             description: courseData.description || "Course description unavailable",
             thumbnail: courseData.thumbnail || course, // Fallback image if needed
             icon: icon, // Using static icon for now as per design

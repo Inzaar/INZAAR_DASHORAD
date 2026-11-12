@@ -4,7 +4,60 @@ import EducationalQualificationInput from "@/components/shared/EducationalQualif
 import NationalitySelect from "@/components/shared/NationalitySelect";
 
 
-function Other({ setUserPayload, userPayload, userInfo }) {
+const OtherSkeleton = () => {
+    return (
+        <div className="w-full p-[24px] rounded-[12px] bg-[#FFFFFF] border border-[#E2E8F0] flex flex-col gap-5 animate-pulse">
+            <div className="w-full flex flex-col gap-5">
+                {/* Gender & DOB */}
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
+                    <div className="w-full sm:w-[50%] gap-2 flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-20"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                    <div className="w-full sm:w-[50%] gap-2 flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-28"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                </div>
+
+                {/* Education & Nationality */}
+                <div className="w-full gap-4 flex flex-col sm:flex-row">
+                    <div className="w-full sm:w-[50%] gap-2 flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-44"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                    <div className="w-full sm:w-[50%] gap-2 flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                </div>
+
+                {/* Permanent Address */}
+                <div className="w-full gap-2 flex flex-col">
+                    <div className="h-4 bg-gray-200 rounded w-36"></div>
+                    <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                </div>
+
+                {/* Religious Course */}
+                <div className="w-full gap-2 flex flex-col">
+                    <div className="h-4 bg-gray-200 rounded w-64"></div>
+                    <div className="w-full h-[82px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                </div>
+
+                {/* Referral Source */}
+                <div className="w-full gap-2 flex flex-col">
+                    <div className="h-4 bg-gray-200 rounded w-56"></div>
+                    <div className="w-full h-[82px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+function Other({ setUserPayload, userPayload, userInfo, errors, isLoading = false }) {
+    if (isLoading) {
+        return <OtherSkeleton />;
+    }
     const { t } = useTranslation();
     return (
         <div className="w-full p-[24px] gap-[24px] rounded-[12px] b-[1px] bg-[#FFFFFF]  border border-[#E2E8F0]">

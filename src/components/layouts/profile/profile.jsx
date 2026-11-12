@@ -19,7 +19,7 @@ import { useUnsavedWarning } from "@/hooks/useUnsavedWarning";
 import UnsavedChangesModal from "@/components/shared/UnsavedChangesModal";
 // import profile from "@/assets/images/profile.png"
 
-function Profile({ userInfo, setUserPayload, userPayload }) {
+function Profile({ userInfo, setUserPayload, userPayload, isLoading = false }) {
     const [activeTab, setActiveTab] = useState("account");
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
@@ -101,7 +101,8 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
         return Math.round((filledCount / fields.length) * 100);
     };
 
-    const completionPercentage = calculateProfileCompletion(userPayload || userInfo);
+    const effectiveUser = userPayload || userInfo || user;
+    const completionPercentage = calculateProfileCompletion(effectiveUser);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab);
@@ -228,9 +229,9 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                         }}
                     >
                         <div className="w-full h-full rounded-full overflow-hidden bg-gray-200 border-2 border-white flex items-center justify-center">
-                            {(userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '') || (userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '') ? (
+                            {(userPayload?.profileImageUrl && userPayload.profileImageUrl.trim() !== '') || (userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== '') || (effectiveUser?.profileImageUrl && effectiveUser.profileImageUrl.trim() !== '') ? (
                                 <img
-                                    src={userPayload?.profileImageUrl || userInfo?.profileImageUrl}
+                                    src={userPayload?.profileImageUrl || userInfo?.profileImageUrl || effectiveUser?.profileImageUrl}
                                     alt="profile"
                                     className="w-full h-full object-cover bg-white"
                                 />
@@ -243,12 +244,22 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                     <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] ltr:left-2 ltr:min-[500px]:left-[35px] rtl:right-2 rtl:min-[500px]:right-[35px] ltr:text-left rtl:text-right">
                         {/* <h5>Zain</h5> */}
                         <div className="flex items-center gap-2.5 flex-wrap pt-1 pb-1">
-                            <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">{userInfo?.firstname || "[YOUR_NAME]"}</h4>
+                            {isLoading && !effectiveUser?.firstname && !effectiveUser?.name ? (
+                                <div className="h-8 w-36 bg-gray-200 rounded animate-pulse"></div>
+                            ) : (
+                                <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">
+                                    {effectiveUser?.firstname || (effectiveUser?.name ? effectiveUser.name.split(' ')[0] : "[YOUR_NAME]")}
+                                </h4>
+                            )}
                             <span className="bg-[#3758EE]/10 text-[#3758EE] text-xs min-[600px]:text-sm font-extrabold px-2.5 py-0.5 rounded-full border border-[#3758EE]/20 shadow-sm shrink-0">
                                 {completionPercentage}%
                             </span>
                         </div>
-                        <a href="#" className="w-full h-[24px] text-[16px] underline truncate">{userInfo?.email || "[EMAIL_ADDRESS]"}</a>
+                        {isLoading && !effectiveUser?.email ? (
+                            <div className="h-4 w-44 bg-gray-200 rounded animate-pulse"></div>
+                        ) : (
+                            <a href="#" className="w-full h-[24px] text-[16px] underline truncate">{effectiveUser?.email || "[EMAIL_ADDRESS]"}</a>
+                        )}
                         <h6 className="font-bold text-[16px] leading-[22px] tracking-[-0.7%] text-[#1E293B] leading-[1.8] pt-1">{t('personal_info', 'Personal Info')}</h6>
                         <p className="font-bold text-[14px] leading-[160%] tracking-[0%] text-[#475569] leading-[1.8]">{t('personal_info_desc', 'You can change your personal information settings here.')}</p>
                     </div>
@@ -276,7 +287,24 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                                 <h6 onClick={() => handleTabClick("other")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "other" ? "text-[#18181B]" : "text-[#71717A]"}`}>{t('other', 'Other')}</h6>
                             </div>
                         </div>
-                        {activeTab === "account" ? <Account className="w-full" setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} errors={errors} /> : <Other setUserPayload={setUserPayload} userPayload={userPayload} userInfo={userInfo} errors={errors} />}
+                        {activeTab === "account" ? (
+                            <Account
+                                className="w-full"
+                                setUserPayload={setUserPayload}
+                                userPayload={userPayload}
+                                userInfo={userInfo}
+                                errors={errors}
+                                isLoading={isLoading}
+                            />
+                        ) : (
+                            <Other
+                                setUserPayload={setUserPayload}
+                                userPayload={userPayload}
+                                userInfo={userInfo}
+                                errors={errors}
+                                isLoading={isLoading}
+                            />
+                        )}
                     </div>
 
                 </div>
@@ -293,8 +321,10 @@ function Profile({ userInfo, setUserPayload, userPayload }) {
                 >
                     {t('cancel', 'Cancel')}
                 </button>
-                <div onClick={handleSave}>
-                    <GradiantButton className={"w-[100px] h-[40px] rounded"}>{t('save', 'Save')}</GradiantButton>
+                <div onClick={!isLoading ? handleSave : undefined}>
+                    <GradiantButton disabled={isLoading} className={`w-[100px] h-[40px] rounded ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        {t('save', 'Save')}
+                    </GradiantButton>
                 </div>
             </div>
 

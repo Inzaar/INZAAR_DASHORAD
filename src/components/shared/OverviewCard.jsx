@@ -7,6 +7,7 @@ const OverviewCard = ({
     userCourses,
     statsOverride,  // optional: { col1, col2, col3 } each { value, label, color }
     showCircles = true, // Add this prop
+    loading = false,
 }) => {
     const { t } = useTranslation();
 
@@ -36,7 +37,11 @@ const OverviewCard = ({
                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
             </div>
             <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{col.value}</span>
+                {loading ? (
+                    <div className="h-8 w-16 bg-gray-200 rounded animate-pulse" />
+                ) : (
+                    <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{col.value}</span>
+                )}
                 <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap" style={{ color: col.color }}>
                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
                     {col.label}
