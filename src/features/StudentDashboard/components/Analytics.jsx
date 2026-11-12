@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 // Analytics renders differently depending on context:
 //  - Dashboard view: pass userCourses (shows total enrolled, completed/inProgress/timeSpent, overallProgress)
 //  - Course detail view: pass courseData (shows Progress%, quizScore/lectureCompleted/timeSpent, overallPerformance)
-function Analytics({ userCourses, courseData, name, courseTitle, className, percentageOverride }) {
+function Analytics({ userCourses, courseData, name, courseTitle, className, percentageOverride, loading = false }) {
     const { t } = useTranslation();
 
     // Build course-detail overrides from courseData when present
@@ -34,7 +34,11 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
             col2: { value: courseData.lectureCompleted ?? 0, label: t("lecture_completed", "Lecture Completed"), color: "#3758EE" },
             col3: { value: courseData.timeSpentLastWeek ?? "N/A", label: t("time_spent", "Time Spent"), color: "#B666E7" }
         })
-    } : undefined;
+    } : (loading ? {
+        col1: { value: "0%", label: t("quiz_score", "Quiz Score"), color: "#22C55E" },
+        col2: { value: 0, label: t("lecture_completed", "Lecture Completed"), color: "#3758EE" },
+        col3: { value: "0h 0m", label: t("time_spent", "Time Spent"), color: "#B666E7" }
+    } : undefined);
 
     const coursePerformanceProps = courseData ? {
         percentageOverride: percentageOverride !== undefined ? Math.round(Number(percentageOverride) || 0) : Math.round(parseFloat(courseData.overallPerformance?.percentage ?? courseData.progress ?? 0) || 0),
@@ -50,6 +54,7 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
                     <MetricCard
                         className="w-full"
                         userCourses={userCourses}
+                        loading={loading}
                         {...courseMetricProps}
                     />
                 </div>
@@ -58,6 +63,7 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
                         className="w-full max-w-full shadow-sm"
                         userCourses={userCourses}
                         statsOverride={courseOverviewStats}
+                        loading={loading}
                     />
                 </div>
             </div>
@@ -65,6 +71,7 @@ function Analytics({ userCourses, courseData, name, courseTitle, className, perc
                 className="shadow-sm w-full"
                 userCourses={userCourses}
                 name={name || t("overall_performance", "Overall Performance")}
+                loading={loading}
                 {...coursePerformanceProps}
             />
         </div>

@@ -418,12 +418,14 @@ const AddCoursePage = () => {
     /* ── Course Setup State ── */
     const [courseForm, setCourseForm] = useState({
         title: '',
+        description: '',
         instructor: '',
         batchStrength: '',
         totalLectures: '',
         certificateCriteria: '',
         unlockCriteria: '',
         duration: '4 Weeks',
+        totalTime: '',
         releaseDate: '',
         thumbnail: '',
         certificateFile: '',
@@ -479,12 +481,14 @@ const AddCoursePage = () => {
                     const data = res.data.data;
                     setCourseForm({
                         title: data.title || '',
+                        description: data.description || '',
                         instructor: data.instructor || '',
                         batchStrength: String(data.batchStrength || ''),
                         totalLectures: String(data.totalLectures || ''),
                         certificateCriteria: String(data.certificateCriteria || ''),
                         unlockCriteria: String(data.unlockCriteria || ''),
                         duration: data.duration || '',
+                        totalTime: data.totalTime || '',
                         releaseDate: data.releaseDate ? data.releaseDate.split('T')[0] : '',
                         thumbnail: data.thumbnail || '',
                         certificateFile: data.certificateFile || '',
@@ -569,6 +573,7 @@ const AddCoursePage = () => {
     const isCourseOrLectureDirty = Boolean(
         !isSubmitting && !submitSuccess && (
             courseForm.title?.trim() ||
+            courseForm.description?.trim() ||
             courseForm.instructor?.trim() ||
             courseItems.length > 0 ||
             thumbnailPreview ||
@@ -970,6 +975,7 @@ const AddCoursePage = () => {
         try {
             const payload = {
                 title: courseForm.title,
+                description: courseForm.description || '',
                 instructor: courseForm.instructor || '',
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
@@ -977,11 +983,13 @@ const AddCoursePage = () => {
                 certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
                 unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration || '',
+                totalTime: courseForm.totalTime || '',
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
                 hasSections: courseForm.hasSections || false,
                 sections: courseForm.sections || [],
+                departmentId: courseForm.departmentId || null,
                 ...(isEditMode ? {} : { status: 'draft' }),
             };
 
@@ -1010,6 +1018,7 @@ const AddCoursePage = () => {
         try {
             const payload = {
                 title: courseForm.title || 'Untitled Draft',
+                description: courseForm.description || '',
                 instructor: courseForm.instructor || '',
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
@@ -1017,11 +1026,13 @@ const AddCoursePage = () => {
                 certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
                 unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration || '',
+                totalTime: courseForm.totalTime || '',
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
                 hasSections: courseForm.hasSections || false,
                 sections: courseForm.sections || [],
+                departmentId: courseForm.departmentId || null,
                 status: 'draft',
             };
 
@@ -1051,6 +1062,7 @@ const AddCoursePage = () => {
             const payload = {
                 id: courseId, // Ensure the draft ID is passed for upsert
                 title: courseForm.title,
+                description: courseForm.description || '',
                 instructor: courseForm.instructor,
                 addBy: user?.name || user?.firstname || 'Admin',
                 batchStrength: Number(courseForm.batchStrength) || 0,
@@ -1058,12 +1070,14 @@ const AddCoursePage = () => {
                 certificateCriteria: courseForm.certificateCriteria !== '' ? Number(courseForm.certificateCriteria) : 90,
                 unlockCriteria: courseForm.unlockCriteria !== '' ? Number(courseForm.unlockCriteria) : 90,
                 duration: courseForm.duration,
+                totalTime: courseForm.totalTime || '',
                 releaseDate: courseForm.releaseDate || new Date().toISOString(),
                 thumbnail: courseForm.thumbnail || '',
                 certificateFile: courseForm.certificateFile || '',
                 status,
                 hasSections: courseForm.hasSections || false,
                 sections: courseForm.sections || [],
+                departmentId: courseForm.departmentId || null,
                 lectures: courseItems.map((item, idx) => ({
                     title: item.title,
                     type: item.type || 'Lecture',
@@ -1408,6 +1422,32 @@ const AddCoursePage = () => {
                                                             </div>
                                                             <p className="mt-2 text-[11px] text-gray-400 font-medium">60% of this course must be viewed.</p>
                                                         </div>
+
+                                                        {/* Total Time of the Course */}
+                                                        <div>
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Total Time of the Course</label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Enter total time of the course"
+                                                                value={courseForm.totalTime}
+                                                                onChange={e => handleCourseFormChange('totalTime', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                            />
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Example 34h 15m or 34 Hours</p>
+                                                        </div>
+
+                                                        {/* Course Description */}
+                                                        <div className="col-span-1 md:col-span-2">
+                                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">Course Description</label>
+                                                            <textarea
+                                                                rows={3}
+                                                                placeholder="Enter course description"
+                                                                value={courseForm.description}
+                                                                onChange={e => handleCourseFormChange('description', e.target.value)}
+                                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm resize-none"
+                                                            />
+                                                            <p className="mt-2 text-[11px] text-gray-400 font-medium">Brief overview of what this course is about (shown on course cards).</p>
+                                                        </div>
                                                     </div>
 
                                                     {/* Sections Setup */}
@@ -1589,11 +1629,13 @@ const AddCoursePage = () => {
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
                                                             {[
                                                                 { label: 'Course Title', value: courseForm.title || '—' },
+                                                                { label: 'Course Description', value: courseForm.description || '—' },
                                                                 { label: 'Select Department', value: departments.find(d => d._id === courseForm.departmentId)?.name || '—' },
                                                                 { label: 'Instructor', value: courseForm.instructor || '—' },
                                                                 { label: 'Add by (read-only)', value: user?.name || user?.firstname || 'Admin' },
                                                                 { label: 'Limit Strength', value: courseForm.batchStrength ? `${courseForm.batchStrength} students per limit` : '—' },
                                                                 { label: 'Total Lectures', value: courseForm.totalLectures || courseItems.length || '—' },
+                                                                { label: 'Total Time of the Course', value: courseForm.totalTime || '—' },
                                                                 { label: 'Course Duration', value: courseForm.duration || '—' },
                                                                 { label: 'Unlock Next Lecture (%)', value: courseForm.unlockCriteria !== '' ? `${courseForm.unlockCriteria}%` : '90% (Default)' },
                                                                 { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria !== '' ? `${courseForm.certificateCriteria}%` : '90% (Default)' },

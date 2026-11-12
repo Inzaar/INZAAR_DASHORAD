@@ -6,7 +6,57 @@ import Notification from '@/components/shared/notification/Notification';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
-import { Loader, BellOff, Lock } from 'lucide-react';
+import { BellOff, Lock } from 'lucide-react';
+
+const NotificationSkeleton = () => {
+    return (
+        <div className="flex flex-col gap-6 animate-pulse">
+            {/* Section 1 Skeleton */}
+            <div className="flex flex-col">
+                <div className="h-3.5 bg-gray-200 rounded w-24 mb-3 mx-1"></div>
+                {[
+                    { w: 'w-[85%]', t: 'w-14' },
+                    { w: 'w-[75%]', t: 'w-14' },
+                    { w: 'w-[90%]', t: 'w-14' },
+                    { w: 'w-[70%]', t: 'w-14' },
+                    { w: 'w-[65%]', t: 'w-14' },
+                ].map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100">
+                        <div className="flex-1 flex items-center gap-4 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
+                            <div className="flex items-center gap-2 flex-1 min-w-0 pr-4">
+                                <div className={`h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                            </div>
+                        </div>
+                        <div className={`h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Section 2 Skeleton */}
+            <div className="flex flex-col">
+                <div className="h-3.5 bg-gray-200 rounded w-20 mb-3 mx-1"></div>
+                {[
+                    { w: 'w-[80%]', t: 'w-16' },
+                    { w: 'w-[92%]', t: 'w-16' },
+                    { w: 'w-[68%]', t: 'w-16' },
+                    { w: 'w-[74%]', t: 'w-16' },
+                    { w: 'w-[82%]', t: 'w-16' },
+                ].map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100">
+                        <div className="flex-1 flex items-center gap-4 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
+                            <div className="flex items-center gap-2 flex-1 min-w-0 pr-4">
+                                <div className={`h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                            </div>
+                        </div>
+                        <div className={`h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const NotificationPage = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -141,9 +191,7 @@ const NotificationPage = () => {
 
                         <div className="flex flex-col">
                             {loading ? (
-                                <div className="flex items-center justify-center h-[60vh]">
-                                    <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
-                                </div>
+                                <NotificationSkeleton />
                             ) : user?.role === 'guest' ? (
                                 <div className="flex flex-col items-center justify-center py-20 gap-3 border-2 border-dashed border-gray-100 rounded-2xl">
                                     <div className="w-16 h-16 bg-[#F3E8FF] rounded-full flex items-center justify-center mb-2 border-4 border-[#F3E8FF]">

@@ -10,6 +10,7 @@ const PerformanceCard = ({
     name,
     percentageOverride,
     trendOverride,
+    loading = false,
 }) => {
     const { t } = useTranslation();
 
@@ -38,7 +39,13 @@ const PerformanceCard = ({
             "w-full min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
             className
         )}>
-            <h3 className="text-[18px] font-bold text-black leading-normal pb-1 text-center">{name}</h3>
+            <h3 className="text-[18px] font-bold text-black leading-normal pb-1 text-center">
+                {loading && !name ? (
+                    <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mx-auto" />
+                ) : (
+                    name
+                )}
+            </h3>
             <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
                 <svg width={size} height={size} className="transform -rotate-90">
                     <defs>
@@ -55,28 +62,38 @@ const PerformanceCard = ({
                         strokeWidth={strokeWidth}
                         fill="transparent"
                     />
-                    <circle
-                        cx={center}
-                        cy={center}
-                        r={radius}
-                        stroke="url(#gradient)"
-                        strokeWidth={strokeWidth}
-                        fill="transparent"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
-                        strokeLinecap="round"
-                    />
+                    {!loading && (
+                        <circle
+                            cx={center}
+                            cy={center}
+                            r={radius}
+                            stroke="url(#gradient)"
+                            strokeWidth={strokeWidth}
+                            fill="transparent"
+                            strokeDasharray={circumference}
+                            strokeDashoffset={offset}
+                            strokeLinecap="round"
+                        />
+                    )}
                 </svg>
 
                 <div className="absolute flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold text-black">{percentageInfo.percentage}%</span>
+                    {loading ? (
+                        <div className="h-8 w-14 bg-gray-200 rounded animate-pulse mb-1" />
+                    ) : (
+                        <span className="text-3xl font-bold text-black">{percentageInfo.percentage}%</span>
+                    )}
                     <span className="text-xs text-gray-500 whitespace-nowrap">{t("performance_label", "Performance")}</span>
                 </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-1 text-[11px] sm:text-sm font-medium text-center">
                 <span>{t("trending_up_by", "Trending up by")}</span>
-                <span className="text-[#3758EE]">{percentageInfo.trend}%</span>
+                {loading ? (
+                    <div className="h-4 w-8 bg-gray-200 rounded animate-pulse inline-block mx-1" />
+                ) : (
+                    <span className="text-[#3758EE]">{percentageInfo.trend}%</span>
+                )}
                 <span>{t("this_week", "this Week")}</span>
                 <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black ml-1" />
             </div>
