@@ -208,7 +208,6 @@ const AdminDashboard = () => {
                                 pagination={pagination}
                                 onPageChange={fetchStudentsTable}
                                 title="Student Table"
-                                showDropdown={true}
                             />
                         </div>
 

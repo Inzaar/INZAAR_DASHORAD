@@ -1607,9 +1607,9 @@ const CourseView = () => {
                                     }
                                 }
                             }).catch(err => console.warn('Progress update failed:', err))
-                              .finally(() => {
-                                  isUpdatingProgressRef.current = false;
-                              });
+                                .finally(() => {
+                                    isUpdatingProgressRef.current = false;
+                                });
                         }
                     }
                 }
@@ -2040,11 +2040,10 @@ const CourseView = () => {
                                             disabled={!hasModerator}
                                             onClick={handleWhatsAppClick}
                                             title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
-                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${
-                                                hasModerator
+                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${hasModerator
                                                     ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
                                                     : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
-                                            }`}
+                                                }`}
                                         >
                                             WhatsApp <FaWhatsapp size={16} />
                                         </button>
@@ -2054,11 +2053,10 @@ const CourseView = () => {
                                             disabled={!hasModerator}
                                             onClick={handleWhatsAppClick}
                                             title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
-                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${
-                                                hasModerator
+                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${hasModerator
                                                     ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
                                                     : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
-                                            }`}
+                                                }`}
                                         >
                                             <FaWhatsapp size={20} />
                                         </button>
@@ -2069,11 +2067,10 @@ const CourseView = () => {
                                                     disabled={!isCourseCompleted}
                                                     onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
                                                     title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${
-                                                        !isCourseCompleted
+                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${!isCourseCompleted
                                                             ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
                                                             : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <Download className="w-4 h-4" />
                                                     Download Certificate
@@ -2082,11 +2079,10 @@ const CourseView = () => {
                                                     disabled={!isCourseCompleted}
                                                     onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
                                                     title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${
-                                                        !isCourseCompleted
+                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${!isCourseCompleted
                                                             ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
                                                             : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <Download className="w-5 h-5" />
                                                 </GradiantButton>
@@ -2097,11 +2093,10 @@ const CourseView = () => {
                                                     disabled={!allLecturesCompleted}
                                                     onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
                                                     title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
-                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${
-                                                        !allLecturesCompleted
+                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${!allLecturesCompleted
                                                             ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
                                                             : "cursor-pointer"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <GraduationCap className="w-4 h-4" />
                                                     Generate Certificate
@@ -2110,11 +2105,10 @@ const CourseView = () => {
                                                     disabled={!allLecturesCompleted}
                                                     onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
                                                     title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
-                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${
-                                                        !allLecturesCompleted
+                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${!allLecturesCompleted
                                                             ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
                                                             : "cursor-pointer"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <GraduationCap className="w-5 h-5" />
                                                 </GradiantButton>
@@ -2125,8 +2119,8 @@ const CourseView = () => {
                                             {t('enroll_new_course', 'Enroll New Course')}
                                         </GradiantButton>
                                         <div className="relative group max-[600px]:inline-flex hidden">
-                                            <GradiantButton 
-                                                onClick={() => navigate('/courses')} 
+                                            <GradiantButton
+                                                onClick={() => navigate('/courses')}
                                                 className="text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
                                             >
                                                 <Plus className="w-5 h-5" />
@@ -2519,7 +2513,7 @@ const CourseView = () => {
                                                                                 autoPlay={shouldAutoplay}
                                                                                 className="w-full h-12 outline-none"
                                                                                 src={getAudioSrc(url)}
-                                                                                                                                                         onError={() => {
+                                                                                onError={() => {
                                                                                     if (isDrive) {
                                                                                         setAudioError(true);
                                                                                     }
@@ -2877,9 +2871,9 @@ const CourseView = () => {
                                         <div className="flex items-center justify-between mb-4 pt-2 pb-2">
                                             {isSelectionMode ? (
                                                 <div className="flex items-center gap-3 w-full bg-blue-50/50 p-2 rounded-xl border border-blue-100">
-                                                    <button 
+                                                    <button
                                                         type="button"
-                                                        onClick={() => { setIsSelectionMode(false); setSelectedComments([]); }} 
+                                                        onClick={() => { setIsSelectionMode(false); setSelectedComments([]); }}
                                                         className="p-1.5 text-gray-500 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
                                                         title="Cancel selection"
                                                     >
@@ -2940,25 +2934,25 @@ const CourseView = () => {
                                                                         <div className="flex-1 h-px bg-green-500/30"></div>
                                                                     </div>
                                                                 )}
-                                                                <div 
+                                                                <div
                                                                     onClick={() => {
                                                                         if (isSelectionMode) {
                                                                             handleToggleCommentSelection(comment._id);
                                                                         }
                                                                     }}
                                                                     className={cn(
-                                                                        "relative flex items-center gap-3 w-full group hover:z-[100] transition-all", 
+                                                                        "relative flex items-center gap-3 w-full group hover:z-[100] transition-all",
                                                                         !isMe ? "justify-start" : "justify-end",
                                                                         isSelectionMode && "cursor-pointer"
                                                                     )}
                                                                 >
                                                                     {isSelectionMode && !isMe && (
-                                                                        <button 
+                                                                        <button
                                                                             type="button"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
                                                                                 handleToggleCommentSelection(comment._id);
-                                                                            }} 
+                                                                            }}
                                                                             className="text-gray-400 hover:text-blue-600 transition-colors shrink-0"
                                                                         >
                                                                             {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
@@ -3067,12 +3061,12 @@ const CourseView = () => {
                                                                     </div>
 
                                                                     {isSelectionMode && isMe && (
-                                                                        <button 
+                                                                        <button
                                                                             type="button"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
                                                                                 handleToggleCommentSelection(comment._id);
-                                                                            }} 
+                                                                            }}
                                                                             className="text-gray-400 hover:text-blue-600 transition-colors shrink-0"
                                                                         >
                                                                             {isSelected ? <CheckSquare size={20} className="text-blue-600" /> : <Square size={20} />}
@@ -3295,11 +3289,10 @@ const CourseView = () => {
                                             lectureMediaInputRef.current?.click();
                                         }
                                     }}
-                                    className={`w-full py-5 px-4 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${
-                                        isLectureMediaUploading
+                                    className={`w-full py-5 px-4 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group ${isLectureMediaUploading
                                             ? 'border-blue-400/50 bg-blue-50/20 cursor-wait'
                                             : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50/30'
-                                    }`}
+                                        }`}
                                 >
                                     {isLectureMediaUploading ? (
                                         <div className="flex flex-col items-center gap-2">
@@ -3806,8 +3799,8 @@ const CourseView = () => {
                 const isDrive = Boolean(
                     activeAudioUrl &&
                     (activeAudioUrl.includes('drive.google.com') ||
-                     activeAudioUrl.includes('drive.usercontent.google.com') ||
-                     activeAudioUrl.includes('docs.google.com'))
+                        activeAudioUrl.includes('drive.usercontent.google.com') ||
+                        activeAudioUrl.includes('docs.google.com'))
                 );
 
                 const getDriveEmbedSrc = (url) => {
@@ -3824,12 +3817,10 @@ const CourseView = () => {
                 };
 
                 return (
-                    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 animate-in slide-in-from-bottom-4 ${
-                        isDrive ? 'w-[95%] sm:w-[540px] max-w-xl' : 'w-[90%] max-w-md'
-                    }`}>
-                        <div className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100 flex flex-col gap-3 transition-all ${
-                            isDrive ? 'p-4 sm:p-5' : 'p-4'
+                    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 animate-in slide-in-from-bottom-4 ${isDrive ? 'w-[95%] sm:w-[540px] max-w-xl' : 'w-[90%] max-w-md'
                         }`}>
+                        <div className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100 flex flex-col gap-3 transition-all ${isDrive ? 'p-4 sm:p-5' : 'p-4'
+                            }`}>
                             <div className="flex justify-between items-center pb-2 border-b border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm">

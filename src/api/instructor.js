@@ -4,8 +4,8 @@ export const createInstructor = (data) => {
     return axiosInstance.post('/instructors', data);
 };
 
-export const getInstructors = () => {
-    return axiosInstance.get('/instructors');
+export const getInstructors = (params) => {
+    return axiosInstance.get('/instructors', { params });
 };
 
 export const getInstructorById = (id) => {

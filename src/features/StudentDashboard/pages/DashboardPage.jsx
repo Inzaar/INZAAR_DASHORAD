@@ -270,15 +270,9 @@ const DashboardPage = () => {
                                     <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>
-                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm no-scrollbar">
+                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t("enrolled_courses", "Enrolled Courses")}</h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
-                                            <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${progressPercentage}%` }}
-                                                />
-                                            </div>
                                         </div>
                                         <div className="hidden min-[680px]:flex min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%] flex-col">
                                             <Calendar18 className="w-full h-full flex-1" />

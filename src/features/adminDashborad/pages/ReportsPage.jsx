@@ -33,18 +33,12 @@ const ReportsPage = () => {
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
     const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
-    // Filter State
+    // Filter State (shared for both top and bottom controls)
     const [filterStatus, setFilterStatus] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-
-    // Bottom table filters (separate from top)
     const [tableSearch, setTableSearch] = useState('');
     const [tableSearchType, setTableSearchType] = useState('NAME');
-    const [tableFrom, setTableFrom] = useState('');
-    const [tableTo, setTableTo] = useState('');
-    const [tableStatus, setTableStatus] = useState('');
     const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
 
     const toggleSidebar = () => {
@@ -63,9 +57,15 @@ const ReportsPage = () => {
     ]);
 
     // Fetch report data from API
-    const fetchReport = useCallback(async (page = 1) => {
+    const fetchReport = useCallback(async (page = 1, customParams = {}) => {
         setLoading(true);
         try {
+            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+            const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
+
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 5);
@@ -74,13 +74,12 @@ const ReportsPage = () => {
                 params.append('gender', user.gender);
             }
 
-            // Apply table filters
-            if (tableStatus) params.append('status', tableStatus);
-            if (tableFrom) params.append('from', tableFrom);
-            if (tableTo) params.append('to', tableTo);
-            if (tableSearch.trim()) {
-                params.append('search', tableSearch.trim());
-                params.append('searchType', tableSearchType);
+            if (currentStatus) params.append('status', currentStatus);
+            if (currentFrom) params.append('from', currentFrom);
+            if (currentTo) params.append('to', currentTo);
+            if (currentSearch && currentSearch.trim()) {
+                params.append('search', currentSearch.trim());
+                params.append('searchType', currentSearchType);
             }
 
             const res = await axiosInstance.get(`/admin/reports/students?${params.toString()}`);
@@ -99,62 +98,82 @@ const ReportsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [tableStatus, tableFrom, tableTo, tableSearch, tableSearchType]);
+    }, [filterStatus, filterFrom, filterTo, tableSearch, tableSearchType, user]);
 
-    // Real-time search effect
+    // Search debouncing and initial fetch
+    const isFirstMount = React.useRef(true);
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            fetchReport(1);
+            return;
+        }
         const timer = setTimeout(() => {
             fetchReport(1);
         }, 300);
         return () => clearTimeout(timer);
-    }, [tableSearch, tableSearchType, tableStatus, tableFrom, tableTo, fetchReport]);
+    }, [tableSearch, tableSearchType]);
+
+    const handleStatusChange = (val) => {
+        setFilterStatus(val);
+        fetchReport(1, { status: val });
+    };
+
+    const handleFromChange = (val) => {
+        setFilterFrom(val);
+        fetchReport(1, { from: val });
+    };
+
+    const handleToChange = (val) => {
+        setFilterTo(val);
+        fetchReport(1, { to: val });
+    };
+
+    const filteredStudents = React.useMemo(() => {
+        return (students || []).filter(student => {
+            // 1. Status Filter: strictly match Active vs In-active
+            if (filterStatus === 'active') {
+                return (student.status || '').toLowerCase() === 'active';
+            }
+            if (filterStatus === 'inactive') {
+                return (student.status || '').toLowerCase() !== 'active';
+            }
+
+            // 2. Date Filter: between filterFrom and filterTo
+            if (filterFrom || filterTo) {
+                if (!student.lastLogin) return false;
+                const d = new Date(student.lastLogin);
+                if (isNaN(d.getTime())) return false;
+                const studentDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (filterFrom && studentDateStr < filterFrom) return false;
+                if (filterTo && studentDateStr > filterTo) return false;
+            }
+
+            return true;
+        });
+    }, [students, filterStatus, filterFrom, filterTo]);
 
     // Handle top filter search
     const handleTopSearch = () => {
-        // Sync top filters to table filters
-        setTableStatus(filterStatus);
-        setTableFrom(filterFrom);
-        setTableTo(filterTo);
-        setTableSearch(searchQuery);
-        setTableSearchType(searchType);
         setIsFilterDropdownOpen(false);
-        // Fetch will be triggered by fetchReport call below
-        setTimeout(() => fetchReport(1), 0);
+        fetchReport(1, { status: filterStatus, from: filterFrom, to: filterTo });
     };
 
-    // Handle top clear filter
-    const handleTopClear = () => {
+    // Handle clear filter
+    const handleClear = () => {
         setFilterStatus('');
         setFilterFrom('');
         setFilterTo('');
-        setSearchQuery('');
-        setTableStatus('');
-        setTableFrom('');
-        setTableTo('');
         setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+        setIsFilterDropdownOpen(false);
+        setIsTableFilterOpen(false);
+        fetchReport(1, { status: '', from: '', to: '', search: '' });
     };
 
     // Handle table filter search
     const handleTableSearch = () => {
         fetchReport(1);
     };
-
-    // Handle table clear filter
-    const handleTableClear = () => {
-        setTableStatus('');
-        setTableFrom('');
-        setTableTo('');
-        setTableSearch('');
-        setTimeout(() => {
-            fetchReport(1);
-        }, 0);
-    };
-
-    // Handle table clear (uses the ref-less approach)  
-    useEffect(() => {
-        // This runs when table filters change via clear
-    }, [tableStatus, tableFrom, tableTo, tableSearch]);
 
     // Pagination handler
     const goToPage = (page) => {
@@ -230,7 +249,7 @@ const ReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                         <select
                                             value={filterStatus}
-                                            onChange={(e) => setFilterStatus(e.target.value)}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">{t("all_students_filter", "All Students")}</option>
@@ -244,7 +263,7 @@ const ReportsPage = () => {
                                             <input
                                                 type="date"
                                                 value={filterFrom}
-                                                onChange={(e) => setFilterFrom(e.target.value)}
+                                                onChange={(e) => handleFromChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -256,7 +275,7 @@ const ReportsPage = () => {
                                             <input
                                                 type="date"
                                                 value={filterTo}
-                                                onChange={(e) => setFilterTo(e.target.value)}
+                                                onChange={(e) => handleToChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -275,7 +294,7 @@ const ReportsPage = () => {
                                     </GradiantButton>
                                     <button
                                         className="h-[42px] px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors"
-                                        onClick={handleTopClear}
+                                        onClick={handleClear}
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear Filter
@@ -303,7 +322,7 @@ const ReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                                 <select
                                                     value={filterStatus}
-                                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                                    onChange={(e) => handleStatusChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">{t("all_students_filter", "All Students")}</option>
@@ -317,7 +336,7 @@ const ReportsPage = () => {
                                                     <input
                                                         type="date"
                                                         value={filterFrom}
-                                                        onChange={(e) => setFilterFrom(e.target.value)}
+                                                        onChange={(e) => handleFromChange(e.target.value)}
                                                         className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -329,7 +348,7 @@ const ReportsPage = () => {
                                                     <input
                                                         type="date"
                                                         value={filterTo}
-                                                        onChange={(e) => setFilterTo(e.target.value)}
+                                                        onChange={(e) => handleToChange(e.target.value)}
                                                         className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -408,7 +427,7 @@ const ReportsPage = () => {
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
-                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_email", "Search by email")}
                                                 className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={tableSearch}
                                                 onChange={(e) => setTableSearch(e.target.value)}
@@ -417,16 +436,16 @@ const ReportsPage = () => {
                                             <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
                                                 <button
                                                     onClick={() => {
-                                                        if (tableSearchType !== 'PHONE') {
-                                                            setTableSearchType('PHONE');
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
                                                             setTableSearch('');
                                                         } else if (tableSearch.trim()) {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
-                                                    PHONE#
+                                                    EMAIL
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -437,7 +456,7 @@ const ReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -450,8 +469,8 @@ const ReportsPage = () => {
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
-                                            value={tableFrom}
-                                            onChange={(e) => setTableFrom(e.target.value)}
+                                            value={filterFrom}
+                                            onChange={(e) => handleFromChange(e.target.value)}
                                         />
                                     </div>
 
@@ -460,8 +479,8 @@ const ReportsPage = () => {
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
-                                            value={tableTo}
-                                            onChange={(e) => setTableTo(e.target.value)}
+                                            value={filterTo}
+                                            onChange={(e) => handleToChange(e.target.value)}
                                         />
                                     </div>
 
@@ -469,20 +488,20 @@ const ReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status", "Status")}</span>
                                         <div className="relative">
                                             <select
-                                                value={tableStatus}
-                                                onChange={(e) => setTableStatus(e.target.value)}
+                                                value={filterStatus}
+                                                onChange={(e) => handleStatusChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
                                             >
-                                                <option value="">{t("select", "Select")}</option>
-                                                <option value="active">{t("active", "Active")}</option>
-                                                <option value="inactive">{t("inactive", "Inactive")}</option>
+                                                <option value="">{t("all_students_filter", "All Students")}</option>
+                                                <option value="active">{t("active_students", "Active Students")}</option>
+                                                <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
                                             </select>
                                             <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                         </div>
                                     </div>
 
                                     <button
-                                        onClick={handleTableClear}
+                                        onClick={handleClear}
                                         className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
@@ -496,7 +515,7 @@ const ReportsPage = () => {
                                         <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("advanced_search", "ADVANCED SEARCH")}</p>
                                         <div className="flex items-center justify-end gap-3">
                                             <button
-                                                onClick={handleTableClear}
+                                                onClick={handleClear}
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
@@ -517,13 +536,13 @@ const ReportsPage = () => {
                                                                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("status", "Status")}</label>
                                                                 <div className="relative">
                                                                     <select
-                                                                        value={tableStatus}
-                                                                        onChange={(e) => setTableStatus(e.target.value)}
+                                                                        value={filterStatus}
+                                                                        onChange={(e) => handleStatusChange(e.target.value)}
                                                                         className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                                                                     >
-                                                                        <option value="">{t("select", "Select")}</option>
-                                                                        <option value="active">{t("active", "Active")}</option>
-                                                                        <option value="inactive">{t("inactive", "Inactive")}</option>
+                                                                        <option value="">{t("all_students_filter", "All Students")}</option>
+                                                                        <option value="active">{t("active_students", "Active Students")}</option>
+                                                                        <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
                                                                     </select>
                                                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
@@ -533,8 +552,8 @@ const ReportsPage = () => {
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={tableFrom}
-                                                                    onChange={(e) => setTableFrom(e.target.value)}
+                                                                    value={filterFrom}
+                                                                    onChange={(e) => handleFromChange(e.target.value)}
                                                                 />
                                                             </div>
                                                             <div>
@@ -542,8 +561,8 @@ const ReportsPage = () => {
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={tableTo}
-                                                                    onChange={(e) => setTableTo(e.target.value)}
+                                                                    value={filterTo}
+                                                                    onChange={(e) => handleToChange(e.target.value)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -560,7 +579,7 @@ const ReportsPage = () => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_email", "Search by email")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={tableSearch}
                                                     onChange={(e) => setTableSearch(e.target.value)}
@@ -570,16 +589,16 @@ const ReportsPage = () => {
                                             <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
                                                 <button
                                                     onClick={() => {
-                                                        if (tableSearchType !== 'PHONE') {
-                                                            setTableSearchType('PHONE');
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
                                                             setTableSearch('');
                                                         } else if (tableSearch.trim()) {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
-                                                    PHONE#
+                                                    EMAIL
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -600,7 +619,7 @@ const ReportsPage = () => {
                                 </div>
 
                                 <SharedStudentTable
-                                    students={students}
+                                    students={filteredStudents}
                                     loading={loading}
                                     pagination={pagination}
                                     onPageChange={goToPage}

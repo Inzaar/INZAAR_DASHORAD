@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -31,7 +31,6 @@ const ExportStudentReportsPage = () => {
     const [filterGender, setFilterGender] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
 
     const [courses, setCourses] = useState([]);
     const [batches, setBatches] = useState([]);
@@ -40,17 +39,6 @@ const ExportStudentReportsPage = () => {
     const [filterCourse, setFilterCourse] = useState('');
     const [filterBatch, setFilterBatch] = useState('');
     const [filterModerator, setFilterModerator] = useState('');
-
-    const [appliedCourse, setAppliedCourse] = useState('');
-    const [appliedBatch, setAppliedBatch] = useState('');
-    const [appliedModerator, setAppliedModerator] = useState('');
-    const [appliedGender, setAppliedGender] = useState('');
-
-
-    // Applied Top Filters State
-    const [appliedStatus, setAppliedStatus] = useState('');
-    const [appliedFrom, setAppliedFrom] = useState('');
-    const [appliedTo, setAppliedTo] = useState('');
 
     // Bottom table filters (separate from top)
     const [tableSearch, setTableSearch] = useState('');
@@ -109,32 +97,39 @@ const ExportStudentReportsPage = () => {
     };
 
     // Fetch report data from API
-    const fetchReport = useCallback(async (page = 1) => {
+    const fetchReport = useCallback(async (page = 1, customParams = {}) => {
         setLoading(true);
         try {
+            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+            const currentGender = customParams.gender !== undefined ? customParams.gender : filterGender;
+            const currentCourse = customParams.courseId !== undefined ? customParams.courseId : filterCourse;
+            const currentBatch = customParams.batchId !== undefined ? customParams.batchId : filterBatch;
+            const currentModerator = customParams.moderatorId !== undefined ? customParams.moderatorId : filterModerator;
+            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+            const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
+
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 100000); // Fetch all records for export view
 
             if (user?.role === 'moderator' && user?.gender) {
                 params.append('gender', user.gender);
+            } else if (currentGender) {
+                params.append('gender', currentGender);
             }
 
-            // Apply filters
-            if (appliedStatus) params.append('status', appliedStatus);
-            if (appliedGender) params.append('gender', appliedGender);
-            if (appliedFrom) params.append('from', appliedFrom);
-            if (appliedTo) params.append('to', appliedTo);
+            if (currentStatus) params.append('status', currentStatus);
+            if (currentFrom) params.append('from', currentFrom);
+            if (currentTo) params.append('to', currentTo);
+            if (currentCourse) params.append('courseId', currentCourse);
+            if (currentBatch) params.append('batchId', currentBatch);
+            if (currentModerator) params.append('moderatorId', currentModerator);
 
-            if (appliedCourse) params.append('courseId', appliedCourse);
-            if (appliedBatch) params.append('batchId', appliedBatch);
-            if (appliedModerator) params.append('moderatorId', appliedModerator);
-
-
-            // Apply table filters
-            if (tableSearch.trim()) {
-                params.append('search', tableSearch.trim());
-                params.append('searchType', tableSearchType);
+            if (currentSearch && currentSearch.trim()) {
+                params.append('search', currentSearch.trim());
+                params.append('searchType', currentSearchType);
             }
 
             const res = await axiosInstance.get(`/admin/reports/students?${params.toString()}`);
@@ -145,60 +140,99 @@ const ExportStudentReportsPage = () => {
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
             setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
         } catch (err) {
             console.error('Failed to fetch students report:', err);
         } finally {
             setLoading(false);
         }
-    }, [appliedStatus, appliedGender, appliedFrom, appliedTo, appliedCourse, appliedBatch, appliedModerator, tableSearch, tableSearchType]);
+    }, [filterStatus, filterGender, filterCourse, filterBatch, filterModerator, filterFrom, filterTo, tableSearch, tableSearchType, user]);
 
-    // Real-time search effect
+    // Initial mount and debounce for tableSearch / tableSearchType
+    const isFirstMount = useRef(true);
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            fetchReport(1);
+            return;
+        }
         const timer = setTimeout(() => {
             fetchReport(1);
         }, 300);
         return () => clearTimeout(timer);
-    }, [tableSearch, tableSearchType, fetchReport]);
+    }, [tableSearch, tableSearchType]);
+
+    const handleStatusChange = (val) => {
+        setFilterStatus(val);
+        fetchReport(1, { status: val });
+    };
+
+    const handleGenderChange = (val) => {
+        setFilterGender(val);
+        fetchReport(1, { gender: val });
+    };
+
+    const handleCourseChange = (val) => {
+        setFilterCourse(val);
+        fetchReport(1, { courseId: val });
+    };
+
+    const handleBatchChange = (val) => {
+        setFilterBatch(val);
+        fetchReport(1, { batchId: val });
+    };
+
+    const handleModeratorChange = (val) => {
+        setFilterModerator(val);
+        fetchReport(1, { moderatorId: val });
+    };
+
+    const handleFromChange = (val) => {
+        setFilterFrom(val);
+        fetchReport(1, { from: val });
+    };
+
+    const handleToChange = (val) => {
+        setFilterTo(val);
+        fetchReport(1, { to: val });
+    };
 
     // Handle top search
     const handleTopSearch = () => {
-        setAppliedStatus(filterStatus);
-        setAppliedGender(filterGender);
-        setAppliedFrom(filterFrom);
-        setAppliedTo(filterTo);
-
-        setAppliedCourse(filterCourse);
-        setAppliedBatch(filterBatch);
-        setAppliedModerator(filterModerator);
-
-        setTableSearch(searchQuery);
-        setTableSearchType(searchType);
         setIsFilterDropdownOpen(false);
-        setTimeout(() => fetchReport(1), 0);
+        fetchReport(1, {
+            status: filterStatus,
+            gender: filterGender,
+            courseId: filterCourse,
+            batchId: filterBatch,
+            moderatorId: filterModerator,
+            from: filterFrom,
+            to: filterTo,
+            search: tableSearch,
+            searchType: tableSearchType
+        });
     };
 
     // Handle top clear filter
     const handleTopClear = () => {
         setFilterStatus('');
         setFilterGender('');
-        setFilterFrom('');
-        setFilterTo('');
-        setAppliedStatus('');
-        setAppliedGender('');
-        setAppliedFrom('');
-        setAppliedTo('');
-
         setFilterCourse('');
         setFilterBatch('');
         setFilterModerator('');
-        setAppliedCourse('');
-        setAppliedBatch('');
-        setAppliedModerator('');
-
-        setSearchQuery('');
+        setFilterFrom('');
+        setFilterTo('');
         setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+        setIsFilterDropdownOpen(false);
+        fetchReport(1, {
+            status: '',
+            gender: '',
+            courseId: '',
+            batchId: '',
+            moderatorId: '',
+            from: '',
+            to: '',
+            search: ''
+        });
     };
 
     // Handle table filter search
@@ -209,15 +243,56 @@ const ExportStudentReportsPage = () => {
     // Handle table clear filter
     const handleTableClear = () => {
         setTableSearch('');
-        setTimeout(() => {
-            fetchReport(1);
-        }, 0);
+        fetchReport(1, { search: '' });
     };
 
-    // Handle table clear (uses the ref-less approach)  
-    useEffect(() => {
-        // This runs when table filters change via clear
-    }, [tableSearch]);
+    // Client-side filtering memo
+    const filteredStudents = useMemo(() => {
+        return (students || []).filter(student => {
+            // 1. Status Filter: strictly match Active vs In-active
+            if (filterStatus === 'active' && (student.status || '').toLowerCase() !== 'active') {
+                return false;
+            }
+            if (filterStatus === 'inactive' && (student.status || '').toLowerCase() === 'active') {
+                return false;
+            }
+
+            // 2. Gender Filter
+            if (filterGender && (student.gender || '').toLowerCase() !== filterGender.toLowerCase()) {
+                return false;
+            }
+
+            // 3. Date Filter: between filterFrom and filterTo (on lastLogin / createdAt)
+            if (filterFrom || filterTo) {
+                if (!student.lastLogin) return false;
+                const d = new Date(student.lastLogin);
+                if (isNaN(d.getTime())) return false;
+                const studentDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (filterFrom && studentDateStr < filterFrom) return false;
+                if (filterTo && studentDateStr > filterTo) return false;
+            }
+
+            // 4. Search Filter
+            if (tableSearch && tableSearch.trim()) {
+                const q = tableSearch.trim().toLowerCase();
+                if (tableSearchType === 'NAME') {
+                    const name = (student.name || '').toLowerCase();
+                    const qWords = q.split(/\s+/).filter(Boolean);
+                    const matches = qWords.every(word => name.includes(word));
+                    if (!matches) return false;
+                } else if (tableSearchType === 'EMAIL') {
+                    const email = (student.email || '').toLowerCase();
+                    if (!email.includes(q)) return false;
+                } else if (tableSearchType === 'PHONE') {
+                    const phone = (student.phone || '').replace(/\D/g, '');
+                    const qPhone = q.replace(/\D/g, '');
+                    if (qPhone && !phone.includes(qPhone)) return false;
+                }
+            }
+
+            return true;
+        });
+    }, [students, filterStatus, filterGender, filterFrom, filterTo, tableSearch, tableSearchType]);
 
     // Pagination handler
     const goToPage = (page) => {
@@ -254,7 +329,7 @@ const ExportStudentReportsPage = () => {
         const csvRows = [];
         csvRows.push(headers.join(','));
         
-        students.forEach(student => {
+        filteredStudents.forEach(student => {
             const rowValues = activeKeys.map(key => {
                 let val = student[key];
                 
@@ -364,7 +439,7 @@ const ExportStudentReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                         <select
                                             value={filterStatus}
-                                            onChange={(e) => setFilterStatus(e.target.value)}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">{t("all_students_filter", "All Students")}</option>
@@ -376,7 +451,7 @@ const ExportStudentReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">GENDER</span>
                                         <select
                                             value={filterGender}
-                                            onChange={(e) => setFilterGender(e.target.value)}
+                                            onChange={(e) => handleGenderChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">All Genders</option>
@@ -389,7 +464,7 @@ const ExportStudentReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">COURSE</span>
                                         <select
                                             value={filterCourse}
-                                            onChange={(e) => setFilterCourse(e.target.value)}
+                                            onChange={(e) => handleCourseChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">All Courses</option>
@@ -400,7 +475,7 @@ const ExportStudentReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">BATCH</span>
                                         <select
                                             value={filterBatch}
-                                            onChange={(e) => setFilterBatch(e.target.value)}
+                                            onChange={(e) => handleBatchChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">All Batches</option>
@@ -411,7 +486,7 @@ const ExportStudentReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">MODERATOR</span>
                                         <select
                                             value={filterModerator}
-                                            onChange={(e) => setFilterModerator(e.target.value)}
+                                            onChange={(e) => handleModeratorChange(e.target.value)}
                                             className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">All Moderators</option>
@@ -425,7 +500,7 @@ const ExportStudentReportsPage = () => {
                                             <input
                                                 type="date"
                                                 value={filterFrom}
-                                                onChange={(e) => setFilterFrom(e.target.value)}
+                                                onChange={(e) => handleFromChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -438,7 +513,7 @@ const ExportStudentReportsPage = () => {
                                             <input
                                                 type="date"
                                                 value={filterTo}
-                                                onChange={(e) => setFilterTo(e.target.value)}
+                                                onChange={(e) => handleToChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -485,7 +560,7 @@ const ExportStudentReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                                 <select
                                                     value={filterStatus}
-                                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                                    onChange={(e) => handleStatusChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">{t("all_students_filter", "All Students")}</option>
@@ -497,7 +572,7 @@ const ExportStudentReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">GENDER</span>
                                                 <select
                                                     value={filterGender}
-                                                    onChange={(e) => setFilterGender(e.target.value)}
+                                                    onChange={(e) => handleGenderChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">All Genders</option>
@@ -509,7 +584,7 @@ const ExportStudentReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">COURSE</span>
                                                 <select
                                                     value={filterCourse}
-                                                    onChange={(e) => setFilterCourse(e.target.value)}
+                                                    onChange={(e) => handleCourseChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">All Courses</option>
@@ -520,7 +595,7 @@ const ExportStudentReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">BATCH</span>
                                                 <select
                                                     value={filterBatch}
-                                                    onChange={(e) => setFilterBatch(e.target.value)}
+                                                    onChange={(e) => handleBatchChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">All Batches</option>
@@ -531,7 +606,7 @@ const ExportStudentReportsPage = () => {
                                                 <span className="text-xs font-bold text-gray-400 uppercase">MODERATOR</span>
                                                 <select
                                                     value={filterModerator}
-                                                    onChange={(e) => setFilterModerator(e.target.value)}
+                                                    onChange={(e) => handleModeratorChange(e.target.value)}
                                                     className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">All Moderators</option>
@@ -544,7 +619,7 @@ const ExportStudentReportsPage = () => {
                                                     <input
                                                         type="date"
                                                         value={filterFrom}
-                                                        onChange={(e) => setFilterFrom(e.target.value)}
+                                                        onChange={(e) => handleFromChange(e.target.value)}
                                                         className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -556,7 +631,7 @@ const ExportStudentReportsPage = () => {
                                                     <input
                                                         type="date"
                                                         value={filterTo}
-                                                        onChange={(e) => setFilterTo(e.target.value)}
+                                                        onChange={(e) => handleToChange(e.target.value)}
                                                         className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -582,13 +657,13 @@ const ExportStudentReportsPage = () => {
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
-                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
-                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : tableSearchType === "EMAIL" ? t("search_by_email", "Search by email") : t("search_by_phone", "Search by phone")}
+                                                className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={tableSearch}
                                                 onChange={(e) => setTableSearch(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
                                             />
-                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2 shrink-0">
                                                 <button
                                                     onClick={() => {
                                                         if (tableSearchType !== 'PHONE') {
@@ -598,7 +673,7 @@ const ExportStudentReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -611,9 +686,22 @@ const ExportStudentReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`px-3 sm:px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -770,7 +858,7 @@ const ExportStudentReportsPage = () => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : tableSearchType === "EMAIL" ? t("search_by_email", "Search by email") : t("search_by_phone", "Search by phone")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={tableSearch}
                                                     onChange={(e) => setTableSearch(e.target.value)}
@@ -800,9 +888,22 @@ const ExportStudentReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -810,7 +911,7 @@ const ExportStudentReportsPage = () => {
                                 </div>
 
                                 <SharedStudentTable
-                                    students={students}
+                                    students={filteredStudents}
                                     loading={loading}
                                     pagination={pagination}
                                     onPageChange={goToPage}

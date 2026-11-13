@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -25,15 +25,10 @@ const ExportModeratorReportsPage = () => {
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
     const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
-    // Top Filter State
+    // Filter State (unified across top and table)
     const [filterStatus, setFilterStatus] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
-
-    // Applied Top Filters State
-    const [appliedStatus, setAppliedStatus] = useState('');
-    const [appliedFrom, setAppliedFrom] = useState('');
-    const [appliedTo, setAppliedTo] = useState('');
 
     // Table Filter State
     const [tableSearch, setTableSearch] = useState('');
@@ -56,9 +51,15 @@ const ExportModeratorReportsPage = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     // Fetch report data from API
-    const fetchReport = useCallback(async (page = 1) => {
+    const fetchReport = useCallback(async (page = 1, customParams = {}) => {
         setLoading(true);
         try {
+            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+            const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
+
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 100000); // Fetch all records for export view
@@ -67,15 +68,13 @@ const ExportModeratorReportsPage = () => {
                 params.append('gender', user.gender);
             }
 
-            // Apply filters
-            if (appliedStatus) params.append('status', appliedStatus);
-            if (appliedFrom) params.append('from', appliedFrom);
-            if (appliedTo) params.append('to', appliedTo);
+            if (currentStatus) params.append('status', currentStatus);
+            if (currentFrom) params.append('from', currentFrom);
+            if (currentTo) params.append('to', currentTo);
 
-            // Apply table filters
-            if (tableSearch.trim()) {
-                params.append('search', tableSearch.trim());
-                params.append('searchType', tableSearchType);
+            if (currentSearch && currentSearch.trim()) {
+                params.append('search', currentSearch.trim());
+                params.append('searchType', currentSearchType);
             }
 
             const res = await axiosInstance.get(`/admin/reports/moderators?${params.toString()}`);
@@ -86,43 +85,112 @@ const ExportModeratorReportsPage = () => {
             setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
             setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
         } catch (err) {
             console.error('Failed to fetch moderators report:', err);
         } finally {
             setLoading(false);
         }
-    }, [appliedStatus, appliedFrom, appliedTo, tableSearch, tableSearchType]);
+    }, [filterStatus, filterFrom, filterTo, tableSearch, tableSearchType, user]);
 
-    // Real-time search effect
+    // Initial mount and real-time search effect
+    const isFirstMount = useRef(true);
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            fetchReport(1);
+            return;
+        }
         const timer = setTimeout(() => {
             fetchReport(1);
         }, 300);
         return () => clearTimeout(timer);
-    }, [tableSearch, tableSearchType, fetchReport]);
+    }, [tableSearch, tableSearchType]);
+
+    const handleStatusChange = (val) => {
+        setFilterStatus(val);
+        fetchReport(1, { status: val });
+    };
+
+    const handleFromChange = (val) => {
+        setFilterFrom(val);
+        fetchReport(1, { from: val });
+    };
+
+    const handleToChange = (val) => {
+        setFilterTo(val);
+        fetchReport(1, { to: val });
+    };
 
     // Top filter handlers
     const handleTopSearch = () => {
-        setAppliedStatus(filterStatus);
-        setAppliedFrom(filterFrom);
-        setAppliedTo(filterTo);
         setIsFilterDropdownOpen(false);
-        setTimeout(() => fetchReport(1), 0);
+        fetchReport(1, {
+            status: filterStatus,
+            from: filterFrom,
+            to: filterTo,
+            search: tableSearch,
+            searchType: tableSearchType
+        });
     };
+
     const handleTopClear = () => {
-        setFilterStatus(''); setFilterFrom(''); setFilterTo('');
-        setAppliedStatus(''); setAppliedFrom(''); setAppliedTo('');
+        setFilterStatus('');
+        setFilterFrom('');
+        setFilterTo('');
         setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+        setIsFilterDropdownOpen(false);
+        fetchReport(1, { status: '', from: '', to: '', search: '' });
     };
 
     // Table filter handlers
     const handleTableSearch = () => fetchReport(1);
     const handleTableClear = () => {
-        setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+        handleTopClear();
     };
+
+    // Client-side filtering memo
+    const filteredModerators = useMemo(() => {
+        return (moderators || []).filter(mod => {
+            // 1. Status Filter: strictly match Active vs Inactive
+            if (filterStatus === 'active' && (mod.status || '').toLowerCase() !== 'active') {
+                return false;
+            }
+            if (filterStatus === 'inactive' && (mod.status || '').toLowerCase() === 'active') {
+                return false;
+            }
+
+            // 2. Date Filter
+            if (filterFrom || filterTo) {
+                const dateVal = mod.lastLogin || mod.joiningDate;
+                if (!dateVal) return false;
+                const d = new Date(dateVal);
+                if (isNaN(d.getTime())) return false;
+                const modDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (filterFrom && modDateStr < filterFrom) return false;
+                if (filterTo && modDateStr > filterTo) return false;
+            }
+
+            // 3. Search Filter
+            if (tableSearch && tableSearch.trim()) {
+                const q = tableSearch.trim().toLowerCase();
+                if (tableSearchType === 'NAME') {
+                    const name = (mod.name || '').toLowerCase();
+                    const qWords = q.split(/\s+/).filter(Boolean);
+                    const matches = qWords.every(word => name.includes(word));
+                    if (!matches) return false;
+                } else if (tableSearchType === 'EMAIL') {
+                    const email = (mod.email || '').toLowerCase();
+                    if (!email.includes(q)) return false;
+                } else if (tableSearchType === 'PHONE') {
+                    const phone = (mod.phone || '').replace(/\D/g, '');
+                    const qPhone = q.replace(/\D/g, '');
+                    if (qPhone && !phone.includes(qPhone)) return false;
+                }
+            }
+
+            return true;
+        });
+    }, [moderators, filterStatus, filterFrom, filterTo, tableSearch, tableSearchType]);
 
     // Pagination
     const goToPage = (page) => {
@@ -157,7 +225,7 @@ const ExportModeratorReportsPage = () => {
         const csvRows = [];
         csvRows.push(headers.join(','));
         
-        moderators.forEach(mod => {
+        filteredModerators.forEach(mod => {
             const row = [
                 `"${mod.name || ''}"`,
                 `"${mod.email || ''}"`,
@@ -229,7 +297,7 @@ const ExportModeratorReportsPage = () => {
                                 <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
-                                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
                                             <option value="">{t("all_moderators_filter", "All Moderators")}</option>
                                             <option value="active">{t("active_moderators", "Active Moderators")}</option>
                                             <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
@@ -238,14 +306,14 @@ const ExportModeratorReportsPage = () => {
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
@@ -253,7 +321,7 @@ const ExportModeratorReportsPage = () => {
 
                                 <div className="flex gap-2 items-center w-full justify-between xl:justify-start xl:w-auto">
                                     <div className="xl:hidden w-[140px] shrink-0">
-                                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-3 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer h-[42px]">
+                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-3 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer h-[42px]">
                                             <option value="">{t("all_moderators_filter", "All Moderators")}</option>
                                             <option value="active">{t("active_moderators", "Active Moderators")}</option>
                                             <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
@@ -282,14 +350,14 @@ const ExportModeratorReportsPage = () => {
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
@@ -313,7 +381,7 @@ const ExportModeratorReportsPage = () => {
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                                             <input
                                                 type="text"
-                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : tableSearchType === "EMAIL" ? t("search_by_email", "Search by email") : t("search_by_phone", "Search by phone")}
                                                 className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={tableSearch}
                                                 onChange={(e) => setTableSearch(e.target.value)}
@@ -345,6 +413,19 @@ const ExportModeratorReportsPage = () => {
                                                     className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -501,7 +582,7 @@ const ExportModeratorReportsPage = () => {
                                                 <Search className="text-gray-400 w-5 h-5 mr-3" />
                                                 <input
                                                     type="text"
-                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_phone", "Search by phone")}
+                                                    placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : tableSearchType === "EMAIL" ? t("search_by_email", "Search by email") : t("search_by_phone", "Search by phone")}
                                                     className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={tableSearch}
                                                     onChange={(e) => setTableSearch(e.target.value)}
@@ -531,9 +612,22 @@ const ExportModeratorReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (tableSearchType !== 'EMAIL') {
+                                                            setTableSearchType('EMAIL');
+                                                            setTableSearch('');
+                                                        } else if (tableSearch.trim()) {
+                                                            handleTableSearch();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -544,7 +638,7 @@ const ExportModeratorReportsPage = () => {
                                     <div className="flex items-center justify-center py-24">
                                         <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
-                                ) : moderators.length === 0 ? (
+                                ) : filteredModerators.length === 0 ? (
                                     <div className="flex items-center justify-center py-16">
                                         <span className="text-gray-400 text-sm">{t("no_moderators_found", "No moderators found")}</span>
                                     </div>
@@ -564,7 +658,7 @@ const ExportModeratorReportsPage = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-50">
-                                                    {moderators.map((moderator) => (
+                                                    {filteredModerators.map((moderator) => (
                                                         <tr key={moderator.id} className="bg-[#F8F9FA] transition-colors group">
                                                             {visibleColumns.name && (
                                                                 <td className="py-4 print:py-1 print:border print:border-black text-center">

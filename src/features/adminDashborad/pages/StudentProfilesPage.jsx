@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -98,10 +98,10 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-    const fetchStudentsData = async () => {
+    const fetchStudentsData = async (pageToFetch = currentPage) => {
         try {
             setIsLoading(true);
-            const res = await getStudentProfiles(currentPage, 10, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
+            const res = await getStudentProfiles(pageToFetch, 10, searchText, statusFilter, genderFilter, fromDate, toDate, searchType);
             if (res?.data) {
                 setStudents(res.data.students || []);
                 setTotalPages(res.data.totalPages || 1);
@@ -111,22 +111,49 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                     inactive: 0,
                     pending: 0
                 });
+            } else {
+                setStudents([]);
             }
         } catch (error) {
             console.error("Failed to fetch students data:", error);
+            setStudents([]);
         } finally {
             setIsLoading(false);
         }
     };
 
+    const filteredStudents = useMemo(() => {
+        if (!searchText || !searchText.trim()) return students;
+        const cleanTerm = searchText.trim().toLowerCase();
+        return (students || []).filter(student => {
+            if (searchType === 'PHONE') {
+                const cleanDigits = cleanTerm.replace(/\D/g, "");
+                const phoneDigits = (student.phone || "").replace(/\D/g, "");
+                return (student.phone || "").toLowerCase().includes(cleanTerm) || (cleanDigits && phoneDigits.includes(cleanDigits));
+            } else if (searchType === 'EMAIL') {
+                return (student.email || "").toLowerCase().includes(cleanTerm);
+            } else {
+                const name = (student.name || "").toLowerCase();
+                const directMatch = name.includes(cleanTerm);
+                const tokens = cleanTerm.split(/\s+/).filter(Boolean);
+                const tokensMatch = tokens.length > 1 && tokens.every(t => name.includes(t));
+                const emailMatch = (student.email || "").toLowerCase().includes(cleanTerm);
+                const cleanDigits = cleanTerm.replace(/\D/g, "");
+                const phoneDigits = (student.phone || "").replace(/\D/g, "");
+                const phoneMatch = (student.phone || "").toLowerCase().includes(cleanTerm) || (cleanDigits && cleanDigits.length >= 3 && phoneDigits.includes(cleanDigits));
+                return directMatch || tokensMatch || emailMatch || phoneMatch;
+            }
+        });
+    }, [students, searchText, searchType]);
+
     useEffect(() => {
         setCurrentPage(1);
         setStatusFilter("");
-        fetchStudentsData();
+        fetchStudentsData(1);
     }, [genderFilter]);
 
     useEffect(() => {
-        fetchStudentsData();
+        fetchStudentsData(currentPage);
     }, [currentPage, statusFilter, fromDate, toDate]);
 
     useEffect(() => {
@@ -134,7 +161,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
             if (currentPage !== 1) {
                 setCurrentPage(1);
             } else {
-                fetchStudentsData();
+                fetchStudentsData(1);
             }
         }, 300);
         return () => clearTimeout(timer);
@@ -185,8 +212,11 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
     }, [newStudent.email, isAddModalOpen]);
 
     const handleSearchClick = () => {
-        setCurrentPage(1);
-        fetchStudentsData();
+        if (currentPage !== 1) {
+            setCurrentPage(1);
+        } else {
+            fetchStudentsData(1);
+        }
     };
 
     const handleSearchKeyDown = (e) => {
@@ -664,7 +694,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {students.length === 0 ? (
+                                            {filteredStudents.length === 0 ? (
                                                 !isLoading && (
                                                     <tr>
                                                         <td colSpan={user?.role === 'management' ? 7 : 8} className="py-20 text-center bg-[#F8F9FA] rounded-xl">
@@ -672,7 +702,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 <Search size={48} className="opacity-20" />
                                                                 <p className="font-medium text-[16px]">{t("no_students_matching", "No students found matching your criteria")}</p>
                                                                 <button
-                                                                    onClick={() => { setSearchText(""); setStatusFilter(""); fetchStudentsData(); }}
+                                                                    onClick={() => { setSearchText(""); setStatusFilter(""); fetchStudentsData(1); }}
                                                                     className="text-blue-500 text-sm font-bold hover:underline"
                                                                 >
                                                                     {t("clear_all_filters", "Clear all filters")}
@@ -682,7 +712,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                     </tr>
                                                 )
                                             ) : (
-                                                students.map((student) => (
+                                                filteredStudents.map((student) => (
                                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                                         <td className="py-4 rounded-l-xl text-center">
                                                             <span className="text-[14px] text-gray-800">

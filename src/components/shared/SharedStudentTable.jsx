@@ -84,11 +84,6 @@ const SharedStudentTable = ({
             {showTitle && (
                 <div className="mb-6 flex justify-between items-center">
                     <h3 className="text-[20px] font-bold text-gray-900 mb-1">{title}</h3>
-                    {showDropdown && (
-                        <select className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none cursor-pointer">
-                            <option value="student_table">{t("student_table", "Student Table")}</option>
-                        </select>
-                    )}
                 </div>
             )}
 

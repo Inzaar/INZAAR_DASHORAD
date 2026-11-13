@@ -34,6 +34,36 @@ const GroupStudentsPage = () => {
     const [limitData, setLimitData] = useState(null);
     const [modalData, setModalData] = useState({ isOpen: false, initialTab: 'assign' });
 
+    const filteredStudents = (students || []).filter(student => {
+        let match = true;
+        if (searchTerm && searchTerm.trim()) {
+            const cleanTerm = searchTerm.trim().toLowerCase();
+            if (searchType === 'EMAIL') {
+                match = (student.email || "").toLowerCase().includes(cleanTerm);
+            } else {
+                const studentName = (student.name || "").toLowerCase();
+                const directMatch = studentName.includes(cleanTerm);
+                const tokens = cleanTerm.split(/\s+/).filter(Boolean);
+                const tokensMatch = tokens.length > 0 && tokens.every(token => studentName.includes(token));
+                const emailMatch = (student.email || "").toLowerCase().includes(cleanTerm);
+                match = directMatch || tokensMatch || emailMatch;
+            }
+        }
+        if (match && fromDate) {
+            match = new Date(student.joiningDate) >= new Date(fromDate);
+        }
+        if (match && toDate) {
+            const toDateEnd = new Date(toDate);
+            toDateEnd.setHours(23, 59, 59, 999);
+            match = new Date(student.joiningDate) <= toDateEnd;
+        }
+        if (match && statusFilter !== 'All') {
+            if (statusFilter === 'Completed') match = Boolean(student.isCompleted);
+            if (statusFilter === 'In Progress') match = !student.isCompleted;
+        }
+        return match;
+    });
+
     const fetchStudents = async () => {
         try {
             setLoading(true);
@@ -107,7 +137,7 @@ const GroupStudentsPage = () => {
                             </div>
 
                             <div className="bg-white rounded-[16px] p-6 shadow-sm border border-gray-100">
-                                <div className="hidden xl:flex flex-row items-end gap-6 mb-8 mt-4">
+                                <div className="flex flex-col sm:flex-row flex-wrap xl:flex-nowrap items-stretch sm:items-end gap-4 xl:gap-6 mb-8 mt-4">
                                     <div className='flex-1 flex gap-2 flex-col'>
                                         <p className="text-xs text-gray-400 font-bold tracking-wide">ADVANCED SEARCH</p>
                                         <div className="flex items-center bg-white border border-gray-200 rounded-md p-1 transition-all duration-200 group focus-within:ring-1 focus-within:ring-blue-500/50 focus-within:border-blue-500 h-[42px]">
@@ -122,14 +152,14 @@ const GroupStudentsPage = () => {
                                             <div className="flex items-center gap-1.5 shrink-0 mr-1">
                                                 <button
                                                     onClick={() => {
-                                                        if (searchType !== 'PHONE') {
-                                                            setSearchType('PHONE');
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
                                                             setSearchTerm('');
                                                         }
                                                     }}
-                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-4 py-2 text-[11px] whitespace-nowrap font-bold rounded-md transition-all duration-200 tracking-wide ${searchType === 'EMAIL' ? 'bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white shadow-sm' : 'bg-[#C2C9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
-                                                    PHONE
+                                                    EMAIL
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -199,7 +229,7 @@ const GroupStudentsPage = () => {
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-gray-900">Enrolled Students</h3>
                                     <span className="bg-[#3758EE]/10 text-[#3758EE] px-4 py-1.5 rounded-full text-sm font-bold">
-                                        Total: {students.length}
+                                        Total: {filteredStudents.length}
                                     </span>
                                 </div>
 
@@ -218,32 +248,9 @@ const GroupStudentsPage = () => {
                                         <tbody className="divide-y divide-gray-50/50">
                                             {loading ? (
                                                 <tr><td colSpan={6} className="py-20 text-center"><Loader /></td></tr>
-                                            ) : students.length === 0 ? (
+                                            ) : filteredStudents.length === 0 ? (
                                                 <tr><td colSpan={6} className="py-20 text-center text-gray-400 font-medium">No students match your filter.</td></tr>
-                                            ) : students
-                                                .filter(student => {
-                                                    let match = true;
-                                                    if (searchTerm) {
-                                                        const term = searchTerm.toLowerCase();
-                                                        if (searchType === 'NAME') {
-                                                            match = student.name.toLowerCase().includes(term);
-                                                        } else {
-                                                            match = (student.phone || "").toLowerCase().includes(term);
-                                                        }
-                                                    }
-                                                    if (match && fromDate) {
-                                                        match = new Date(student.joiningDate) >= new Date(fromDate);
-                                                    }
-                                                    if (match && toDate) {
-                                                        match = new Date(student.joiningDate) <= new Date(toDate);
-                                                    }
-                                                    if (match && statusFilter !== 'All') {
-                                                        if (statusFilter === 'Completed') match = student.isCompleted;
-                                                        if (statusFilter === 'In Progress') match = !student.isCompleted;
-                                                    }
-                                                    return match;
-                                                })
-                                                .map((student) => (
+                                            ) : filteredStudents.map((student) => (
                                                 <tr key={student._id} className="hover:bg-gray-50/40 transition-colors">
                                                     <td className="py-6 pl-4 font-medium text-gray-800">{student.name}</td>
                                                     <td className="py-6 text-[13px] text-gray-500">{student.email}</td>
