@@ -523,7 +523,7 @@ const NotesModal = ({ activeNotes, onClose }) => {
     );
 };
 
-const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminView, onOpenPdf }) => {
+const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId, isAdminView, onOpenPdf, loading = false }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [activeResources, setActiveResources] = useState(null);
@@ -604,7 +604,42 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {currentLectures.map((lecture, index) => {
+                            {loading ? (
+                                [1, 2, 3, 4, 5].map((i) => (
+                                    <tr key={i} className="text-sm border-b border-gray-100 animate-pulse">
+                                        <td className="px-6 py-4">
+                                            <div className="h-4 w-12 bg-gray-200 rounded" />
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="h-4 w-4/5 bg-gray-200 rounded" />
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="h-6 w-16 bg-gray-200 rounded-full mx-auto" />
+                                        </td>
+                                        {!isAdminView && (
+                                            <td className="px-6 py-4 text-center">
+                                                <div className="h-7 w-20 bg-gray-200 rounded-xl mx-auto" />
+                                            </td>
+                                        )}
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="h-7 w-16 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : currentLectures.length === 0 ? (
+                                <tr>
+                                    <td colSpan={isAdminView ? 6 : 7} className="px-6 py-12 text-center text-gray-400">
+                                        {t('no_lectures_found', 'No lectures found')}
+                                    </td>
+                                </tr>
+                            ) : (
+                                currentLectures.map((lecture, index) => {
                                 const isCurrent = lecture.id === currentLectureId;
                                 const progress = lecture.watchedPercentage || 0;
                                 const lectureNotes = notes.filter(n => n.lectureId === lecture.id);
@@ -744,14 +779,14 @@ const LectureListTable = ({ lectures, notes, onWatch, currentLectureId, isAdminV
                                         </td>
                                     </tr>
                                 );
-                            })}
+                            }))}
                         </tbody>
                     </table>
                 </div>
             </div>
 
 
-            {totalPages > 1 && (
+            {!loading && totalPages > 1 && (
                 <div className="flex justify-end items-center mt-6 p-4 border-t border-gray-100 w-full">
                     <CustomPagination 
                         currentPage={currentPage}

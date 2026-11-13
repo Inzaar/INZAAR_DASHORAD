@@ -186,7 +186,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
           <div className="flex flex-col gap-1.5">
             <p className="text-[12px] text-gray-500 font-medium tracking-tight">{t(course.time, course.time)}</p>
             <p className="text-[12.5px] text-gray-600 line-clamp-2 leading-[1.5] font-normal min-h-[38px]">
-              {t(course.description?.trim(), course.description)}
+              {course.description || t("course_desc_unavailable", "Course description unavailable")}
             </p>
           </div>
         </div>

@@ -1123,10 +1123,12 @@ const CourseView = () => {
         }
 
         const dueDateFormatted = formatAssignmentDueDate(assignment, courseData);
+        const humanId = assignment.assignmentId || (assignment.number && String(assignment.number).includes('-A') ? assignment.number : null) || `${lecture.lectureId || `#${String(lecture.lectureNo || 1).padStart(2, '0')}`}-A01`;
         const mappedAssignmentObj = {
             id: assignment.id || assignment._id,
+            assignmentId: humanId,
             courseId: courseId || courseData?._id || courseData?.id,
-            number: String(lecture.lectureNo || 1).padStart(2, '0'),
+            number: humanId,
             title: assignment.title,
             description: assignment.instructions || `Submit your assignment for ${assignment.title}.`,
             instructions: assignment.instructions || 'Please complete and upload your assignment file.',
@@ -1198,10 +1200,12 @@ const CourseView = () => {
         }
 
         const dueDateFormatted = formatAssignmentDueDate(lecture, courseData);
+        const humanId = lecture.assignmentId || (lecture.assignments && lecture.assignments[0]?.assignmentId) || (lecture.lectureNo && String(lecture.lectureNo).includes('-A') ? lecture.lectureNo : null) || `${lecture.lectureId || `#${String(lecture.lectureNo || 1).padStart(2, '0')}`}-A01`;
         const mappedAssignmentObj = {
             id: lecture.id || lecture._id,
+            assignmentId: humanId,
             courseId: courseId || courseData?._id || courseData?.id,
-            number: String(lecture.lectureNo || 1).padStart(2, '0'),
+            number: humanId,
             title: lecture.title,
             description: `Submit your assignment for ${lecture.title}.`,
             instructions: lecture.instructions || 'Please complete and upload your assignment file.',
@@ -1865,15 +1869,6 @@ const CourseView = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#F8F9FA]">
-                <Loader className="w-10 h-10 text-[#3758EE] animate-spin mb-4" />
-                <p className="text-[#6A6F78] font-medium animate-pulse">Loading course...</p>
-            </div>
-        );
-    }
-
     return (
         <div className="h-screen w-screen flex items-center justify-center">
             {/* Off-screen certificate card — captured by html2canvas */}
@@ -1962,7 +1957,11 @@ const CourseView = () => {
                         <div className={`py-4 pr-2`}>
                             <div className="flex items-start md:items-center justify-between gap-4 mb-8 w-full">
                                 <div className="flex-1 min-w-0 pr-2">
-                                    <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-900 line-clamp-2 overflow-hidden text-ellipsis leading-snug break-words">{courseData?.title}</h2>
+                                    {loading ? (
+                                        <div className="h-8 sm:h-9 w-60 sm:w-80 bg-gray-200 rounded-lg animate-pulse mb-1" />
+                                    ) : (
+                                        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-900 line-clamp-2 overflow-hidden text-ellipsis leading-snug break-words">{courseData?.title}</h2>
+                                    )}
                                     {user?.role !== 'admin' && (
                                         <p className="text-gray-500 text-[11px] md:text-[16px] mt-1">Let's learn something new today!</p>
                                     )}
@@ -2140,6 +2139,7 @@ const CourseView = () => {
                             {!hideSidebarAndCards && (
                                 <Analytics
                                     userCourses={userCourses}
+                                    loading={loading}
                                     courseData={isModeratorViewingStudent ? {
                                         progress: Math.round(progress || 0),
                                         improvementFromLastWeek: 0,
@@ -2161,28 +2161,43 @@ const CourseView = () => {
 
                             <div className={`relative flex flex-col lg:flex-row gap-4 mt-5 items-stretch`}>
                                 <div ref={videoSectionRef} className={`w-full ${((isEditingQuiz || isEditingAssignment) && isAdminView) || isModeratorViewingStudent ? '' : 'lg:w-[70%]'} flex flex-col gap-4`}>
-                                    {!hideSidebarAndCards && currentLecture && (
-                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
-                                            <div>
-                                                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight">
-                                                    {currentLecture?.title}
-                                                </h2>
-                                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 font-medium mt-1">
-                                                    {currentLecture?.lectureNo !== undefined && currentLecture?.lectureNo !== null && (
-                                                        <span>Lecture: {String(currentLecture.lectureNo).startsWith('#') ? currentLecture.lectureNo.replace(/^#+/, '#') : `#${String(currentLecture.lectureNo).padStart(2, '0')}`}</span>
-                                                    )}
+                                    {!hideSidebarAndCards && (
+                                        loading ? (
+                                            <div className="flex flex-col gap-2 pb-1">
+                                                <div className="h-6 sm:h-7 w-64 sm:w-96 bg-gray-200 rounded-lg animate-pulse" />
+                                                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                                            </div>
+                                        ) : currentLecture && (
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+                                                <div>
+                                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+                                                        {currentLecture?.title}
+                                                    </h2>
+                                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 font-medium mt-1">
+                                                        {currentLecture?.lectureNo !== undefined && currentLecture?.lectureNo !== null && (
+                                                            <span>Lecture: {String(currentLecture.lectureNo).startsWith('#') ? currentLecture.lectureNo.replace(/^#+/, '#') : `#${String(currentLecture.lectureNo).padStart(2, '0')}`}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {user?.role !== 'admin' && typeof progress === 'number' && !isNaN(progress) && (
+                                                    <div className="flex items-center gap-2 self-start sm:self-center">
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${progress > 75 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}`}>
+                                                            {Math.round(progress)}% Watched
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )
+                                    )}
+                                    {loading ? (
+                                        <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 h-fit">
+                                            <div className="relative w-full overflow-hidden min-h-[300px] sm:min-h-0 aspect-video rounded-xl bg-gray-100 animate-pulse flex items-center justify-center">
+                                                <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center">
+                                                    <Play className="w-7 h-7 ml-1 text-gray-400 opacity-60" />
                                                 </div>
                                             </div>
-                                            {user?.role !== 'admin' && typeof progress === 'number' && !isNaN(progress) && (
-                                                <div className="flex items-center gap-2 self-start sm:self-center">
-                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${progress > 75 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-blue-100 text-blue-700 border border-blue-200'}`}>
-                                                        {Math.round(progress)}% Watched
-                                                    </span>
-                                                </div>
-                                            )}
                                         </div>
-                                    )}
-                                    {isEditingAssignment && isAdminView ? (
+                                    ) : isEditingAssignment && isAdminView ? (
                                         <CreateAssignment
                                             courseId={courseId}
                                             initialData={currentLecture}
@@ -2746,61 +2761,78 @@ const CourseView = () => {
                                         <h3 className="text-xl font-bold text-gray-900">Lectures Playlist</h3>
                                         <div className="flex-1 relative lg:min-h-0">
                                             <div className="lg:absolute lg:inset-0 bg-white rounded-xl p-2 sm:p-3 border border-gray-100 overflow-y-auto custom-scrollbar scroll-smooth snap-y">
-                                                <div className="flex flex-col gap-3">
-                                                    {(() => {
-                                                        let sectionCounter = 0;
-                                                        return groupedLectures.map((item, itemIdx) => {
-                                                            if (item.type === 'section') {
-                                                                sectionCounter++;
-                                                                const isExpanded = Boolean(expandedSections[item.id]);
-                                                                return (
-                                                                    <div key={item.id || itemIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
-                                                                        <div className="w-full group">
-                                                                            <button
-                                                                                onClick={() => toggleSection(item.id)}
-                                                                                className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${isExpanded
-                                                                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
-                                                                                    : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
-                                                                                    }`}
-                                                                            >
-                                                                                <div className="flex items-center gap-4">
-                                                                                    <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${isExpanded
-                                                                                        ? 'bg-blue-600 text-white border-blue-500'
-                                                                                        : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
-                                                                                        }`}>
-                                                                                        <span className="font-black text-lg">{sectionCounter}</span>
-                                                                                    </div>
-                                                                                    <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${isExpanded ? 'text-blue-900' : 'text-gray-800'
-                                                                                        }`}>
-                                                                                        {item.sectionName}
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${isExpanded
-                                                                                    ? 'bg-blue-100/80 text-blue-700'
-                                                                                    : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
-                                                                                    }`}>
-                                                                                    {isExpanded ? (
-                                                                                        <ChevronDown size={22} strokeWidth={2.5} />
-                                                                                    ) : (
-                                                                                        <ChevronRight size={22} strokeWidth={2.5} />
-                                                                                    )}
-                                                                                </div>
-                                                                            </button>
-
-                                                                            {isExpanded && (
-                                                                                <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
-                                                                                    {item.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
+                                                {loading ? (
+                                                    <div className="flex flex-col gap-3 animate-pulse">
+                                                        {[1, 2, 3, 4, 5].map((i) => (
+                                                            <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/60">
+                                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                                    <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0"></div>
+                                                                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                                                                        <div className="h-3.5 bg-gray-200 rounded w-4/5"></div>
+                                                                        <div className="h-2.5 bg-gray-200 rounded w-1/3"></div>
                                                                     </div>
-                                                                );
-                                                            } else {
-                                                                return renderLectureItem(item.lecture, item.index ?? itemIdx);
-                                                            }
-                                                        });
-                                                    })()}
-                                                </div>
+                                                                </div>
+                                                                <div className="w-6 h-6 rounded-full bg-gray-200 shrink-0 ml-2"></div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col gap-3">
+                                                        {(() => {
+                                                            let sectionCounter = 0;
+                                                            return groupedLectures.map((item, itemIdx) => {
+                                                                if (item.type === 'section') {
+                                                                    sectionCounter++;
+                                                                    const isExpanded = Boolean(expandedSections[item.id]);
+                                                                    return (
+                                                                        <div key={item.id || itemIdx} className="w-full flex flex-col gap-2 shrink-0 snap-start">
+                                                                            <div className="w-full group">
+                                                                                <button
+                                                                                    onClick={() => toggleSection(item.id)}
+                                                                                    className={`w-full group flex items-center justify-between p-4 sm:p-5 rounded-2xl transition-all duration-300 border ${isExpanded
+                                                                                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md ring-1 ring-blue-100'
+                                                                                        : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 hover:bg-blue-50/30'
+                                                                                        }`}
+                                                                                >
+                                                                                    <div className="flex items-center gap-4">
+                                                                                        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-colors shadow-sm border ${isExpanded
+                                                                                            ? 'bg-blue-600 text-white border-blue-500'
+                                                                                            : 'bg-gray-50 text-gray-500 border-gray-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:border-blue-200'
+                                                                                            }`}>
+                                                                                            <span className="font-black text-lg">{sectionCounter}</span>
+                                                                                        </div>
+                                                                                        <span className={`font-bold text-[16px] sm:text-[18px] text-left leading-tight ${isExpanded ? 'text-blue-900' : 'text-gray-800'
+                                                                                            }`}>
+                                                                                            {item.sectionName}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className={`p-2 rounded-full transition-colors shrink-0 ml-2 ${isExpanded
+                                                                                        ? 'bg-blue-100/80 text-blue-700'
+                                                                                        : 'bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                                                                        }`}>
+                                                                                        {isExpanded ? (
+                                                                                            <ChevronDown size={22} strokeWidth={2.5} />
+                                                                                        ) : (
+                                                                                            <ChevronRight size={22} strokeWidth={2.5} />
+                                                                                        )}
+                                                                                    </div>
+                                                                                </button>
+
+                                                                                {isExpanded && (
+                                                                                    <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 mt-2 lg:mt-3 pt-2 pb-3 w-full">
+                                                                                        {item.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                } else {
+                                                                    return renderLectureItem(item.lecture, item.index ?? itemIdx);
+                                                                }
+                                                            });
+                                                        })()}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -2813,7 +2845,12 @@ const CourseView = () => {
                                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-left w-full lg:w-1/2 flex flex-col">
                                         <h3 className="text-xl font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t('lecture_notes', 'Lecture Notes')}</h3>
                                         <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
-                                            {notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
+                                            {loading ? (
+                                                <div className="flex flex-col gap-2.5 py-1 animate-pulse">
+                                                    <div className="h-12 bg-gray-100/80 rounded-xl w-full"></div>
+                                                    <div className="h-12 bg-gray-100/80 rounded-xl w-full"></div>
+                                                </div>
+                                            ) : notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).length > 0 ?
                                                 notes.filter(n => n.lectureId === (currentLecture?.id || currentLecture?._id)).map(note => (
                                                     <div key={note.id} id={`note-${note.id}`} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center group/note animate-in fade-in duration-200">
                                                         <div className="flex-1">
@@ -2892,9 +2929,19 @@ const CourseView = () => {
                                                     )}
                                                 </div>
                                             ) : (
-                                                <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
-                                                    {t('comments_and_queries', 'Comments and Queries')} <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture?.title})</span>
-                                                </h3>
+                                                <>
+                                                    <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
+                                                        {t('comments_and_queries', 'Comments and Queries')} {!loading && currentLecture?.title && (
+                                                            <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture.title})</span>
+                                                        )}
+                                                    </h3>
+                                                    <button
+                                                        onClick={() => setIsSelectionMode(true)}
+                                                        className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                                                    >
+                                                        Select
+                                                    </button>
+                                                </>
                                             )}
                                         </div>
                                         <div
@@ -2902,7 +2949,18 @@ const CourseView = () => {
                                             onScroll={handleCommentsScroll}
                                             className="flex flex-col gap-3 mb-6 flex-1 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar"
                                         >
-                                            {lectureComments && lectureComments.length > 0 ? (
+                                            {loading ? (
+                                                <div className="flex flex-col gap-3 py-1 animate-pulse">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0"></div>
+                                                        <div className="h-10 bg-gray-100/80 rounded-xl flex-1"></div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0"></div>
+                                                        <div className="h-10 bg-gray-100/80 rounded-xl flex-1"></div>
+                                                    </div>
+                                                </div>
+                                            ) : lectureComments && lectureComments.length > 0 ? (
                                                 <div className="flex flex-col gap-4 flex-1 pb-12">
                                                     {lectureComments.map((comment, index) => {
                                                         const senderId = comment.senderId?._id || comment.senderId?.id || comment.senderId;
@@ -3123,6 +3181,7 @@ const CourseView = () => {
                             {/* Lecture List Table Section */}
                             {!hideSidebarAndCards && !isModeratorViewingStudent && (
                                 <LectureListTable
+                                    loading={loading}
                                     lectures={lectures.reduce((acc, lecture) => {
                                         acc.push(lecture);
 

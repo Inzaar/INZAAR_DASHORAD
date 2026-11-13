@@ -13,6 +13,7 @@ const MetricCard = ({
     value: valueProp,
     trendValue: trendValueProp,
     trendLabel: trendLabelProp,
+    loading = false,
 }) => {
     const { t } = useTranslation();
     const formatValue = (val) => {
@@ -44,15 +45,29 @@ const MetricCard = ({
             {/* Left Content */}
             <div className="flex flex-col gap-4 flex-1">
                 <div className="flex flex-col gap-2">
-                    <h3 className="text-gray-500 font-medium text-sm sm:text-base leading-tight">{metricInfo.title}</h3>
-                    <span className="text-4xl font-bold text-gray-900">{metricInfo.value}</span>
+                    <h3 className="text-gray-500 font-medium text-sm sm:text-base leading-tight">
+                        {loading && !titleProp ? (
+                            <div className="h-5 w-44 bg-gray-200 rounded animate-pulse" />
+                        ) : (
+                            metricInfo.title
+                        )}
+                    </h3>
+                    {loading ? (
+                        <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse my-0.5" />
+                    ) : (
+                        <span className="text-4xl font-bold text-gray-900">{metricInfo.value}</span>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
                     <div className="rounded-full bg-emerald-50 p-0.5">
                         <ArrowUpRight className="w-4 h-4 text-emerald-500" />
                     </div>
-                    <span className="text-emerald-500 font-medium text-sm">{metricInfo.trend.value}</span>
+                    {loading ? (
+                        <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
+                    ) : (
+                        <span className="text-emerald-500 font-medium text-sm">{metricInfo.trend.value}</span>
+                    )}
                     <span className="text-gray-400 text-[11px] min-[430px]:text-sm">{metricInfo.trend.label}</span>
                 </div>
             </div>

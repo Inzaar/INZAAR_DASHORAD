@@ -7,6 +7,59 @@ import axiosInstance from '@/api/axiosInstance';
 import CertificateCard from '@/features/courses/components/CertificateCard';
 import { useTranslation } from 'react-i18next';
 
+const CertificateTableRowsSkeleton = () => {
+    return (
+        <div className="flex flex-col gap-4 md:gap-2 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                    key={i}
+                    className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4"
+                >
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        {/* Course Info */}
+                        <div className="md:col-span-3 flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg bg-gray-200 shrink-0"></div>
+                            <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/3 md:hidden"></div>
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <div className="md:col-span-2 flex justify-start md:justify-center">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        </div>
+
+                        {/* Start & End Date */}
+                        <div className="md:col-span-2 flex flex-col items-start md:items-center gap-1.5">
+                            <div className="h-3 bg-gray-200 rounded w-20"></div>
+                            <div className="h-3 bg-gray-200 rounded w-20 hidden md:block"></div>
+                        </div>
+
+                        {/* Progress */}
+                        <div className="md:col-span-1">
+                            <div className="flex items-center gap-2 justify-end md:justify-center w-full">
+                                <div className="w-full md:w-14 h-1.5 bg-gray-200 rounded-full"></div>
+                                <div className="h-3 bg-gray-200 rounded w-7"></div>
+                            </div>
+                        </div>
+
+                        {/* Status */}
+                        <div className="md:col-span-2 flex justify-start md:justify-center items-center">
+                            <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                        </div>
+
+                        {/* Action */}
+                        <div className="md:col-span-2 flex justify-start md:justify-center items-center">
+                            <div className="h-8 bg-gray-200 rounded-xl md:rounded-lg w-full md:w-28"></div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const StudentCertificates = ({ profileData }) => {
     const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(1);
@@ -253,82 +306,90 @@ const StudentCertificates = ({ profileData }) => {
             )}
 
             <div className="w-full">
-                        {loading ? (
-                            <div className="flex items-center justify-center h-full">
-                                <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
-                            </div>
-                        ) : (
-                            <div className="py-4 pr-2 flex flex-col gap-6">
+                <div className="py-4 pr-2 flex flex-col gap-6">
 
-                                {/* ── Metric Cards ── */}
-                                <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
-                                    {metricCards.map((metric, index) => (
-                                        <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
-                                            <div>
-                                                <h3 className="text-gray-900 font-semibold mb-2">{metric.label}</h3>
-                                                <div className="flex items-baseline gap-2 mb-2">
-                                                    <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
-                                                    <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
-                                                    {metric.change && (
-                                                        <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded">{metric.change}</span>
-                                                    )}
-                                                </div>
-                                                <p className="text-gray-400 text-[11px] leading-tight">{metric.desc}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                    {/* ── Metric Cards ── */}
+                    <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
+                        {metricCards.map((metric, index) => (
+                            <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                <div>
+                                    <h3 className="text-gray-900 font-semibold mb-2">{metric.label}</h3>
+                                    <div className="flex items-baseline gap-2 mb-2">
+                                        {loading ? (
+                                            <>
+                                                <div className="h-8 bg-gray-200 rounded w-10 animate-pulse"></div>
+                                                <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
+                                                {metric.change && (
+                                                    <div className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
+                                                <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
+                                                {metric.change && (
+                                                    <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded">{metric.change}</span>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    <p className="text-gray-400 text-[11px] leading-tight">{metric.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* ── Certificates Table ── */}
+                    <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm">
+                        <div className="flex flex-col justify-between mb-6 gap-4">
+                            <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('certificates_list', 'Certificates List')}</h2>
+                                    <p className="text-gray-500 text-sm leading-[1.8]">{t('manage_certificates', 'Manage your Certificates')}</p>
+                                </div>
+                                <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
+                                    <div className="relative w-full md:w-[300px]">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <input
+                                            type="text"
+                                            value={search}
+                                            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+                                            placeholder={t('search_by_course', 'Search certificate by Course name')}
+                                            className="w-full pl-9 pr-4 h-[40px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                        />
+                                    </div>
+                                    <GradiantButton className={"h-[40px] px-3 md:px-4 rounded"}>
+                                        <Search className="h-4 w-4" />
+                                        <span className="hidden md:inline">{t('search', 'Search')}</span>
+                                    </GradiantButton>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
+                            <div className="w-full min-w-[960px]">
+                                {/* Table Header - Desktop Only */}
+                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
+                                    <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
+                                    <div className="col-span-2">{t('title', 'Title')}</div>
+                                    <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
+                                    <div className="col-span-1">{t('progress', 'Progress')}</div>
+                                    <div className="col-span-2">{t('status', 'Status')}</div>
+                                    <div className="col-span-2">{t('action', 'Action')}</div>
                                 </div>
 
-                                {/* ── Certificates Table ── */}
-                                <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm">
-                                    <div className="flex flex-col justify-between mb-6 gap-4">
-                                        <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
-                                            <div>
-                                                <h2 className="text-xl font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('certificates_list', 'Certificates List')}</h2>
-                                                <p className="text-gray-500 text-sm leading-[1.8]">{t('manage_certificates', 'Manage your Certificates')}</p>
-                                            </div>
-                                            <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
-                                                <div className="relative w-full md:w-[300px]">
-                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                                                    <input
-                                                        type="text"
-                                                        value={search}
-                                                        onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-                                                        placeholder={t('search_by_course', 'Search certificate by Course name')}
-                                                        className="w-full pl-9 pr-4 h-[40px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                                    />
-                                                </div>
-                                                <GradiantButton className={"h-[40px] px-3 md:px-4 rounded"}>
-                                                    <Search className="h-4 w-4" />
-                                                    <span className="hidden md:inline">{t('search', 'Search')}</span>
-                                                </GradiantButton>
-                                            </div>
-                                        </div>
+                                {/* Table Rows or States */}
+                                {loading ? (
+                                    <CertificateTableRowsSkeleton />
+                                ) : filtered.length === 0 ? (
+                                    <div className="text-center py-16 text-gray-400">
+                                        <div className="text-5xl mb-4">🎓</div>
+                                        <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
+                                        <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
                                     </div>
-
-                                    {filtered.length === 0 ? (
-                                        <div className="text-center py-16 text-gray-400">
-                                            <div className="text-5xl mb-4">🎓</div>
-                                            <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
-                                            <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
-                                            <div className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</div>
-                                        </div>
-                                    ) : (
-                                        <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
-                                            <div className="w-full min-w-[960px]">
-                                                {/* Table Header - Desktop Only */}
-                                                <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
-                                                    <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
-                                                    <div className="col-span-2">{t('title', 'Title')}</div>
-                                                    <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
-                                                    <div className="col-span-1">{t('progress', 'Progress')}</div>
-                                                    <div className="col-span-2">{t('status', 'Status')}</div>
-                                                    <div className="col-span-2">{t('action', 'Action')}</div>
-                                                </div>
-
-                                                {/* Table Rows / Mobile Cards */}
-                                                <div className="flex flex-col gap-4 md:gap-2">
-                                                    {currentData.map((item) => (
+                                ) : (
+                                    <div className="flex flex-col gap-4 md:gap-2">
+                                        {currentData.map((item) => (
                                                         <div key={item.enrollmentId} className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4 transition-colors hover:bg-gray-50/50">
                                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
 
@@ -455,12 +516,12 @@ const StudentCertificates = ({ profileData }) => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
 
                                     {/* Pagination */}
-                                    {totalPages > 1 && (
+                                    {!loading && totalPages > 1 && (
                                         <div className="w-full h-10 mt-auto pt-6 pb-2 flex items-center justify-end">
                                             <CustomPagination 
                                                 currentPage={currentPage} 
@@ -471,7 +532,6 @@ const StudentCertificates = ({ profileData }) => {
                                     )}
                                 </div>
                             </div>
-                        )}
             </div>
         </div>
     );

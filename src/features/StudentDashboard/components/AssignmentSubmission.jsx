@@ -283,7 +283,7 @@ const AssignmentSubmission = () => {
                     <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-start bg-white rounded-t-2xl shrink-0">
                         <div>
                             <p className="text-sm font-semibold text-[#3758EE] mb-1">
-                                {t('assignment_label', 'Assignment')} {assignment.number}
+                                {assignment.assignmentId || assignment.number || '#01-A01'}
                             </p>
                             <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
                                 {assignment.title}

@@ -7,7 +7,72 @@ import toast from 'react-hot-toast';
 import { MdUploadFile } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 
-function Account({ setUserPayload, userPayload, userInfo, errors }) {
+const AccountSkeleton = () => {
+    return (
+        <div className="w-full rounded-[12px] p-[24px] bg-[#FFFFFF] flex flex-col gap-5 border border-[#E2E8F0] animate-pulse">
+            <div className="w-full flex flex-col gap-5">
+                {/* Firstname & Lastname */}
+                <div className="w-full gap-[16px] flex flex-col min-[600px]:flex-row">
+                    <div className="w-full min-[800px]:w-[50%] gap-[8px] flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                    <div className="w-full min-[800px]:w-[50%] gap-[8px] flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                </div>
+
+                {/* Email */}
+                <div className="w-full gap-2 flex flex-col">
+                    <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                </div>
+
+                {/* Password & WhatsApp */}
+                <div className="w-full gap-[16px] flex flex-col min-[1218px]:flex-row">
+                    <div className="w-full min-[1218px]:w-[50%] gap-[8px] flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                    <div className="w-full min-[1218px]:w-[50%] gap-[8px] flex flex-col">
+                        <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                    </div>
+                </div>
+
+                {/* City town */}
+                <div className="w-full gap-[8px] flex flex-col">
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                    <div className="w-full h-[52px] rounded-md bg-gray-100 border border-[#E4E4E7]"></div>
+                </div>
+            </div>
+
+            {/* Upload Box */}
+            <div className="w-full gap-[8px] flex flex-col min-[1218px]:flex-row justify-between items-center min-[1218px]:items-start mt-2">
+                <div className="w-[99px] h-[108px] flex flex-col gap-3 items-center">
+                    <div className="h-3.5 bg-gray-200 rounded w-20"></div>
+                    <div className="w-[80px] h-[80px] rounded-full bg-gray-200 border border-gray-100"></div>
+                </div>
+
+                <div className="w-full min-[1218px]:w-[80%] h-[170px] border-2 border-dashed border-gray-200 rounded-[40px] p-6 flex flex-col items-center justify-center gap-3">
+                    <div className="w-[48px] h-[48px] rounded-full bg-[#EEF2FF] flex justify-center items-center">
+                        <div className="w-6 h-6 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="h-4 bg-gray-200 rounded w-48"></div>
+                        <div className="h-3 bg-gray-100 rounded w-60"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+function Account({ setUserPayload, userPayload, userInfo, errors, isLoading = false }) {
+    if (isLoading) {
+        return <AccountSkeleton />;
+    }
     const [showCropper, setShowCropper] = useState(false);
     const [cropSrc, setCropSrc] = useState('');
     const [isUploading, setIsUploading] = useState(false);
