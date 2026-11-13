@@ -23,7 +23,7 @@ import {
 const ManagementsPage = ({ genderFilter = "All" }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
-    const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
+    const [searchType, setSearchType] = useState('NAME'); // 'NAME', 'PHONE', or 'EMAIL'
     const [managements, setManagements] = useState([]);
     const [statsData, setStatsData] = useState({
         totalManagements: 0,
@@ -209,7 +209,7 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
 
     const handleSearchChange = (val) => {
         if (searchType === 'PHONE') {
-            const numericValue = val.replace(/[^0-9+]/g, '');
+            const numericValue = val.replace(/[^0-9+\s\-()]/g, '');
             setSearchText(numericValue);
         } else {
             setSearchText(val);
@@ -439,12 +439,12 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
                                             <input
                                                 type="text"
                                                 placeholder={`Search by ${searchType.toLowerCase()}`}
-                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
                                                 onKeyDown={handleSearchKeyDown}
                                             />
-                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2 shrink-0">
                                                 <button
                                                     onClick={() => {
                                                         if (searchType !== 'PHONE') {
@@ -454,7 +454,7 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -467,9 +467,22 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -639,6 +652,19 @@ const ManagementsPage = ({ genderFilter = "All" }) => {
                                                     className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>

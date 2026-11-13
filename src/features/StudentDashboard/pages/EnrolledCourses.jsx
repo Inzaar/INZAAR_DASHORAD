@@ -96,17 +96,11 @@ const EnrolledCourses = () => {
                                     <Analytics userCourses={{ stats: userCourses?.stats }} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>
-                                        <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm no-scrollbar">
+                                        <div className="w-full bg-white rounded-lg flex flex-col py-4 px-2 shadow-sm">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">
                                                 {t('enrolled_courses', 'Enrolled Courses')}
                                             </h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses || []} loading={loading} />
-                                            <div className="w-full h-2 mt-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-[#A892FF] rounded-full transition-all duration-300 ease-in-out"
-                                                    style={{ width: `${progressPercentage}%` }}
-                                                />
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

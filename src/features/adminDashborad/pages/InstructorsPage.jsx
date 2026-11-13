@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
@@ -23,8 +23,8 @@ import UnsavedChangesModal from '@/components/shared/UnsavedChangesModal';
 const InstructorsPage = ({ genderFilter = "All" }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
-    const [searchType, setSearchType] = useState('NAME'); // 'NAME' or 'PHONE'
-    const [instructors, setInstructors] = useState([]);
+    const [searchType, setSearchType] = useState('NAME'); // 'NAME', 'PHONE', or 'EMAIL'
+    const [allInstructors, setAllInstructors] = useState([]);
     const [statsData, setStatsData] = useState({
         totalInstructors: 0,
         activeInstructors: 0,
@@ -34,7 +34,6 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
 
     // Pagination & Loading
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
@@ -209,7 +208,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                     inactiveFemale: females.filter(f => f.status === 'in-active' || f.isActive === false).length,
                 });
 
-                setInstructors(instructorsData);
+                setAllInstructors(instructorsData);
             }
         } catch (error) {
             console.error("Failed to fetch instructors:", error);
@@ -219,29 +218,19 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
     };
 
     useEffect(() => {
-        setCurrentPage(1);
+        fetchInstructorsData();
+    }, []);
+
+    const handleClearFilters = () => {
+        setSearchText("");
         setStatusFilter("");
-        fetchInstructorsData();
-    }, [genderFilter]);
-
-    useEffect(() => {
-        fetchInstructorsData();
-    }, [currentPage, statusFilter, fromDate, toDate]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage !== 1) {
-                setCurrentPage(1);
-            } else {
-                fetchInstructorsData();
-            }
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchText, searchType]);
+        setFromDate("");
+        setToDate("");
+        setCurrentPage(1);
+    };
 
     const handleSearchClick = () => {
         setCurrentPage(1);
-        fetchInstructorsData();
     };
 
     const handleSearchKeyDown = (e) => {
@@ -257,7 +246,90 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
         } else {
             setSearchText(val);
         }
+        setCurrentPage(1);
     };
+
+    const filteredInstructors = useMemo(() => {
+        return allInstructors.filter(inst => {
+            // 1. Gender Filter
+            if (genderFilter && genderFilter !== 'All') {
+                if ((inst.gender || '').toLowerCase() !== genderFilter.toLowerCase()) {
+                    return false;
+                }
+            }
+
+            // 2. Status Filter
+            if (statusFilter) {
+                const isInstActive = inst.status === 'active' || (inst.status === undefined && inst.isActive !== false) || inst.isActive === true;
+                if (statusFilter === 'Active' && !isInstActive) return false;
+                if (statusFilter === 'Inactive' && isInstActive) return false;
+                if (statusFilter === 'Deleted' && !inst.isDeleted && inst.status !== 'Deleted') return false;
+                if (statusFilter === 'Pool' && inst.status !== 'pending') return false;
+            }
+
+            // 3. Date Range Filter
+            if (fromDate || toDate) {
+                if (!inst.createdAt) return false;
+                const instDate = new Date(inst.createdAt).getTime();
+                if (fromDate && instDate < new Date(fromDate).getTime()) return false;
+                if (toDate) {
+                    const toEnd = new Date(toDate);
+                    toEnd.setHours(23, 59, 59, 999);
+                    if (instDate > toEnd.getTime()) return false;
+                }
+            }
+
+            // 4. Search Filter
+            if (searchText && searchText.trim()) {
+                const clean = searchText.trim().toLowerCase();
+                if (searchType === 'PHONE') {
+                    const digitsSearch = clean.replace(/\D/g, '');
+                    const instPhone = (inst.phone || '').toLowerCase();
+                    const instPhoneDigits = instPhone.replace(/\D/g, '');
+                    const matchesRaw = instPhone.includes(clean);
+                    const matchesDigits = digitsSearch && instPhoneDigits.includes(digitsSearch);
+                    if (!matchesRaw && !matchesDigits) return false;
+                } else if (searchType === 'EMAIL') {
+                    const instEmail = (inst.email || '').toLowerCase();
+                    if (!instEmail.includes(clean)) return false;
+                } else {
+                    // NAME / General Search: matches firstname, lastname, full name, email
+                    const fName = (inst.firstname || '').toLowerCase();
+                    const lName = (inst.lastname || '').toLowerCase();
+                    const fullName = `${fName} ${lName}`.trim();
+                    const email = (inst.email || '').toLowerCase();
+
+                    if (fullName.includes(clean) || fName.includes(clean) || lName.includes(clean) || email.includes(clean)) {
+                        return true;
+                    }
+
+                    // Multi-word token match (e.g. "zaima batool")
+                    const tokens = clean.split(/\s+/).filter(Boolean);
+                    if (tokens.length > 1) {
+                        const allTokensMatch = tokens.every(token => fName.includes(token) || lName.includes(token));
+                        if (!allTokensMatch) return false;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        });
+    }, [allInstructors, genderFilter, statusFilter, fromDate, toDate, searchText, searchType]);
+
+    const itemsPerPage = 6;
+    const totalPages = Math.ceil(filteredInstructors.length / itemsPerPage) || 1;
+    const paginatedInstructors = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredInstructors.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredInstructors, currentPage]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(1);
+        }
+    }, [totalPages, currentPage]);
 
     const handleFeatureToggle = (feature) => {
         setNewInstructor(prev => {
@@ -329,9 +401,9 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
         }
     };
 
-    const activeCount = instructors.filter(m => m.status === 'active' || m.status === undefined).length;
-    const inactiveCount = instructors.filter(m => m.status === 'in-active').length;
-    const poolCount = instructors.filter(m => m.status === 'pending').length;
+    const activeCount = allInstructors.filter(m => m.status === 'active' || m.status === undefined).length;
+    const inactiveCount = allInstructors.filter(m => m.status === 'in-active').length;
+    const poolCount = allInstructors.filter(m => m.status === 'pending').length;
 
     const stats = [
         { title: `Total ${genderFilter === 'All' ? '' : genderFilter + ' '}Instructors`, value: (statsData?.totalInstructors || 0).toString(), trend: "2.4%", trendDirection: "up", trendText: "vs last month", type: "" },
@@ -454,12 +526,12 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                             <input
                                                 type="text"
                                                 placeholder={`Search by ${searchType.toLowerCase()}`}
-                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                className="w-full pl-10 pr-4 py-2.5 bg-transparent text-sm focus:outline-none"
                                                 value={searchText}
                                                 onChange={(e) => handleSearchChange(e.target.value)}
                                                 onKeyDown={handleSearchKeyDown}
                                             />
-                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2 shrink-0">
                                                 <button
                                                     onClick={() => {
                                                         if (searchType !== 'PHONE') {
@@ -469,7 +541,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -482,9 +554,22 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`px-3 sm:px-4 py-2 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
                                                 </button>
                                             </div>
                                         </div>
@@ -529,13 +614,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                     </div>
 
                                     <button
-                                        onClick={() => {
-                                            setSearchText("");
-                                            setStatusFilter("");
-                                            setFromDate("");
-                                            setToDate("");
-                                            setCurrentPage(1);
-                                        }}
+                                        onClick={handleClearFilters}
                                         className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
@@ -549,13 +628,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                         <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
                                         <div className="flex items-center justify-end gap-3">
                                             <button
-                                                onClick={() => {
-                                                    setSearchText("");
-                                                    setStatusFilter("");
-                                                    setFromDate("");
-                                                    setToDate("");
-                                                    setCurrentPage(1);
-                                                }}
+                                                onClick={handleClearFilters}
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
@@ -655,6 +728,19 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                                 >
                                                     NAME
                                                 </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (searchType !== 'EMAIL') {
+                                                            setSearchType('EMAIL');
+                                                            setSearchText('');
+                                                        } else if (searchText.trim()) {
+                                                            handleSearchClick();
+                                                        }
+                                                    }}
+                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                >
+                                                    EMAIL
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -662,14 +748,14 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
 
                                 {/* Instructors Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {instructors.length === 0 ? (
+                                    {paginatedInstructors.length === 0 ? (
                                         !isLoading && (
                                             <div className="col-span-full py-20 text-center">
                                                 <div className="flex flex-col items-center gap-2 text-gray-400">
                                                     <Search size={48} className="opacity-20" />
                                                     <p className="font-medium text-[16px]">No instructors found matching your criteria</p>
                                                     <button
-                                                        onClick={() => { setSearchText(""); setStatusFilter(""); fetchInstructorsData(); }}
+                                                        onClick={handleClearFilters}
                                                         className="text-blue-500 text-sm font-bold hover:underline"
                                                     >
                                                         Clear all filters
@@ -678,7 +764,7 @@ const InstructorsPage = ({ genderFilter = "All" }) => {
                                             </div>
                                         )
                                     ) : (
-                                        instructors.map((mod) => (
+                                        paginatedInstructors.map((mod) => (
                                             <UserCard
                                                 key={mod._id}
                                                 name={`${mod.firstname} ${mod.lastname || ''}`.trim()}

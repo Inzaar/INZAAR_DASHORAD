@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -26,20 +26,15 @@ const CourseReportsPage = () => {
     // API Data State
     const [courses, setCourses] = useState([]);
     const [totalCourses, setTotalCourses] = useState({ count: 0, trend: '+2.7%' });
-    const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
+    const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Published' });
     const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
     const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
 
-    // Top Filter State
+    // Filter State (unified across top and table)
     const [filterStatus, setFilterStatus] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
-
-    // Table Filter State
     const [tableSearch, setTableSearch] = useState('');
-    const [tableFrom, setTableFrom] = useState('');
-    const [tableTo, setTableTo] = useState('');
-    const [tableStatus, setTableStatus] = useState('');
     const [isTableFilterOpen, setIsTableFilterOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -56,17 +51,22 @@ const CourseReportsPage = () => {
     ]);
 
     // Fetch report data from API
-    const fetchReport = useCallback(async (page = 1) => {
+    const fetchReport = useCallback(async (page = 1, customParams = {}) => {
         setLoading(true);
         try {
+            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+
             const params = new URLSearchParams();
             params.append('page', page);
             params.append('limit', 5);
-            if (tableStatus) params.append('status', tableStatus);
-            if (tableFrom) params.append('from', tableFrom);
-            if (tableTo) params.append('to', tableTo);
-            if (tableSearch.trim()) {
-                params.append('search', tableSearch.trim());
+            if (currentStatus) params.append('status', currentStatus);
+            if (currentFrom) params.append('from', currentFrom);
+            if (currentTo) params.append('to', currentTo);
+            if (currentSearch && currentSearch.trim()) {
+                params.append('search', currentSearch.trim());
             }
 
             const res = await axiosInstance.get(`/admin/reports/courses?${params.toString()}`);
@@ -74,7 +74,7 @@ const CourseReportsPage = () => {
 
             setCourses(data.coursesList || []);
             setTotalCourses(data.totalCourses || { count: 0, trend: '+2.7%' });
-            setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
+            setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Published' });
             setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
             setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
             if (data.sessionActivity) {
@@ -85,36 +85,104 @@ const CourseReportsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [tableStatus, tableFrom, tableTo, tableSearch]);
+    }, [filterStatus, filterFrom, filterTo, tableSearch]);
 
-    // Real-time search effect
+    // Initial mount and real-time search effect
+    const isFirstMount = useRef(true);
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            fetchReport(1);
+            return;
+        }
         const timer = setTimeout(() => {
             fetchReport(1);
         }, 300);
         return () => clearTimeout(timer);
-    }, [tableSearch, tableStatus, tableFrom, tableTo, fetchReport]);
+    }, [tableSearch]);
+
+    const handleStatusChange = (val) => {
+        setFilterStatus(val);
+        fetchReport(1, { status: val });
+    };
+
+    const handleFromChange = (val) => {
+        setFilterFrom(val);
+        fetchReport(1, { from: val });
+    };
+
+    const handleToChange = (val) => {
+        setFilterTo(val);
+        fetchReport(1, { to: val });
+    };
 
     // Top filter handlers
     const handleTopSearch = () => {
-        setTableStatus(filterStatus);
-        setTableFrom(filterFrom);
-        setTableTo(filterTo);
         setIsFilterDropdownOpen(false);
-        setTimeout(() => fetchReport(1), 0);
+        fetchReport(1, {
+            status: filterStatus,
+            from: filterFrom,
+            to: filterTo,
+            search: tableSearch
+        });
     };
+
     const handleTopClear = () => {
-        setFilterStatus(''); setFilterFrom(''); setFilterTo('');
-        setTableStatus(''); setTableFrom(''); setTableTo(''); setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+        setFilterStatus('');
+        setFilterFrom('');
+        setFilterTo('');
+        setTableSearch('');
+        setIsFilterDropdownOpen(false);
+        fetchReport(1, { status: '', from: '', to: '', search: '' });
     };
 
     // Table filter handlers
-    const handleTableSearch = () => fetchReport(1);
-    const handleTableClear = () => {
-        setTableStatus(''); setTableFrom(''); setTableTo(''); setTableSearch('');
-        setTimeout(() => fetchReport(1), 0);
+    const handleTableSearch = () => {
+        fetchReport(1, {
+            status: filterStatus,
+            from: filterFrom,
+            to: filterTo,
+            search: tableSearch
+        });
     };
+
+    const handleTableClear = () => {
+        handleTopClear();
+    };
+
+    // Client-side filtering memo
+    const filteredCourses = useMemo(() => {
+        return (courses || []).filter(c => {
+            // 1. Status Filter: strictly match Published vs Draft
+            if (filterStatus) {
+                const normFilter = filterStatus.toLowerCase();
+                const courseStatus = (c.status || c.rawStatus || '').toLowerCase();
+                if (normFilter === 'published' && courseStatus !== 'published') return false;
+                if (normFilter === 'draft' && courseStatus !== 'draft') return false;
+            }
+
+            // 2. Date Filter
+            if (filterFrom || filterTo) {
+                const dateVal = c.releaseDate || c.createdAt;
+                if (!dateVal) return false;
+                const d = new Date(dateVal);
+                if (isNaN(d.getTime())) return false;
+                const courseDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (filterFrom && courseDateStr < filterFrom) return false;
+                if (filterTo && courseDateStr > filterTo) return false;
+            }
+
+            // 3. Search Filter
+            if (tableSearch && tableSearch.trim()) {
+                const q = tableSearch.trim().toLowerCase();
+                const name = (c.name || '').toLowerCase();
+                const instructor = (c.instructor || '').toLowerCase();
+                if (!name.includes(q) && !instructor.includes(q)) return false;
+            }
+
+            return true;
+        });
+    }, [courses, filterStatus, filterFrom, filterTo, tableSearch]);
 
     // Pagination
     const goToPage = (page) => {
@@ -180,7 +248,7 @@ const CourseReportsPage = () => {
                                 <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
-                                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
                                             <option value="">{t("all_status", "All Status")}</option>
                                             <option value="published">{t("published", "Published")}</option>
                                             <option value="draft">{t("draft", "Draft")}</option>
@@ -189,14 +257,14 @@ const CourseReportsPage = () => {
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
@@ -223,7 +291,7 @@ const CourseReportsPage = () => {
                                         <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
-                                                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                                <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
                                                     <option value="">{t("all_status", "All Status")}</option>
                                                     <option value="published">{t("published", "Published")}</option>
                                                     <option value="draft">{t("draft", "Draft")}</option>
@@ -232,14 +300,14 @@ const CourseReportsPage = () => {
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
@@ -327,8 +395,8 @@ const CourseReportsPage = () => {
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
-                                            value={tableFrom}
-                                            onChange={(e) => setTableFrom(e.target.value)}
+                                            value={filterFrom}
+                                            onChange={(e) => handleFromChange(e.target.value)}
                                         />
                                     </div>
 
@@ -337,8 +405,8 @@ const CourseReportsPage = () => {
                                         <input
                                             type="date"
                                             className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
-                                            value={tableTo}
-                                            onChange={(e) => setTableTo(e.target.value)}
+                                            value={filterTo}
+                                            onChange={(e) => handleToChange(e.target.value)}
                                         />
                                     </div>
 
@@ -346,11 +414,11 @@ const CourseReportsPage = () => {
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status", "Status")}</span>
                                         <div className="relative">
                                             <select
-                                                value={tableStatus}
-                                                onChange={(e) => setTableStatus(e.target.value)}
+                                                value={filterStatus}
+                                                onChange={(e) => handleStatusChange(e.target.value)}
                                                 className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
                                             >
-                                                <option value="">{t("select", "Select")}</option>
+                                                <option value="">{t("all_status", "All Status")}</option>
                                                 <option value="published">{t("published", "Published")}</option>
                                                 <option value="draft">{t("draft", "Draft")}</option>
                                             </select>
@@ -394,11 +462,11 @@ const CourseReportsPage = () => {
                                                                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("status", "Status")}</label>
                                                                 <div className="relative">
                                                                     <select
-                                                                        value={tableStatus}
-                                                                        onChange={(e) => setTableStatus(e.target.value)}
+                                                                        value={filterStatus}
+                                                                        onChange={(e) => handleStatusChange(e.target.value)}
                                                                         className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                                                                     >
-                                                                        <option value="">{t("select", "Select")}</option>
+                                                                        <option value="">{t("all_status", "All Status")}</option>
                                                                         <option value="published">{t("published", "Published")}</option>
                                                                         <option value="draft">{t("draft", "Draft")}</option>
                                                                     </select>
@@ -410,8 +478,8 @@ const CourseReportsPage = () => {
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={tableFrom}
-                                                                    onChange={(e) => setTableFrom(e.target.value)}
+                                                                    value={filterFrom}
+                                                                    onChange={(e) => handleFromChange(e.target.value)}
                                                                 />
                                                             </div>
                                                             <div>
@@ -419,8 +487,8 @@ const CourseReportsPage = () => {
                                                                 <input
                                                                     type="date"
                                                                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={tableTo}
-                                                                    onChange={(e) => setTableTo(e.target.value)}
+                                                                    value={filterTo}
+                                                                    onChange={(e) => handleToChange(e.target.value)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -452,7 +520,7 @@ const CourseReportsPage = () => {
                                     <div className="flex items-center justify-center py-24">
                                         <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
-                                ) : courses.length === 0 ? (
+                                ) : filteredCourses.length === 0 ? (
                                     <div className="flex items-center justify-center py-16">
                                         <span className="text-gray-400 text-sm">{t("no_courses_found", "No courses found")}</span>
                                     </div>
@@ -473,7 +541,7 @@ const CourseReportsPage = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-50">
-                                                    {courses.map((course) => (
+                                                    {filteredCourses.map((course) => (
                                                         <tr key={course.id} className="hover:bg-gray-50/50 transition-colors">
                                                             <td className="py-4 pl-4">
                                                                 <span className="text-[14px] font-medium text-gray-700">{course.name}</span>
@@ -494,8 +562,12 @@ const CourseReportsPage = () => {
                                                                 <span className="text-[14px] font-medium text-gray-700">{formatDate(course.releaseDate)}</span>
                                                             </td>
                                                             <td className="py-4 text-center">
-                                                                <span className={`text-[13px] px-2 py-1 rounded-full ${course.status === 'Active' ? 'text-[#00C896]' : 'text-red-500'}`}>
-                                                                    {course.status}
+                                                                <span className={`text-[13px] px-2 py-1 rounded-full font-medium ${
+                                                                    (course.status || '').toLowerCase() === 'published' 
+                                                                        ? 'text-[#00C896]' 
+                                                                        : 'text-[#F59E0B]'
+                                                                }`}>
+                                                                    {t((course.status || '').toLowerCase(), course.status || 'Draft')}
                                                                 </span>
                                                             </td>
                                                             <td className="py-4">

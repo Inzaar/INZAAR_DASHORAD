@@ -434,14 +434,6 @@ const AdminCourseDetailPage = () => {
                             <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-lg font-bold text-gray-900">{t("student_table", "Student Table")}</h3>
-                                    <div className="relative">
-                                        <select className="appearance-none bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded px-3 py-1.5 pr-7 focus:outline-none">
-                                            <option>{t("student_table", "Student Table")}</option>
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
