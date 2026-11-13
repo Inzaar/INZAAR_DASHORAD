@@ -305,6 +305,7 @@ const ExportStudentReportsPage = () => {
         // Build headers dynamically from visibleColumns, skipping 'action'
         const columnMap = {
             name: "Name",
+            contact: "Email",
             email: "Email",
             phone: "Phone Number",
             enrollments: "Enrollments",
@@ -324,31 +325,51 @@ const ExportStudentReportsPage = () => {
         };
         
         const activeKeys = Object.keys(visibleColumns).filter(col => visibleColumns[col] && col !== 'action');
-        const headers = activeKeys.map(key => columnMap[key]);
-        
+        const headers = activeKeys.map(key => `"${columnMap[key] || key}"`);
+
         const csvRows = [];
         csvRows.push(headers.join(','));
         
         filteredStudents.forEach(student => {
-            const rowValues = activeKeys.map(key => {
-                let val = student[key];
-                
-                // Format specific fields if needed
-                if (key === 'enrollments') {
-                    val = (student.enrollments || []).join(' | ');
-                } else if (key === 'progress') {
-                    val = student.progress || '0%';
-                } else if (key === 'lastLogin') {
-                    val = formatDate(student.lastLogin) || '-';
-                }
-                
-                return `"${(val || '').toString().replace(/"/g, '""')}"`;
+            const courses = Array.isArray(student.enrollments)
+                ? student.enrollments.filter(Boolean)
+                : (student.enrollments ? [student.enrollments] : []);
+
+            const enrollmentEntries = courses.length > 0 ? courses : ["Not Enrolled"];
+            const rowsToOutput = visibleColumns.enrollments ? enrollmentEntries : [null];
+
+            rowsToOutput.forEach(courseName => {
+                const rowValues = [];
+                activeKeys.forEach(key => {
+                    if (key === 'enrollments') {
+                        rowValues.push(`"${(courseName || '').toString().replace(/"/g, '""')}"`);
+                    } else if (key === 'phone') {
+                        let p = String(student.phone || '').trim();
+                        if (p && !p.startsWith('+') && p.startsWith('92')) {
+                            p = '+' + p;
+                        }
+                        const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
+                        rowValues.push(cleanP ? `\u200C${cleanP}` : '""');
+                    } else if (key === 'contact' || key === 'email') {
+                        const email = student.email || student.contact?.email || student.contact || '';
+                        rowValues.push(`"${(email || '').toString().replace(/"/g, '""')}"`);
+                    } else if (key === 'progress') {
+                        const prog = student.progress || '0%';
+                        rowValues.push(`"${prog.toString().replace(/"/g, '""')}"`);
+                    } else if (key === 'lastLogin') {
+                        const login = formatDate(student.lastLogin) || '-';
+                        rowValues.push(`"${login.toString().replace(/"/g, '""')}"`);
+                    } else {
+                        const val = student[key];
+                        rowValues.push(`"${(val || '').toString().replace(/"/g, '""')}"`);
+                    }
+                });
+                csvRows.push(rowValues.join(','));
             });
-            csvRows.push(rowValues.join(','));
         });
 
         const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv' });
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

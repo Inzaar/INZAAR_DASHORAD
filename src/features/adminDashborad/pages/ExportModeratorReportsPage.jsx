@@ -221,31 +221,68 @@ const ExportModeratorReportsPage = () => {
     };
 
     const handleExportCSV = () => {
-        const headers = ["Name", "Email", "Phone Number", "Manage Batch's", "Progress", "Last Login", "Status"];
+        const headers = [];
+        if (visibleColumns.name) headers.push('"Name"');
+        if (visibleColumns.contact) headers.push('"Email"');
+        if (visibleColumns.phone) headers.push('"Phone Number"');
+        if (visibleColumns.manageBatches) headers.push('"Manage Batch\'s"');
+        if (visibleColumns.progress) headers.push('"Progress"');
+        if (visibleColumns.lastLogin) headers.push('"Last Login"');
+        if (visibleColumns.status) headers.push('"Status"');
+
         const csvRows = [];
         csvRows.push(headers.join(','));
-        
+
         filteredModerators.forEach(mod => {
-            const row = [
-                `"${mod.name || ''}"`,
-                `"${mod.email || ''}"`,
-                `"${mod.phone || ''}"`,
-                `"${(mod.batches || []).join('; ')}"`,
-                `"${mod.progress || ''}"`,
-                `"${formatDate(mod.lastLogin)}"`,
-                `"${mod.status || ''}"`
-            ];
-            csvRows.push(row.join(','));
+            const batches = Array.isArray(mod.batches)
+                ? mod.batches.filter(Boolean)
+                : (mod.batches ? [mod.batches] : []);
+
+            const batchEntries = batches.length > 0 ? batches : ["N/A"];
+            const rowsToOutput = visibleColumns.manageBatches ? batchEntries : [null];
+
+            rowsToOutput.forEach(batchName => {
+                const row = [];
+                if (visibleColumns.name) {
+                    row.push(`"${(mod.name || '').toString().replace(/"/g, '""')}"`);
+                }
+                if (visibleColumns.contact) {
+                    row.push(`"${(mod.email || '').toString().replace(/"/g, '""')}"`);
+                }
+                if (visibleColumns.phone) {
+                    let p = String(mod.phone || '').trim();
+                    if (p && !p.startsWith('+') && p.startsWith('92')) {
+                        p = '+' + p;
+                    }
+                    const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
+                    row.push(cleanP ? `\u200C${cleanP}` : '""');
+                }
+                if (visibleColumns.manageBatches) {
+                    row.push(`"${(batchName || '').toString().replace(/"/g, '""')}"`);
+                }
+                if (visibleColumns.progress) {
+                    row.push(`"${(mod.progress || '').toString().replace(/"/g, '""')}"`);
+                }
+                if (visibleColumns.lastLogin) {
+                    row.push(`"${formatDate(mod.lastLogin)}"`);
+                }
+                if (visibleColumns.status) {
+                    row.push(`"${(mod.status || '').toString().replace(/"/g, '""')}"`);
+                }
+                csvRows.push(row.join(','));
+            });
         });
 
-        const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "moderators_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `moderator_reports_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
     };
 
     const toggleColumn = (col) => {
