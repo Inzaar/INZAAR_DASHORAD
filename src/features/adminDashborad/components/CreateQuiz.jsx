@@ -205,7 +205,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                 isCorrect: opt.isCorrect || false
                             })),
                             explanation: q.explanation || '',
-                            points: q.points || 1,
+                            points: q.points !== '' && !isNaN(Number(q.points)) ? Math.max(0, parseInt(q.points, 10)) : 1,
                             difficulty: q.difficulty || 'Easy',
                             shuffle: q.shuffleOptions || false,
                             isExpanded: false
@@ -299,7 +299,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                     questionText: q.text,
                     description: q.description || '',
                     explanation: q.explanation || '',
-                    points: q.points || 1,
+                    points: q.points !== '' && !isNaN(Number(q.points)) ? Math.max(0, parseInt(q.points, 10)) : 1,
                     difficulty: q.difficulty || 'Easy',
                     shuffleOptions: q.shuffle || false,
                     mediaUrl: q.media?.url || '',          // Cloudinary URL
@@ -946,9 +946,29 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                     <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Points</label>
                                                     <input
                                                         type="number"
-                                                        value={q.points}
-                                                        onChange={(e) => handleQuestionChange(q.id, 'points', parseInt(e.target.value))}
-                                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm"
+                                                        min="0"
+                                                        value={q.points === undefined || q.points === null ? '' : q.points}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val === '') {
+                                                                handleQuestionChange(q.id, 'points', '');
+                                                            } else {
+                                                                const num = parseInt(val, 10);
+                                                                handleQuestionChange(q.id, 'points', isNaN(num) ? 0 : Math.max(0, num));
+                                                            }
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                        onWheel={(e) => e.target.blur()}
+                                                        onBlur={() => {
+                                                            if (q.points === '' || isNaN(q.points)) {
+                                                                handleQuestionChange(q.id, 'points', 0);
+                                                            }
+                                                        }}
+                                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     />
                                                 </div>
 
@@ -1017,7 +1037,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                         </div>
                                         <div className="flex items-center justify-between text-[12px] sm:text-[13px] font-medium">
                                             <span className="text-[#64748b]">Total Points:</span>
-                                            <span className="text-[#0f172a] font-bold">{questions.reduce((acc, q) => acc + (q.points || 0), 0)}</span>
+                                            <span className="text-[#0f172a] font-bold">{questions.reduce((acc, q) => acc + (parseInt(q.points, 10) || 0), 0)}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-[11px] sm:text-[12px] font-medium text-gray-400 pt-1">
                                             <HelpCircle size={14} />
