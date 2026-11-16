@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import AuthLeft from '../components/AuthLeft'
 import AuthPage from '../../../components/layouts/AuthPage'
@@ -9,7 +9,6 @@ import Input1 from '../../../components/ui/inputs/Input1'
 import PhoneInput from '../../../components/ui/inputs/PhoneInput'
 import GradiantButton from '../../../components/ui/buttons/GradiantButton'
 import GoogleLoginButton from '../../../components/ui/buttons/GoogleLoginButton'
-import { Link } from 'react-router-dom';
 import { useRegister } from '../context/RegisterContext';
 import AuthText from '../components/AuthText';
 import { checkUsername, checkEmail } from '../../../api/auth';
@@ -18,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 function RegisterPageP1() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { formData, updateFormData } = useRegister();
   const [error, setError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -173,7 +173,7 @@ function RegisterPageP1() {
     }
 
     setError('');
-    navigate('/register/step2');
+    navigate({ pathname: '/register/step2', search: location.search });
   };
 
   return (

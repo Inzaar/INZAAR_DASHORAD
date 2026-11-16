@@ -37,8 +37,19 @@ const GoogleLoginButton = ({ text = "Continue with Google", className = "" }) =>
           localStorage.setItem('firstName', JSON.stringify(userData.firstname));
           localStorage.setItem('userId', JSON.stringify(userData._id));
 
+          const searchParams = new URLSearchParams(window.location.search);
+          const redirectParam = searchParams.get('redirect');
+          const courseIdParam = searchParams.get('courseId');
+          const tabParam = searchParams.get('tab');
+
           if (userData.role === 'admin') {
             navigate('/admin-dashboard', { replace: true });
+          } else if (redirectParam) {
+            const params = new URLSearchParams();
+            if (tabParam) params.set('tab', tabParam);
+            if (courseIdParam) params.set('courseId', courseIdParam);
+            const qs = params.toString() ? `?${params.toString()}` : '';
+            navigate(`${redirectParam}${qs}`, { replace: true });
           } else {
             navigate('/dashboard', { replace: true });
           }
