@@ -25,6 +25,7 @@ import AddCoursePage from "@/features/adminDashborad/pages/AddCoursePage";
 import ModeratorsPage from "@/features/adminDashborad/pages/ModeratorsPage";
 import InstructorsPage from "@/features/adminDashborad/pages/InstructorsPage";
 import InstructorDetails from "@/features/adminDashborad/pages/InstructorDetails";
+import VolunteersPage from "@/features/adminDashborad/pages/VolunteersPage";
 import StudentProfilesPage from "@/features/adminDashborad/pages/StudentProfilesPage";
 import AdminCoursesPage from "@/features/adminDashborad/pages/AdminCoursesPage";
 import ReportsPage from "@/features/adminDashborad/pages/ReportsPage";
@@ -114,6 +115,7 @@ const routes = createRoutesFromElements(
             <Route path="/admin/profile" element={<ProfilePage />} />
             <Route path="/registered-users" element={<RegisteredUsersPage />} />
             <Route path="/registered-courses" element={<RegisteredCoursesPage />} />
+            <Route path="/admin-volunteers" element={<VolunteersPage />} />
         </Route>
 
         <Route element={<StudentRoute />}>
