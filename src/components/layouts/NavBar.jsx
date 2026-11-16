@@ -104,6 +104,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         '/admin-add-course': 'Courses Management',
         '/registered-users': 'Student Profiles',
         '/registered-courses': 'Courses Management',
+        '/admin-volunteers': 'Volunteers',
 
         // Auth
         '/logout': 'Logout'

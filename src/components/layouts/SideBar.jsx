@@ -49,13 +49,14 @@ function Sidebar({ className, onClose }) {
       'Moderator Reports': 'moderator_reports',
       'Course Reports': 'course_reports',
       'My Batches': 'my_batches',
+      'Volunteers': 'volunteers',
       'Logout': 'logout',
     };
     return map[str] || str;
   };
 
   // Define menu items based on role
-  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Instructors', 'Management', 'Batches', 'Student Profiles', 'Courses Management', 'Reports & Logs'];
+  const adminItems = ['Dashboard', 'Calendar', 'Notification', 'Moderators', 'Instructors', 'Management', 'Batches', 'Student Profiles', 'Volunteers', 'Courses Management', 'Reports & Logs'];
   const studentItems = ['Dashboard', 'My Courses', 'Certificates', 'Profile', 'Notifications', 'Help Center'];
 
   // Determine which items to show based on the active path/context, not strictly user role
@@ -73,7 +74,8 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/management-details') ||
     location.pathname.startsWith('/admin-batches') ||
     location.pathname.startsWith('/registered-users') ||
-    location.pathname.startsWith('/registered-courses');
+    location.pathname.startsWith('/registered-courses') ||
+    location.pathname.startsWith('/admin-volunteers');
 
   // ONLY FULL ADMIN gets the adminItems main list. Moderators keep the student list.
   let menuItems = (isAdminRoute && user?.role === 'admin') ? adminItems : studentItems;
@@ -173,6 +175,7 @@ function Sidebar({ className, onClose }) {
     '/admin-add-course': 'Courses Management',
     '/registered-users': 'Student Profiles',
     '/registered-courses': 'Courses Management',
+    '/admin-volunteers': 'Volunteers',
 
     // Auth
     '/logout': 'Logout'
@@ -260,6 +263,13 @@ function Sidebar({ className, onClose }) {
 
     if (itemName === 'Management') {
       navigate('/admin-management');
+      if (onClose) onClose();
+      return;
+    }
+
+    if (itemName === 'Volunteers') {
+      navigate('/admin-volunteers');
+      setActiveItem('Volunteers');
       if (onClose) onClose();
       return;
     }
