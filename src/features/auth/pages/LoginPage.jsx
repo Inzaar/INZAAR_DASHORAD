@@ -8,7 +8,7 @@ import GrayButton from '@/components/ui/buttons/GrayButton';
 import GoogleLoginButton from '@/components/ui/buttons/GoogleLoginButton';
 import AuthText from '../components/AuthText';
 import { login } from '@/api/auth';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,7 @@ import ErrorAlert from '@/components/ui/alerts/ErrorAlert';
 const LoginPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login: authLogin, loginAsGuest } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -80,12 +81,22 @@ const LoginPage = () => {
         localStorage.setItem('firstName', JSON.stringify(userData.firstname));
         localStorage.setItem('userId', JSON.stringify(userData._id));
 
+        const redirectParam = searchParams.get('redirect');
+        const courseIdParam = searchParams.get('courseId');
+        const tabParam = searchParams.get('tab');
+
         if (userData.role === 'admin') {
           navigate('/admin-dashboard', { replace: true });
         } else if (userData.role === 'moderator') {
           navigate('/student-profiles', { replace: true });
         } else if (userData.role === 'management') {
           navigate('/management-dashboard', { replace: true });
+        } else if (redirectParam) {
+          const params = new URLSearchParams();
+          if (tabParam) params.set('tab', tabParam);
+          if (courseIdParam) params.set('courseId', courseIdParam);
+          const qs = params.toString() ? `?${params.toString()}` : '';
+          navigate(`${redirectParam}${qs}`, { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
         }
@@ -113,7 +124,18 @@ const LoginPage = () => {
 
   const handleGuestLogin = () => {
     loginAsGuest();
-    navigate('/dashboard', { replace: true });
+    const redirectParam = searchParams.get('redirect');
+    const courseIdParam = searchParams.get('courseId');
+    const tabParam = searchParams.get('tab');
+    if (redirectParam) {
+      const params = new URLSearchParams();
+      if (tabParam) params.set('tab', tabParam);
+      if (courseIdParam) params.set('courseId', courseIdParam);
+      const qs = params.toString() ? `?${params.toString()}` : '';
+      navigate(`${redirectParam}${qs}`, { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
+    }
   };
 
   return (

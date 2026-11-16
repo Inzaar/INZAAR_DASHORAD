@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import AuthPage from '../../../components/layouts/AuthPage'
 import AuthLeft from '../components/AuthLeft'
@@ -21,6 +21,7 @@ import NationalitySelect from '@/components/shared/NationalitySelect'
 function RegisterPageP2() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { formData, updateFormData } = useRegister();
   const { login } = useAuth();
   
@@ -149,7 +150,7 @@ function RegisterPageP2() {
         
         // Redirect to login screen after 1.2 seconds
         setTimeout(() => {
-          navigate('/login');
+          navigate({ pathname: '/login', search: location.search });
         }, 1200);
       } else {
         setError(res.data.message || t('auth.registration_failed', 'Registration failed.'));
@@ -168,7 +169,7 @@ function RegisterPageP2() {
         {step === 'form' ? (
           <form onSubmit={handleSendOtpAndProceed} className="flex flex-col gap-3 w-full items-center">
             <div className='max-w-[500px] w-full flex items-center gap-3'>
-              <button type="button" onClick={() => navigate('/register')} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
+              <button type="button" onClick={() => navigate({ pathname: '/register', search: location.search })} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
                 <ArrowLeft size={26} />
               </button>
               <AuthHeading>
