@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, Lock, Eye, FileText } from 'lucide-react';
+import { Search, Download, Lock, Eye, FileText, Star, X, CheckCircle } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 import axiosInstance from '@/api/axiosInstance';
@@ -84,6 +84,64 @@ const Certificates = () => {
         lockedCertificates: { count: 0 },
     });
     const [allCertificates, setAllCertificates] = useState([]);
+
+    // Review System States
+    const [reviewModalItem, setReviewModalItem] = useState(null);
+    const [viewReviewModalItem, setViewReviewModalItem] = useState(null);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewError, setReviewError] = useState('');
+
+    const openSubmitReview = (item) => {
+        setReviewModalItem(item);
+        setReviewRating(5);
+        setHoverRating(0);
+        setReviewComment('');
+        setReviewError('');
+    };
+
+    const openViewReview = (item) => {
+        setViewReviewModalItem(item);
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (!reviewModalItem) return;
+        setReviewError('');
+        setSubmittingReview(true);
+
+        try {
+            const payload = {
+                enrollmentId: reviewModalItem.enrollmentId,
+                rating: reviewRating,
+                comment: reviewComment.trim()
+            };
+
+            const res = await axiosInstance.post('/reviews', payload, { withCredentials: true });
+            const savedReview = res.data?.data;
+
+            // Update local allCertificates state immediately
+            setAllCertificates(prev => prev.map(item => {
+                if (item.enrollmentId === reviewModalItem.enrollmentId) {
+                    return {
+                        ...item,
+                        hasReviewed: true,
+                        review: savedReview
+                    };
+                }
+                return item;
+            }));
+
+            setReviewModalItem(null);
+        } catch (err) {
+            console.error("Failed to submit review:", err);
+            setReviewError(err.response?.data?.message || "Failed to submit review. Please try again.");
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
 
     const itemsPerPage = 10;
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -556,45 +614,70 @@ const Certificates = () => {
                                                             </div>
 
                                                             {/* Action */}
-                                                            <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex justify-center">
+                                                            <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex flex-col md:flex-row items-center justify-center gap-1.5 flex-wrap">
                                                                 {item.isCertEligible ? (
-                                                                    item.certificateUrl ? (
-                                                                        <button
-                                                                            onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
-                                                                            disabled={generatingId === item.enrollmentId}
-                                                                            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer disabled:opacity-50"
-                                                                        >
-                                                                            {generatingId === item.enrollmentId ? (
-                                                                                <>
-                                                                                    <Loader className="w-4 h-4 md:w-3 md:h-3 animate-spin text-white" />
-                                                                                    {t('generating', 'Generating...')}
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <Download className="w-4 h-4 md:w-3 md:h-3" />
-                                                                                    {t('download', 'Download')}
-                                                                                </>
-                                                                            )}
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => handleGenerateCertificate(item)}
-                                                                            disabled={generatingId === item.enrollmentId}
-                                                                            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-4 py-2.5 md:py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer"
-                                                                        >
-                                                                            {generatingId === item.enrollmentId ? (
-                                                                                <>
-                                                                                    <Loader className="w-4 h-4 animate-spin text-blue-500" />
-                                                                                    {t('generating', 'Generating...')}
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <Lock className="w-4 h-4" />
-                                                                                    {t('generate_certificate', 'Generate Certificate')}
-                                                                                </>
-                                                                            )}
-                                                                        </button>
-                                                                    )
+                                                                    <>
+                                                                        {item.certificateUrl ? (
+                                                                            <button
+                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
+                                                                                disabled={generatingId === item.enrollmentId}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer disabled:opacity-50"
+                                                                            >
+                                                                                {generatingId === item.enrollmentId ? (
+                                                                                    <>
+                                                                                        <Loader className="w-3.5 h-3.5 animate-spin text-white" />
+                                                                                        {t('generating', 'Generating...')}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Download className="w-3.5 h-3.5" />
+                                                                                        {t('download', 'Download')}
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => handleGenerateCertificate(item)}
+                                                                                disabled={generatingId === item.enrollmentId}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                                                                            >
+                                                                                {generatingId === item.enrollmentId ? (
+                                                                                    <>
+                                                                                        <Loader className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                                                                                        {t('generating', 'Generating...')}
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Lock className="w-3.5 h-3.5" />
+                                                                                        {t('generate_certificate', 'Generate')}
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                        )}
+
+                                                                        {/* Review Button or Reviewed Status Badge */}
+                                                                        {item.hasReviewed ? (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => openViewReview(item)}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-1 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl md:rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                                                                                title="View Your Submitted Review"
+                                                                            >
+                                                                                <Star className="w-3.5 h-3.5 fill-purple-400 text-purple-600" />
+                                                                                <span>{item.review?.rating || 5}★ {t('reviewed', 'Reviewed')}</span>
+                                                                            </button>
+                                                                        ) : (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => openSubmitReview(item)}
+                                                                                className="w-full md:w-auto flex items-center justify-center gap-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold rounded-xl md:rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-xs"
+                                                                                title="Leave a Review for this Course Batch"
+                                                                            >
+                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                                                                <span>{t('review', 'Review')}</span>
+                                                                            </button>
+                                                                        )}
+                                                                    </>
                                                                 ) : (item.isCourseDeleted || item.status === 'Course Incomplete') ? (
                                                                     <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl md:rounded-lg cursor-not-allowed select-none border border-red-200">
                                                                         <Lock className="w-4 h-4 md:w-3 md:h-3 text-red-500" />
@@ -636,6 +719,185 @@ const Certificates = () => {
                     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 `}} />
             </div>
+
+            {/* Submit Review Modal */}
+            {reviewModalItem && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
+                        <button
+                            type="button"
+                            onClick={() => setReviewModalItem(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500">
+                                <Star className="w-5 h-5 fill-amber-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 leading-tight">Review Course</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                    {reviewModalItem.course} {reviewModalItem.batchName ? `• ${reviewModalItem.batchName}` : ''}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-purple-50/70 border border-purple-100 rounded-xl p-3 mb-4 text-xs text-purple-900 flex items-start gap-2">
+                            <Lock className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                            <span>
+                                Once submitted, your review for this batch completion is permanent and cannot be modified.
+                            </span>
+                        </div>
+
+                        <form onSubmit={handleReviewSubmit} className="space-y-4">
+                            {reviewError && (
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
+                                    {reviewError}
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
+                                    Rating (1 to 5 Stars) *
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            type="button"
+                                            key={star}
+                                            onClick={() => setReviewRating(star)}
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            className="p-1 transition-transform hover:scale-110 focus:outline-none"
+                                        >
+                                            <Star
+                                                className={`w-7 h-7 ${
+                                                    star <= (hoverRating || reviewRating)
+                                                        ? 'fill-amber-400 text-amber-500'
+                                                        : 'text-gray-300'
+                                                }`}
+                                            />
+                                        </button>
+                                    ))}
+                                    <span className="text-xs font-bold text-gray-600 ml-2">
+                                        {reviewRating} of 5 Stars
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">
+                                    Your Feedback / Comments *
+                                </label>
+                                <textarea
+                                    value={reviewComment}
+                                    onChange={(e) => setReviewComment(e.target.value)}
+                                    rows={5}
+                                    placeholder="Share your detailed thoughts on the course structure, instructor, lectures, and what you learned..."
+                                    maxLength={1500}
+                                    required
+                                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 resize-none"
+                                ></textarea>
+                                <div className="text-right text-[11px] text-gray-400 mt-1">
+                                    {reviewComment.length} / 1500
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setReviewModalItem(null)}
+                                    className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submittingReview}
+                                    className="px-5 py-2 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                                >
+                                    {submittingReview ? (
+                                        <>
+                                            <Loader className="w-4 h-4 animate-spin text-white" />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        'Submit Review'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* View Review Modal (Read-Only) */}
+            {viewReviewModalItem && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
+                        <button
+                            type="button"
+                            onClick={() => setViewReviewModalItem(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600">
+                                <CheckCircle className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 leading-tight">Your Submitted Review</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                    {viewReviewModalItem.course} {viewReviewModalItem.batchName ? `• ${viewReviewModalItem.batchName}` : ''}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                            key={star}
+                                            className={`w-5 h-5 ${
+                                                star <= (viewReviewModalItem.review?.rating || 5)
+                                                    ? 'fill-amber-400 text-amber-500'
+                                                    : 'text-gray-300'
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-xs font-semibold text-gray-400">
+                                    {viewReviewModalItem.review?.createdAt ? new Date(viewReviewModalItem.review.createdAt).toLocaleDateString() : ''}
+                                </span>
+                            </div>
+
+                            <div>
+                                <p className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                    {viewReviewModalItem.review?.comment || ''}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                            <span className="text-[11px] text-gray-400 flex items-center gap-1">
+                                <Lock className="w-3.5 h-3.5" /> Permanent verified review (Cannot be edited)
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => setViewReviewModalItem(null)}
+                                className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
