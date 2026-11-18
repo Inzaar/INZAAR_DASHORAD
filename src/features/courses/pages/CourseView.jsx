@@ -1166,7 +1166,8 @@ const CourseView = () => {
                     isLate: assignment.isLate || false,
                     isAttemptsExhausted: mappedAssignmentObj.isAttemptsExhausted,
                     submittedAt: assignment.submittedAt ? new Date(assignment.submittedAt).toLocaleString() : new Date().toLocaleString(),
-                    returnUrl: window.location.pathname + window.location.search,
+                    returnUrl: (window.location.pathname.replace(/^\/app/, '') || '/course-view') + window.location.search,
+                    isAdminView,
                     enrollmentId
                 }
             });
@@ -1175,7 +1176,7 @@ const CourseView = () => {
 
         navigate('/assignment', {
             state: {
-                returnUrl: window.location.pathname + window.location.search,
+                returnUrl: (window.location.pathname.replace(/^\/app/, '') || '/course-view') + window.location.search,
                 isAdminView,
                 assignment: mappedAssignmentObj,
                 enrollmentId
@@ -1243,7 +1244,8 @@ const CourseView = () => {
                     isLate: lecture.isLate || false,
                     isAttemptsExhausted: mappedAssignmentObj.isAttemptsExhausted,
                     submittedAt: lecture.submittedAt ? new Date(lecture.submittedAt).toLocaleString() : new Date().toLocaleString(),
-                    returnUrl: window.location.pathname + window.location.search,
+                    returnUrl: (window.location.pathname.replace(/^\/app/, '') || '/course-view') + window.location.search,
+                    isAdminView,
                     enrollmentId
                 }
             });
@@ -1252,7 +1254,8 @@ const CourseView = () => {
 
         navigate('/assignment', {
             state: {
-                returnUrl: window.location.pathname + window.location.search,
+                returnUrl: (window.location.pathname.replace(/^\/app/, '') || '/course-view') + window.location.search,
+                isAdminView,
                 assignment: mappedAssignmentObj,
                 enrollmentId
             }
@@ -2844,7 +2847,7 @@ const CourseView = () => {
                                 <div className="flex flex-col lg:flex-row gap-6 mt-8 mb-8 w-full items-stretch">
                                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-left w-full lg:w-1/2 flex flex-col">
                                         <h3 className="text-xl font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t('lecture_notes', 'Lecture Notes')}</h3>
-                                        <div className="flex flex-col gap-3 mb-6 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+                                        <div className="flex flex-col gap-3 mb-6 flex-1 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
                                             {loading ? (
                                                 <div className="flex flex-col gap-2.5 py-1 animate-pulse">
                                                     <div className="h-12 bg-gray-100/80 rounded-xl w-full"></div>
@@ -2888,7 +2891,7 @@ const CourseView = () => {
                                                 )
                                             }
                                         </div>
-                                        <div className="relative">
+                                        <div className="relative mt-auto">
                                             <input
                                                 type="text"
                                                 placeholder={t('add_note_placeholder', 'Add a new note at this time...')}
@@ -2929,19 +2932,11 @@ const CourseView = () => {
                                                     )}
                                                 </div>
                                             ) : (
-                                                <>
-                                                    <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
-                                                        {t('comments_and_queries', 'Comments and Queries')} {!loading && currentLecture?.title && (
-                                                            <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture.title})</span>
-                                                        )}
-                                                    </h3>
-                                                    <button
-                                                        onClick={() => setIsSelectionMode(true)}
-                                                        className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-                                                    >
-                                                        Select
-                                                    </button>
-                                                </>
+                                                <h3 className="text-xl font-bold text-gray-900 leading-[1.8]">
+                                                    {t('comments_and_queries', 'Comments and Queries')} {!loading && currentLecture?.title && (
+                                                        <span className="text-sm font-normal text-gray-500 ml-2">({currentLecture.title})</span>
+                                                    )}
+                                                </h3>
                                             )}
                                         </div>
                                         <div
