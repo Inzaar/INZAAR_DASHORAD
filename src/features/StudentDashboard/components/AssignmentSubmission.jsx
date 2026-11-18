@@ -204,6 +204,8 @@ const AssignmentSubmission = () => {
                     status: 'Submitted',
                     submittedAt,
                     returnUrl,
+                    enrollmentId,
+                    isAdminView,
                     isLate: assignment.isLate || false,
                     isAttemptsExhausted: newIsAttemptsExhausted
                 }
@@ -235,10 +237,40 @@ const AssignmentSubmission = () => {
     }
 
     const handleClose = () => {
-        if (returnUrl) {
-            navigate(returnUrl);
+        const queryParams = new URLSearchParams(location.search);
+        const rawReturnUrl = returnUrl || location.state?.returnPath || queryParams.get('returnUrl') || queryParams.get('returnPath');
+        if (rawReturnUrl) {
+            let decoded = decodeURIComponent(rawReturnUrl);
+            if (decoded.includes('/course-play')) {
+                decoded = decoded.replace('/course-play', '/course-view');
+            }
+            if (decoded.startsWith('/app/')) {
+                decoded = decoded.replace(/^\/app/, '');
+            } else if (decoded === '/app') {
+                decoded = '/';
+            }
+            navigate(decoded);
+            return;
+        }
+
+        const targetCourseId = assignment?.courseId?._id || assignment?.courseId || queryParams.get('courseId') || queryParams.get('id');
+        const targetLectureId = assignment?.id || assignment?._id || assignment?.lectureId || queryParams.get('lectureId');
+        const targetEnrollmentId = enrollmentId || location.state?.enrollmentId || assignment?.enrollmentId || queryParams.get('enrollmentId');
+        const targetBatchId = assignment?.batchId?._id || assignment?.batchId || queryParams.get('batchId');
+
+        if (targetCourseId) {
+            if (isAdminView) {
+                navigate(`/admin-course-play?id=${targetCourseId}${targetLectureId ? `&lectureId=${targetLectureId}` : ''}`);
+            } else {
+                const params = new URLSearchParams();
+                params.set('id', targetCourseId);
+                if (targetEnrollmentId) params.set('enrollmentId', targetEnrollmentId);
+                if (targetLectureId) params.set('lectureId', targetLectureId);
+                if (targetBatchId) params.set('batchId', targetBatchId);
+                navigate(`/course-view?${params.toString()}`);
+            }
         } else {
-            navigate(-1);
+            navigate('/course-view');
         }
     };
 
