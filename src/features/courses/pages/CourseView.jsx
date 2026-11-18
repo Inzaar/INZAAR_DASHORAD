@@ -11,7 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, CheckCircle, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, CheckCircle, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, MoreVertical, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -495,6 +495,7 @@ const CourseView = () => {
     const [isAudioUploading, setIsAudioUploading] = useState(false);
     const [isPdfUploading, setIsPdfUploading] = useState(false);
     const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+    const [isCourseActionsMenuOpen, setIsCourseActionsMenuOpen] = useState(false);
     const [newAudioLink, setNewAudioLink] = useState("");
     const [newAudioTitle, setNewAudioTitle] = useState("");
     const [newPdfLink, setNewPdfLink] = useState("");
@@ -518,6 +519,7 @@ const CourseView = () => {
     const completedIdsRef = useRef(new Set()); // For unlocking NEXT lecture
     const fullyCompletedIdsRef = useRef(new Set()); // For unlocking CURRENT lecture's quizzes/assignments/certificate
     const adminMenuRef = useRef(null);
+    const courseActionsMenuRef = useRef(null);
     const lectureMediaInputRef = useRef(null);
     const audioInputRef = useRef(null);
     const pdfInputRef = useRef(null);
@@ -547,6 +549,9 @@ const CourseView = () => {
             if (adminMenuRef.current && !adminMenuRef.current.contains(event.target)) {
                 setIsAdminMenuOpen(false);
             }
+            if (courseActionsMenuRef.current && !courseActionsMenuRef.current.contains(event.target)) {
+                setIsCourseActionsMenuOpen(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -558,6 +563,11 @@ const CourseView = () => {
             : String(lecture.lectureNo || index + 1).padStart(2, '0'));
         const q = lecture.quizzes || [];
         const a = lecture.assignments || [];
+
+        const isCurrentLecture = Boolean(
+            (currentLecture?.id && (currentLecture.id === lecture.id || currentLecture.id === lecture._id)) ||
+            (currentLecture?._id && (currentLecture._id === lecture.id || currentLecture._id === lecture._id))
+        );
 
         const isAudioLecture = lecture.type === 'Audio' ||
             lecture.mediaType?.toLowerCase() === 'audio' ||
@@ -573,6 +583,7 @@ const CourseView = () => {
             <React.Fragment key={lecture.id}>
                 {/* Main Lecture Card */}
                 <div
+                    id={`playlist-lecture-${lecture.id || lecture._id}`}
                     onClick={() => {
                         if (!lecture.isLocked) {
                             if (lecture.type === 'Assignment') {
@@ -586,26 +597,26 @@ const CourseView = () => {
                         }
                     }}
                     className={`
-                                                        relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
-                                                        w-[260px] sm:w-[300px] lg:w-full flex flex-col
-                                                        ${(currentLecture?.id === lecture.id || currentLecture?._id === lecture.id || currentLecture?.id === lecture._id || currentLecture?._id === lecture._id)
+                        relative bg-white p-2 rounded-xl border transition-all cursor-pointer group shrink-0 snap-start
+                        w-[260px] sm:w-[300px] lg:w-full flex flex-col
+                        ${isCurrentLecture
                             ? 'border-blue-500 shadow-md ring-1 ring-blue-500'
                             : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
                         }
-                                                        ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
-                                                        ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
-                                                        ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
-                                                    `}
+                        ${lecture.isLocked ? 'opacity-70 cursor-not-allowed' : ''}
+                        ${lecture.type === 'Quiz' ? 'border-dashed border-purple-300 bg-purple-50/10' : ''}
+                        ${lecture.type === 'Assignment' ? 'border-dashed border-orange-300 bg-orange-50/10' : ''}
+                    `}
                 >
                     {isAudioLecture ? (
-                        <div className="relative w-full h-[84px] rounded-lg overflow-hidden group flex flex-col bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF] transition-all">
+                        <div className="relative w-full aspect-video lg:aspect-auto lg:h-[84px] rounded-lg overflow-hidden group flex flex-col bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF] transition-all">
                             {/* Minimal White Shadow Overlay like Navbar */}
                             <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-transparent pointer-events-none" />
 
                             {/* Content Container */}
                             <div className="absolute top-0 left-0 p-3 pr-11 w-full h-full text-white flex flex-col justify-center z-20 pointer-events-none">
                                 <div className="flex justify-between items-start">
-                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-sm line-clamp-1 ${currentLecture?.id === lecture.id ? 'text-white font-extrabold' : 'text-white'}`}>
+                                    <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-sm line-clamp-2 ${isCurrentLecture ? 'text-white font-extrabold' : 'text-white'}`}>
                                         {lecture.title}
                                     </h4>
                                 </div>
@@ -617,10 +628,16 @@ const CourseView = () => {
                                 </div>
                             </div>
 
-                            {lecture.isLocked && (
+                            {lecture.isLocked ? (
                                 <div className="absolute inset-0 flex items-center justify-center z-10">
                                     <div className="bg-black/50 p-2.5 rounded-full backdrop-blur-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className={`absolute inset-0 flex items-center justify-center z-10 pointer-events-none ${isCurrentLecture ? 'opacity-0' : 'opacity-80'}`}>
+                                    <div className="bg-white/20 p-2.5 rounded-full backdrop-blur-md shadow-sm group-hover:scale-110 transition-transform">
+                                        <Volume2 className="w-5 h-5 text-white" />
                                     </div>
                                 </div>
                             )}
@@ -645,7 +662,7 @@ const CourseView = () => {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:bg-black/40 transition-colors" />
                                 <div className="absolute top-0 left-0 p-3 w-full h-full text-white flex flex-col z-20 pointer-events-none">
                                     <div className="flex justify-between items-start">
-                                        <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md ${currentLecture?.id === lecture.id ? 'text-blue-300' : 'text-white'}`}>
+                                        <h4 className={`font-bold text-[14px] leading-tight mb-1 drop-shadow-md line-clamp-2 ${isCurrentLecture ? 'text-blue-300' : 'text-white'}`}>
                                             {lecture.title}
                                         </h4>
                                     </div>
@@ -663,19 +680,19 @@ const CourseView = () => {
                                         </div>
                                     </div>
                                 ) : lecture.type === 'Assignment' ? (
-                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${isCurrentLecture ? 'opacity-0' : 'opacity-100'}`}>
                                         <div className="bg-orange-500/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
                                             <span className="text-white text-lg">📋</span>
                                         </div>
                                     </div>
                                 ) : lecture.type === 'Quiz' ? (
-                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${isCurrentLecture ? 'opacity-0' : 'opacity-100'}`}>
                                         <div className="bg-purple-600/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
                                             <GraduationCap className="text-white w-5 h-5" />
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${currentLecture?.id === lecture.id ? 'opacity-0' : 'opacity-100'}`}>
+                                    <div className={`absolute inset-0 flex items-center justify-center z-10 ${isCurrentLecture ? 'opacity-0' : 'opacity-100'}`}>
                                         <div className="bg-white/30 p-2.5 rounded-full backdrop-blur-md shadow-lg group-hover:scale-110 transition-transform mt-3">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                                         </div>
@@ -691,10 +708,10 @@ const CourseView = () => {
                             </div>
                         </div>
                     )}
-                    {currentLecture?.id === lecture.id && (
+                    {isCurrentLecture && (
                         <div className="absolute right-0 top-4 bottom-4 w-1 bg-blue-600 rounded-l-full" />
                     )}
-                    {lecture.isCompleted && currentLecture?.id !== lecture.id && (
+                    {lecture.isCompleted && !isCurrentLecture && (
                         <div className="absolute top-2 left-2 bg-green-500 rounded-full p-0.5 shadow-sm z-30">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-white"><polyline points="20 6 9 17 4 12" /></svg>
                         </div>
@@ -975,11 +992,13 @@ const CourseView = () => {
     const groupedLectures = React.useMemo(() => {
         const groups = [];
         const sectionMap = {};
+        let currentStandaloneGroup = null;
 
         lectures.forEach((lecture, idx) => {
             const sec = (lecture.section || "").trim();
 
             if (sec) {
+                currentStandaloneGroup = null;
                 if (!sectionMap[sec]) {
                     const newGroup = {
                         type: 'section',
@@ -995,13 +1014,16 @@ const CourseView = () => {
             } else if ((lecture.type === 'Quiz' || lecture.type === 'Assignment' || lecture.status === 'Quiz') && groups.length > 0 && groups[groups.length - 1].type === 'section') {
                 groups[groups.length - 1].lectures.push(lecture);
             } else {
-                groups.push({
-                    type: 'lecture',
-                    id: `lecture-${lecture.id || idx}`,
-                    isExplicitSection: false,
-                    lecture: lecture,
-                    index: idx
-                });
+                if (!currentStandaloneGroup) {
+                    currentStandaloneGroup = {
+                        type: 'standalone_group',
+                        id: `standalone-${idx}`,
+                        isExplicitSection: false,
+                        lectures: []
+                    };
+                    groups.push(currentStandaloneGroup);
+                }
+                currentStandaloneGroup.lectures.push(lecture);
             }
         });
 
@@ -1019,6 +1041,16 @@ const CourseView = () => {
             }
         }
     }, [currentLecture, groupedLectures]);
+
+    useEffect(() => {
+        if (currentLecture) {
+            const id = currentLecture.id || currentLecture._id;
+            const el = document.getElementById(`playlist-lecture-${id}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+            }
+        }
+    }, [currentLecture?.id, currentLecture?._id]);
 
     const toggleSection = (id) => {
         setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
@@ -2036,105 +2068,121 @@ const CourseView = () => {
                                 )}
 
                                 {!isAdminView && user?.role !== 'admin' && (
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="relative" ref={courseActionsMenuRef}>
                                         <button
                                             type="button"
-                                            disabled={!hasModerator}
-                                            onClick={handleWhatsAppClick}
-                                            title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
-                                            className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm max-[400px]:hidden ${hasModerator
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
-                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
-                                                }`}
+                                            onClick={() => setIsCourseActionsMenuOpen(prev => !prev)}
+                                            aria-label="Course Options"
+                                            title="More options"
+                                            className="p-2 sm:p-2.5 bg-white border border-gray-200/90 rounded-xl shadow-sm hover:bg-gray-50 text-gray-700 hover:text-gray-900 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
                                         >
-                                            WhatsApp <FaWhatsapp size={16} />
-                                        </button>
-                                        {/* Mobile icon-only WhatsApp button */}
-                                        <button
-                                            type="button"
-                                            disabled={!hasModerator}
-                                            onClick={handleWhatsAppClick}
-                                            title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
-                                            className={`max-[400px]:flex hidden items-center justify-center p-2 rounded-full transition-colors shadow-sm ${hasModerator
-                                                    ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
-                                                    : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
-                                                }`}
-                                        >
-                                            <FaWhatsapp size={20} />
+                                            <MoreVertical className="w-5 h-5" />
                                         </button>
 
-                                        {certificateUrl ? (
-                                            <>
-                                                <GradiantButton
-                                                    disabled={!isCourseCompleted}
-                                                    onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
-                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${!isCourseCompleted
-                                                            ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
+                                        {isCourseActionsMenuOpen && (
+                                            <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                                {/* WhatsApp Support */}
+                                                <button
+                                                    type="button"
+                                                    disabled={!hasModerator}
+                                                    onClick={() => {
+                                                        handleWhatsAppClick();
+                                                        setIsCourseActionsMenuOpen(false);
+                                                    }}
+                                                    title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
+                                                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left ${hasModerator
+                                                            ? "text-gray-700 hover:bg-emerald-50/80 hover:text-emerald-700 cursor-pointer"
+                                                            : "text-gray-400 cursor-not-allowed opacity-60"
                                                         }`}
                                                 >
-                                                    <Download className="w-4 h-4" />
-                                                    Download Certificate
-                                                </GradiantButton>
-                                                <GradiantButton
-                                                    disabled={!isCourseCompleted}
-                                                    onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
-                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${!isCourseCompleted
-                                                            ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
-                                                        }`}
-                                                >
-                                                    <Download className="w-5 h-5" />
-                                                </GradiantButton>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <GradiantButton
-                                                    disabled={!allLecturesCompleted}
-                                                    onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
-                                                    title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
-                                                    className={`max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 font-medium rounded-lg shadow-lg text-xs sm:text-base flex items-center gap-2 transition-all ${!allLecturesCompleted
-                                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "cursor-pointer"
-                                                        }`}
-                                                >
-                                                    <GraduationCap className="w-4 h-4" />
-                                                    Generate Certificate
-                                                </GradiantButton>
-                                                <GradiantButton
-                                                    disabled={!allLecturesCompleted}
-                                                    onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
-                                                    title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
-                                                    className={`max-[600px]:flex hidden text-xl px-4 py-2.5 font-medium rounded-lg shadow-lg items-center justify-center transition-all ${!allLecturesCompleted
-                                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                                                            : "cursor-pointer"
-                                                        }`}
-                                                >
-                                                    <GraduationCap className="w-5 h-5" />
-                                                </GradiantButton>
-                                            </>
-                                        )}
+                                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${hasModerator ? "bg-[#25D366]/15 text-[#25D366]" : "bg-gray-100 text-gray-400"
+                                                        }`}>
+                                                        <FaWhatsapp size={18} />
+                                                    </span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="truncate font-semibold text-xs sm:text-sm">WhatsApp</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                            {hasModerator ? "Contact assigned moderator" : "No moderator assigned"}
+                                                        </span>
+                                                    </div>
+                                                </button>
 
-                                        <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-4 sm:px-6 py-2 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs sm:text-base">
-                                            {t('enroll_new_course', 'Enroll New Course')}
-                                        </GradiantButton>
-                                        <div className="relative group max-[600px]:inline-flex hidden">
-                                            <GradiantButton
-                                                onClick={() => navigate('/courses')}
-                                                className="text-xl px-4 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 items-center justify-center"
-                                            >
-                                                <Plus className="w-5 h-5" />
-                                            </GradiantButton>
-                                            {/* Hover White Tooltip / Toaster on bottom */}
-                                            <div className="absolute top-full right-0 mt-2 pointer-events-none opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-200 z-50 transform -translate-y-1 group-hover:translate-y-0">
-                                                <div className="bg-white text-gray-800 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center relative border border-gray-200">
-                                                    <div className="absolute -top-1 right-4 w-2 h-2 bg-white border-t border-l border-gray-200 rotate-45"></div>
-                                                    <span className="relative z-10">{t('enroll_new_course', 'Enroll New Course')}</span>
-                                                </div>
+                                                {/* Certificate: Download or Generate */}
+                                                {certificateUrl ? (
+                                                    <button
+                                                        type="button"
+                                                        disabled={!isCourseCompleted}
+                                                        onClick={() => {
+                                                            if (isCourseCompleted) {
+                                                                handleDownloadCertificate();
+                                                                setIsCourseActionsMenuOpen(false);
+                                                            }
+                                                        }}
+                                                        title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${isCourseCompleted
+                                                                ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
+                                                                : "text-gray-400 cursor-not-allowed opacity-60"
+                                                            }`}
+                                                    >
+                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isCourseCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
+                                                            }`}>
+                                                            <Download className="w-4 h-4" />
+                                                        </span>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="truncate font-semibold text-xs sm:text-sm">Download Certificate</span>
+                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                                {isCourseCompleted ? "Save your course certificate" : "Complete course to unlock"}
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        disabled={!allLecturesCompleted}
+                                                        onClick={() => {
+                                                            if (allLecturesCompleted) {
+                                                                navigate('/certificates');
+                                                                setIsCourseActionsMenuOpen(false);
+                                                            }
+                                                        }}
+                                                        title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${allLecturesCompleted
+                                                                ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
+                                                                : "text-gray-400 cursor-not-allowed opacity-60"
+                                                            }`}
+                                                    >
+                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${allLecturesCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
+                                                            }`}>
+                                                            <GraduationCap className="w-4 h-4" />
+                                                        </span>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="truncate font-semibold text-xs sm:text-sm">Generate Certificate</span>
+                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                                {allLecturesCompleted ? "Get your official certificate" : "Complete course to unlock"}
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                )}
+
+                                                {/* Enroll New Course */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        navigate('/courses');
+                                                        setIsCourseActionsMenuOpen(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-purple-50/80 hover:text-[#8B5CF6] transition-colors text-left border-t border-gray-100/70 cursor-pointer"
+                                                >
+                                                    <span className="w-8 h-8 rounded-lg bg-purple-50 text-[#8B5CF6] flex items-center justify-center shrink-0">
+                                                        <Plus className="w-4 h-4" />
+                                                    </span>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="truncate font-semibold text-xs sm:text-sm">{t('enroll_new_course', 'Enroll New Course')}</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">Explore other courses</span>
+                                                    </div>
+                                                </button>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -2827,6 +2875,12 @@ const CourseView = () => {
                                                                                     </div>
                                                                                 )}
                                                                             </div>
+                                                                        </div>
+                                                                    );
+                                                                } else if (item.type === 'standalone_group') {
+                                                                    return (
+                                                                        <div key={item.id || itemIdx} className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible snap-x lg:snap-none no-scrollbar gap-3 pt-1 pb-3 w-full">
+                                                                            {item.lectures.map((lecture, index) => renderLectureItem(lecture, index))}
                                                                         </div>
                                                                     );
                                                                 } else {

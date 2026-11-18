@@ -91,8 +91,8 @@ const EnrolledCourses = () => {
                                 </GradiantButton>
                             </div> */}
 
-                            <div className="gap-6">
-                                <div className=" flex flex-col gap-6">
+                            <div className="gap-3.5 sm:gap-6">
+                                <div className=" flex flex-col gap-3.5 sm:gap-6">
                                     <Analytics userCourses={{ stats: userCourses?.stats }} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>

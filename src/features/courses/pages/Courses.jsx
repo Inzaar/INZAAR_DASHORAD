@@ -274,39 +274,42 @@ const Courses = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="py-4 pr-2">
-                            <div className="flex bg-gray-200 w-full max-w-[500px] rounded-lg p-1 mb-8">
+                            {/* Segmented Tab Control */}
+                            <div className="flex bg-[#F1F3F9] w-full max-w-[280px] min-[380px]:max-w-[320px] sm:max-w-[360px] rounded-xl p-1 mb-5 sm:mb-6 border border-gray-200/60 shadow-sm">
                                 {activeTab === 'all' ? (
-                                    <GradiantButton className="w-[50%] px-4 py-3 rounded-lg shadow-sm">
+                                    <GradiantButton className="w-1/2 py-1.5 sm:py-2 px-3 rounded-[9px] text-xs sm:text-[13px] font-bold shadow-sm">
                                         {t('all_courses', 'All Courses')}
                                     </GradiantButton>
                                 ) : (
-                                    <div
+                                    <button
+                                        type="button"
                                         onClick={() => handleTabChange('all')}
-                                        className="w-[50%] px-4 py-3 rounded-lg flex items-center justify-center cursor-pointer text-gray-500 font-medium hover:text-gray-900 transition-colors"
+                                        className="w-1/2 py-1.5 sm:py-2 px-3 rounded-[9px] flex items-center justify-center cursor-pointer text-gray-500 font-semibold text-xs sm:text-[13px] hover:text-gray-900 hover:bg-white/60 transition-all active:scale-95"
                                     >
                                         {t('all_courses', 'All Courses')}
-                                    </div>
+                                    </button>
                                 )}
 
                                 {activeTab === 'new' ? (
-                                    <GradiantButton className="w-[50%] px-4 py-3 rounded-lg shadow-sm">
+                                    <GradiantButton className="w-1/2 py-1.5 sm:py-2 px-3 rounded-[9px] text-xs sm:text-[13px] font-bold shadow-sm">
                                         {t('new_courses', 'New Courses')}
                                     </GradiantButton>
                                 ) : (
-                                    <div
+                                    <button
+                                        type="button"
                                         onClick={() => handleTabChange('new')}
-                                        className="w-[50%] px-4 py-3 rounded-lg flex items-center justify-center cursor-pointer text-gray-500 font-medium hover:text-gray-900 transition-colors"
+                                        className="w-1/2 py-1.5 sm:py-2 px-3 rounded-[9px] flex items-center justify-center cursor-pointer text-gray-500 font-semibold text-xs sm:text-[13px] hover:text-gray-900 hover:bg-white/60 transition-all active:scale-95"
                                     >
                                         {t('new_courses', 'New Courses')}
-                                    </div>
+                                    </button>
                                 )}
                             </div>
 
-                            <div className="mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                            <div className="mb-4 sm:mb-6">
+                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1">
                                     {activeTab === 'new' ? t('new_courses', 'New Courses') : t('all_courses', 'All Courses')}
                                 </h2>
-                                <p className="text-gray-500">
+                                <p className="text-gray-500 text-xs sm:text-sm">
                                     {activeTab === 'new'
                                         ? t('latest_additions_desc', 'Check out the latest additions to our curriculum.')
                                         : t('top_picks_desc', 'We know the best things for You. Top picks for You.')}

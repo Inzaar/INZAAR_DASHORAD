@@ -265,12 +265,12 @@ const DashboardPage = () => {
                                 </div>
                             </div>
 
-                            <div className="gap-6">
-                                <div className=" flex flex-col gap-6">
+                            <div className="gap-3.5 sm:gap-6">
+                                <div className=" flex flex-col gap-3.5 sm:gap-6">
                                     <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} percentageOverride={progressPercentage} />
 
                                     <div className='flex w-full gap-6'>
-                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm">
+                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm min-w-0">
                                             <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t("enrolled_courses", "Enrolled Courses")}</h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
                                         </div>

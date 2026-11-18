@@ -34,6 +34,8 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const [isLoadingBatches, setIsLoadingBatches] = useState(false);
 
   const handleEnrollClick = async () => {
+    if (isLoadingBatches || isEnrolling) return;
+
     if (user?.role === 'guest') {
       setShowGuestModal(true);
       return;
@@ -110,6 +112,8 @@ const CardCourse = ({ course, isAdmin = false }) => {
   };
 
   const proceedWithEnrollment = async (batchId) => {
+    if (isLoadingBatches || isEnrolling) return;
+
     if (enrolledBatchIds.some(id => String(id) === String(batchId))) {
       toast("You have already enrolled in it and it will be coming soon", { icon: "⏳" });
       return;
@@ -193,41 +197,70 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
         <div className="mt-1">
           <GradiantButton
-            className="px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[140px]"
+            className={`px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[140px] ${(isEnrolling || isLoadingBatches) ? 'opacity-80 pointer-events-none cursor-wait' : ''}`}
             onClick={handleEnrollClick}
             disabled={isEnrolling || isLoadingBatches}
           >
-            {isAdmin ? t("view_details", "View Details") : isEnrolled ? t("already_enrolled", "Already Enrolled") : t("enroll_now", "Enroll now")}
+            {isLoadingBatches ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{t("checking", "Checking...")}</span>
+              </span>
+            ) : isEnrolling ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{t("enrolling", "Enrolling...")}</span>
+              </span>
+            ) : (
+              isAdmin ? t("view_details", "View Details") : isEnrolled ? t("already_enrolled", "Already Enrolled") : t("enroll_now", "Enroll now")
+            )}
           </GradiantButton>
         </div>
       </div>
 
-      {isEnrolling && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <h3 className="text-lg font-bold text-gray-900">{t("enrolling", "Enrolling...")}</h3>
+      {(isEnrolling || isLoadingBatches) && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 cursor-wait">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 sm:p-7 flex flex-col items-center text-center gap-4 animate-in zoom-in-95 duration-200 border border-gray-100">
+            <div className="relative flex items-center justify-center">
+              <div className="w-14 h-14 border-4 border-purple-100 border-t-[#3758EE] border-r-[#B666E7] rounded-full animate-spin"></div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h3 className="text-lg font-bold text-gray-900">
+                {isEnrolling ? t("enrolling_in_course", "Enrolling in Course...") : t("checking_availability", "Checking Batches...")}
+              </h3>
+              <p className="text-xs text-gray-500">
+                {isEnrolling 
+                  ? t("enrolling_wait_msg", "Please wait while we complete your enrollment. Do not refresh or tap again.") 
+                  : t("checking_batches_msg", "Finding available batches for this course...")}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
       {isAlreadyEnrolled && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 sm:p-6 relative animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setIsAlreadyEnrolled(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="flex flex-col items-center text-center gap-4 pt-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <div className="flex flex-col items-center text-center gap-3 sm:gap-4 pt-1 sm:pt-2">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{t("notice", "Notice")}</h3>
-                <p className="text-sm text-gray-500">{errorMessage}</p>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{t("notice", "Notice")}</h3>
+                <p className="text-xs sm:text-sm text-gray-500">{errorMessage}</p>
               </div>
               <GradiantButton
                 onClick={() => {
@@ -236,7 +269,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
                     navigate("/course-view?id=" + course.id);
                   }
                 }}
-                className="w-full py-2 rounded-md"
+                className="w-full py-2 rounded-xl text-xs sm:text-sm"
               >
                 {t("continue", "Continue")}
               </GradiantButton>
@@ -247,22 +280,22 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
       {/* Guest Enrollment Modal */}
       {showGuestModal && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl sm:rounded-[1.5rem] shadow-2xl w-full max-w-sm p-5 sm:p-7 md:p-8 relative animate-in zoom-in-95 duration-300">
             <button
               onClick={() => setShowGuestModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 sm:p-2 rounded-full hover:bg-gray-100"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="flex flex-col items-center text-center gap-5 pt-2">
-              <div className="w-16 h-16 rounded-full bg-[#F3E8FF] flex items-center justify-center text-[#B666E7] mb-2 border-4 border-[#F3E8FF]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+            <div className="flex flex-col items-center text-center gap-4 sm:gap-5 pt-1 sm:pt-2">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#F3E8FF] flex items-center justify-center text-[#B666E7] mb-1 sm:mb-2 border-4 border-[#F3E8FF]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-8 sm:h-8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Account Required</h3>
-                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">Account Required</h3>
+                <p className="text-xs sm:text-[14px] leading-relaxed text-gray-500 font-medium">
                   You are currently browsing as a guest. Please create an account or sign in to enroll in this course.
                 </p>
               </div>
@@ -271,7 +304,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
                   setShowGuestModal(false);
                   logout('/app/login');
                 }}
-                className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
+                className="mt-1 sm:mt-2 w-full py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#3758EE] to-[#B666E7] text-white font-bold text-xs sm:text-[14px] shadow-lg shadow-purple-500/20 hover:opacity-90 active:scale-95 transition-all"
               >
                 Sign In / Create Account
               </button>
@@ -282,19 +315,19 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
       {/* WhatsApp Error Modal */}
       {showWhatsappModal && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-8 relative animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl sm:rounded-[1.5rem] shadow-2xl w-full max-w-sm p-5 sm:p-7 md:p-8 relative animate-in zoom-in-95 duration-300">
             <button
               onClick={() => setShowWhatsappModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 sm:p-2 rounded-full hover:bg-gray-100"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="flex flex-col items-center text-center gap-5 pt-2">
+            <div className="flex flex-col items-center text-center gap-4 sm:gap-5 pt-1 sm:pt-2">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{t("notice", "Notice")}</h3>
-                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">{t("notice", "Notice")}</h3>
+                <p className="text-xs sm:text-[14px] leading-relaxed text-gray-500 font-medium">
                   {t("add_whatsapp_number_to_enroll", "Please add your WhatsApp number in your profile to enroll in this course.")}
                 </p>
               </div>
@@ -303,7 +336,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
                   setShowWhatsappModal(false);
                   navigate('/profile');
                 }}
-                className="mt-2 w-full py-2.5 rounded-xl text-[14px]"
+                className="mt-1 sm:mt-2 w-full py-2.5 rounded-xl text-xs sm:text-[14px]"
               >
                 {t("go_to_profile", "Go to Profile")}
               </GradiantButton>
@@ -314,24 +347,24 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
       {/* Batch Selection Modal */}
       {showBatchSelectionModal && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-lg p-8 relative animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl sm:rounded-[1.5rem] shadow-2xl w-full max-w-lg p-4 sm:p-6 md:p-8 relative animate-in zoom-in-95 duration-300 max-h-[92vh] flex flex-col">
             <button
               onClick={() => setShowBatchSelectionModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 text-gray-400 hover:text-gray-600 transition-colors p-1.5 sm:p-2 rounded-full hover:bg-gray-100 z-10"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="flex flex-col gap-5 pt-2">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Batch</h3>
-                <p className="text-[14px] leading-relaxed text-gray-500 font-medium">
-                  Please select which batch you would like to enroll in for {course.title}.
+            <div className="flex flex-col gap-3 sm:gap-5 pt-1 sm:pt-2 min-h-0 flex-1">
+              <div className="pr-6 sm:pr-8">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">{t("select_a_batch", "Select a Batch")}</h3>
+                <p className="text-xs sm:text-[14px] leading-relaxed text-gray-500 font-medium line-clamp-2 sm:line-clamp-none">
+                  {t("select_batch_desc", "Please select which batch you would like to enroll in for")} <span className="font-semibold text-gray-800">{course.title}</span>.
                 </p>
               </div>
               
-              <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-2.5 sm:gap-3 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar flex-1 min-h-0">
                 {availableBatches.map(batch => {
                   const now = new Date();
                   const isUpcoming = new Date(batch.startDate) > now;
@@ -349,12 +382,13 @@ const CardCourse = ({ course, isAdmin = false }) => {
                   return (
                     <div 
                       key={batch._id} 
-                      className={`border rounded-xl p-4 flex flex-col gap-2 transition-colors ${
-                        isDisabled 
-                          ? 'border-gray-300 bg-gray-100 opacity-80 cursor-not-allowed' 
-                          : 'border-gray-200 hover:border-[#3758EE] bg-gray-50 hover:bg-white cursor-pointer'
+                      className={`border rounded-xl p-3 sm:p-4 flex flex-col gap-2 transition-colors ${
+                        isDisabled || isEnrolling || isLoadingBatches
+                          ? 'border-gray-300 bg-gray-100 opacity-80 cursor-not-allowed pointer-events-none' 
+                          : 'border-gray-200 hover:border-[#3758EE] bg-gray-50 hover:bg-white cursor-pointer active:scale-[0.99]'
                       }`}
                       onClick={() => {
+                        if (isEnrolling || isLoadingBatches) return;
                         if (isBatchEnrolled) {
                           setShowBatchSelectionModal(false);
                           const courseId = course.id || course._id;
@@ -373,13 +407,14 @@ const CardCourse = ({ course, isAdmin = false }) => {
                         }
                       }}
                     >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-gray-900">
+                      {/* Header with Title and Badge (No overlap!) */}
+                      <div className="flex flex-row justify-between items-start gap-2 mb-1">
+                        <span className="font-bold text-[13.5px] sm:text-[15px] text-gray-900 leading-snug break-words min-w-0 flex-1">
                           {isBatchEnrolled 
                             ? (batch.name ? `${batch.name} (Enrolled)` : 'Already Enrolled') 
                             : (batch.name || (isUpcoming ? 'Upcoming Batch' : 'Running Batch'))}
                         </span>
-                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                        <span className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shrink-0 whitespace-nowrap text-center ${
                           isBatchEnrolled ? 'bg-gray-200 text-gray-700' :
                           (isEnrollmentClosed ? 'bg-red-100 text-red-600' :
                            isEnrollmentUpcoming ? 'bg-orange-100 text-orange-600' :
@@ -391,16 +426,26 @@ const CardCourse = ({ course, isAdmin = false }) => {
                             'Enrollment Open')}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-600 grid grid-cols-2 gap-2 border-t border-gray-100 pt-2 mt-1">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Course Schedule</span>
-                          <span className="text-[13px]">Starts: <span className="font-semibold text-gray-800">{new Date(batch.startDate).toLocaleDateString()}</span></span>
-                          <span className="text-[13px]">Ends: <span className="font-semibold text-gray-800">{new Date(batch.endDate).toLocaleDateString()}</span></span>
+
+                      {/* Schedule details */}
+                      <div className="text-xs sm:text-sm text-gray-600 grid grid-cols-2 gap-2 sm:gap-3 border-t border-gray-100 pt-2 mt-0.5">
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Course Schedule</span>
+                          <span className="text-[11px] min-[360px]:text-[12px] sm:text-[13px] leading-tight text-gray-600 truncate">
+                            Starts: <span className="font-semibold text-gray-800">{new Date(batch.startDate).toLocaleDateString()}</span>
+                          </span>
+                          <span className="text-[11px] min-[360px]:text-[12px] sm:text-[13px] leading-tight text-gray-600 truncate mt-0.5">
+                            Ends: <span className="font-semibold text-gray-800">{new Date(batch.endDate).toLocaleDateString()}</span>
+                          </span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-gray-400 mb-1">Enrollment Window</span>
-                          <span className="text-[13px]">Starts: <span className="font-semibold text-gray-800">{enrollmentStart ? enrollmentStart.toLocaleDateString() : 'N/A'}</span></span>
-                          <span className="text-[13px]">Ends: <span className="font-semibold text-gray-800">{enrollmentEnd ? enrollmentEnd.toLocaleDateString() : 'N/A'}</span></span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Enrollment Window</span>
+                          <span className="text-[11px] min-[360px]:text-[12px] sm:text-[13px] leading-tight text-gray-600 truncate">
+                            Starts: <span className="font-semibold text-gray-800">{enrollmentStart ? enrollmentStart.toLocaleDateString() : 'N/A'}</span>
+                          </span>
+                          <span className="text-[11px] min-[360px]:text-[12px] sm:text-[13px] leading-tight text-gray-600 truncate mt-0.5">
+                            Ends: <span className="font-semibold text-gray-800">{enrollmentEnd ? enrollmentEnd.toLocaleDateString() : 'N/A'}</span>
+                          </span>
                         </div>
                       </div>
                     </div>

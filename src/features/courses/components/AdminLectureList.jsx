@@ -81,7 +81,22 @@ const AdminLectureList = ({ lectures, onWatch, id }) => {
                                     )}
                                 >
                                     <td className="py-4 px-4 font-bold text-gray-800">#{String(lecture.lectureNo).padStart(2, '0')}</td>
-                                    <td className="py-4 px-4 font-medium text-gray-800">{lecture.title}</td>
+                                    <td className="py-4 px-4 max-w-[260px] sm:max-w-[340px] md:max-w-[420px]">
+                                        <div
+                                            className="font-medium text-gray-800 leading-snug"
+                                            style={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                wordBreak: 'break-word',
+                                            }}
+                                            title={lecture.title}
+                                        >
+                                            {lecture.title}
+                                        </div>
+                                    </td>
                                     <td className="py-4 px-4">{new Date(lecture.date || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}</td>
                                     <td className="py-4 px-4 text-center font-bold">N/A</td>
                                     <td className="py-4 px-4">

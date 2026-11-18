@@ -484,10 +484,23 @@ const StudentCourseDashboard = ({ profileData }) => {
                             {paginatedLectures.length > 0 ? paginatedLectures.map((lecture, i) => (
                                 <tr key={i} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4 font-medium text-gray-900">{lecture.no}</td>
-                                    <td className="px-6 py-4 font-medium text-gray-800">
-                                        {lecture.title}
+                                    <td className="px-6 py-4 font-medium text-gray-800 max-w-[280px] sm:max-w-[340px]">
+                                        <div
+                                            className="leading-snug"
+                                            style={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                wordBreak: 'break-word',
+                                            }}
+                                            title={lecture.title}
+                                        >
+                                            {lecture.title}
+                                        </div>
                                         {lecture.type !== 'Lecture' && (
-                                            <span className="ml-2 text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                            <span className="mt-1 inline-block text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
                                                 {lecture.type}
                                             </span>
                                         )}

@@ -7,9 +7,9 @@ function EnrolledCourse({ userCourses = [], loading }) {
     return (
         <div className="w-full flex flex-col">
             <div 
-                className={`flex gap-5 pb-3 overflow-x-auto custom-scrollbar-courses ${
+                className={`flex gap-3.5 sm:gap-5 pb-3 overflow-x-auto custom-scrollbar-courses ${
                     !loading && userCourses?.length > 0 && userCourses.length < 3 
-                        ? 'justify-center items-center' 
+                        ? 'justify-start min-[680px]:justify-center min-[680px]:items-center' 
                         : 'justify-start'
                 }`} 
             >
@@ -18,21 +18,21 @@ function EnrolledCourse({ userCourses = [], loading }) {
                         {[1, 2, 3].map((item) => (
                             <div 
                                 key={item}
-                                className="w-[301px] h-[250px] bg-white rounded-[10px] border border-gray-200/80 p-[10px] flex flex-col gap-[10px] shadow-sm animate-pulse shrink-0"
+                                className="w-[220px] min-[380px]:w-[240px] sm:w-[301px] h-[215px] sm:h-[250px] bg-white rounded-[10px] border border-gray-200/80 p-[10px] flex flex-col gap-[8px] sm:gap-[10px] shadow-sm animate-pulse shrink-0"
                             >
                                 {/* Image Skeleton */}
-                                <div className="w-full min-h-[140px] flex-1 rounded-[6px] bg-gray-200"></div>
+                                <div className="w-full min-h-[110px] sm:min-h-[140px] flex-1 rounded-[6px] bg-gray-200"></div>
 
                                 {/* Content Skeleton */}
                                 <div className="flex flex-col gap-2 min-w-0 w-full overflow-hidden">
-                                    <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-4 sm:h-5 bg-gray-200 rounded w-3/4"></div>
 
                                     {/* Progress Section Skeleton */}
                                     <div className="flex flex-col gap-1.5 mt-1">
                                         <div className="flex justify-end">
-                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                            <div className="h-3.5 sm:h-4 bg-gray-200 rounded w-20"></div>
                                         </div>
-                                        <div className="w-full h-2 bg-gray-200 rounded-full"></div>
+                                        <div className="w-full h-1.5 sm:h-2 bg-gray-200 rounded-full"></div>
                                     </div>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@ function EnrolledCourse({ userCourses = [], loading }) {
                             title={course.title} 
                             completed={course.completedLecturesCount} 
                             total={course.totalLectures} 
-                            className="min-w-[300px] shadow-sm shrink-0" 
+                            className="w-[220px] min-[380px]:w-[240px] sm:w-[301px] min-w-[220px] min-[380px]:min-w-[240px] sm:min-w-[300px] shadow-sm shrink-0" 
                             image={course.thumbnail} 
                             batchStartDate={course.batchStartDate} 
                         />

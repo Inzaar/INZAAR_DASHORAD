@@ -13,6 +13,7 @@ const MetricCard = ({
     value: valueProp,
     trendValue: trendValueProp,
     trendLabel: trendLabelProp,
+    valueClassName,
     loading = false,
 }) => {
     const { t } = useTranslation();
@@ -53,9 +54,9 @@ const MetricCard = ({
                         )}
                     </h3>
                     {loading ? (
-                        <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse my-0.5" />
+                        <div className="h-8 sm:h-9 w-20 sm:w-24 bg-gray-200 rounded-lg animate-pulse my-0.5" />
                     ) : (
-                        <span className="text-4xl font-bold text-gray-900">{metricInfo.value}</span>
+                        <span className={cn("text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight", valueClassName)}>{metricInfo.value}</span>
                     )}
                 </div>
 

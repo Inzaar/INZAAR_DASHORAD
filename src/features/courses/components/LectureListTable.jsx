@@ -654,8 +654,21 @@ const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId
                                         <td className="px-6 py-4">
                                             <span className="font-medium text-gray-900">{displayLectureNo}</span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="font-medium text-gray-900">{t(lecture.title, lecture.title)}</span>
+                                        <td className="px-6 py-4 w-[35%] max-w-[280px] sm:max-w-[340px] md:max-w-[420px]">
+                                            <div
+                                                className="font-medium text-gray-900 leading-snug"
+                                                style={{
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 3,
+                                                    WebkitBoxOrient: 'vertical',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    wordBreak: 'break-word',
+                                                }}
+                                                title={t(lecture.title, lecture.title)}
+                                            >
+                                                {t(lecture.title, lecture.title)}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className="text-gray-500">{formatDate(lecture.date)}</span>

@@ -1,6 +1,6 @@
 import React from "react";
 import { CiBellOn } from "react-icons/ci";
-import { Menu } from "lucide-react";
+import { Menu, User, LogOut } from "lucide-react";
 import Profilelogo from "../../assets/images/course2.png";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
@@ -144,11 +144,11 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                                 <Menu size={20} className="sm:w-6 sm:h-6" />
                             </button>
                         )}
-                        <div className="min-w-0">
-                            <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-normal tracking-tight text-[#2C2C2C] pb-1">
+                        <div className="min-w-0 flex flex-col justify-center">
+                            <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C]">
                                 {t((computedTitle).toLowerCase().replace(/ /g, '_'), computedTitle)}
                             </div>
-                            <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-normal text-[#2C2C2C]/80">
+                            <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-tight text-[#2C2C2C]/80 mt-0.5">
                                 {today}
                             </div>
                         </div>
@@ -197,14 +197,15 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         </div>
 
                         {isLangOpen && (
-                            <div className="absolute top-full mt-2 right-0 w-[140px] bg-white rounded-xl shadow-2xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="absolute top-full mt-2.5 right-0 w-[125px] sm:w-[140px] bg-white rounded-xl shadow-xl border border-gray-100 p-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute -top-1.5 right-3 w-2.5 h-2.5 bg-white border-t border-l border-gray-100 rotate-45"></div>
                                 {languages.map((lang) => (
                                     <button
                                         key={lang.code}
                                         onClick={() => handleLanguageChange(lang)}
-                                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors flex items-center gap-3 ${currentLang.code === lang.code ? 'text-[#5D5FEF] font-bold bg-blue-50/50' : 'text-gray-700 font-medium'}`}
+                                        className={`w-full text-left px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors flex items-center gap-2.5 sm:gap-3 rounded-lg relative z-10 ${currentLang.code === lang.code ? 'text-[#5D5FEF] font-bold bg-blue-50/50' : 'text-gray-700 font-medium'}`}
                                     >
-                                        <img src={lang.flag} alt="" className="w-[18px] h-auto rounded-[2px] shadow-sm" />
+                                        <img src={lang.flag} alt="" className="w-[16px] sm:w-[18px] h-auto rounded-[2px] shadow-sm" />
                                         {t(lang.name.toLowerCase(), lang.name)}
                                     </button>
                                 ))}
@@ -215,7 +216,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                     <div className="relative" ref={profileDropdownRef}>
                         <div
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
+                            className="w-[32px] h-[32px] sm:w-[40px] sm:h-[40px] rounded-full overflow-hidden border-[2.5px] sm:border-[3.5px] border-white shadow-lg bg-white/20 flex items-center justify-center cursor-pointer hover:scale-105 transition-all shrink-0"
                         >
                             {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
                                 <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
@@ -225,40 +226,50 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                         </div>
 
                         {isProfileOpen && (
-                            <div className="absolute top-full mt-2 right-0 w-[240px] bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                                <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
-                                    <div className="w-[40px] h-[40px] rounded-full overflow-hidden border-2 border-gray-100 bg-gray-50 flex items-center justify-center shrink-0">
+                            <div className="absolute top-full mt-2.5 right-0 w-[195px] min-[380px]:w-[215px] sm:w-[240px] bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-1.5 sm:p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                {/* Top Pointer Notch */}
+                                <div className="absolute -top-1.5 right-3.5 sm:right-4 w-2.5 h-2.5 bg-white border-t border-l border-gray-100 rotate-45"></div>
+
+                                {/* User Header */}
+                                <div className="px-2.5 py-2 sm:px-3 sm:py-2.5 border-b border-gray-100 flex items-center gap-2.5 sm:gap-3 relative z-10 bg-white rounded-t-lg">
+                                    <div className="w-[30px] h-[30px] sm:w-[38px] sm:h-[38px] rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
                                         {user?.profileImageUrl && user.profileImageUrl.trim() !== '' ? (
                                             <img src={user.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-gray-500 font-bold text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>
+                                            <span className="text-gray-600 font-bold text-xs sm:text-sm">{user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'A'}</span>
                                         )}
                                     </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="text-sm font-bold text-gray-900 truncate">
+                                    <div className="flex flex-col min-w-0 flex-1">
+                                        <span className="text-xs sm:text-sm font-bold text-gray-900 truncate leading-tight">
                                             {user?.firstname || user?.name || "User"} {user?.lastname || ""}
                                         </span>
-                                        <span className="text-xs text-gray-500 truncate">{user?.email || ""}</span>
+                                        <span className="text-[10px] sm:text-xs text-gray-500 truncate leading-tight mt-0.5" title={user?.email}>
+                                            {user?.email || ""}
+                                        </span>
                                     </div>
                                 </div>
-                                <div className="py-1">
+
+                                {/* Actions */}
+                                <div className="pt-1 flex flex-col gap-0.5 relative z-10">
                                     <button
                                         onClick={() => {
                                             setIsProfileOpen(false);
                                             user?.role === 'admin' ? navigate('/admin/profile') : navigate('/profile');
                                         }}
-                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#5D5FEF] transition-colors font-medium"
+                                        className="w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 hover:text-[#5D5FEF] transition-colors font-medium flex items-center gap-2 sm:gap-2.5 rounded-lg"
                                     >
-                                        {t('profile', 'Profile')}
+                                        <User size={14} className="text-gray-400 shrink-0 sm:w-4 sm:h-4" />
+                                        <span>{t('profile', 'Profile')}</span>
                                     </button>
                                     <button
                                         onClick={() => {
                                             setIsProfileOpen(false);
                                             if (logout) logout();
                                         }}
-                                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                                        className="w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 transition-colors font-medium flex items-center gap-2 sm:gap-2.5 rounded-lg"
                                     >
-                                        {t('logout', 'Logout')}
+                                        <LogOut size={14} className="text-red-500 shrink-0 sm:w-4 sm:h-4" />
+                                        <span>{t('logout', 'Logout')}</span>
                                     </button>
                                 </div>
                             </div>
