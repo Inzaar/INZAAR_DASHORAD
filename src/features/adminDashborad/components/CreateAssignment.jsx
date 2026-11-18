@@ -14,7 +14,9 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
         setDueDate: initialData?.setDueDate ?? (initialData?.dueDate || initialData?.maxDays ? true : false),
         maxDays: initialData?.maxDays || '1-Day',
         acceptedTypes: Array.isArray(initialData?.acceptedTypes) && initialData.acceptedTypes.length > 0
-            ? initialData.acceptedTypes
+            ? (initialData.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).length > 0
+                ? initialData.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png'))
+                : ['PDF'])
             : ['PDF'],
         referenceFileUrl: initialData?.referenceFileUrl || (Array.isArray(initialData?.pdfUrl) ? initialData.pdfUrl[0] : initialData?.pdfUrl) || '',
         referenceFileName: '',
@@ -36,7 +38,9 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                 setDueDate: initialData.setDueDate ?? (initialData.dueDate || initialData.maxDays ? true : false),
                 maxDays: initialData.maxDays || '1-Day',
                 acceptedTypes: Array.isArray(initialData.acceptedTypes) && initialData.acceptedTypes.length > 0
-                    ? initialData.acceptedTypes
+                    ? (initialData.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).length > 0
+                        ? initialData.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png'))
+                        : ['PDF'])
                     : ['PDF'],
                 referenceFileUrl: refUrl,
                 referenceFileName: refUrl ? refUrl.split('/').pop() : '',
@@ -59,18 +63,24 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
         });
     };
 
-    const handleFileChange = async (e) => {
-        const file = e.target.files?.[0];
+    const handleUploadReferenceFile = async (file) => {
         if (!file) return;
+
+        const isAllowed = file.type.includes('pdf') ||
+                          file.type.includes('document') ||
+                          file.type.includes('msword') ||
+                          file.name.match(/\.(pdf|doc|docx)$/i);
+
+        if (!isAllowed) {
+            toast.error("Only PDF and DOC/DOCX files are allowed for reference file.");
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setUploadingFile(true);
         try {
-            const { uploadPdf, uploadImage } = await import('@/api/course');
-            let res;
-            if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('msword') || file.type.includes('presentation') || file.name.match(/\.(pdf|doc|docx|ppt|pptx)$/i)) {
-                res = await uploadPdf(file);
-            } else {
-                res = await uploadImage(file);
-            }
+            const { uploadPdf } = await import('@/api/course');
+            const res = await uploadPdf(file);
             if (res?.url) {
                 setAssignmentData(prev => ({
                     ...prev,
@@ -84,7 +94,19 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
             toast.error("Failed to upload reference file.");
         } finally {
             setUploadingFile(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) handleUploadReferenceFile(file);
+    };
+
+    const handleReferenceFileDrop = (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer?.files?.[0];
+        if (file) handleUploadReferenceFile(file);
     };
 
     const handleContinue = async () => {
@@ -218,11 +240,15 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                                accept=".pdf,.doc,.docx"
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
-                            <div className="w-full py-10 px-6 border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc]/50 rounded-2xl flex flex-col items-center justify-center transition-all hover:bg-[#f8fafc]">
+                            <div 
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={handleReferenceFileDrop}
+                                className="w-full py-10 px-6 border-2 border-dashed border-[#e2e8f0] bg-[#f8fafc]/50 rounded-2xl flex flex-col items-center justify-center transition-all hover:bg-[#f8fafc]"
+                            >
                                 {uploadingFile ? (
                                     <div className="flex flex-col items-center gap-2">
                                         <Loader2 className="w-8 h-8 text-[#8b5cf6] animate-spin" />
@@ -259,7 +285,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                                         >
                                             Browse file
                                         </button>
-                                        <p className="text-[11px] text-gray-400 font-medium">PDF / DOCX — worksheet or task brief for students</p>
+                                        <p className="text-[11px] text-gray-400 font-medium">PDF / DOC / DOCX — worksheet or task brief for students</p>
                                     </>
                                 )}
                             </div>
@@ -269,7 +295,7 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                         <div className="mb-8">
                             <label className="block text-[13px] font-bold text-[#0f172a] mb-3">Accepted Submission File Types</label>
                             <div className="flex flex-wrap gap-3">
-                                {['PDF', 'DOC / DOCX', 'Image (JPG/PNG)'].map((type) => {
+                                {['PDF', 'DOC / DOCX'].map((type) => {
                                     const isSelected = assignmentData.acceptedTypes.includes(type);
                                     return (
                                         <button

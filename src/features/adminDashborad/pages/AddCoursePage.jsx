@@ -35,7 +35,7 @@ const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource
                         </div>
                         <h4 className="text-[16px] font-bold text-[#0f172a] leading-tight truncate">{item.title || 'Untitled Assignment'}</h4>
                         <p className="text-[12px] text-gray-400 font-medium leading-snug">
-                            {item.acceptedTypes ? item.acceptedTypes.join(', ') : 'PDF, DOC / DOCX, Image (JPG/PNG)'} · {item.setDueDate ? (item.maxDays || '1-Day') : 'No due date'}
+                            {(item.acceptedTypes ? item.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).join(', ') : '') || 'PDF, DOC / DOCX'} · {item.setDueDate ? (item.maxDays || '1-Day') : 'No due date'}
                         </p>
                     </div>
                 </div>

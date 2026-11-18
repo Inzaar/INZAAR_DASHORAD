@@ -1135,8 +1135,8 @@ const CourseView = () => {
             dueDate: dueDateFormatted,
             status: assignment.isCompleted ? 'Submitted' : 'Not submitted',
             acceptedFormats: (Array.isArray(assignment.acceptedTypes) && assignment.acceptedTypes.length > 0)
-                ? assignment.acceptedTypes.join(', ')
-                : (assignment.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'),
+                ? (assignment.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).join(', ') || 'PDF, DOC / DOCX')
+                : (assignment.acceptedFormats ? assignment.acceptedFormats.split(',').map(t => t.trim()).filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).join(', ') || 'PDF, DOC / DOCX' : 'PDF, DOC / DOCX'),
             attempts: assignment.maxAttempts || '3',
             maxAttempts: assignment.maxAttempts || '3',
             attemptCount: typeof assignment.attemptCount === 'number' ? assignment.attemptCount : (assignment.isCompleted ? 1 : 0),
@@ -1213,8 +1213,8 @@ const CourseView = () => {
             dueDate: dueDateFormatted,
             status: lecture.isCompleted ? 'Submitted' : 'Not submitted',
             acceptedFormats: (Array.isArray(lecture.acceptedTypes) && lecture.acceptedTypes.length > 0)
-                ? lecture.acceptedTypes.join(', ')
-                : (lecture.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'),
+                ? (lecture.acceptedTypes.filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).join(', ') || 'PDF, DOC / DOCX')
+                : (lecture.acceptedFormats ? lecture.acceptedFormats.split(',').map(t => t.trim()).filter(t => !t.toLowerCase().includes('image') && !t.toLowerCase().includes('jpg') && !t.toLowerCase().includes('png')).join(', ') || 'PDF, DOC / DOCX' : 'PDF, DOC / DOCX'),
             attempts: lecture.maxAttempts || '3',
             maxAttempts: lecture.maxAttempts || '3',
             attemptCount: typeof lecture.attemptCount === 'number' ? lecture.attemptCount : (lecture.isCompleted ? 1 : 0),

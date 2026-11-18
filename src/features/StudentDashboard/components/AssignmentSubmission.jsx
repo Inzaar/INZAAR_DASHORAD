@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import GrayButton from '@/components/ui/buttons/GrayButton';
@@ -50,6 +50,20 @@ const AssignmentSubmission = () => {
         }
         return 'End of Course';
     })();
+
+    const displayAcceptedFormats = useMemo(() => {
+        let raw = assignment?.acceptedFormats || '';
+        if (!raw && Array.isArray(assignment?.acceptedTypes) && assignment.acceptedTypes.length > 0) {
+            raw = assignment.acceptedTypes.join(', ');
+        }
+        if (!raw) return 'PDF, DOC / DOCX';
+        const filtered = raw
+            .split(/[,/]/)
+            .map(f => f.trim())
+            .filter(f => f && !f.toLowerCase().includes('image') && !f.toLowerCase().includes('jpg') && !f.toLowerCase().includes('png'));
+        const unique = Array.from(new Set(filtered));
+        return unique.length > 0 ? unique.join(', ') : 'PDF, DOC / DOCX';
+    }, [assignment?.acceptedFormats, assignment?.acceptedTypes]);
 
     const [dragOver, setDragOver] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -126,16 +140,30 @@ const AssignmentSubmission = () => {
 
     const handleDragLeave = () => setDragOver(false);
 
+    const validateAndSetFile = (file) => {
+        if (!file) return;
+        const isPdfOrDoc = file.type.includes('pdf') ||
+                           file.type.includes('document') ||
+                           file.type.includes('msword') ||
+                           file.name.match(/\.(pdf|doc|docx)$/i);
+        if (!isPdfOrDoc) {
+            toast.error(t('invalid_file_type', 'Only PDF and DOC/DOCX files are allowed.'));
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+        setSelectedFile(file);
+    };
+
     const handleDrop = (e) => {
         e.preventDefault();
         setDragOver(false);
         const file = e.dataTransfer.files[0];
-        if (file) setSelectedFile(file);
+        if (file) validateAndSetFile(file);
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) setSelectedFile(file);
+        if (file) validateAndSetFile(file);
     };
 
     const handleRemoveFile = () => {
@@ -438,7 +466,7 @@ const AssignmentSubmission = () => {
                                                     {t('browse_file', 'Browse file')}
                                                 </button>
                                                 <p className="text-xs text-gray-400 mt-3 text-center">
-                                                    {(assignment.acceptedFormats ? assignment.acceptedFormats.split(',').map(f => f.trim()).join(' / ') : 'PDF / DOC / DOCX / Image (JPG/PNG)')} — worksheet or task brief for students
+                                                    {displayAcceptedFormats.split(',').map(f => f.trim()).join(' / ')} — worksheet or task brief for students
                                                 </p>
                                             </>
                                         )}
@@ -481,7 +509,7 @@ const AssignmentSubmission = () => {
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('accepted_formats', 'Accepted formats')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{assignment.acceptedFormats || 'PDF, DOC / DOCX, Image (JPG/PNG)'}</span>
+                                        <span className="text-sm font-medium text-gray-800">{displayAcceptedFormats}</span>
                                     </div>
                                     <div className="flex items-center justify-between px-5 py-4">
                                         <span className="text-sm text-gray-500">{t('attempts', 'Attempts')}</span>
