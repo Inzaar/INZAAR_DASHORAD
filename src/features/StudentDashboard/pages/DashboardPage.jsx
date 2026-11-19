@@ -235,13 +235,13 @@ const DashboardPage = () => {
                         scrollbarWidth: 'none'
                     }}>
                         <div className="pt-2 sm:pt-4 pb-1 sm:pb-4 pr-2">
-                            <div className="flex justify-between items-start mb-8 gap-4 w-full">
+                            <div className="flex justify-between items-start mb-3 sm:mb-6 md:mb-8 gap-4 w-full">
                                 <div>
-                                    <h2 className="text-[15px] min-[430px]:text-[19px] min-[641px]:text-2xl font-bold text-gray-900 mb-1 leading-tight pt-2 pb-1 flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
+                                    <h2 className="text-[15px] min-[430px]:text-[19px] min-[641px]:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 leading-tight pt-1 sm:pt-2 pb-0.5 sm:pb-1 flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
                                         <span>{t('welcome_user', 'Welcome, ')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')}</span>
                                         <span>👋🏻</span>
                                     </h2>
-                                    <p className="text-gray-500 text-xs min-[430px]:text-sm min-[641px]:text-base leading-relaxed pb-3">
+                                    <p className="text-gray-500 text-xs min-[430px]:text-sm min-[641px]:text-base leading-relaxed">
                                         {t('lets_learn_something_new_today', "Let's learn something new today!")}
                                     </p>
                                 </div>
