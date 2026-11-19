@@ -334,47 +334,55 @@ const AssignmentSubmission = () => {
             <Navbar />
 
             {/* Popup Overlay Background */}
-            <div className="flex-1 flex items-center justify-center p-4 sm:p-6 bg-gray-900/30 backdrop-blur-sm overflow-hidden">
+            <div className="flex-1 flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-gray-900/30 backdrop-blur-sm overflow-hidden">
 
                 {/* Popup Container */}
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-5xl flex flex-col max-h-full animate-in fade-in zoom-in-95 duration-200">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100 w-full max-w-5xl flex flex-col max-h-[92vh] sm:max-h-full animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                     {/* Header */}
-                    <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-start bg-white rounded-t-2xl shrink-0">
-                        <div>
-                            <p className="text-sm font-semibold text-[#3758EE] mb-1">
+                    <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-gray-100 flex justify-between items-start bg-white rounded-t-xl sm:rounded-t-2xl shrink-0">
+                        <div className="flex-1 min-w-0 pr-2">
+                            <p className="text-xs sm:text-sm font-semibold text-[#3758EE] mb-0.5 sm:mb-1">
                                 {assignment.assignmentId || assignment.number || '#01-A01'}
                             </p>
-                            <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
+                            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 leading-tight mb-1 sm:mb-2 truncate">
                                 {assignment.title}
                             </h2>
-                            <p className="text-gray-500 text-sm">
+                            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed line-clamp-2">
                                 {assignment.description}
                             </p>
                         </div>
+                        <button
+                            onClick={handleClose}
+                            disabled={isUploading}
+                            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors shrink-0 -mr-1 -mt-1"
+                            title={t('close', 'Close')}
+                        >
+                            <X size={18} />
+                        </button>
                     </div>
 
                     {/* Content Grid (Scrollable) */}
-                    <div className="flex flex-col lg:flex-row gap-6 px-6 py-6 overflow-y-auto custom-scrollbar bg-gray-50/30">
+                    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 px-3.5 sm:px-6 py-4 sm:py-6 overflow-y-auto custom-scrollbar bg-gray-50/30 flex-1">
                         {/* Left Column: Instructions + Upload */}
-                        <div className="flex-1 flex flex-col gap-5">
+                        <div className="flex-1 flex flex-col gap-4 sm:gap-5 min-w-0">
                             {/* Instructions Card */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                                <h3 className="text-base font-semibold text-gray-900 mb-3">
+                            <div className="bg-white border border-gray-200 rounded-xl p-3.5 sm:p-5 shadow-sm">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">
                                     {t('instructions', 'Instructions')}
                                 </h3>
-                                <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
                                     {assignment.instructions}
                                 </p>
 
                                 {assignment.pdfUrl && (Array.isArray(assignment.pdfUrl) ? assignment.pdfUrl.length > 0 : typeof assignment.pdfUrl === 'string') && (
-                                    <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
-                                        <h4 className="text-sm font-semibold text-gray-800">{t('attached_documents', 'Attached Documents')}</h4>
+                                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 flex flex-col gap-2.5 sm:gap-3">
+                                        <h4 className="text-xs sm:text-sm font-semibold text-gray-800">{t('attached_documents', 'Attached Documents')}</h4>
                                         {(Array.isArray(assignment.pdfUrl) ? assignment.pdfUrl : [assignment.pdfUrl]).map((url, idx) => (
-                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                    <FileText className="w-5 h-5 text-[#3758EE] flex-shrink-0" />
-                                                    <span className="text-sm text-gray-700 truncate">
+                                            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3 gap-2">
+                                                <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
+                                                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#3758EE] flex-shrink-0" />
+                                                    <span className="text-xs sm:text-sm text-gray-700 truncate" title={url.split('/').pop() || `Attachment ${idx + 1}`}>
                                                         {url.split('/').pop() || `Attachment ${idx + 1}`}
                                                     </span>
                                                 </div>
@@ -382,7 +390,7 @@ const AssignmentSubmission = () => {
                                                     href={`https://docs.google.com/viewer?url=${encodeURIComponent(url)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="px-4 py-1.5 bg-blue-100 text-[#3758EE] text-xs font-semibold rounded hover:bg-blue-200 transition-colors"
+                                                    className="px-3 sm:px-4 py-1 sm:py-1.5 bg-blue-100 text-[#3758EE] text-xs font-semibold rounded hover:bg-blue-200 transition-colors shrink-0"
                                                 >
                                                     {t('open', 'Open')}
                                                 </a>
@@ -393,25 +401,25 @@ const AssignmentSubmission = () => {
                             </div>
 
                             {/* Upload Card */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
-                                <h3 className="text-base font-semibold text-gray-900">
+                            <div className="bg-white border border-gray-200 rounded-xl p-3.5 sm:p-5 shadow-sm flex flex-col gap-3 sm:gap-4">
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                                     {t('upload_your_file', 'Upload your file')}
                                 </h3>
 
                                 {isAttemptsExhausted ? (
-                                    <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-8 flex flex-col items-center justify-center text-center">
-                                        <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-3 text-amber-700">
-                                            <Lock size={22} />
+                                    <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-5 sm:p-8 flex flex-col items-center justify-center text-center">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center mb-2.5 sm:mb-3 text-amber-700">
+                                            <Lock size={20} />
                                         </div>
-                                        <h4 className="text-base font-bold text-gray-900 mb-1">
+                                        <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-1">
                                             {t('all_attempts_used_title', 'All Submission Attempts Completed')}
                                         </h4>
-                                        <p className="text-xs sm:text-sm text-gray-600 max-w-md leading-relaxed mb-4">
+                                        <p className="text-xs sm:text-sm text-gray-600 max-w-md leading-relaxed mb-3 sm:mb-4">
                                             {t('all_attempts_used_msg', `You have reached the maximum limit of ${maxAttempts} submission attempt(s) for this assignment. Additional submissions are not permitted.`)}
                                         </p>
 
                                         {hasPendingRequest ? (
-                                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-800">
+                                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-800">
                                                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                                                 {t('request_pending_review', 'Exception request submitted. Awaiting review.')}
                                             </div>
@@ -419,9 +427,9 @@ const AssignmentSubmission = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsRequestModalOpen(true)}
-                                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2055A5] to-[#8C6DFD] hover:opacity-95 text-white text-xs font-bold rounded-lg shadow-sm transition-all"
+                                                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#2055A5] to-[#8C6DFD] hover:opacity-95 text-white text-xs font-bold rounded-lg shadow-sm transition-all"
                                             >
-                                                <HelpCircle size={15} />
+                                                <HelpCircle size={14} />
                                                 <span>{t('request_extra_attempt_btn', 'Request Extra Attempt / Extension')}</span>
                                             </button>
                                         )}
@@ -429,7 +437,7 @@ const AssignmentSubmission = () => {
                                 ) : (
                                     /* Drop Zone */
                                     <div
-                                        className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-10 px-4 transition-colors duration-200 cursor-pointer
+                                        className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-6 sm:py-10 px-3 sm:px-4 transition-colors duration-200 cursor-pointer
                                             ${dragOver
                                                 ? 'border-[#3758EE] bg-blue-50'
                                                 : 'border-gray-200 bg-gray-50 hover:border-[#3758EE] hover:bg-blue-50/30'
@@ -440,32 +448,32 @@ const AssignmentSubmission = () => {
                                         onClick={() => !selectedFile && fileInputRef.current?.click()}
                                     >
                                         {selectedFile ? (
-                                            <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm w-full max-w-xs">
-                                                <FileText className="w-6 h-6 text-[#3758EE] flex-shrink-0" />
-                                                <span className="text-sm text-gray-700 truncate flex-1">{selectedFile.name}</span>
+                                            <div className="flex items-center gap-2.5 sm:gap-3 bg-white border border-gray-200 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm w-full max-w-xs">
+                                                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-[#3758EE] flex-shrink-0" />
+                                                <span className="text-xs sm:text-sm text-gray-700 truncate flex-1">{selectedFile.name}</span>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleRemoveFile(); }}
-                                                    className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                                                    className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         ) : (
                                             <>
-                                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                                                    <Upload className="w-6 h-6 text-[#3758EE]" />
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2 sm:mb-3">
+                                                    <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-[#3758EE]" />
                                                 </div>
-                                                <p className="text-sm text-gray-500 mb-3">
+                                                <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">
                                                     {t('drag_drop', 'Drag & drop or')}
                                                 </p>
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                                                    className="border border-[#3758EE] text-[#3758EE] text-sm px-5 py-1.5 rounded-full hover:bg-blue-50 transition-colors font-medium"
+                                                    className="border border-[#3758EE] text-[#3758EE] text-xs sm:text-sm px-4 sm:px-5 py-1 sm:py-1.5 rounded-full hover:bg-blue-50 transition-colors font-medium"
                                                 >
                                                     {t('browse_file', 'Browse file')}
                                                 </button>
-                                                <p className="text-xs text-gray-400 mt-3 text-center">
+                                                <p className="text-[11px] sm:text-xs text-gray-400 mt-2 sm:mt-3 text-center">
                                                     {displayAcceptedFormats.split(',').map(f => f.trim()).join(' / ')} — worksheet or task brief for students
                                                 </p>
                                             </>
@@ -496,24 +504,24 @@ const AssignmentSubmission = () => {
                         <div className="lg:w-[320px] flex-shrink-0">
                             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden sticky top-0">
                                 <div className="divide-y divide-gray-100">
-                                    <div className="flex items-center justify-between px-5 py-4">
-                                        <span className="text-sm text-gray-500">{t('due_date', 'Due date')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{displayDueDate}</span>
+                                    <div className="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-4">
+                                        <span className="text-xs sm:text-sm text-gray-500">{t('due_date', 'Due date')}</span>
+                                        <span className="text-xs sm:text-sm font-medium text-gray-800">{displayDueDate}</span>
                                     </div>
-                                    <div className="flex items-center justify-between px-5 py-4">
-                                        <span className="text-sm text-gray-500">{t('status', 'Status')}</span>
-                                        <span className={`text-sm font-semibold ${(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? 'text-green-500' : 'text-orange-500'
+                                    <div className="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-4">
+                                        <span className="text-xs sm:text-sm text-gray-500">{t('status', 'Status')}</span>
+                                        <span className={`text-xs sm:text-sm font-semibold ${(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? 'text-green-500' : 'text-orange-500'
                                             }`}>
                                             {(assignment.status === 'Submitted' || assignment.status === 'Completed' || assignment.isCompleted) ? t('submitted', 'Submitted') : t(assignment.status ? assignment.status.toLowerCase().replace(/ /g, '_') : 'not_submitted', assignment.status || 'Not submitted')}
                                         </span>
                                     </div>
-                                    <div className="flex items-center justify-between px-5 py-4">
-                                        <span className="text-sm text-gray-500">{t('accepted_formats', 'Accepted formats')}</span>
-                                        <span className="text-sm font-medium text-gray-800">{displayAcceptedFormats}</span>
+                                    <div className="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-4 gap-2">
+                                        <span className="text-xs sm:text-sm text-gray-500 shrink-0">{t('accepted_formats', 'Accepted formats')}</span>
+                                        <span className="text-xs sm:text-sm font-medium text-gray-800 truncate text-right" title={displayAcceptedFormats}>{displayAcceptedFormats}</span>
                                     </div>
-                                    <div className="flex items-center justify-between px-5 py-4">
-                                        <span className="text-sm text-gray-500">{t('attempts', 'Attempts')}</span>
-                                        <span className={`text-sm font-medium ${isAttemptsExhausted ? 'text-amber-700 font-semibold' : 'text-gray-800'}`}>
+                                    <div className="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-4">
+                                        <span className="text-xs sm:text-sm text-gray-500">{t('attempts', 'Attempts')}</span>
+                                        <span className={`text-xs sm:text-sm font-medium ${isAttemptsExhausted ? 'text-amber-700 font-semibold' : 'text-gray-800'}`}>
                                             {maxAttempts === Infinity
                                                 ? `${attemptCount} (${t('unlimited', 'Unlimited')})`
                                                 : `${attemptCount} / ${maxAttempts}${isAttemptsExhausted ? ' (Max reached)' : ''}`}
@@ -525,39 +533,39 @@ const AssignmentSubmission = () => {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl shrink-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-100 bg-white rounded-b-xl sm:rounded-b-2xl shrink-0">
                         <button
                             type="button"
                             onClick={handleClose}
                             disabled={isUploading}
-                            className={`bg-gray-100 flex items-center justify-center transition-colors px-5 py-2 rounded-lg text-sm font-medium text-gray-700 border border-gray-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-200'}`}
+                            className={`flex-1 sm:flex-initial bg-gray-100 flex items-center justify-center transition-colors px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 border border-gray-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-200'}`}
                         >
                             {t('cancel', 'Cancel')}
                         </button>
                         {isAdminView ? (
                             <GradiantButton
                                 onClick={handleEditAssignment}
-                                className="px-6 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                                className="flex-1 sm:flex-initial px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
                             >
                                 {t('edit_assignment', 'Edit Assignment')}
                             </GradiantButton>
                         ) : isAttemptsExhausted ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
                                 <GradiantButton
                                     disabled={true}
-                                    className="px-5 py-2.5 rounded-lg text-sm font-semibold opacity-50 cursor-not-allowed flex items-center gap-2"
+                                    className="flex-1 sm:flex-initial px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold opacity-50 cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2"
                                 >
-                                    <Lock size={16} />
-                                    {t('no_attempts_left', 'No Attempts Remaining')}
+                                    <Lock size={15} />
+                                    <span className="truncate">{t('no_attempts_left', 'No Attempts Left')}</span>
                                 </GradiantButton>
                                 {!hasPendingRequest && (
                                     <button
                                         type="button"
                                         onClick={() => setIsRequestModalOpen(true)}
-                                        className="px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors flex items-center gap-1.5 shadow-sm"
+                                        className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold border border-purple-200 text-purple-700 bg-purple-50 hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
                                     >
-                                        <HelpCircle size={15} />
-                                        {t('request_exception', 'Request Exception')}
+                                        <HelpCircle size={14} />
+                                        <span>{t('request_exception', 'Request Exception')}</span>
                                     </button>
                                 )}
                             </div>
@@ -565,10 +573,10 @@ const AssignmentSubmission = () => {
                             <GradiantButton
                                 onClick={handleSubmit}
                                 disabled={!selectedFile || isUploading}
-                                className={`px-6 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 ${(!selectedFile || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`flex-1 sm:flex-initial px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 ${(!selectedFile || isUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {isUploading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                {isUploading ? t('submitting', 'Submitting...') : t('submit_assignment', 'Submit Assignment')}
+                                {isUploading && <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />}
+                                <span>{isUploading ? t('submitting', 'Submitting...') : t('submit_assignment', 'Submit Assignment')}</span>
                             </GradiantButton>
                         )}
                     </div>
@@ -577,10 +585,10 @@ const AssignmentSubmission = () => {
 
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 3px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
             `}} />
             <UnsavedChangesModal
                 isOpen={showModal}
