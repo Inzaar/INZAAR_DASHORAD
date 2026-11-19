@@ -249,8 +249,8 @@ const DashboardPage = () => {
                                     {t('enroll_new_course', 'Enroll New Course')}
                                 </GradiantButton>
                                 <div className="relative group max-[600px]:inline-flex hidden">
-                                    <GradiantButton 
-                                        onClick={() => navigate('/courses')} 
+                                    <GradiantButton
+                                        onClick={() => navigate('/courses')}
                                         className="items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
                                     >
                                         +
@@ -283,32 +283,32 @@ const DashboardPage = () => {
                                         <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
 
                                         {/* Mobile Calendar - Visible only below 680px */}
-                                        <div className="min-[680px]:hidden w-full bg-white rounded-lg p-4 shadow-sm">
+                                        <div className="min-[680px]:hidden w-full bg-white rounded-lg shadow-sm">
                                             <Calendar18 className="w-full h-[350px]" />
                                         </div>
 
-                                        <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-6 bg-white rounded-lg p-4">
-                                            <div className="flex justify-between items-center">
-                                                <h3 className="text-lg font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
+                                        <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-3.5 sm:gap-6 bg-white rounded-lg p-3 sm:p-4">
+                                            <div className="flex justify-between items-center gap-2">
+                                                <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-[1.8] pt-1 pb-1 sm:pt-2 sm:pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
                                                 <div className="relative z-20" ref={lectureDropdownRef}>
                                                     <button
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
-                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-4 py-2 shadow-sm text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[120px] min-[450px]:w-full min-[900px]:w-[250px] justify-between"
+                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 shadow-sm text-xs sm:text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[110px] min-[450px]:w-full min-[900px]:w-[250px] justify-between"
                                                     >
                                                         <span className="truncate flex-1 text-left">
                                                             {t(selectedCourseData?.title, selectedCourseData?.title) || t('select_course', 'Select Course')}
                                                         </span>
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
-                                                            width="16"
-                                                            height="16"
+                                                            width="14"
+                                                            height="14"
                                                             viewBox="0 0 24 24"
                                                             fill="none"
                                                             stroke="currentColor"
                                                             strokeWidth="2"
                                                             strokeLinecap="round"
                                                             strokeLinejoin="round"
-                                                            className={`w-4 h-4 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`}
+                                                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`}
                                                         >
                                                             <path d="m6 9 6 6 6-6" />
                                                         </svg>
@@ -342,24 +342,24 @@ const DashboardPage = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div ref={lecturesContainerRef} className="flex gap-4 overflow-x-auto pb-2 no-scrollbar relative" style={{ scrollbarWidth: 'none' }}>
+                                            <div ref={lecturesContainerRef} className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 no-scrollbar relative" style={{ scrollbarWidth: 'none' }}>
                                                 {loading ? (
-                                                    <div className="flex gap-4 overflow-hidden w-full">
+                                                    <div className="flex gap-3 sm:gap-4 overflow-hidden w-full">
                                                         {[1, 2, 3].map((item) => (
                                                             <div
                                                                 key={item}
-                                                                className="w-[273px] h-[161px] rounded-[23px] bg-gray-200/90 p-4 flex flex-col justify-between shrink-0 animate-pulse border border-gray-100"
+                                                                className="w-[220px] min-[380px]:w-[240px] sm:w-[273px] h-[130px] min-[380px]:h-[142px] sm:h-[161px] rounded-[16px] sm:rounded-[20px] md:rounded-[23px] bg-gray-200/90 p-2.5 min-[380px]:p-3 sm:p-4 flex flex-col justify-between shrink-0 animate-pulse border border-gray-100"
                                                             >
-                                                                <div className="flex justify-between items-start">
-                                                                    <div className="flex flex-col gap-2 w-3/4">
-                                                                        <div className="h-4 bg-gray-300 rounded w-full"></div>
-                                                                        <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-                                                                        <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                                                                <div className="flex justify-between items-start gap-2">
+                                                                    <div className="flex flex-col gap-1.5 w-3/4">
+                                                                        <div className="h-3.5 sm:h-4 bg-gray-300 rounded w-full"></div>
+                                                                        <div className="h-2.5 sm:h-3 bg-gray-300 rounded w-1/2"></div>
+                                                                        <div className="h-2.5 sm:h-3 bg-gray-300 rounded w-1/3"></div>
                                                                     </div>
-                                                                    <div className="w-8 h-8 rounded-full bg-gray-300 shrink-0"></div>
+                                                                    <div className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 shrink-0"></div>
                                                                 </div>
                                                                 <div className="flex justify-center mt-auto">
-                                                                    <div className="h-7 w-28 bg-gray-300 rounded-lg"></div>
+                                                                    <div className="h-6 sm:h-7 w-20 sm:w-28 bg-gray-300 rounded-lg"></div>
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -392,7 +392,7 @@ const DashboardPage = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="w-full h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
                                                     className={`h-full rounded-full transition-all duration-300 ease-in-out ${loading ? 'bg-gray-200 animate-pulse w-full' : 'bg-[#A892FF]'}`}
                                                     style={!loading ? { width: `${ongoingProgressPercentage}%` } : undefined}

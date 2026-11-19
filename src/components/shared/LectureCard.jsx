@@ -21,7 +21,7 @@ const LectureCard = ({
         <div
             onClick={!isLocked ? onClick : undefined}
             className={cn(
-                "w-[273px] h-[161px] rounded-[23px] relative overflow-hidden group shrink-0",
+                "w-[220px] min-[380px]:w-[240px] sm:w-[273px] h-[130px] min-[380px]:h-[142px] sm:h-[161px] rounded-[16px] sm:rounded-[20px] md:rounded-[23px] relative overflow-hidden group shrink-0",
                 isLocked ? "cursor-not-allowed opacity-85" : "cursor-pointer",
                 className
             )}
@@ -40,19 +40,19 @@ const LectureCard = ({
             <div className={cn("absolute inset-0 transition-colors", isLocked ? "bg-black/60" : "bg-black/40")}></div>
 
             {/* Content Container */}
-            <div className="relative h-full w-full p-4 flex flex-col justify-between">
+            <div className="relative h-full w-full p-2.5 min-[380px]:p-3 sm:p-4 flex flex-col justify-between">
 
                 {/* Top Section */}
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-2">
                     {/* Text Info */}
-                    <div className="flex flex-col text-white">
-                        <h3 className="font-semibold text-base leading-normal pb-1 mb-1 line-clamp-2">{t(title?.trim(), title)}</h3>
-                        <span className="text-[10px] font-medium opacity-90">{t("lecture", "Lecture")}:{lecture}</span>
-                        <span className="text-[10px] font-medium opacity-90">{t("date", "Date")}:{date}</span>
+                    <div className="flex flex-col text-white min-w-0 flex-1">
+                        <h3 className="font-semibold text-xs min-[380px]:text-sm sm:text-base leading-tight pb-0.5 mb-0.5 line-clamp-2">{t(title?.trim(), title)}</h3>
+                        <span className="text-[9px] min-[380px]:text-[10px] font-medium opacity-90">{t("lecture", "Lecture")}:{lecture}</span>
+                        <span className="text-[9px] min-[380px]:text-[10px] font-medium opacity-90">{t("date", "Date")}:{date}</span>
                     </div>
 
                     {/* Profile Image */}
-                    <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden shrink-0">
+                    <div className="w-6 h-6 min-[380px]:w-7 min-[380px]:h-7 sm:w-8 sm:h-8 rounded-full border border-white sm:border-2 overflow-hidden shrink-0">
                         <img
                             src={profileImage || pImage}
                             alt="Instructor"
@@ -67,13 +67,13 @@ const LectureCard = ({
                         <button
                             type="button"
                             disabled
-                            className="px-8 py-1.5 rounded-lg text-xs font-semibold bg-black/60 text-white/80 border border-white/20 flex items-center justify-center gap-1.5 cursor-not-allowed backdrop-blur-md shadow-sm"
+                            className="px-5 min-[380px]:px-7 sm:px-8 py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold bg-black/60 text-white/80 border border-white/20 flex items-center justify-center gap-1.5 cursor-not-allowed backdrop-blur-md shadow-sm"
                         >
-                            <Lock className="w-3.5 h-3.5 text-white/80" />
+                            <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/80" />
                             <span>{t("locked", "Locked")}</span>
                         </button>
                     ) : (
-                        <GradiantButton className="px-10 py-1 rounded-lg text-sm">{t("play", "Play")}</GradiantButton>
+                        <GradiantButton className="px-6 min-[380px]:px-8 sm:px-10 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium">{t("play", "Play")}</GradiantButton>
                     )}
                 </div>
             </div>
