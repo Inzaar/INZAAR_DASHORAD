@@ -9,10 +9,10 @@ import Notification from '@/components/shared/notification/Notification';
 
 const NotificationSkeleton = () => {
     return (
-        <div className="flex flex-col gap-6 animate-pulse">
+        <div className="flex flex-col gap-4 sm:gap-6 animate-pulse">
             {/* Section 1 Skeleton */}
             <div className="flex flex-col">
-                <div className="h-3.5 bg-gray-200 rounded w-24 mb-3 mx-1"></div>
+                <div className="h-3.5 bg-gray-200 rounded w-20 sm:w-24 mb-3 mx-1"></div>
                 {[
                     { w: 'w-[85%]', t: 'w-14' },
                     { w: 'w-[75%]', t: 'w-14' },
@@ -20,21 +20,22 @@ const NotificationSkeleton = () => {
                     { w: 'w-[70%]', t: 'w-14' },
                     { w: 'w-[65%]', t: 'w-14' },
                 ].map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100">
-                        <div className="flex-1 flex items-center gap-4 min-w-0">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
-                            <div className="flex items-center gap-2 flex-1 min-w-0 pr-4">
-                                <div className={`h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                    <div key={idx} className="flex justify-between items-start sm:items-center p-2.5 sm:p-4 border-b border-gray-100">
+                        <div className="flex-1 flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 shrink-0 mt-0.5 sm:mt-0"></div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-1 min-w-0 pr-2 sm:pr-4">
+                                <div className={`h-3.5 sm:h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                                <div className="sm:hidden h-2.5 bg-gray-200 rounded w-16 mt-0.5"></div>
                             </div>
                         </div>
-                        <div className={`h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
+                        <div className={`hidden sm:block h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
                     </div>
                 ))}
             </div>
 
             {/* Section 2 Skeleton */}
             <div className="flex flex-col">
-                <div className="h-3.5 bg-gray-200 rounded w-20 mb-3 mx-1"></div>
+                <div className="h-3.5 bg-gray-200 rounded w-16 sm:w-20 mb-3 mx-1"></div>
                 {[
                     { w: 'w-[80%]', t: 'w-16' },
                     { w: 'w-[92%]', t: 'w-16' },
@@ -42,14 +43,15 @@ const NotificationSkeleton = () => {
                     { w: 'w-[74%]', t: 'w-16' },
                     { w: 'w-[82%]', t: 'w-16' },
                 ].map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3.5 md:p-4 border-b border-gray-100">
-                        <div className="flex-1 flex items-center gap-4 min-w-0">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0"></div>
-                            <div className="flex items-center gap-2 flex-1 min-w-0 pr-4">
-                                <div className={`h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                    <div key={idx} className="flex justify-between items-start sm:items-center p-2.5 sm:p-4 border-b border-gray-100">
+                        <div className="flex-1 flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0">
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 shrink-0 mt-0.5 sm:mt-0"></div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-1 min-w-0 pr-2 sm:pr-4">
+                                <div className={`h-3.5 sm:h-4 bg-gray-200 rounded ${item.w} max-w-full`}></div>
+                                <div className="sm:hidden h-2.5 bg-gray-200 rounded w-16 mt-0.5"></div>
                             </div>
                         </div>
-                        <div className={`h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
+                        <div className={`hidden sm:block h-3 bg-gray-200 rounded ${item.t} shrink-0 ml-4`}></div>
                     </div>
                 ))}
             </div>
@@ -172,11 +174,11 @@ const AdminNotification = () => {
         // Changed h-screen to min-h-screen for better mobile compatibility
         <div className="min-h-screen max-h-[1680px] w-full flex items-center justify-center bg-[#F8F9FA]">
             {/* Added relative and overflow-hidden to prevent layout shifts */}
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col h-screen overflow-hidden gap-2 sm:gap-4">
 
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2.5 sm:px-4 gap-2 sm:gap-4 flex-1 overflow-hidden relative pb-2.5 sm:pb-4'>
 
                     {/* Overlay for mobile sidebar */}
                     {isSidebarOpen && (
@@ -197,12 +199,12 @@ const AdminNotification = () => {
                     />
 
                     {/* The Main Scrollable Area */}
-                    <main className="flex-1 overflow-y-auto no-scrollbar bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
-                        <div className="mb-8">
-                            <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1">
+                    <main className="flex-1 overflow-y-auto no-scrollbar bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3.5 sm:p-6 shadow-sm">
+                        <div className="mb-4 sm:mb-8">
+                            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1">
                                 Notifications
                             </h2>
-                            <p className="text-gray-400 text-sm md:text-base">
+                            <p className="text-gray-400 text-xs sm:text-sm md:text-base">
                                 Notifications List
                             </p>
                         </div>
@@ -214,10 +216,10 @@ const AdminNotification = () => {
                                 (() => {
                                     const { today, yesterday, earlier } = groupNotificationsByDate(notifications);
                                     return (
-                                        <div className="flex flex-col gap-6">
+                                        <div className="flex flex-col gap-4 sm:gap-6">
                                             {today.length > 0 && (
                                                 <div className="flex flex-col">
-                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                    <h3 className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2 px-1">
                                                         Today
                                                     </h3>
                                                     {today.map((notification) => (
@@ -235,7 +237,7 @@ const AdminNotification = () => {
 
                                             {yesterday.length > 0 && (
                                                 <div className="flex flex-col">
-                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                    <h3 className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2 px-1">
                                                         Yesterday
                                                     </h3>
                                                     {yesterday.map((notification) => (
@@ -253,7 +255,7 @@ const AdminNotification = () => {
 
                                             {earlier.length > 0 && (
                                                 <div className="flex flex-col">
-                                                    <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                    <h3 className="text-[11px] sm:text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-1.5 sm:mb-2 px-1">
                                                         Earlier
                                                     </h3>
                                                     {earlier.map((notification) => (
