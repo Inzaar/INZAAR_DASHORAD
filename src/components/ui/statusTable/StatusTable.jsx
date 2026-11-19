@@ -82,90 +82,78 @@ function StatusTable({ userCourses, loading }) {
         return [...new Set(pages)];
     };
 
-    if (loading || allLectures.length === 0) {
-        return (
-            <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
-                <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
-                <div className="overflow-x-auto pb-3 custom-scrollbar-thin">
-                    <div className="min-w-[1080px]">
-                        <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                            <div className="w-[134px] flex items-center justify-center">{t("courses", "Courses")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("lecture", "Lecture")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("title", "Title")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("date", "Date")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("progress", "Progress")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("next_lecture", "Next Lecture")}</div>
-                            {/* <div className="w-[134px] flex items-center justify-center">{t("contact_moderator", "Contact Moderator")}</div> */}
-                            <div className="w-[134px] flex items-center justify-center">{t("comments", "Comments")}</div>
-                            <div className="w-[134px] flex items-center justify-center">{t("action", "Action")}</div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            {loading ? (
-                                [1, 2, 3, 4].map((i) => (
-                                    <div key={i} className="h-[52px] w-full flex items-center justify-between border-b border-gray-50 px-2 animate-pulse">
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-4 w-12 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-4 w-16 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-2 w-20 bg-gray-200 rounded-full"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-4 w-16 bg-gray-200 rounded"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-6 w-14 bg-gray-200 rounded-full"></div>
-                                        </div>
-                                        <div className="w-[134px] flex items-center justify-center">
-                                            <div className="h-8 w-20 bg-gray-200 rounded-lg"></div>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="flex items-center justify-center h-[100px]">
-                                    <p className="text-gray-500">{t("no_enrolled_courses_yet", "You have no enrolled courses yet !")}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="mt-8 bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm mb-10">
-            <h3 className="font-bold text-gray-900 mb-6">{t("current_status", "Current status")}</h3>
-            <div className="overflow-x-auto pb-3 custom-scrollbar-thin">
-                <div className="min-w-[1080px]">
-                    <div className="h-[60px] w-full bg-white flex items-center justify-between font-bold border-b border-gray-100 mb-4">
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("courses", "Courses")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("lecture", "Lecture")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("title", "Title")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("date", "Date")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("progress", "Progress")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("next_lecture", "Next Lecture")}</div>
-                        {/* <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("contact_moderator", "Contact Moderator")}</div> */}
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("comments", "Comments")}</div>
-                        <div className="flex-1 min-w-[120px] flex items-center justify-center text-center">{t("action", "Action")}</div>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        {currentData.map((item) => (
-                            <StatusRow key={item.id} data={item} />
-                        ))}
-                    </div>
+        <div className="mt-4 sm:mt-8 bg-white rounded-[16px] sm:rounded-[20px] border border-gray-100 p-3 sm:p-5 md:p-6 shadow-sm mb-1 sm:mb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 sm:mb-6 gap-3">
+                <div>
+                    <h2 className="text-base sm:text-xl font-bold text-gray-900 leading-tight">{t("current_status", "Current status")}</h2>
                 </div>
             </div>
+
+            {/* Table view */}
+            <div className="overflow-x-auto small-scroller -mx-1 sm:mx-0">
+                <div className="w-full min-w-[760px] md:min-w-full px-1 sm:px-0">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/90 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-100">
+                            <tr className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th className="px-2.5 py-2 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-left whitespace-nowrap">{t("courses", "Courses")}</th>
+                                <th className="px-2 py-2 sm:px-3 sm:py-3.5 md:px-4 md:py-4 text-center whitespace-nowrap">{t("lecture", "Lecture")}</th>
+                                <th className="px-2.5 py-2 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-left min-w-[130px] sm:min-w-[160px] md:min-w-[200px]">{t("title", "Title")}</th>
+                                <th className="px-2 py-2 sm:px-3 sm:py-3.5 md:px-4 md:py-4 text-center whitespace-nowrap">{t("date", "Date")}</th>
+                                <th className="px-2 py-2 sm:px-3 sm:py-3.5 md:px-4 md:py-4 text-center whitespace-nowrap">{t("progress", "Progress")}</th>
+                                <th className="px-2 py-2 sm:px-3 sm:py-3.5 md:px-4 md:py-4 text-center whitespace-nowrap">{t("next_lecture", "Next Lecture")}</th>
+                                <th className="px-2 py-2 sm:px-3 sm:py-3.5 md:px-4 md:py-4 text-center whitespace-nowrap">{t("comments", "Comments")}</th>
+                                <th className="px-2 py-2 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center whitespace-nowrap">{t("action", "Action")}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {loading ? (
+                                [1, 2, 3, 4, 5].map((i) => (
+                                    <tr key={i} className="text-xs sm:text-sm border-b border-gray-100 animate-pulse">
+                                        <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
+                                            <div className="h-3.5 w-24 bg-gray-200 rounded" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 text-center">
+                                            <div className="h-3.5 w-10 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                        <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
+                                            <div className="h-3.5 w-3/4 bg-gray-200 rounded" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 text-center">
+                                            <div className="h-3.5 w-16 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 text-center">
+                                            <div className="h-3.5 w-10 bg-gray-200 rounded mx-auto" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 text-center">
+                                            <div className="h-5 w-16 bg-gray-200 rounded-full mx-auto" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-4 text-center">
+                                            <div className="h-5 w-12 bg-gray-200 rounded-full mx-auto" />
+                                        </td>
+                                        <td className="px-2 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                            <div className="h-7 w-20 bg-gray-200 rounded-lg mx-auto" />
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : allLectures.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="px-4 py-10 text-center text-xs sm:text-sm text-gray-400">
+                                        {t("no_enrolled_courses_yet", "You have no enrolled courses yet !")}
+                                    </td>
+                                </tr>
+                            ) : (
+                                currentData.map((item) => (
+                                    <StatusRow key={item.id} data={item} />
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             {totalPages > 1 && (
-                <div className="flex justify-end items-center mt-6 w-full">
+                <div className="flex justify-center sm:justify-end items-center mt-3 sm:mt-5 w-full">
                     <CustomPagination 
                         currentPage={currentPage} 
                         totalPages={totalPages} 
@@ -175,23 +163,24 @@ function StatusTable({ userCourses, loading }) {
             )}
             <style dangerouslySetInnerHTML={{
                 __html: `
-                    .custom-scrollbar-thin {
-                        scrollbar-width: thin;
-                        scrollbar-color: #cbd5e1 #f1f5f9;
+                    .small-scroller::-webkit-scrollbar {
+                        width: 4px;
+                        height: 4px;
                     }
-                    .custom-scrollbar-thin::-webkit-scrollbar {
-                        height: 6px;
+                    .small-scroller::-webkit-scrollbar-track {
+                        background: #f8fafc;
+                        border-radius: 9999px;
                     }
-                    .custom-scrollbar-thin::-webkit-scrollbar-track {
-                        background: #f1f5f9;
-                        border-radius: 8px;
-                    }
-                    .custom-scrollbar-thin::-webkit-scrollbar-thumb {
+                    .small-scroller::-webkit-scrollbar-thumb {
                         background: #cbd5e1;
-                        border-radius: 8px;
+                        border-radius: 9999px;
                     }
-                    .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                    .small-scroller::-webkit-scrollbar-thumb:hover {
                         background: #94a3b8;
+                    }
+                    .small-scroller {
+                        scrollbar-width: thin;
+                        scrollbar-color: #cbd5e1 #f8fafc;
                     }
                 `
             }} />

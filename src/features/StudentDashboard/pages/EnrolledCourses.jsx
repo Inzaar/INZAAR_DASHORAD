@@ -52,7 +52,7 @@ const EnrolledCourses = () => {
         <div className="h-screen w-screen flex items-center justify-center">
             <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-1 sm:pb-4'>
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -73,7 +73,7 @@ const EnrolledCourses = () => {
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="py-4 pr-2">
+                        <div className="pt-2 sm:pt-4 pb-1 sm:pb-4 pr-2">
                             {/* <div className="flex justify-between items-start mb-8 gap-4 w-full">
                                 <div>
                                     <h2 className="text-[20px] min-[430px]:text-[24px] min-[641px]:text-3xl font-bold text-gray-900 mb-1 leading-[1.8] pt-4 pb-2">

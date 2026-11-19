@@ -34,6 +34,20 @@ const getPdfEmbedUrl = (url) => {
     return formattedUrl;
 };
 
+const getAudioSrc = (url) => {
+    if (!url) return '';
+    const formattedUrl = formatResourceUrl(url);
+    if (formattedUrl.includes('drive.google.com') || formattedUrl.includes('drive.usercontent.google.com')) {
+        const matchD = formattedUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        const matchId = formattedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const fileId = matchD ? matchD[1] : (matchId ? matchId[1] : null);
+        if (fileId) {
+            return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+        }
+    }
+    return formattedUrl;
+};
+
 const forceDownload = async (url, filename, setDownloadingIdx, idx) => {
     if (setDownloadingIdx) setDownloadingIdx(idx);
     try {
@@ -339,14 +353,32 @@ const PdfViewerModal = ({ viewingPdf, onClose }) => {
     );
 };
 
-const ResourcesModal = ({ activeResources, onClose }) => {
-    const [downloadingIdx, setDownloadingIdx] = useState(null);
+const ResourcesModal = ({ activeResources, onClose, onSelectPdf, onSelectAudio }) => {
     const { t } = useTranslation();
 
     if (!activeResources) return null;
 
-    const { lectureNo, title, type, urls } = activeResources;
-    const isPdf = type === 'pdf';
+    const { lectureNo, title, defaultTab = 'pdf', pdfUrls = [], audioUrls = [] } = activeResources;
+    const [selectedTab, setSelectedTab] = useState(defaultTab || 'all');
+
+    useEffect(() => {
+        if (activeResources?.defaultTab) {
+            setSelectedTab(activeResources.defaultTab);
+        }
+    }, [activeResources]);
+
+    const hasPdfs = pdfUrls.length > 0;
+    const hasAudios = audioUrls.length > 0;
+    const hasBoth = hasPdfs && hasAudios;
+
+    // Filter items based on selectedTab
+    const showPdfs = selectedTab === 'all' || selectedTab === 'pdf';
+    const showAudios = selectedTab === 'all' || selectedTab === 'audio';
+
+    const items = [
+        ...(showPdfs ? pdfUrls.map((item, idx) => ({ item, type: 'pdf', idx: `pdf-${idx}` })) : []),
+        ...(showAudios ? audioUrls.map((item, idx) => ({ item, type: 'audio', idx: `audio-${idx}` })) : []),
+    ];
 
     return ReactDOM.createPortal(
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
@@ -358,89 +390,155 @@ const ResourcesModal = ({ activeResources, onClose }) => {
             
             {/* Modal Container */}
             <div 
-                className="relative bg-white rounded-[28px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_-15px_rgba(0,0,0,0.3)] border border-gray-100 p-6 flex flex-col animate-in zoom-in-95 fade-in duration-200"
+                className="relative bg-white rounded-[24px] sm:rounded-[28px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_-15px_rgba(0,0,0,0.3)] border border-gray-100 p-5 sm:p-6 flex flex-col animate-in zoom-in-95 fade-in duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
-                            {isPdf ? <FileText size={20} /> : <Volume2 size={20} />}
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            selectedTab === 'audio' ? 'bg-blue-50 text-blue-500' : 'bg-red-50 text-red-500'
+                        }`}>
+                            {selectedTab === 'audio' ? <Volume2 size={20} /> : <FileText size={20} />}
                         </div>
                         <div className="text-left">
-                            <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                                {lectureNo} {isPdf ? t('pdf_notes', 'PDF Notes') : t('audio_resources', 'Audio Resources')}
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">
+                                {lectureNo} {t('resources', 'Resources')}
                             </h3>
-                            <p className="text-xs text-gray-500 font-medium truncate max-w-[240px]">{t(title, title)}</p>
+                            <p className="text-xs text-gray-500 font-medium truncate max-w-[220px] sm:max-w-[260px]">{t(title, title)}</p>
                         </div>
                     </div>
                     <button 
                         onClick={onClose} 
-                        className="p-1.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all"
+                        className="p-1.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-100 transition-all cursor-pointer"
                     >
                         <X size={18} />
                     </button>
                 </div>
 
-                {/* Resource List */}
-                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 no-scrollbar text-left">
-                    {urls.map((url, idx) => {
-                        const isObj = typeof url === 'object' && url !== null;
-                        const resourceUrl = isObj ? (url.url || '') : url;
-                        const adminTitle = isObj ? url.title : null;
-                        let filename = resourceUrl.split('/').pop()?.split('?')[0] || `${type}_resource_${idx + 1}`;
-                        if (isPdf && !filename.toLowerCase().endsWith('.pdf')) {
-                            filename += '.pdf';
-                        } else if (!isPdf && !filename.toLowerCase().endsWith('.mp3')) {
-                            filename += '.mp3';
-                        }
-                        const isDownloading = downloadingIdx === idx;
-                        const resourceDisplayName = adminTitle || (isPdf 
-                            ? `${t('handout_note_part', 'Handout Note Part')} ${idx + 1}`
-                            : `${t('audio_lecture_part', 'Audio Lecture Part')} ${idx + 1}`);
+                {/* Filter Tabs if both PDF and Audio are present */}
+                {hasBoth && (
+                    <div className="flex items-center p-1 bg-gray-100/90 rounded-xl mb-3.5 text-xs font-semibold">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedTab('all')}
+                            className={`flex-1 py-1.5 rounded-lg transition-all ${
+                                selectedTab === 'all' ? 'bg-white text-gray-900 shadow-2xs' : 'text-gray-500 hover:text-gray-800'
+                            }`}
+                        >
+                            {t('all', 'All')} ({pdfUrls.length + audioUrls.length})
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSelectedTab('pdf')}
+                            className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                                selectedTab === 'pdf' ? 'bg-white text-red-600 shadow-2xs' : 'text-gray-500 hover:text-gray-800'
+                            }`}
+                        >
+                            <FileText size={12} />
+                            <span>PDFs ({pdfUrls.length})</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setSelectedTab('audio')}
+                            className={`flex-1 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1 ${
+                                selectedTab === 'audio' ? 'bg-white text-blue-600 shadow-2xs' : 'text-gray-500 hover:text-gray-800'
+                            }`}
+                        >
+                            <Volume2 size={12} />
+                            <span>Audio ({audioUrls.length})</span>
+                        </button>
+                    </div>
+                )}
 
-                        return (
-                            <div 
-                                key={idx}
-                                onClick={() => window.open(resourceUrl, '_blank')}
-                                className={`flex items-center justify-between p-3.5 border rounded-2xl cursor-pointer transition-all duration-200 group active:scale-[0.99] ${
-                                    isPdf 
-                                        ? 'bg-slate-50 hover:bg-red-50/40 border-slate-100 hover:border-red-100' 
-                                        : 'bg-slate-50 hover:bg-blue-50/40 border-slate-100 hover:border-blue-100'
-                                }`}
-                            >
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-100/50 text-red-500' : 'bg-blue-100/50 text-blue-500'}`}>
-                                        {isPdf ? <FileText size={16} /> : <Volume2 size={16} />}
-                                    </div>
-                                    <div className="text-left min-w-0">
-                                        <p className="text-sm font-semibold text-gray-800 truncate pr-2">
-                                            {resourceDisplayName}
-                                        </p>
-                                        <p className="text-[10px] text-gray-400 font-medium truncate max-w-[180px]">
-                                            {filename}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button 
-                                    disabled={isDownloading}
-                                    className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 ${
-                                        isDownloading 
-                                            ? 'bg-gray-100 text-gray-400' 
-                                            : `bg-white text-gray-600 border border-gray-100 shadow-sm group-hover:scale-105 ${
-                                                isPdf ? 'hover:bg-red-500 hover:text-white' : 'hover:bg-blue-500 hover:text-white'
-                                            }`
+                {/* Resource List */}
+                <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 small-scroller text-left">
+                    {items.length === 0 ? (
+                        <div className="py-8 text-center text-gray-400 text-xs">
+                            {t('no_resources_found', 'No resources available')}
+                        </div>
+                    ) : (
+                        items.map(({ item, type, idx }) => {
+                            const isPdf = type === 'pdf';
+                            const isObj = typeof item === 'object' && item !== null;
+                            const resourceUrl = formatResourceUrl(isObj ? (item.url || '') : item);
+                            const adminTitle = isObj ? item.title : null;
+                            let filename = resourceUrl.split('/').pop()?.split('?')[0] || `${type}_resource`;
+                            if (isPdf && !filename.toLowerCase().endsWith('.pdf')) {
+                                filename += '.pdf';
+                            } else if (!isPdf && !filename.toLowerCase().endsWith('.mp3')) {
+                                filename += '.mp3';
+                            }
+                            const resourceDisplayName = adminTitle || (isPdf 
+                                ? `${t('handout_note', 'Handout Document')} ${idx.split('-')[1] ? Number(idx.split('-')[1]) + 1 : ''}`.trim()
+                                : `${t('audio_lecture', 'Audio Recording')} ${idx.split('-')[1] ? Number(idx.split('-')[1]) + 1 : ''}`.trim());
+
+                            const handleItemClick = (e) => {
+                                if (e) e.stopPropagation();
+                                if (isPdf) {
+                                    if (onSelectPdf) {
+                                        onSelectPdf(resourceUrl, filename);
+                                    } else {
+                                        window.open(resourceUrl, '_blank');
+                                    }
+                                } else {
+                                    if (onSelectAudio) {
+                                        onSelectAudio(resourceUrl, filename);
+                                    } else {
+                                        window.open(resourceUrl, '_blank');
+                                    }
+                                }
+                            };
+
+                            return (
+                                <div 
+                                    key={idx}
+                                    onClick={handleItemClick}
+                                    className={`flex items-center justify-between p-3 border rounded-2xl cursor-pointer transition-all duration-200 group active:scale-[0.99] ${
+                                        isPdf 
+                                            ? 'bg-slate-50/80 hover:bg-red-50/40 border-slate-100 hover:border-red-200' 
+                                            : 'bg-slate-50/80 hover:bg-blue-50/40 border-slate-100 hover:border-blue-200'
                                     }`}
                                 >
-                                    {isDownloading ? (
-                                        <Loader2 size={14} className={`animate-spin ${isPdf ? 'text-red-500' : 'text-blue-500'}`} />
-                                    ) : (
-                                        <Download size={14} className="group-hover:animate-bounce" />
-                                    )}
-                                </button>
-                            </div>
-                        );
-                    })}
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                                            isPdf ? 'bg-red-100/70 text-red-500' : 'bg-blue-100/70 text-blue-500'
+                                        }`}>
+                                            {isPdf ? <FileText size={16} /> : <Volume2 size={16} />}
+                                        </div>
+                                        <div className="text-left min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
+                                                    {resourceDisplayName}
+                                                </p>
+                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                                    isPdf ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                                                }`}>
+                                                    {isPdf ? 'PDF' : 'Audio'}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-gray-400 font-medium truncate max-w-[180px] sm:max-w-[220px] mt-0.5">
+                                                {filename}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center shrink-0 ml-2">
+                                        <button 
+                                            type="button"
+                                            onClick={handleItemClick}
+                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border shadow-2xs active:scale-95 cursor-pointer ${
+                                                isPdf 
+                                                    ? 'bg-white text-red-600 border-red-200 hover:bg-red-50' 
+                                                    : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'
+                                            }`}
+                                        >
+                                            {isPdf ? t('view', 'View') : t('listen', 'Listen')}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>,
@@ -523,12 +621,13 @@ const NotesModal = ({ activeNotes, onClose }) => {
     );
 };
 
-const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId, isAdminView, onOpenPdf, loading = false }) => {
+const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId, isAdminView, onOpenPdf, onOpenAudio, loading = false }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [activeResources, setActiveResources] = useState(null);
     const [pdfPopover, setPdfPopover] = useState(null);
     const [viewingPdf, setViewingPdf] = useState(null);
+    const [playingAudioUrl, setPlayingAudioUrl] = useState(null);
     const [activeNotes, setActiveNotes] = useState(null);
     const { t } = useTranslation();
     const itemsPerPage = 5;
@@ -558,17 +657,19 @@ const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId
     };
 
     return (
-        <div className="bg-white rounded-[20px] p-8 shadow-sm mt-8 border border-gray-100">
+        <div className="bg-white rounded-[20px] p-3.5 sm:p-5 md:p-6 shadow-sm mt-6 sm:mt-8 border border-gray-100">
             {/* Header section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6 gap-3">
                 <div>
-                    <h2 className="text-[22px] font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('lecture_list', 'Lecture List')}</h2>
-                    <p className="text-gray-400 text-sm leading-[1.8]">{t('manage_your_lecture', 'Manage your lecture')}</p>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">{t('lecture_list', 'Lecture List')}</h2>
+                    <p className="text-gray-400 text-xs leading-normal mt-0.5">{t('manage_your_lecture', 'Manage your lecture')}</p>
                 </div>
+
+                {/* Search Bar */}
                 <div className="flex w-full md:w-auto">
-                    <div className="relative flex-1 md:w-[320px]">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-gray-400" />
+                    <div className="relative flex-1 md:w-[280px]">
+                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <Search className="h-3.5 w-3.5 text-gray-400" />
                         </div>
                         <input
                             type="text"
@@ -578,248 +679,247 @@ const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm animate-none"
+                            className="w-full pl-9 pr-3 py-1.5 sm:py-2 bg-white border border-gray-200 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm"
                         />
                     </div>
-                    <button className="bg-[#6366F1] text-white px-6 py-2.5 rounded-r-lg flex items-center gap-2 hover:bg-[#5558e6] transition-colors">
-                        <Search className="h-4 w-4" />
-                        <span className="text-sm font-medium">{t('search', 'Search')}</span>
+                    <button className="bg-[#6366F1] text-white px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-r-lg flex items-center gap-1.5 hover:bg-[#5558e6] transition-colors shrink-0">
+                        <Search className="h-3.5 w-3.5" />
+                        <span className="text-xs sm:text-sm font-medium">{t('search', 'Search')}</span>
                     </button>
                 </div>
             </div>
 
-            {/* Table wrapper */}
-            <div className="overflow-x-auto custom-scrollbar-thin -mx-4 sm:mx-0 max-h-[400px]">
-                <div className="min-w-[1000px] px-4 sm:px-0">
+            {/* Table view */}
+            <div className="overflow-x-auto small-scroller -mx-1 sm:mx-0 max-h-[440px] md:max-h-none">
+                <div className="w-full min-w-[540px] sm:min-w-full px-1 sm:px-0">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
-                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
-                                <th className="px-6 py-4 w-[15%]">{t('lecture_no', 'Lecture No')}</th>
-                                <th className="px-6 py-4 w-[35%]">{t('title', 'Title')}</th>
-                                <th className="px-6 py-4 text-center w-[15%]">{t('date', 'Date')}</th>
-                                <th className="px-6 py-4 text-center w-[15%]">{t('progress', 'Progress')}</th>
-                                <th className="px-6 py-4 text-center w-[10%]">{t('status', 'Status')}</th>
-                                {!isAdminView && <th className="px-6 py-4 text-center w-[10%]">{t('comments_and_queries', 'Comments and Queries')}</th>}
-                                <th className="px-6 py-4 text-center w-[10%]">{t('action', 'Action')}</th>
+                        <thead className="bg-gray-50/90 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-100">
+                            <tr className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th className="px-2.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 w-[14%] whitespace-nowrap">{t('lecture_no', 'Lecture No')}</th>
+                                <th className="px-2.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 w-[34%] min-w-[130px] sm:min-w-[180px] md:min-w-[240px]">{t('title', 'Title')}</th>
+                                <th className="px-1.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center w-[13%] whitespace-nowrap">{t('date', 'Date')}</th>
+                                <th className="px-1.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center w-[11%] whitespace-nowrap">{t('progress', 'Progress')}</th>
+                                <th className="px-1.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center w-[10%] whitespace-nowrap">{t('status', 'Status')}</th>
+                                {!isAdminView && <th className="px-1.5 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center w-[10%] whitespace-nowrap">{t('notes', 'Notes')}</th>}
+                                <th className="px-2 py-2.5 sm:px-4 sm:py-3.5 md:px-6 md:py-4 text-center w-[12%] whitespace-nowrap">{t('action', 'Action')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
                                 [1, 2, 3, 4, 5].map((i) => (
-                                    <tr key={i} className="text-sm border-b border-gray-100 animate-pulse">
-                                        <td className="px-6 py-4">
-                                            <div className="h-4 w-12 bg-gray-200 rounded" />
+                                    <tr key={i} className="text-xs sm:text-sm border-b border-gray-100 animate-pulse">
+                                        <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
+                                            <div className="h-3.5 w-10 bg-gray-200 rounded" />
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="h-4 w-4/5 bg-gray-200 rounded" />
+                                        <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4">
+                                            <div className="h-3.5 w-4/5 bg-gray-200 rounded" />
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="h-4 w-20 bg-gray-200 rounded mx-auto" />
+                                        <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                            <div className="h-3.5 w-14 bg-gray-200 rounded mx-auto" />
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="h-4 w-10 bg-gray-200 rounded mx-auto" />
+                                        <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                            <div className="h-3.5 w-8 bg-gray-200 rounded mx-auto" />
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="h-6 w-16 bg-gray-200 rounded-full mx-auto" />
+                                        <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                            <div className="h-5 w-14 bg-gray-200 rounded-full mx-auto" />
                                         </td>
                                         {!isAdminView && (
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="h-7 w-20 bg-gray-200 rounded-xl mx-auto" />
+                                            <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                                <div className="h-6 w-14 bg-gray-200 rounded-lg mx-auto" />
                                             </td>
                                         )}
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="h-7 w-16 bg-gray-200 rounded mx-auto" />
+                                        <td className="px-2 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center">
+                                            <div className="h-6 w-14 bg-gray-200 rounded mx-auto" />
                                         </td>
                                     </tr>
                                 ))
                             ) : currentLectures.length === 0 ? (
                                 <tr>
-                                    <td colSpan={isAdminView ? 6 : 7} className="px-6 py-12 text-center text-gray-400">
+                                    <td colSpan={isAdminView ? 6 : 7} className="px-4 py-10 text-center text-xs sm:text-sm text-gray-400">
                                         {t('no_lectures_found', 'No lectures found')}
                                     </td>
                                 </tr>
                             ) : (
-                                currentLectures.map((lecture, index) => {
-                                const isCurrent = lecture.id === currentLectureId;
-                                const progress = lecture.watchedPercentage || 0;
-                                const lectureNotes = notes.filter(n => n.lectureId === lecture.id);
-                                const latestNote = lectureNotes.length > 0 ? lectureNotes[lectureNotes.length - 1].text : 'N/A';
+                                currentLectures.map((lecture) => {
+                                    const isCurrent = lecture.id === currentLectureId;
+                                    const progress = lecture.watchedPercentage || 0;
+                                    const lectureNotes = notes.filter(n => n.lectureId === lecture.id);
 
-                                const displayLectureNo = typeof lecture.lectureNo === 'string' && lecture.lectureNo.startsWith('#')
-                                    ? lecture.lectureNo
-                                    : `#${String(lecture.lectureNo).padStart(2, '0')}`;
+                                    const displayLectureNo = typeof lecture.lectureNo === 'string' && lecture.lectureNo.startsWith('#')
+                                        ? lecture.lectureNo
+                                        : `#${String(lecture.lectureNo).padStart(2, '0')}`;
 
-                                return (
-                                    <tr key={lecture.id} className={`text-sm text-gray-600 hover:bg-gray-50/50 transition-colors ${isCurrent ? 'bg-blue-50/30' : ''}`}>
-                                        <td className="px-6 py-4">
-                                            <span className="font-medium text-gray-900">{displayLectureNo}</span>
-                                        </td>
-                                        <td className="px-6 py-4 w-[35%] max-w-[280px] sm:max-w-[340px] md:max-w-[420px]">
-                                            <div
-                                                className="font-medium text-gray-900 leading-snug"
-                                                style={{
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 3,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    wordBreak: 'break-word',
-                                                }}
-                                                title={t(lecture.title, lecture.title)}
-                                            >
-                                                {t(lecture.title, lecture.title)}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="text-gray-500">{formatDate(lecture.date)}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="text-[#3758EE] font-bold">{String(progress).padStart(2, '0')}%</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="flex justify-center items-center">
-                                                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 ${
-                                                    !lecture.isLocked ? 'text-emerald-500 bg-emerald-50' : 'text-gray-500 bg-gray-50'
-                                                }`}>
-                                                    {lecture.isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-                                                    {lecture.isLocked ? t('locked', 'Locked') : t('unlocked', 'Unlocked')}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        {!isAdminView && (
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex items-center justify-center">
-                                                    {lectureNotes.length > 0 ? (
-                                                        <button
-                                                            onClick={() => setActiveNotes({
-                                                                lectureNo: displayLectureNo,
-                                                                title: lecture.title,
-                                                                notesList: lectureNotes
-                                                            })}
-                                                            className="px-4 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-xl transition-all duration-200 shadow-xs active:scale-[0.98] cursor-pointer"
-                                                        >
-                                                            {t('see_notes', 'See Notes')}
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            disabled
-                                                            className="px-4 py-1.5 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-150 rounded-xl cursor-not-allowed"
-                                                        >
-                                                            {t('no_notes', 'No Notes')}
-                                                        </button>
-                                                    )}
+                                    const pdfUrls = Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : []);
+                                    const hasPdf = pdfUrls.length > 0;
+                                    const audioUrls = Array.isArray(lecture.audioUrl) ? lecture.audioUrl : (lecture.audioUrl ? [lecture.audioUrl] : []);
+                                    const hasAudio = audioUrls.length > 0;
+
+                                    return (
+                                        <tr key={lecture.id} className={`text-xs sm:text-sm text-gray-600 hover:bg-gray-50 transition-colors ${isCurrent ? 'bg-blue-50/40' : ''}`}>
+                                            <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 whitespace-nowrap">
+                                                <span className="font-semibold sm:font-medium text-gray-900 text-xs sm:text-sm">{displayLectureNo}</span>
+                                            </td>
+                                            <td className="px-2.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 w-[35%] max-w-[280px] sm:max-w-[340px] md:max-w-[420px]">
+                                                <div
+                                                    className="font-medium text-gray-900 text-xs sm:text-sm leading-snug"
+                                                    style={{
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 3,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        wordBreak: 'break-word',
+                                                    }}
+                                                    title={t(lecture.title, lecture.title)}
+                                                >
+                                                    {t(lecture.title, lecture.title)}
                                                 </div>
                                             </td>
-                                        )}
-                                        <td className="px-6 py-4 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        const pdfUrls = Array.isArray(lecture.pdfUrl) ? lecture.pdfUrl : (lecture.pdfUrl ? [lecture.pdfUrl] : []);
-                                                        if (pdfUrls.length === 1) {
-                                                            const pdfItem = pdfUrls[0];
-                                                            const targetUrl = typeof pdfItem === 'object' ? pdfItem.url : pdfItem;
-                                                            const targetTitle = typeof pdfItem === 'object' ? pdfItem.title : 'document.pdf';
-                                                            if (onOpenPdf) {
-                                                                onOpenPdf(targetUrl);
-                                                            } else {
-                                                                setViewingPdf({ url: targetUrl, filename: targetTitle });
+                                            <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center whitespace-nowrap">
+                                                <span className="text-gray-500 text-[11px] sm:text-xs md:text-sm">{formatDate(lecture.date)}</span>
+                                            </td>
+                                            <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center whitespace-nowrap">
+                                                <span className="text-[#3758EE] font-bold text-xs sm:text-sm">{progress}%</span>
+                                            </td>
+                                            <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center whitespace-nowrap">
+                                                <div className="flex justify-center items-center">
+                                                    <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold flex items-center gap-1 ${
+                                                        !lecture.isLocked ? 'text-emerald-600 bg-emerald-50 border border-emerald-100' : 'text-gray-500 bg-gray-100 border border-gray-200'
+                                                    }`}>
+                                                        {lecture.isLocked ? <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <Unlock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
+                                                        {lecture.isLocked ? t('locked', 'Locked') : t('unlocked', 'Unlocked')}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            {!isAdminView && (
+                                                <td className="px-1.5 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center whitespace-nowrap">
+                                                    <div className="flex items-center justify-center">
+                                                        {lectureNotes.length > 0 ? (
+                                                            <button
+                                                                onClick={() => setActiveNotes({
+                                                                    lectureNo: displayLectureNo,
+                                                                    title: lecture.title,
+                                                                    notesList: lectureNotes
+                                                                })}
+                                                                className="px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 rounded-lg sm:rounded-full transition-all duration-200 shadow-2xs active:scale-[0.98] cursor-pointer"
+                                                            >
+                                                                {t('see_notes', 'See Notes')}
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                disabled
+                                                                className="px-2 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-gray-400 bg-gray-50 border border-gray-150 rounded-lg sm:rounded-full cursor-not-allowed"
+                                                            >
+                                                                {t('no_notes', 'No Notes')}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
+                                            <td className="px-2 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center whitespace-nowrap">
+                                                <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (hasPdf) {
+                                                                setActiveResources({
+                                                                    lectureNo: displayLectureNo,
+                                                                    title: lecture.title,
+                                                                    defaultTab: 'pdf',
+                                                                    pdfUrls,
+                                                                    audioUrls
+                                                                });
                                                             }
-                                                        } else if (pdfUrls.length > 1) {
-                                                            const rect = e.currentTarget.getBoundingClientRect();
-                                                            setPdfPopover({
-                                                                lectureId: lecture.id,
-                                                                rect,
-                                                                lectureNo: displayLectureNo,
-                                                                title: lecture.title,
-                                                                urls: pdfUrls
-                                                            });
-                                                        }
-                                                    }}
-                                                    disabled={!lecture.pdfUrl || (Array.isArray(lecture.pdfUrl) && lecture.pdfUrl.length === 0)}
-                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${
-                                                        !lecture.pdfUrl || (Array.isArray(lecture.pdfUrl) && lecture.pdfUrl.length === 0)
-                                                            ? 'bg-red-50 text-red-300 opacity-50 cursor-not-allowed'
-                                                            : 'bg-red-50 text-red-500 hover:bg-red-100 hover:scale-105 active:scale-95 shadow-sm'
-                                                    }`}
-                                                >
-                                                    <FileText size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        const audioUrls = Array.isArray(lecture.audioUrl) ? lecture.audioUrl : (lecture.audioUrl ? [lecture.audioUrl] : []);
-                                                        if (audioUrls.length === 1) {
-                                                            const audioItem = audioUrls[0];
-                                                            window.open(typeof audioItem === 'object' ? audioItem.url : audioItem, '_blank');
-                                                        } else if (audioUrls.length > 1) {
-                                                            setActiveResources({
-                                                                lectureNo: displayLectureNo,
-                                                                title: lecture.title,
-                                                                type: 'audio',
-                                                                urls: audioUrls
-                                                            });
-                                                        }
-                                                    }}
-                                                    disabled={!lecture.audioUrl || (Array.isArray(lecture.audioUrl) && lecture.audioUrl.length === 0)}
-                                                    className={`w-7 h-7 rounded flex items-center justify-center transition-all ${
-                                                        !lecture.audioUrl || (Array.isArray(lecture.audioUrl) && lecture.audioUrl.length === 0)
-                                                            ? 'bg-blue-50 text-blue-300 opacity-50 cursor-not-allowed'
-                                                            : 'bg-blue-50 text-blue-500 hover:bg-blue-100 hover:scale-105 active:scale-95 shadow-sm'
-                                                    }`}
-                                                >
-                                                    <Volume2 size={14} />
-                                                </button>
-                                                {lecture.type === 'Assignment' ? (
+                                                        }}
+                                                        disabled={!hasPdf}
+                                                        title={hasPdf ? "View PDFs" : "No PDF"}
+                                                        className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded sm:rounded-lg flex items-center justify-center transition-all ${
+                                                            !hasPdf
+                                                                ? 'bg-red-50 text-red-300 opacity-40 cursor-not-allowed'
+                                                                : 'bg-red-50 text-red-500 hover:bg-red-100 active:scale-95 shadow-2xs cursor-pointer'
+                                                        }`}
+                                                    >
+                                                        <FileText className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (hasAudio) {
+                                                                setActiveResources({
+                                                                    lectureNo: displayLectureNo,
+                                                                    title: lecture.title,
+                                                                    defaultTab: 'audio',
+                                                                    pdfUrls,
+                                                                    audioUrls
+                                                                });
+                                                            }
+                                                        }}
+                                                        disabled={!hasAudio}
+                                                        title={hasAudio ? "Listen Audio" : "No Audio"}
+                                                        className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded sm:rounded-lg flex items-center justify-center transition-all ${
+                                                            !hasAudio
+                                                                ? 'bg-blue-50 text-blue-300 opacity-40 cursor-not-allowed'
+                                                                : 'bg-blue-50 text-blue-500 hover:bg-blue-100 active:scale-95 shadow-2xs cursor-pointer'
+                                                        }`}
+                                                    >
+                                                        <Volume2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+                                                    </button>
                                                     <GradiantButton
                                                         onClick={() => onWatch(lecture)}
-                                                        className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors shadow-none disabled:opacity-50"
+                                                        className="bg-[#3758EE] text-white text-[10px] sm:text-xs font-bold px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-[4px] sm:rounded-md hover:bg-blue-600 transition-colors shadow-none disabled:opacity-50"
                                                         disabled={lecture.isLocked}
                                                     >
-                                                        {isAdminView ? t('edit_assignment', 'Edit Assignment') : t('start', 'Start')}
+                                                        {lecture.type === 'Assignment' && isAdminView ? t('edit_assignment', 'Edit Assignment') : t('start', 'Start')}
                                                     </GradiantButton>
-                                                ) : (
-                                                    <GradiantButton
-                                                        onClick={() => onWatch(lecture)}
-                                                        className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors shadow-none disabled:opacity-50"
-                                                        disabled={lecture.isLocked}
-                                                    >
-                                                        {t('start', 'Start')}
-                                                    </GradiantButton>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            }))}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-
             {!loading && totalPages > 1 && (
-                <div className="flex justify-end items-center mt-6 p-4 border-t border-gray-100 w-full">
+                <div className="flex justify-center sm:justify-end items-center mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100 w-full">
                     <CustomPagination 
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={setCurrentPage}
+                        className="justify-center sm:justify-end"
                     />
                 </div>
             )}
             {activeResources && (
-                                                <ResourcesModal 
-                                                    activeResources={activeResources} 
-                                                    onClose={() => setActiveResources(null)} 
-                                                />
-                                            )}
-                                            {activeNotes && (
-                                                <NotesModal 
-                                                    activeNotes={activeNotes} 
-                                                    onClose={() => setActiveNotes(null)} 
-                                                />
-                                            )}
+                <ResourcesModal 
+                    activeResources={activeResources} 
+                    onClose={() => setActiveResources(null)}
+                    onSelectPdf={(url, filename) => {
+                        setActiveResources(null);
+                        if (onOpenPdf) {
+                            onOpenPdf(url);
+                        } else {
+                            setViewingPdf({ url, filename });
+                        }
+                    }}
+                    onSelectAudio={(url, filename) => {
+                        setActiveResources(null);
+                        if (onOpenAudio) {
+                            onOpenAudio(url);
+                        } else {
+                            setPlayingAudioUrl(url);
+                        }
+                    }}
+                />
+            )}
+            {activeNotes && (
+                <NotesModal 
+                    activeNotes={activeNotes} 
+                    onClose={() => setActiveNotes(null)} 
+                />
+            )}
             {pdfPopover && (
                 <PdfResourcesPopover
                     popover={pdfPopover}
@@ -840,11 +940,74 @@ const LectureListTable = ({ lectures = [], notes = [], onWatch, currentLectureId
                     onClose={() => setViewingPdf(null)}
                 />
             )}
+            {playingAudioUrl && (() => {
+                const isDrive = !!(playingAudioUrl && (playingAudioUrl.includes('drive.google.com') || playingAudioUrl.includes('drive.usercontent.google.com') || playingAudioUrl.includes('docs.google.com')));
+                const getDriveEmbedSrc = (rawUrl) => {
+                    if (!rawUrl) return '';
+                    const match = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        return `https://drive.google.com/file/d/${match[1]}/preview`;
+                    }
+                    const matchId = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                    if (matchId && matchId[1]) {
+                        return `https://drive.google.com/file/d/${matchId[1]}/preview`;
+                    }
+                    return rawUrl;
+                };
+
+                return ReactDOM.createPortal(
+                    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[10002] transition-all duration-300 animate-in slide-in-from-bottom-4 ${isDrive ? 'w-[95%] sm:w-[540px] max-w-xl' : 'w-[90%] max-w-md'}`}>
+                        <div className={`bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-100 flex flex-col gap-3 transition-all ${isDrive ? 'p-4 sm:p-5' : 'p-4'}`}>
+                            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shrink-0 shadow-sm">
+                                        <Volume2 size={18} className="text-white animate-pulse" />
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-800">Playing Audio Resource</span>
+                                </div>
+                                <button
+                                    onClick={() => setPlayingAudioUrl(null)}
+                                    className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-all shrink-0 cursor-pointer"
+                                    aria-label="Close audio player"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            {isDrive ? (
+                                <div className="w-full h-44 sm:h-48 min-h-[160px] rounded-xl overflow-hidden bg-gray-50 border border-gray-200/60 shadow-inner">
+                                    <iframe
+                                        src={getDriveEmbedSrc(playingAudioUrl)}
+                                        className="w-full h-full border-none"
+                                        title="Google Drive Audio Player"
+                                        allow="autoplay"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full">
+                                    <audio
+                                        key={playingAudioUrl}
+                                        src={getAudioSrc(playingAudioUrl)}
+                                        controls
+                                        autoPlay
+                                        className="w-full h-10 custom-audio-player"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>,
+                    document.body
+                );
+            })()}
             
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                .small-scroller::-webkit-scrollbar { width: 4px; height: 4px; }
+                .small-scroller::-webkit-scrollbar-track { background: #f8fafc; border-radius: 9999px; }
+                .small-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+                .small-scroller::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                .small-scroller { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f8fafc; }
                 .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }

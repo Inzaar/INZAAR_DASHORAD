@@ -11,7 +11,7 @@ import { getCourseById, getAdminCourseById, getEnrolledCoursesByUserId, updateLe
 import { createNotification } from "@/api/notification";
 import { getLectureById, updateLecture } from "@/api/lecture";
 import { useAuth } from "@/context/AuthContext";
-import { Loader, GraduationCap, Trash2, Edit2, Check, CheckCircle, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, Download, Plus, Smile, MoreHorizontal, MoreVertical, Square, CheckSquare, Award, Play, FileQuestion, RefreshCw } from "lucide-react";
+import { Loader, GraduationCap, Trash2, Edit2, Check, CheckCircle, X, Loader2, ChevronDown, ChevronRight, Upload, FileText, Volume2, VolumeX, Download, Plus, Smile, MoreHorizontal, MoreVertical, Square, CheckSquare, Award, Play, Pause, FileQuestion, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FaWhatsapp } from "react-icons/fa";
 import CertificateCard from "../components/CertificateCard";
@@ -2519,12 +2519,12 @@ const CourseView = () => {
                                                         <img src={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-md transition-all duration-700 group-hover:scale-105 group-hover:opacity-30" />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/60 to-transparent"></div>
 
-                                                        <div className="relative z-10 w-full px-6 sm:px-12 flex flex-col items-center justify-center flex-1 py-6 sm:py-8">
-                                                            <div className="w-56 sm:w-72 md:w-80 aspect-video rounded-xl border-2 border-white/20 overflow-hidden mb-6 shadow-2xl relative shrink-0">
+                                                        <div className="relative z-10 w-full px-3 sm:px-8 md:px-12 flex flex-col items-center justify-center flex-1 py-4 sm:py-8">
+                                                            <div className="w-48 sm:w-64 md:w-80 aspect-video rounded-xl border-2 border-white/20 overflow-hidden mb-4 sm:mb-6 shadow-2xl relative shrink-0">
                                                                 <img src={thumbnailSrc || currentLecture?.thumbnail || courseData?.thumbnail || fallbackImg} alt="Thumbnail" className="w-full h-full object-cover" />
                                                             </div>
 
-                                                            <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl border border-white/10 shadow-2xl">
+                                                            <div className="w-full max-w-xl mx-auto backdrop-blur-xl bg-white/10 p-2.5 sm:p-4 rounded-2xl border border-white/10 shadow-2xl">
                                                                 {(() => {
                                                                     const url = currentLecture.videoUrl || (currentLecture.audioUrl?.length > 0 ? (typeof currentLecture.audioUrl[0] === 'string' ? currentLecture.audioUrl[0] : currentLecture.audioUrl[0].url) : '');
                                                                     const isDrive = Boolean(url && (url.includes('drive.google.com') || url.includes('drive.usercontent.google.com')));
@@ -2572,12 +2572,87 @@ const CourseView = () => {
 
                                                                     return (
                                                                         <div className="flex flex-col gap-3 w-full">
+                                                                            {/* Custom White Pill Audio Player with small, always-visible progress bar */}
+                                                                            <div className="w-full bg-white/95 backdrop-blur-md rounded-full px-3 sm:px-4 py-2 sm:py-2.5 flex items-center gap-2 sm:gap-3 shadow-lg border border-white/40 text-gray-800">
+                                                                                {/* Play / Pause Button */}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        if (audioRef.current) {
+                                                                                            if (isPlaying) {
+                                                                                                audioRef.current.pause();
+                                                                                            } else {
+                                                                                                audioRef.current.play();
+                                                                                            }
+                                                                                        }
+                                                                                    }}
+                                                                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-800 flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-2xs"
+                                                                                    aria-label={isPlaying ? "Pause" : "Play"}
+                                                                                >
+                                                                                    {isPlaying ? (
+                                                                                        <Pause size={14} className="fill-current text-gray-800" />
+                                                                                    ) : (
+                                                                                        <Play size={14} className="fill-current text-gray-800 ml-0.5" />
+                                                                                    )}
+                                                                                </button>
+
+                                                                                {/* Time Display */}
+                                                                                <span className="text-[10px] sm:text-xs font-semibold text-gray-600 shrink-0 font-mono tracking-tight select-none">
+                                                                                    {formatTime(currentTime)} / {formatTime(duration)}
+                                                                                </span>
+
+                                                                                {/* Small, Slim, ALWAYS Visible Progress Bar */}
+                                                                                <div
+                                                                                    className="flex-1 relative flex items-center h-5 sm:h-6 cursor-pointer group py-1.5"
+                                                                                    onClick={(e) => {
+                                                                                        if (!audioRef.current || !duration) return;
+                                                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                                                        const clickX = e.clientX - rect.left;
+                                                                                        const newPercent = Math.max(0, Math.min(1, clickX / rect.width));
+                                                                                        const newTime = newPercent * duration;
+                                                                                        audioRef.current.currentTime = newTime;
+                                                                                        setCurrentTime(newTime);
+                                                                                    }}
+                                                                                    title="Seek"
+                                                                                >
+                                                                                    {/* Track Background */}
+                                                                                    <div className="w-full h-1.5 sm:h-2 bg-gray-200/90 rounded-full overflow-hidden relative">
+                                                                                        {/* Progress Fill */}
+                                                                                        <div
+                                                                                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-[width] duration-75"
+                                                                                            style={{ width: `${duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0}%` }}
+                                                                                        />
+                                                                                    </div>
+                                                                                    {/* Scrubber Thumb */}
+                                                                                    <div
+                                                                                        className="absolute w-3.5 h-3.5 sm:w-4 sm:h-4 bg-white border-2 border-blue-600 rounded-full shadow-md -translate-x-1/2 pointer-events-none transition-transform group-hover:scale-110"
+                                                                                        style={{ left: `${duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0}%` }}
+                                                                                    />
+                                                                                </div>
+
+                                                                                {/* Volume / Mute Button */}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        if (audioRef.current) {
+                                                                                            audioRef.current.muted = !isMuted;
+                                                                                            setIsMuted(!isMuted);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full hover:bg-gray-100 active:scale-95 text-gray-600 hover:text-gray-900 flex items-center justify-center shrink-0 transition-all cursor-pointer"
+                                                                                    aria-label={isMuted ? "Unmute" : "Mute"}
+                                                                                    title={isMuted ? "Unmute" : "Mute"}
+                                                                                >
+                                                                                    {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                                                                                </button>
+                                                                            </div>
+
+                                                                            {/* Underlying Audio Engine */}
                                                                             <audio
                                                                                 ref={audioRef}
                                                                                 key={currentLecture.id || currentLecture._id}
-                                                                                controls
                                                                                 autoPlay={shouldAutoplay}
-                                                                                className="w-full h-12 outline-none"
+                                                                                className="hidden"
                                                                                 src={getAudioSrc(url)}
                                                                                 onError={() => {
                                                                                     if (isDrive) {
@@ -2590,8 +2665,8 @@ const CourseView = () => {
                                                                                         getCurrentTime: () => audioEl.currentTime || 0,
                                                                                         getDuration: () => audioEl.duration || 0,
                                                                                         seekTo: (time) => { audioEl.currentTime = time; },
-                                                                                        mute: () => { audioEl.muted = true; },
-                                                                                        unMute: () => { audioEl.muted = false; },
+                                                                                        mute: () => { audioEl.muted = true; setIsMuted(true); },
+                                                                                        unMute: () => { audioEl.muted = false; setIsMuted(false); },
                                                                                         setVolume: (vol) => { audioEl.volume = vol / 100; },
                                                                                         playVideo: () => { audioEl.play(); },
                                                                                         pauseVideo: () => { audioEl.pause(); },
@@ -2608,8 +2683,8 @@ const CourseView = () => {
                                                                                         getCurrentTime: () => audioEl.currentTime || 0,
                                                                                         getDuration: () => audioEl.duration || 0,
                                                                                         seekTo: (time) => { audioEl.currentTime = time; },
-                                                                                        mute: () => { audioEl.muted = true; },
-                                                                                        unMute: () => { audioEl.muted = false; },
+                                                                                        mute: () => { audioEl.muted = true; setIsMuted(true); },
+                                                                                        unMute: () => { audioEl.muted = false; setIsMuted(false); },
                                                                                         setVolume: (vol) => { audioEl.volume = vol / 100; },
                                                                                         playVideo: () => { audioEl.play(); },
                                                                                         pauseVideo: () => { audioEl.pause(); },
@@ -2619,6 +2694,9 @@ const CourseView = () => {
                                                                                     if (currentLecture?.lastWatchedTime > 0) {
                                                                                         audioEl.currentTime = currentLecture.lastWatchedTime;
                                                                                     }
+                                                                                    if (audioEl.duration) {
+                                                                                        setDuration(audioEl.duration);
+                                                                                    }
                                                                                 }}
                                                                                 onTimeUpdate={(e) => {
                                                                                     const audioEl = e.target;
@@ -2627,8 +2705,8 @@ const CourseView = () => {
                                                                                             getCurrentTime: () => audioEl.currentTime || 0,
                                                                                             getDuration: () => audioEl.duration || 0,
                                                                                             seekTo: (time) => { audioEl.currentTime = time; },
-                                                                                            mute: () => { audioEl.muted = true; },
-                                                                                            unMute: () => { audioEl.muted = false; },
+                                                                                            mute: () => { audioEl.muted = true; setIsMuted(true); },
+                                                                                            unMute: () => { audioEl.muted = false; setIsMuted(false); },
                                                                                             setVolume: (vol) => { audioEl.volume = vol / 100; },
                                                                                             playVideo: () => { audioEl.play(); },
                                                                                             pauseVideo: () => { audioEl.pause(); },
@@ -2652,6 +2730,7 @@ const CourseView = () => {
                                                                                     }
                                                                                 }}
                                                                                 onEnded={() => {
+                                                                                    setIsPlaying(false);
                                                                                     handleMarkComplete();
                                                                                 }}
                                                                             >
@@ -3319,6 +3398,13 @@ const CourseView = () => {
                                     onOpenPdf={(url) => {
                                         const cleanUrl = typeof url === 'object' ? (url?.url || '') : (url || '');
                                         if (cleanUrl) setActivePdfUrl(cleanUrl);
+                                    }}
+                                    onOpenAudio={(url) => {
+                                        const cleanUrl = typeof url === 'object' ? (url?.url || '') : (url || '');
+                                        if (cleanUrl) {
+                                            pauseMainPlayer();
+                                            setActiveAudioUrl(cleanUrl);
+                                        }
                                     }}
                                 />
                             )}

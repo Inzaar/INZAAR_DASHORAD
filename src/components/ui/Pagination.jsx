@@ -20,7 +20,7 @@ function Pagination({
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-end mt-auto pt-6 pb-2", className)}
+      className={cn("flex w-full justify-center sm:justify-end items-center mt-auto pt-4 pb-2", className)}
       {...props} />
   );
 }
@@ -32,7 +32,7 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center justify-center sm:justify-end gap-1 sm:gap-1.5 p-0 m-0 list-none", className)}
       {...props} />
   );
 }
@@ -78,10 +78,10 @@ function PaginationPrevious({
     <PaginationLink
       aria-label="Go to previous page"
       size="default"
-      className={cn("gap-1.5 px-3 hover:bg-transparent text-[#94A3B8] transition-colors duration-200", className)}
+      className={cn("gap-1 px-2 sm:px-2.5 h-8 sm:h-9 hover:bg-transparent text-[#94A3B8] hover:text-gray-700 transition-colors duration-200", className)}
       {...props}>
-      <ChevronLeftIcon className="size-4" />
-      <span className="hidden sm:inline font-medium">{t('previous', 'Previous')}</span>
+      <ChevronLeftIcon className="size-4 shrink-0" />
+      <span className="hidden sm:inline font-medium text-xs sm:text-sm">{t('previous', 'Previous')}</span>
     </PaginationLink>
   );
 }
@@ -95,10 +95,10 @@ function PaginationNext({
     <PaginationLink
       aria-label="Go to next page"
       size="default"
-      className={cn("gap-1.5 px-3 hover:bg-transparent text-[#94A3B8] transition-colors duration-200", className)}
+      className={cn("gap-1 px-2 sm:px-2.5 h-8 sm:h-9 hover:bg-transparent text-[#94A3B8] hover:text-gray-700 transition-colors duration-200", className)}
       {...props}>
-      <span className="hidden sm:inline font-medium">{t('next', 'Next')}</span>
-      <ChevronRightIcon className="size-4" />
+      <span className="hidden sm:inline font-medium text-xs sm:text-sm">{t('next', 'Next')}</span>
+      <ChevronRightIcon className="size-4 shrink-0" />
     </PaginationLink>
   );
 }
@@ -111,9 +111,9 @@ function PaginationEllipsis({
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
+      className={cn("flex size-7 sm:size-8 items-center justify-center text-gray-400", className)}
       {...props}>
-      <MoreHorizontalIcon className="size-4" />
+      <MoreHorizontalIcon className="size-3.5 sm:size-4" />
       <span className="sr-only">More pages</span>
     </span>
   );
@@ -129,12 +129,12 @@ export {
   PaginationEllipsis,
 }
 
-export function CustomPagination({ currentPage, totalPages, onPageChange }) {
+export function CustomPagination({ currentPage, totalPages, onPageChange, className }) {
   if (!totalPages || totalPages <= 1) return null;
 
   const getPageNumbers = () => {
     const pages = [];
-    if (totalPages <= 5) {
+    if (totalPages <= 6) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
@@ -144,14 +144,20 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(totalPages - 1, currentPage + 1);
 
-      if (currentPage === 1) {
+      if (currentPage <= 2) {
+        startPage = 2;
         endPage = 3;
-      } else if (currentPage === totalPages) {
+      } else if (currentPage >= totalPages - 1) {
         startPage = totalPages - 2;
+        endPage = totalPages - 1;
       }
 
       if (startPage > 2) {
-        pages.push('...');
+        if (startPage === 3) {
+          pages.push(2);
+        } else {
+          pages.push('...');
+        }
       }
 
       for (let i = startPage; i <= endPage; i++) {
@@ -159,7 +165,11 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
       }
 
       if (endPage < totalPages - 1) {
-        pages.push('...');
+        if (endPage === totalPages - 2) {
+          pages.push(totalPages - 1);
+        } else {
+          pages.push('...');
+        }
       }
 
       pages.push(totalPages);
@@ -168,13 +178,13 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
   };
 
   return (
-    <Pagination>
-      <PaginationContent>
+    <Pagination className={cn("w-full flex justify-center sm:justify-end items-center !mt-0 !pt-0 !pb-0", className)}>
+      <PaginationContent className="flex flex-row items-center justify-center sm:justify-end gap-1 sm:gap-1.5 p-0 m-0 list-none">
         <PaginationItem>
           <PaginationPrevious
             href="#"
             onClick={(e) => { e.preventDefault(); if (currentPage > 1) onPageChange(currentPage - 1); }}
-            className={currentPage <= 1 ? "opacity-50 pointer-events-none" : ""}
+            className={currentPage <= 1 ? "opacity-40 pointer-events-none" : "cursor-pointer"}
           />
         </PaginationItem>
         {getPageNumbers().map((p, index) => (
@@ -186,7 +196,7 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
                 href="#"
                 isActive={p === currentPage}
                 onClick={(e) => { e.preventDefault(); onPageChange(p); }}
-                className="font-semibold w-9 h-9"
+                className="font-semibold text-xs sm:text-sm w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center p-0"
               >
                 {p}
               </PaginationLink>
@@ -197,7 +207,7 @@ export function CustomPagination({ currentPage, totalPages, onPageChange }) {
           <PaginationNext
             href="#"
             onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) onPageChange(currentPage + 1); }}
-            className={currentPage >= totalPages ? "opacity-50 pointer-events-none" : ""}
+            className={currentPage >= totalPages ? "opacity-40 pointer-events-none" : "cursor-pointer"}
           />
         </PaginationItem>
       </PaginationContent>
