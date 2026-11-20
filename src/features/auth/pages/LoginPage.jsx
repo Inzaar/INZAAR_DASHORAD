@@ -141,15 +141,15 @@ const LoginPage = () => {
   return (
     <AuthPage>
       <AuthLeft />
-      <RightAuth className="h-[634px] gap-3">
-        <div className='max-w-[500px] w-full'>
+      <RightAuth className="my-auto gap-2.5 sm:gap-3.5 py-4 sm:py-6">
+        <div className='max-w-[500px] w-full mb-1 sm:mb-2'>
           <AuthHeading>
             {t('auth.welcome', 'Welcome to Inzaar.org LMS Portal')}
           </AuthHeading>
-          <p className='text-[#71717A] text-[12px]'>{t('auth.create_or_sign_in', 'Create your account or sign in.')}</p>
+          <p className='text-[#71717A] text-xs sm:text-[13px]'>{t('auth.create_or_sign_in', 'Create your account or sign in.')}</p>
         </div>
 
-        <form className="w-full flex flex-col items-center gap-4">
+        <form onSubmit={handleSubmit} className="w-full max-w-[500px] flex flex-col items-center gap-3 sm:gap-4">
           <Input1
             label={t('auth.email', 'Email')}
             name="email"
@@ -165,10 +165,10 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <div className="w-full flex justify-end -mt-2">
+          <div className="w-full flex justify-end -mt-1 sm:-mt-2">
             <Link
               to="/forgot-password"
-              className="text-[14px] text-[#B566E7] hover:text-[#9333EA] hover:underline transition-colors font-medium"
+              className="text-xs sm:text-[14px] text-[#B566E7] hover:text-[#9333EA] hover:underline transition-colors font-medium"
             >
               {t('auth.forgot_password_question', 'Forgot Password?')}
             </Link>
@@ -177,15 +177,15 @@ const LoginPage = () => {
           <ErrorAlert message={error} />
 
           <div className="w-full max-w-[500px]">
-            <GradiantButton onClick={handleSubmit} className="w-full h-[52px] rounded" type="submit">
+            <GradiantButton onClick={handleSubmit} className="w-full h-[46px] sm:h-[52px] rounded" type="submit">
               {loading ? t('auth.signing_in', 'Signing in...') : t('auth.sign_in', 'Sign in')}
             </GradiantButton>
           </div>
         </form>
 
-        <p className='text-[#636363] text-[16px]'>{t('auth.or', 'Or')}</p>
-        <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="mt-5 mb-3 !w-[calc(100%_-_60px)]" />
-        <GrayButton onClick={handleGuestLogin} className="!w-[calc(100%_-_60px)] rounded py-3 mb-10 mt-2">
+        <p className='text-[#636363] text-xs sm:text-base my-0.5 sm:my-1'>{t('auth.or', 'Or')}</p>
+        <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="w-full max-w-[500px] h-[46px] sm:h-[52px] mb-2 sm:mb-3" />
+        <GrayButton onClick={handleGuestLogin} className="w-full max-w-[500px] h-[46px] sm:h-[52px] rounded mb-3 sm:mb-5">
           {t('auth.continue_as_guest', 'Continue As A Guest')}
         </GrayButton>
         <AuthText />

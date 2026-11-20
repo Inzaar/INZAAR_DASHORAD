@@ -60,16 +60,17 @@ function Other({ setUserPayload, userPayload, userInfo, errors, isLoading = fals
     }
     const { t } = useTranslation();
     return (
-        <div className="w-full p-[24px] gap-[24px] rounded-[12px] b-[1px] bg-[#FFFFFF]  border border-[#E2E8F0]">
-            <div className="w-full rotate-0 opacity-100 flex flex-col gap-[5px] ">
+        <div className="w-full p-4 sm:p-6 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm">
+            <div className="w-full flex flex-col gap-3.5 sm:gap-5">
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row">
+                {/* gender & DOB */}
+                <div className="w-full gap-3 sm:gap-4 flex flex-col sm:flex-row">
                     {/* gender field */}
-                    <div className="w-full sm:w-[50%] gap-2  flex flex-col">
-                        <label className="leading-[1.8]">{t('gender_required', 'Gender*')} </label>
+                    <div className="w-full sm:w-1/2 gap-1.5 sm:gap-2 flex flex-col">
+                        <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('gender_required', 'Gender*')}</label>
                         <div>
                             <select
-                                className=" w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] "
+                                className="w-full h-[46px] sm:h-[52px] rounded-lg px-3.5 sm:px-4 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 bg-white transition-colors"
                                 name="Gender"
                                 id="Gender"
                                 value={userPayload?.gender || "Choose"}
@@ -82,39 +83,37 @@ function Other({ setUserPayload, userPayload, userInfo, errors, isLoading = fals
                         </div>
                     </div>
                     {/* Date of birth*/}
-                    <div className="w-full sm:w-[50%]">
-                        <div className="w-full gap-2 flex flex-col">
-                            <label className="leading-[1.8]">{t('dob_required', 'Date Of Birth*')} </label>
-
-                            <input
-                                type="date"
-                                placeholder={t('enter_dob', 'Enter Your DOB')}
-                                value={userPayload?.dob ? new Date(userPayload.dob).toISOString().split('T')[0] : ''}
-                                onChange={(e) => setUserPayload({ ...userPayload, dob: e.target.value })}
-                                className="h-[52px] rounded-md px-3 border border-[#E4E4E7]"
-                            />
-                        </div>
+                    <div className="w-full sm:w-1/2 gap-1.5 sm:gap-2 flex flex-col">
+                        <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('dob_required', 'Date Of Birth*')}</label>
+                        <input
+                            type="date"
+                            placeholder={t('enter_dob', 'Enter Your DOB')}
+                            value={userPayload?.dob ? new Date(userPayload.dob).toISOString().split('T')[0] : ''}
+                            onChange={(e) => setUserPayload({ ...userPayload, dob: e.target.value })}
+                            className="w-full h-[46px] sm:h-[52px] rounded-lg px-3.5 sm:px-4 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-colors"
+                        />
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row sm:items-start">
+                {/* Educational qualification & Nationality */}
+                <div className="w-full gap-3 sm:gap-4 flex flex-col sm:flex-row sm:items-start">
                     {/* Educational qualification */}
                     <EducationalQualificationInput
                         value={userPayload?.educationQualification || ''}
                         onChange={(val) => setUserPayload({ ...userPayload, educationQualification: val })}
                         label={t('education_required', 'Educational Qualification*')}
-                        labelClassName="leading-[1.8]"
-                        containerClassName="gap-2 flex flex-col mt-6 w-full sm:w-[50%]"
-                        selectClassName="w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] opacity-100 rotate-0 bg-white outline-none"
-                        inputClassName="w-full h-[52px] rounded-md px-3 border border-[#E4E4E7] opacity-100 rotate-0 outline-none mt-2"
+                        labelClassName="text-xs sm:text-sm font-semibold text-gray-700"
+                        containerClassName="gap-1.5 sm:gap-2 flex flex-col w-full sm:w-1/2"
+                        selectClassName="w-full h-[46px] sm:h-[52px] rounded-lg px-3.5 sm:px-4 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 bg-white transition-colors outline-none"
+                        inputClassName="w-full h-[46px] sm:h-[52px] rounded-lg px-3.5 sm:px-4 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none mt-2 transition-colors"
                         placeholder="Select Educational Qualification"
                         otherPlaceholder="Specify your qualification"
                     />
                     {/* national */}
-                    <div className="w-full sm:w-[50%] flex flex-col mt-6">
+                    <div className="w-full sm:w-1/2 flex flex-col">
                         <NationalitySelect
                             label={t('nationality_required', 'Nationality*')}
-                            labelClassName="leading-[1.8] text-[#18181B] text-[16px]"
+                            labelClassName="text-xs sm:text-sm font-semibold text-gray-700"
                             placeholder={t('select_nationality', 'Select Nationality')}
                             value={userPayload?.nationality || ''}
                             onChange={(e) => setUserPayload({ ...userPayload, nationality: e.target.value })}
@@ -122,51 +121,42 @@ function Other({ setUserPayload, userPayload, userInfo, errors, isLoading = fals
                     </div>
                 </div>
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row">
-                    {/* permanent address */}
-                    <div className=" gap-2 flex flex-col mt-6 flex-1">
-                        <label className="leading-[1.8]">{t('permanent_address_required', 'Permanent Address*')} </label>
-
-                        <input
-                            type="text"
-                            placeholder={t('enter_permanent_address', 'Enter Your Permanent Address')}
-                            value={userPayload?.permanentAddress || ''}
-                            onChange={(e) => setUserPayload({ ...userPayload, permanentAddress: e.target.value })}
-                            className="w-full h-[52px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 "
-                        />
-                    </div>
+                {/* permanent address */}
+                <div className="w-full gap-1.5 sm:gap-2 flex flex-col">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('permanent_address_required', 'Permanent Address*')}</label>
+                    <input
+                        type="text"
+                        placeholder={t('enter_permanent_address', 'Enter Your Permanent Address')}
+                        value={userPayload?.permanentAddress || ''}
+                        onChange={(e) => setUserPayload({ ...userPayload, permanentAddress: e.target.value })}
+                        className="w-full h-[46px] sm:h-[52px] rounded-lg px-3.5 sm:px-4 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-colors"
+                    />
                 </div>
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row">
-                    {/*Religious course */}
-                    <div className=" gap-2 flex flex-col flex-1">
-                        <label className="leading-[1.8]">
-                            {t('attended_religious_course_lbl', 'Already Attended a Religious Course, give details if any: ')}{" "}
-                        </label>
-
-                        <textarea
-                            type="text"
-                            placeholder={t('enter_details', 'Enter Details')}
-                            value={userPayload?.attendedReligiousCourseDetails || ''}
-                            onChange={(e) => setUserPayload({ ...userPayload, attendedReligiousCourseDetails: e.target.value })}
-                            className="w-full h-[82px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 pt-16px pr-3 pb-46px pl-3 gap-4  "
-                        />
-                    </div>
+                {/* Religious course */}
+                <div className="w-full gap-1.5 sm:gap-2 flex flex-col">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700">
+                        {t('attended_religious_course_lbl', 'Already Attended a Religious Course, give details if any:')}
+                    </label>
+                    <textarea
+                        placeholder={t('enter_details', 'Enter Details')}
+                        value={userPayload?.attendedReligiousCourseDetails || ''}
+                        onChange={(e) => setUserPayload({ ...userPayload, attendedReligiousCourseDetails: e.target.value })}
+                        className="w-full min-h-[70px] sm:min-h-[82px] rounded-lg p-3 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-none"
+                    />
                 </div>
 
-                <div className="w-full gap-4 flex flex-col sm:flex-row">
-                    {/*inzar courses*/}
-                    <div className=" gap-2 flex flex-col flex-1">
-                        <label className="leading-[1.8]">{t('how_know_about_inzaar_lbl', 'How Did You Come To Know About Inzaar/Course: ')} </label>
-
-                        <textarea
-                            type="text"
-                            placeholder={t('enter_feedback', 'Enter Feedback')}
-                            value={userPayload?.referralSource || ''}
-                            onChange={(e) => setUserPayload({ ...userPayload, referralSource: e.target.value })}
-                            className="w-full h-[82px] rounded-md px-3 gap-1 border border-[#E4E4E7] opacity-100 rotate-0 pt-16px pr-3 pb-46px pl-3 gap-4  "
-                        />
-                    </div>
+                {/* inzar courses */}
+                <div className="w-full gap-1.5 sm:gap-2 flex flex-col">
+                    <label className="text-xs sm:text-sm font-semibold text-gray-700">
+                        {t('how_know_about_inzaar_lbl', 'How Did You Come To Know About Inzaar/Course:')}
+                    </label>
+                    <textarea
+                        placeholder={t('enter_feedback', 'Enter Feedback')}
+                        value={userPayload?.referralSource || ''}
+                        onChange={(e) => setUserPayload({ ...userPayload, referralSource: e.target.value })}
+                        className="w-full min-h-[70px] sm:min-h-[82px] rounded-lg p-3 text-xs sm:text-sm border border-[#E4E4E7] focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-colors resize-none"
+                    />
                 </div>
             </div>
         </div>

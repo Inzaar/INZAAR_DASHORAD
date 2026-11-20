@@ -59,9 +59,9 @@ const ProfilePage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2.5 sm:px-4 gap-2.5 sm:gap-4 flex-1 overflow-hidden relative pb-2 sm:pb-4'>
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -81,7 +81,7 @@ const ProfilePage = () => {
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="">
+                        <div className="pb-3 sm:pb-6">
                             {isLoading || userInfo ? (
                                 <Profile userInfo={userInfo} setUserPayload={setUserPayload} userPayload={userPayload} isLoading={isLoading} />
                             ) : (

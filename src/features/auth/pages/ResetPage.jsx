@@ -122,7 +122,7 @@ function ResetPage() {
             />
           </div>
 
-          <GradiantButton type="submit" disabled={loading} className="max-w-[500px] w-full h-[52px] rounded mt-[10px]">
+          <GradiantButton type="submit" disabled={loading} className="max-w-[500px] w-full h-[46px] sm:h-[52px] rounded mt-[10px]">
             {loading ? t('auth.resetting', 'Resetting...') : t('auth.reset_password_btn', 'Reset Password')}
           </GradiantButton>
         </form>

@@ -2004,9 +2004,9 @@ const CourseView = () => {
 
                                 {/* Desktop Buttons */}
                                 {canEdit && (
-                                    <div className="hidden md:flex items-center gap-3">
+                                    <div className="hidden md:flex items-center gap-2 xl:gap-3">
                                         {!isModeratorViewingStudent && (
-                                            <GradiantButton className="bg-[#6366F1] px-6 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                                            <GradiantButton className="bg-[#6366F1] px-4 py-1.5 xl:px-6 xl:py-2.5 rounded-xl text-xs xl:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
                                                 Download Certificate
                                             </GradiantButton>
                                         )}
@@ -2014,7 +2014,7 @@ const CourseView = () => {
                                             <GradiantButton
                                                 onClick={handleEditLectureClick}
                                                 disabled={loadingLecture}
-                                                className="bg-[#8B5CF6] px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                                                className="bg-[#8B5CF6] px-5 py-1.5 xl:px-8 xl:py-2.5 rounded-xl text-xs xl:text-sm font-medium shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap"
                                             >
                                                 {loadingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : "Edit"}
                                             </GradiantButton>
@@ -2068,122 +2068,176 @@ const CourseView = () => {
                                 )}
 
                                 {!isAdminView && user?.role !== 'admin' && (
-                                    <div className="relative" ref={courseActionsMenuRef}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCourseActionsMenuOpen(prev => !prev)}
-                                            aria-label="Course Options"
-                                            title="More options"
-                                            className="p-2 sm:p-2.5 bg-white border border-gray-200/90 rounded-xl shadow-sm hover:bg-gray-50 text-gray-700 hover:text-gray-900 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
-                                        >
-                                            <MoreVertical className="w-5 h-5" />
-                                        </button>
+                                    <>
+                                        {/* Desktop Action Buttons (Visible on big screens, scaled down on medium screens) */}
+                                        <div className="hidden md:flex items-center gap-1.5 lg:gap-2 xl:gap-2.5 shrink-0">
+                                            <button
+                                                type="button"
+                                                disabled={!hasModerator}
+                                                onClick={handleWhatsAppClick}
+                                                title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
+                                                className={`flex items-center gap-1.5 xl:gap-2 px-3 py-1.5 xl:px-5 xl:py-2.5 rounded-full text-xs xl:text-sm font-medium transition-colors shadow-sm whitespace-nowrap ${hasModerator
+                                                        ? "bg-[#25D366] hover:bg-[#20bd5a] text-white cursor-pointer"
+                                                        : "bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none"
+                                                    }`}
+                                            >
+                                                WhatsApp <FaWhatsapp className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                                            </button>
 
-                                        {isCourseActionsMenuOpen && (
-                                            <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                                                {/* WhatsApp Support */}
-                                                <button
-                                                    type="button"
-                                                    disabled={!hasModerator}
-                                                    onClick={() => {
-                                                        handleWhatsAppClick();
-                                                        setIsCourseActionsMenuOpen(false);
-                                                    }}
-                                                    title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
-                                                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left ${hasModerator
-                                                            ? "text-gray-700 hover:bg-emerald-50/80 hover:text-emerald-700 cursor-pointer"
-                                                            : "text-gray-400 cursor-not-allowed opacity-60"
+                                            {certificateUrl ? (
+                                                <GradiantButton
+                                                    disabled={!isCourseCompleted}
+                                                    onClick={isCourseCompleted ? handleDownloadCertificate : undefined}
+                                                    title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                                    className={`px-3 py-1.5 lg:px-4 lg:py-2 xl:px-6 xl:py-2.5 font-medium rounded-lg shadow-lg text-xs lg:text-sm xl:text-base flex items-center gap-1.5 xl:gap-2 transition-all whitespace-nowrap ${!isCourseCompleted
+                                                            ? "!bg-none bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "bg-[#3758EE] text-white hover:bg-blue-700 shadow-blue-500/30 cursor-pointer"
                                                         }`}
                                                 >
-                                                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${hasModerator ? "bg-[#25D366]/15 text-[#25D366]" : "bg-gray-100 text-gray-400"
-                                                        }`}>
-                                                        <FaWhatsapp size={18} />
-                                                    </span>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="truncate font-semibold text-xs sm:text-sm">WhatsApp</span>
-                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
-                                                            {hasModerator ? "Contact assigned moderator" : "No moderator assigned"}
-                                                        </span>
-                                                    </div>
-                                                </button>
-
-                                                {/* Certificate: Download or Generate */}
-                                                {certificateUrl ? (
-                                                    <button
-                                                        type="button"
-                                                        disabled={!isCourseCompleted}
-                                                        onClick={() => {
-                                                            if (isCourseCompleted) {
-                                                                handleDownloadCertificate();
-                                                                setIsCourseActionsMenuOpen(false);
-                                                            }
-                                                        }}
-                                                        title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
-                                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${isCourseCompleted
-                                                                ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
-                                                                : "text-gray-400 cursor-not-allowed opacity-60"
-                                                            }`}
-                                                    >
-                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isCourseCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
-                                                            }`}>
-                                                            <Download className="w-4 h-4" />
-                                                        </span>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="truncate font-semibold text-xs sm:text-sm">Download Certificate</span>
-                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
-                                                                {isCourseCompleted ? "Save your course certificate" : "Complete course to unlock"}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        disabled={!allLecturesCompleted}
-                                                        onClick={() => {
-                                                            if (allLecturesCompleted) {
-                                                                navigate('/certificates');
-                                                                setIsCourseActionsMenuOpen(false);
-                                                            }
-                                                        }}
-                                                        title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
-                                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${allLecturesCompleted
-                                                                ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
-                                                                : "text-gray-400 cursor-not-allowed opacity-60"
-                                                            }`}
-                                                    >
-                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${allLecturesCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
-                                                            }`}>
-                                                            <GraduationCap className="w-4 h-4" />
-                                                        </span>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="truncate font-semibold text-xs sm:text-sm">Generate Certificate</span>
-                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
-                                                                {allLecturesCompleted ? "Get your official certificate" : "Complete course to unlock"}
-                                                            </span>
-                                                        </div>
-                                                    </button>
-                                                )}
-
-                                                {/* Enroll New Course */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        navigate('/courses');
-                                                        setIsCourseActionsMenuOpen(false);
-                                                    }}
-                                                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-purple-50/80 hover:text-[#8B5CF6] transition-colors text-left border-t border-gray-100/70 cursor-pointer"
+                                                    <Download className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                                                    Download Certificate
+                                                </GradiantButton>
+                                            ) : (
+                                                <GradiantButton
+                                                    disabled={!allLecturesCompleted}
+                                                    onClick={allLecturesCompleted ? () => navigate('/certificates') : undefined}
+                                                    title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                    className={`px-3 py-1.5 lg:px-4 lg:py-2 xl:px-6 xl:py-2.5 font-medium rounded-lg shadow-lg text-xs lg:text-sm xl:text-base flex items-center gap-1.5 xl:gap-2 transition-all whitespace-nowrap ${!allLecturesCompleted
+                                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                                                            : "cursor-pointer"
+                                                        }`}
                                                 >
-                                                    <span className="w-8 h-8 rounded-lg bg-purple-50 text-[#8B5CF6] flex items-center justify-center shrink-0">
-                                                        <Plus className="w-4 h-4" />
-                                                    </span>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="truncate font-semibold text-xs sm:text-sm">{t('enroll_new_course', 'Enroll New Course')}</span>
-                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">Explore other courses</span>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
+                                                    <GraduationCap className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
+                                                    Generate Certificate
+                                                </GradiantButton>
+                                            )}
+
+                                            <GradiantButton
+                                                onClick={() => navigate('/courses')}
+                                                className="px-3 py-1.5 lg:px-4 lg:py-2 xl:px-6 xl:py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-xs lg:text-sm xl:text-base whitespace-nowrap"
+                                            >
+                                                {t('enroll_new_course', 'Enroll New Course')}
+                                            </GradiantButton>
+                                        </div>
+
+                                        {/* Mobile Three-Dots Menu (Visible only on small screens) */}
+                                        <div className="md:hidden relative" ref={courseActionsMenuRef}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsCourseActionsMenuOpen(prev => !prev)}
+                                                aria-label="Course Options"
+                                                title="More options"
+                                                className="p-2 sm:p-2.5 bg-white border border-gray-200/90 rounded-xl shadow-sm hover:bg-gray-50 text-gray-700 hover:text-gray-900 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                                            >
+                                                <MoreVertical className="w-5 h-5" />
+                                            </button>
+
+                                            {isCourseActionsMenuOpen && (
+                                                <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white border border-gray-100 rounded-2xl shadow-xl z-[60] py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                                                    {/* WhatsApp Support */}
+                                                    <button
+                                                        type="button"
+                                                        disabled={!hasModerator}
+                                                        onClick={() => {
+                                                            handleWhatsAppClick();
+                                                            setIsCourseActionsMenuOpen(false);
+                                                        }}
+                                                        title={hasModerator ? "Contact your assigned moderator on WhatsApp" : "No moderator assigned yet"}
+                                                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left ${hasModerator
+                                                                ? "text-gray-700 hover:bg-emerald-50/80 hover:text-emerald-700 cursor-pointer"
+                                                                : "text-gray-400 cursor-not-allowed opacity-60"
+                                                            }`}
+                                                    >
+                                                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${hasModerator ? "bg-[#25D366]/15 text-[#25D366]" : "bg-gray-100 text-gray-400"
+                                                            }`}>
+                                                            <FaWhatsapp size={18} />
+                                                        </span>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="truncate font-semibold text-xs sm:text-sm">WhatsApp</span>
+                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                                {hasModerator ? "Contact assigned moderator" : "No moderator assigned"}
+                                                            </span>
+                                                        </div>
+                                                    </button>
+
+                                                    {/* Certificate: Download or Generate */}
+                                                    {certificateUrl ? (
+                                                        <button
+                                                            type="button"
+                                                            disabled={!isCourseCompleted}
+                                                            onClick={() => {
+                                                                if (isCourseCompleted) {
+                                                                    handleDownloadCertificate();
+                                                                    setIsCourseActionsMenuOpen(false);
+                                                                }
+                                                            }}
+                                                            title={!isCourseCompleted ? "Course complete karne ke baad certificate download kar sakte hain" : "Download Certificate"}
+                                                            className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${isCourseCompleted
+                                                                    ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
+                                                                    : "text-gray-400 cursor-not-allowed opacity-60"
+                                                                }`}
+                                                        >
+                                                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isCourseCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
+                                                                }`}>
+                                                                <Download className="w-4 h-4" />
+                                                            </span>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="truncate font-semibold text-xs sm:text-sm">Download Certificate</span>
+                                                                <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                                    {isCourseCompleted ? "Save your course certificate" : "Complete course to unlock"}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            disabled={!allLecturesCompleted}
+                                                            onClick={() => {
+                                                                if (allLecturesCompleted) {
+                                                                    navigate('/certificates');
+                                                                    setIsCourseActionsMenuOpen(false);
+                                                                }
+                                                            }}
+                                                            title={!allLecturesCompleted ? "Course complete karne ke baad certificate generate kar sakte hain" : "Generate Certificate"}
+                                                            className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium transition-colors text-left border-t border-gray-100/70 ${allLecturesCompleted
+                                                                    ? "text-gray-700 hover:bg-blue-50/80 hover:text-[#3758EE] cursor-pointer"
+                                                                    : "text-gray-400 cursor-not-allowed opacity-60"
+                                                                }`}
+                                                        >
+                                                            <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${allLecturesCompleted ? "bg-blue-50 text-[#3758EE]" : "bg-gray-100 text-gray-400"
+                                                                }`}>
+                                                                <GraduationCap className="w-4 h-4" />
+                                                            </span>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="truncate font-semibold text-xs sm:text-sm">Generate Certificate</span>
+                                                                <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">
+                                                                    {allLecturesCompleted ? "Get your official certificate" : "Complete course to unlock"}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    )}
+
+                                                    {/* Enroll New Course */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            navigate('/courses');
+                                                            setIsCourseActionsMenuOpen(false);
+                                                        }}
+                                                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium text-gray-700 hover:bg-purple-50/80 hover:text-[#8B5CF6] transition-colors text-left border-t border-gray-100/70 cursor-pointer"
+                                                    >
+                                                        <span className="w-8 h-8 rounded-lg bg-purple-50 text-[#8B5CF6] flex items-center justify-center shrink-0">
+                                                            <Plus className="w-4 h-4" />
+                                                        </span>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="truncate font-semibold text-xs sm:text-sm">{t('enroll_new_course', 'Enroll New Course')}</span>
+                                                            <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal truncate">Explore other courses</span>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
                                 )}
                             </div>
 

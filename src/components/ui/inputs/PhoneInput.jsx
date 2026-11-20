@@ -171,12 +171,12 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
     c.code.includes(searchTerm)
   );
 
-  const containerClasses = containerClassName || 'max-w-[500px] w-full mt-[10px] relative pb-5';
+  const containerClasses = containerClassName || 'max-w-[500px] w-full relative mb-1';
 
   return (
     <div className={containerClasses}>
-      {label && <label className='text-[16px] text-[#18181B] mb-1 block'>{t('auth.phone_number', label)}</label>}
-      <div className={`flex items-center w-full h-[52px] border rounded transition-all duration-200 focus-within:ring-1 ${!isValid && phoneNumber.length > 0
+      {label && <label className='text-xs sm:text-[14px] md:text-[15px] font-medium text-[#18181B] mb-1 block leading-tight'>{t('auth.phone_number', label)}</label>}
+      <div className={`flex items-center w-full h-[46px] sm:h-[52px] border rounded transition-all duration-200 focus-within:ring-1 ${!isValid && phoneNumber.length > 0
         ? 'border-red-500 focus-within:border-red-500 focus-within:ring-red-500'
         : 'border-[#71717A]/30 focus-within:border-[#71717A] focus-within:ring-[#71717A]'
         }`}>
@@ -186,12 +186,12 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
           <button
             type="button"
             onClick={toggleDropdown}
-            className='flex items-center gap-2 h-full px-3 border-r border-[#71717A]/20 hover:bg-gray-50 transition-colors rounded-l'
+            className='flex items-center gap-1.5 sm:gap-2 h-full px-2.5 sm:px-3 border-r border-[#71717A]/20 hover:bg-gray-50 transition-colors rounded-l'
           >
             {selectedCountry?.flag && (
-              <img src={selectedCountry.flag} alt={selectedCountry.cca2 || ''} className='w-6 h-4 object-cover rounded-sm' />
+              <img src={selectedCountry.flag} alt={selectedCountry.cca2 || ''} className='w-5 sm:w-6 h-3.5 sm:h-4 object-cover rounded-sm' />
             )}
-            <span className='text-[14px] text-[#71717A] font-medium'>{selectedCountry?.code}</span>
+            <span className='text-xs sm:text-[14px] text-[#71717A] font-medium'>{selectedCountry?.code}</span>
             <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </button>
 
@@ -201,7 +201,7 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
                 <input
                   type="text"
                   placeholder={t('auth.search_country', 'Search country...')}
-                  className='w-full p-2 text-sm border border-gray-200 rounded outline-none focus:border-[#71717A]'
+                  className='w-full p-2 text-xs sm:text-sm border border-gray-200 rounded outline-none focus:border-[#71717A]'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   autoFocus
@@ -209,9 +209,9 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
               </div>
               <div className='overflow-y-auto'>
                 {isLoading ? (
-                  <div className='p-3 text-sm text-gray-500 text-center'>{t('auth.loading_countries', 'Loading countries...')}</div>
+                  <div className='p-3 text-xs sm:text-sm text-gray-500 text-center'>{t('auth.loading_countries', 'Loading countries...')}</div>
                 ) : filteredCountries.length === 0 ? (
-                  <div className='p-3 text-sm text-gray-500 text-center'>{t('auth.no_countries_found', 'No countries found')}</div>
+                  <div className='p-3 text-xs sm:text-sm text-gray-500 text-center'>{t('auth.no_countries_found', 'No countries found')}</div>
                 ) : (
                   filteredCountries.map((country, idx) => (
                     <button
@@ -223,7 +223,7 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
                       {country?.flag && (
                         <img src={country.flag} alt={country.cca2 || ''} className='w-5 h-3 object-cover rounded-sm' />
                       )}
-                      <span className='text-sm text-gray-700 flex-1'>{country.name}</span>
+                      <span className='text-xs sm:text-sm text-gray-700 flex-1'>{country.name}</span>
                       <span className='text-xs text-gray-400'>{country.code}</span>
                     </button>
                   ))
@@ -237,7 +237,7 @@ function PhoneInput({ value, onChange, name, label = "Phone number", containerCl
         <input
           type="tel"
           placeholder={t('auth.enter_phone_number', 'enter phone number')}
-          className='flex-1 h-full outline-none text-[#71717A] text-[14px] px-3 bg-transparent'
+          className='flex-1 h-full outline-none text-[#71717A] text-xs sm:text-[14px] px-2.5 sm:px-3 bg-transparent'
           value={phoneNumber}
           onChange={handlePhoneChange}
         />

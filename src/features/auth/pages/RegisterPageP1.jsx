@@ -179,14 +179,14 @@ function RegisterPageP1() {
   return (
     <AuthPage>
       <AuthLeft />
-      <AuthRight className="flex flex-col gap-3">
-        <div className='max-w-[500px] w-full'>
+      <AuthRight className="flex flex-col gap-2.5 sm:gap-3 py-3 sm:py-6">
+        <div className='max-w-[500px] w-full mb-0.5 sm:mb-1'>
           <AuthHeading>
             {t('auth.create_new_account', 'Create New Account')}
           </AuthHeading>
         </div>
 
-        {error && <p className="text-red-500 text-sm text-center w-full max-w-[500px]">{error}</p>}
+        {error && <p className="text-red-500 text-xs sm:text-sm text-center w-full max-w-[500px]">{error}</p>}
 
         <div className='max-w-[500px] w-full flex gap-2'>
           <Input1
@@ -198,6 +198,7 @@ function RegisterPageP1() {
           />
           <Input1
             name="Last Name"
+            label={t('auth.last_name', 'Last Name')}
             placeholder={t('auth.second_name', 'Second Name')}
             value={formData.lastname}
             onChange={handleChange}
@@ -212,7 +213,7 @@ function RegisterPageP1() {
             value={formData.username}
             onChange={handleChange}
           />
-          {usernameError && <p className="text-red-500 text-[13px] mt-1 text-left">{usernameError}</p>}
+          {usernameError && <p className="text-red-500 text-xs sm:text-[13px] mt-1 text-left">{usernameError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>
@@ -224,7 +225,7 @@ function RegisterPageP1() {
             value={formData.email}
             onChange={handleChange}
           />
-          {emailError && <p className="text-red-500 text-[13px] mt-1 text-left">{emailError}</p>}
+          {emailError && <p className="text-red-500 text-xs sm:text-[13px] mt-1 text-left">{emailError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>
@@ -237,7 +238,7 @@ function RegisterPageP1() {
             onChange={handleChange}
             isError={!!passwordError}
           />
-          {passwordError && <p className="text-red-500 text-[13px] mt-1 text-left">{passwordError}</p>}
+          {passwordError && <p className="text-red-500 text-xs sm:text-[13px] mt-1 text-left">{passwordError}</p>}
         </div>
 
         <div className='max-w-[500px] w-full'>
@@ -249,46 +250,46 @@ function RegisterPageP1() {
           />
         </div>
 
-        <button onClick={handleNext} className="w-full max-w-[500px]">
-          <GradiantButton className="w-full h-[52px] rounded mt-[10px]">
+        <button onClick={handleNext} className="w-full max-w-[500px] mt-1 sm:mt-2">
+          <GradiantButton className="w-full h-[46px] sm:h-[52px] rounded">
             {t('auth.next', 'Next')}
           </GradiantButton>
         </button>
 
-        <div className="w-full max-w-[500px] flex flex-col items-center justify-center mt-6 mb-2">
-          <p className="text-[#636363] text-[16px] mb-4">{t('auth.or_sign_up_with', 'Or sign up with')}</p>
-          <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} />
+        <div className="w-full max-w-[500px] flex flex-col items-center justify-center mt-3 sm:mt-5 mb-1 sm:mb-2">
+          <p className="text-[#636363] text-xs sm:text-[15px] mb-2 sm:mb-3">{t('auth.or_sign_up_with', 'Or sign up with')}</p>
+          <GoogleLoginButton onClick={() => alert('Google OAuth integration pending setup')} className="w-full max-w-[500px] h-[46px] sm:h-[52px]" />
         </div>
 
-        <div className={`max-w-[548px] w-full flex flex-col gap-4 ${shouldShake ? 'animate-shake' : ''}`}>
+        <div className={`max-w-[500px] w-full flex flex-col gap-2.5 sm:gap-3.5 mt-2 sm:mt-4 ${shouldShake ? 'animate-shake' : ''}`}>
           {/* Checkbox 1 */}
-          <div className='flex items-start w-full gap-3 mt-10'>
+          <div className='flex items-start w-full gap-2.5 sm:gap-3'>
             <input
               type='checkbox'
               id="terms"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
               required
-              className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
+              className='w-4 h-4 sm:w-5 sm:h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
-            <label htmlFor="terms" className='text-[16px] font-[400] text-[#333333CC] cursor-pointer leading-tight select-none'>
-              {t('auth.terms_agree_p1', 'By creating an account, I agree to our')} <span className='underline'>{t('auth.terms_of_use', 'Terms of use')}</span> {t('auth.and', 'and')} <span className='underline'>{t('auth.privacy_policy', 'Privacy Policy')}</span>
+            <label htmlFor="terms" className='text-xs sm:text-[14px] text-[#333333CC] cursor-pointer leading-tight select-none'>
+              {t('auth.terms_agree_p1', 'By creating an account, I agree to our')} <span className='underline font-medium'>{t('auth.terms_of_use', 'Terms of use')}</span> {t('auth.and', 'and')} <span className='underline font-medium'>{t('auth.privacy_policy', 'Privacy Policy')}</span>
             </label>
           </div>
 
           {/* Checkbox 2 */}
-          <div className='flex items-start w-full gap-3'>
+          <div className='flex items-start w-full gap-2.5 sm:gap-3'>
             <input
               type='checkbox'
               id="newsletter"
-              className='w-5 h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
+              className='w-4 h-4 sm:w-5 sm:h-5 mt-0.5 accent-[#7F60EA] cursor-pointer shrink-0 rounded'
             />
-            <label htmlFor="newsletter" className='text-[16px] font-[400] text-[#333333CC] cursor-pointer leading-tight select-none'>
+            <label htmlFor="newsletter" className='text-xs sm:text-[14px] text-[#333333CC] cursor-pointer leading-tight select-none'>
               {t('auth.newsletter_agree', 'By creating an account, I am also consenting to receive SMS messages and emails, including product new feature updates, Courses, and marketing promotions.')}
             </label>
           </div>
         </div>
-        <AuthText className="mt-[20px]" isRegisterPage={true} />
+        <AuthText className="mt-2 sm:mt-4" isRegisterPage={true} />
       </AuthRight>
     </AuthPage>
   )

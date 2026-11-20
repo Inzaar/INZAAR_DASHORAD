@@ -102,7 +102,7 @@ function ForgetPassword() {
               />
             </div>
 
-            <GradiantButton type="submit" disabled={loading} className="max-w-[500px] w-full h-[52px] rounded mt-[10px]">
+            <GradiantButton type="submit" disabled={loading} className="max-w-[500px] w-full h-[46px] sm:h-[52px] rounded mt-[10px]">
               {loading ? t('auth.sending', 'Sending...') : t('auth.send_otp', 'Send OTP')}
             </GradiantButton>
 
@@ -145,7 +145,7 @@ function ForgetPassword() {
             <GradiantButton
               type="submit"
               disabled={loading || otp.length < 6}
-              className="max-w-[500px] w-full h-[52px] rounded mt-[10px]"
+              className="max-w-[500px] w-full h-[46px] sm:h-[52px] rounded mt-[10px]"
             >
               {loading ? t('auth.verifying', 'Verifying...') : t('auth.verify_otp_btn', 'Verify OTP')}
             </GradiantButton>

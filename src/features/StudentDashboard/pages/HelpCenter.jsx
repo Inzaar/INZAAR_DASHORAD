@@ -155,9 +155,9 @@ const HelpCenter = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2.5 sm:px-4 gap-2.5 sm:gap-4 flex-1 overflow-hidden relative pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -179,27 +179,27 @@ const HelpCenter = () => {
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="py-4 pr-2 flex flex-col gap-6">
+                        <div className="py-2 sm:py-4 px-0.5 sm:px-0 sm:pr-2 flex flex-col gap-3.5 sm:gap-6">
 
                             {/* Header Section */}
                             <div>
-                                <h2 className="text-xl font-bold text-gray-800 mb-2 leading-[1.8] pt-2 pb-2">{t('support_center', 'Support Center')}</h2>
-                                <p className="text-gray-500 text-sm leading-[1.8]">{t('support_center_desc', 'Find answers, report issues, and get in touch with our team to help you make the most of Inzaar Team.')}</p>
+                                <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-0.5 sm:mb-1 leading-tight sm:leading-[1.8] pt-1 sm:pt-2 pb-0.5 sm:pb-1">{t('support_center', 'Support Center')}</h2>
+                                <p className="text-gray-500 text-xs sm:text-sm leading-relaxed sm:leading-[1.8]">{t('support_center_desc', 'Find answers, report issues, and get in touch with our team to help you make the most of Inzaar Team.')}</p>
                             </div>
 
                             {/* Tabs */}
-                            <div className="flex bg-white rounded-lg p-1 w-full border border-gray-100 shadow-sm">
+                            <div className="flex bg-white rounded-xl p-1 w-full border border-gray-100 shadow-sm">
                                 {activeTab === 'contact' ? (
                                     <GradiantButton
                                         onClick={() => setActiveTab('contact')}
-                                        className="flex-1 py-2.5 text-sm font-medium rounded-md shadow-sm"
+                                        className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg shadow-sm"
                                     >
                                         {t('contact_support', 'Contact Support')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('contact')}
-                                        className="flex-1 py-2.5 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                        className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all text-gray-500 hover:bg-gray-50"
                                     >
                                         {t('contact_support', 'Contact Support')}
                                     </button>
@@ -208,14 +208,14 @@ const HelpCenter = () => {
                                 {activeTab === 'faq' ? (
                                     <GradiantButton
                                         onClick={() => setActiveTab('faq')}
-                                        className="flex-1 py-2.5 text-sm font-medium rounded-md shadow-sm"
+                                        className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg shadow-sm"
                                     >
                                         {t('helps_faq', 'Helps & FAQ')}
                                     </GradiantButton>
                                 ) : (
                                     <button
                                         onClick={() => setActiveTab('faq')}
-                                        className="flex-1 py-2.5 text-sm font-medium rounded-md transition-all text-gray-500 hover:bg-gray-50"
+                                        className="flex-1 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all text-gray-500 hover:bg-gray-50"
                                     >
                                         {t('helps_faq', 'Helps & FAQ')}
                                     </button>
@@ -225,36 +225,46 @@ const HelpCenter = () => {
                             {/* Content Section */}
                             {activeTab === 'contact' && (
                                 <div className="animate-in fade-in duration-300">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-4">inzaar.edu.support@gmail.com</h3>
+                                    <a
+                                        href="mailto:inzaar.edu.support@gmail.com"
+                                        className="inline-flex items-center gap-2 text-sm sm:text-base font-semibold text-gray-700 hover:text-purple-600 transition-colors break-all mb-2.5 sm:mb-4 group"
+                                    >
+                                        <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 group-hover:bg-purple-100 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                        </span>
+                                        <span>inzaar.edu.support@gmail.com</span>
+                                    </a>
 
-                                    <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
-                                        <div className="mb-8">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('contact_support', 'Contact Support')}</h3>
-                                            <p className="text-black text-sm font-normal leading-[1.8]">{t('contact_support_desc', 'Fill out the form below to get in touch with our support team.')}</p>
+                                    <div className="bg-white rounded-2xl border border-[#EAEDF2] p-4 sm:p-6 md:p-8 shadow-sm">
+                                        <div className="mb-4 sm:mb-6 md:mb-8">
+                                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-0.5 sm:mb-1 leading-snug sm:leading-[1.8] pt-1 sm:pt-2 pb-0.5 sm:pb-1">{t('contact_support', 'Contact Support')}</h3>
+                                            <p className="text-gray-600 text-xs sm:text-sm font-normal leading-relaxed sm:leading-[1.8]">{t('contact_support_desc', 'Fill out the form below to get in touch with our support team.')}</p>
                                         </div>
 
-                                        <form onSubmit={handleSubmit} className="space-y-6">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">{t('name', 'Name')}</label>
+                                        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-5 md:space-y-6">
+                                            <div className="space-y-1.5 sm:space-y-2">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('name', 'Name')}</label>
                                                 <input
                                                     type="text"
                                                     value={name}
                                                     onChange={(e) => setName(e.target.value)}
                                                     required
                                                     placeholder={t('your_name', 'Your name')}
-                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
+                                                    className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">{t('email', 'Email')}</label>
+                                            <div className="space-y-1.5 sm:space-y-2">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('email', 'Email')}</label>
                                                 <input
                                                     type="email"
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     required
                                                     placeholder={t('your_email_address', 'Your email address')}
-                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
+                                                    className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
@@ -379,22 +389,22 @@ const HelpCenter = () => {
                                                 </div>
                                             )} */}
 
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-gray-700">{t('issue_question', 'Issue / Question')}</label>
+                                            <div className="space-y-1.5 sm:space-y-2">
+                                                <label className="text-xs sm:text-sm font-semibold text-gray-700">{t('issue_question', 'Issue / Question')}</label>
                                                 <textarea
                                                     required
                                                     value={issue}
                                                     onChange={(e) => setIssue(e.target.value)}
                                                     placeholder={t('discuss_issue_placeholder', 'Discuss your issue or question here...')}
-                                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 min-h-[160px] resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
+                                                    className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-800 placeholder:text-gray-400 min-h-[120px] sm:min-h-[160px] resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-colors"
                                                 />
                                             </div>
 
-                                            <div className="flex justify-end pt-4">
+                                            <div className="flex justify-end pt-2 sm:pt-4">
                                                 <GradiantButton 
                                                     type="submit" 
                                                     disabled={submitting}
-                                                    className="px-10 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-purple-500/20 flex items-center gap-2"
+                                                    className="w-full sm:w-auto px-6 sm:px-10 py-2.5 rounded-lg text-xs sm:text-sm font-medium shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
                                                 >
                                                     {submitting ? (
                                                         <>
@@ -413,36 +423,34 @@ const HelpCenter = () => {
 
                             {activeTab === 'faq' && (
                                 <div className="animate-in fade-in duration-300">
-                                    {/* <h3 className="text-lg font-semibold text-gray-800 mb-4 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3> */}
-
-                                    <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-8 shadow-sm">
-                                        <div className="mb-6">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-1 leading-[1.8] pt-2 pb-2">{t('helps_faq', 'Helps & FAQs')}</h3>
-                                            <p className="text-black text-sm font-normal leading-[1.8]">{t('helps_faq_desc', 'Find answers to common questions and helpful tips to get started quickly.')}</p>
+                                    <div className="bg-white rounded-2xl border border-[#EAEDF2] p-4 sm:p-6 md:p-8 shadow-sm">
+                                        <div className="mb-4 sm:mb-6">
+                                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-0.5 sm:mb-1 leading-snug sm:leading-[1.8] pt-1 sm:pt-2 pb-0.5 sm:pb-1">{t('helps_faq', 'Helps & FAQs')}</h3>
+                                            <p className="text-gray-600 text-xs sm:text-sm font-normal leading-relaxed sm:leading-[1.8]">{t('helps_faq_desc', 'Find answers to common questions and helpful tips to get started quickly.')}</p>
                                         </div>
 
-                                        <div className="flex flex-col gap-4">
+                                        <div className="flex flex-col gap-2.5 sm:gap-4">
                                             {faqs.map((faq, index) => (
                                                 <div
                                                     key={index}
-                                                    className={`rounded-lg p-4 transition-all duration-200 ${openFaqIndex === index ? 'bg-gray-50' : 'bg-transparent border-b border-gray-100 last:border-0'
+                                                    className={`rounded-xl p-3 sm:p-4 transition-all duration-200 ${openFaqIndex === index ? 'bg-gray-50' : 'bg-transparent border-b border-gray-100 last:border-0'
                                                         }`}
                                                 >
                                                     <button
                                                         onClick={() => setOpenFaqIndex(openFaqIndex === index ? -1 : index)}
-                                                        className="w-full flex items-center justify-between gap-4 text-left"
+                                                        className="w-full flex items-center justify-between gap-3 sm:gap-4 text-left"
                                                     >
-                                                        <span className={`font-medium text-sm ${openFaqIndex === index ? 'text-gray-900' : 'text-gray-700'}`}>
+                                                        <span className={`font-medium text-xs sm:text-sm ${openFaqIndex === index ? 'text-gray-900' : 'text-gray-700'}`}>
                                                             {faq.question}
                                                         </span>
-                                                        <span className={`flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full transition-colors ${openFaqIndex === index ? 'text-[#00C896] bg-[#E6F9F4]' : 'text-gray-400 bg-gray-100'
+                                                        <span className={`flex-shrink-0 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-colors ${openFaqIndex === index ? 'text-[#00C896] bg-[#E6F9F4]' : 'text-gray-400 bg-gray-100'
                                                             }`}>
-                                                            {openFaqIndex === index ? <Plus className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                                                            {openFaqIndex === index ? <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                                                         </span>
                                                     </button>
 
                                                     {openFaqIndex === index && (
-                                                        <div className="mt-3 text-sm text-gray-500 leading-relaxed pr-8 animate-in slide-in-from-top-1 duration-200">
+                                                        <div className="mt-2.5 sm:mt-3 text-xs sm:text-sm text-gray-500 leading-relaxed pr-2 sm:pr-8 animate-in slide-in-from-top-1 duration-200">
                                                             {faq.answer}
                                                         </div>
                                                     )}

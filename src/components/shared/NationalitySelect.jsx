@@ -101,12 +101,12 @@ const NationalitySelect = ({
             : isOpen
             ? 'border-[#71717A] ring-1 ring-[#71717A]/20'
             : 'border-[#E4E4E7]'
-        } outline-none rounded-md px-3 bg-white flex items-center justify-between text-left transition-all ${
+        } outline-none rounded-md px-2.5 sm:px-3 bg-white flex items-center justify-between text-left transition-all ${
           disabled ? 'opacity-60 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:border-[#71717A]/60'
         } ${className}`}
       >
         <span
-          className={`text-[14px] truncate ${
+          className={`text-[13px] sm:text-[14px] truncate ${
             displayValue ? 'text-[#18181B] font-medium' : 'text-[#71717A]'
           }`}
         >

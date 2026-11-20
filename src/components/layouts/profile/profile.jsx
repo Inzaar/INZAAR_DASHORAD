@@ -212,15 +212,12 @@ function Profile({ userInfo, setUserPayload, userPayload, isLoading = false }) {
     };
 
     return (
-        <div className="w-full flex flex-col gap-[24px] rotate-0 opacity-100 bg-gray-100/60 shadow-lg rounded-md relative pb-10">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 rotate-0 opacity-100 bg-gray-100/60 shadow-lg rounded-md relative pb-4 sm:pb-6">
             <ProfileDesign />
-            {/* <div className="bg-red-300 w-full h-[100px] min-[600p]:h-[150px] rounded-t-[10px]">
 
-            </div> */}
-
-            <div className="gap-[22px] flex flex-col min-[800px]:flex-row px-1 min-[600px]:px-10">
+            <div className="gap-5 xl:gap-[22px] flex flex-col min-[800px]:flex-row px-1 min-[600px]:px-6 xl:px-10">
                 {/* div left */}
-                <div className="w-[300px]">
+                <div className="w-[260px] xl:w-[280px] shrink-0">
                     {/* Profile Picture with Circular Progress Ring */}
                     <div
                         className="w-[100px] h-[100px] min-[600px]:w-[150px] min-[600px]:h-[150px] rounded-full p-[6px] min-[600px]:p-[8px] shadow-xl border border-white absolute top-[40px] ltr:left-2 ltr:min-[500px]:left-[30px] rtl:right-2 rtl:min-[500px]:right-[30px] flex items-center justify-center transition-all"
@@ -241,50 +238,56 @@ function Profile({ userInfo, setUserPayload, userPayload, isLoading = false }) {
                         </div>
                     </div>
 
-                    <div className="w-[260px] flex flex-col gap-[10px] absolute top-[150px] min-[600px]:top-[200px] ltr:left-2 ltr:min-[500px]:left-[35px] rtl:right-2 rtl:min-[500px]:right-[35px] ltr:text-left rtl:text-right">
+                    <div className="w-full max-w-[270px] xl:max-w-[280px] flex flex-col gap-2 sm:gap-2.5 absolute top-[148px] min-[600px]:top-[200px] ltr:left-3 ltr:min-[500px]:left-[35px] rtl:right-3 rtl:min-[500px]:right-[35px] ltr:text-left rtl:text-right">
                         {/* <h5>Zain</h5> */}
-                        <div className="flex items-center gap-2.5 flex-wrap pt-1 pb-1">
+                        <div className="flex items-center gap-2 flex-nowrap pt-1 pb-1">
                             {isLoading && !effectiveUser?.firstname && !effectiveUser?.name ? (
-                                <div className="h-8 w-36 bg-gray-200 rounded animate-pulse"></div>
+                                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
                             ) : (
-                                <h4 className="font-bold text-[28px] min-[600px]:text-[30px] leading-normal">
-                                    {effectiveUser?.firstname || (effectiveUser?.name ? effectiveUser.name.split(' ')[0] : "[YOUR_NAME]")}
+                                <h4 className="font-bold text-[20px] min-[450px]:text-[24px] xl:text-[26px] leading-tight text-gray-900 whitespace-nowrap">
+                                    {[effectiveUser?.firstname, effectiveUser?.lastname].filter(Boolean).join(' ') || effectiveUser?.name || "[YOUR_NAME]"}
                                 </h4>
                             )}
-                            <span className="bg-[#3758EE]/10 text-[#3758EE] text-xs min-[600px]:text-sm font-extrabold px-2.5 py-0.5 rounded-full border border-[#3758EE]/20 shadow-sm shrink-0">
+                            <span className="bg-[#3758EE]/10 text-[#3758EE] text-xs font-extrabold px-2.5 py-0.5 rounded-full border border-[#3758EE]/20 shadow-sm shrink-0">
                                 {completionPercentage}%
                             </span>
                         </div>
                         {isLoading && !effectiveUser?.email ? (
                             <div className="h-4 w-44 bg-gray-200 rounded animate-pulse"></div>
                         ) : (
-                            <a href="#" className="w-full h-[24px] text-[16px] underline truncate">{effectiveUser?.email || "[EMAIL_ADDRESS]"}</a>
+                            <a href="#" className="w-full h-[24px] text-[15px] sm:text-[16px] underline truncate">{effectiveUser?.email || "[EMAIL_ADDRESS]"}</a>
                         )}
-                        <h6 className="font-bold text-[16px] leading-[22px] tracking-[-0.7%] text-[#1E293B] leading-[1.8] pt-1">{t('personal_info', 'Personal Info')}</h6>
-                        <p className="font-bold text-[14px] leading-[160%] tracking-[0%] text-[#475569] leading-[1.8]">{t('personal_info_desc', 'You can change your personal information settings here.')}</p>
+                        <h6 className="font-bold text-[16px] text-[#1E293B] pt-0.5">{t('personal_info', 'Personal Info')}</h6>
+                        <p className="font-normal text-xs sm:text-[14px] text-[#475569] leading-relaxed max-w-[240px]">{t('personal_info_desc', 'You can change your personal information settings here.')}</p>
                     </div>
                 </div>
 
-                <div className="w-full">
-                    <div className="hidden min-[500px]:flex w-full h-[120px] sm:h-[150px] md:h-[200px] items-center justify-end px-6 sm:px-0">
+                <div className="flex-1 min-w-0">
+                    <div className="hidden min-[500px]:flex w-full h-[60px] min-[600px]:h-[70px] min-[800px]:h-[135px] items-center justify-end px-2 sm:px-0">
                         <div
                             onClick={() => setIsLogoutModalOpen(true)}
-                            className="flex w-[130px] sm:w-[140px] h-[45px] sm:h-[50px] mt-6 sm:mt-10 rounded-xl justify-center items-center bg-gray-200 border border-gray-300 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer font-bold text-[14px] shadow-sm gap-2"
+                            className="flex w-[125px] sm:w-[135px] h-[40px] sm:h-[44px] mt-0 min-[800px]:mt-6 rounded-xl justify-center items-center bg-gray-200 border border-gray-300 text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all cursor-pointer font-bold text-xs sm:text-sm shadow-sm gap-2"
                         >
-                            {t('logout', 'Log Out')} <MdOutlineLogout size={18} />
+                            {t('logout', 'Log Out')} <MdOutlineLogout size={16} />
                         </div>
                     </div>
 
 
                     <div className="w-full flex flex-col gap-[12px]">
                         {/* buttons */}
-                        <div className="max-w-[333px] w-full h-[40px] rotate-0 opacity-100 p-1 flex bg-gray-200 rounded mt-50 min-[500px]:mt-20 md:mt-0 leading-[1.8]">
+                        <div className="max-w-[340px] w-full h-[40px] p-1 flex bg-gray-200 rounded-xl mt-[230px] min-[500px]:mt-[170px] min-[600px]:mt-[180px] min-[800px]:mt-2 shadow-inner">
                             {/* account button */}
-                            <div className={`cursor-pointer w-[162px] h-[32px] flex items-center justify-center rounded ${activeTab === "account" ? "bg-white" : "bg-gray-200"}`}>
-                                <h6 onClick={() => handleTabClick("account")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "account" ? "text-[#18181B]" : "text-[#71717A]"}`}>{t('account', 'Account')}</h6>
+                            <div 
+                                onClick={() => handleTabClick("account")} 
+                                className={`cursor-pointer flex-1 h-[32px] flex items-center justify-center rounded-lg transition-all ${activeTab === "account" ? "bg-white shadow-sm" : "bg-transparent hover:bg-gray-100/50"}`}
+                            >
+                                <span className={`font-sans font-medium text-xs sm:text-sm text-center ${activeTab === "account" ? "text-[#18181B] font-semibold" : "text-[#71717A]"}`}>{t('account', 'Account')}</span>
                             </div>
-                            <div className={`cursor-pointer w-[162px] h-[32px] flex items-center justify-center rounded ${activeTab === "other" ? "bg-white" : "bg-gray-200"}`}>
-                                <h6 onClick={() => handleTabClick("other")} className={`font-sans font-medium text-sm leading-[20px] tracking-normal text-center ${activeTab === "other" ? "text-[#18181B]" : "text-[#71717A]"}`}>{t('other', 'Other')}</h6>
+                            <div 
+                                onClick={() => handleTabClick("other")} 
+                                className={`cursor-pointer flex-1 h-[32px] flex items-center justify-center rounded-lg transition-all ${activeTab === "other" ? "bg-white shadow-sm" : "bg-transparent hover:bg-gray-100/50"}`}
+                            >
+                                <span className={`font-sans font-medium text-xs sm:text-sm text-center ${activeTab === "other" ? "text-[#18181B] font-semibold" : "text-[#71717A]"}`}>{t('other', 'Other')}</span>
                             </div>
                         </div>
                         {activeTab === "account" ? (
@@ -310,21 +313,23 @@ function Profile({ userInfo, setUserPayload, userPayload, isLoading = false }) {
                 </div>
             </div>
 
-            <div className="w-[calc(100%-80px)] h-[2px] bg-gray-300 mx-10">
-            </div>
+            {/* Divider and Actions */}
+            <div className="w-full flex flex-col gap-3 sm:gap-4 px-2 sm:px-6 min-[600px]:px-10">
+                <div className="w-full h-[1px] bg-gray-200"></div>
 
-            <div className="w-full flex items-center justify-end gap-[15px] pr-10">
-                <button
-                    type="button"
-                    onClick={handleAttemptCancelProfile}
-                    className="w-[100px] h-[40px] rounded bg-[#B1B1B1] text-white hover:bg-gray-500 transition-colors cursor-pointer"
-                >
-                    {t('cancel', 'Cancel')}
-                </button>
-                <div onClick={!isLoading ? handleSave : undefined}>
-                    <GradiantButton disabled={isLoading} className={`w-[100px] h-[40px] rounded ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                        {t('save', 'Save')}
-                    </GradiantButton>
+                <div className="w-full flex items-center justify-between sm:justify-end gap-3">
+                    <button
+                        type="button"
+                        onClick={handleAttemptCancelProfile}
+                        className="flex-1 sm:flex-initial sm:w-[110px] h-[40px] sm:h-[44px] rounded-lg bg-[#B1B1B1] text-white hover:bg-gray-500 font-medium text-xs sm:text-sm transition-colors cursor-pointer flex items-center justify-center"
+                    >
+                        {t('cancel', 'Cancel')}
+                    </button>
+                    <div onClick={!isLoading ? handleSave : undefined} className="flex-1 sm:flex-initial sm:w-auto">
+                        <GradiantButton disabled={isLoading} className={`w-full sm:w-[120px] h-[40px] sm:h-[44px] rounded-lg font-medium text-xs sm:text-sm shadow-md flex items-center justify-center ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {t('save', 'Save')}
+                        </GradiantButton>
+                    </div>
                 </div>
             </div>
 

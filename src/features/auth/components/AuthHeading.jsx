@@ -1,9 +1,9 @@
 
 function AuthHeading({children}) {
   return (
-    <p className="font-semibold text-xl text-[#00235A] mb-2">
+    <h1 className="font-bold text-lg sm:text-xl md:text-2xl text-[#00235A] mb-1 sm:mb-2 leading-tight">
       {children}
-    </p>
+    </h1>
   )
 }
 

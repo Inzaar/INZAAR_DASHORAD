@@ -165,12 +165,12 @@ function RegisterPageP2() {
   return (
     <AuthPage>
       <AuthLeft />
-      <AuthRight className="flex flex-col gap-1 py-10">
+      <AuthRight className="flex flex-col gap-1 py-3 sm:py-6">
         {step === 'form' ? (
-          <form onSubmit={handleSendOtpAndProceed} className="flex flex-col gap-3 w-full items-center">
-            <div className='max-w-[500px] w-full flex items-center gap-3'>
-              <button type="button" onClick={() => navigate({ pathname: '/register', search: location.search })} className="text-[#00235A] hover:text-[#7F60EA] transition-colors mb-2">
-                <ArrowLeft size={26} />
+          <form onSubmit={handleSendOtpAndProceed} className="flex flex-col gap-2.5 sm:gap-3 w-full items-center">
+            <div className='max-w-[500px] w-full flex items-center gap-2.5 sm:gap-3 mb-1'>
+              <button type="button" onClick={() => navigate({ pathname: '/register', search: location.search })} className="text-[#00235A] hover:text-[#7F60EA] transition-colors">
+                <ArrowLeft size={22} className="sm:w-6 sm:h-6" />
               </button>
               <AuthHeading>
                 {t('auth.create_new_account', 'Create New Account')}
@@ -182,13 +182,13 @@ function RegisterPageP2() {
             </div>
 
             <div className='max-w-[500px] w-full flex gap-2'>
-              <div className={`h-[76px] w-[50%] flex flex-col items-start justify-between`}>
-                <label className='text-[#18181B] text-[16px]'>{t('auth.gender_req', 'Gender*')}</label>
+              <div className="w-[50%] flex flex-col items-start gap-1 sm:gap-1.5">
+                <label className='text-xs sm:text-[14px] md:text-[15px] font-medium text-[#18181B] leading-tight'>{t('auth.gender_req', 'Gender*')}</label>
                 <select
                   name="Gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className='w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2'
+                  className='w-full h-[46px] sm:h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-xs sm:text-[14px] rounded px-2 bg-white'
                 >
                   <option value="Choose">{t('auth.choose', 'Choose')}</option>
                   <option value="Male">{t('auth.male', 'Male')}</option>
@@ -214,10 +214,10 @@ function RegisterPageP2() {
                 value={formData.educationQualification || ''}
                 onChange={(val) => updateFormData({ educationQualification: val })}
                 label={t('auth.educational_qualification_req', 'Educational Qualification')}
-                labelClassName="text-[#18181B] text-[16px]"
+                labelClassName="text-xs sm:text-[14px] md:text-[15px] font-medium text-[#18181B] leading-tight"
                 containerClassName="flex flex-col gap-1 w-full"
-                selectClassName="w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-[14px] rounded px-2 bg-white"
-                inputClassName="w-full h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#18181B] text-[14px] rounded px-3 mt-1"
+                selectClassName="w-full h-[46px] sm:h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#71717A] text-xs sm:text-[14px] rounded px-2 bg-white"
+                inputClassName="w-full h-[46px] sm:h-[52px] border border-[#71717A]/30 outline-[#71717A] text-[#18181B] text-xs sm:text-[14px] rounded px-3 mt-1"
                 placeholder="Select Educational Qualification"
                 otherPlaceholder="Specify your qualification"
               />
@@ -230,6 +230,8 @@ function RegisterPageP2() {
                 placeholder={t('select_nationality', 'Select Nationality')}
                 value={formData.nationality || ''}
                 onChange={handleChange}
+                labelClassName="text-xs sm:text-[14px] md:text-[15px] font-medium text-[#18181B] leading-tight"
+                className="h-[46px] sm:h-[52px] text-xs sm:text-[14px]"
               />
             </div>
 
@@ -264,38 +266,38 @@ function RegisterPageP2() {
             <GradiantButton
               type="submit"
               disabled={loading}
-              className="w-full max-w-[500px] h-[52px] rounded mt-2"
+              className="w-full max-w-[500px] h-[46px] sm:h-[52px] rounded mt-2"
             >
               {loading ? t('auth.sending_otp', 'Sending Verification Code...') : t('auth.completed', 'Completed')}
             </GradiantButton>
 
-            <AuthText className="mt-[10px]" isRegisterPage={true} />
+            <AuthText className="mt-2 sm:mt-4" isRegisterPage={true} />
           </form>
         ) : (
           /* OTP Verification Screen */
-          <form onSubmit={handleVerifyAndRegister} className="flex flex-col gap-4 w-full items-center my-auto max-w-[500px]">
-            <div className='w-full flex items-center gap-3'>
+          <form onSubmit={handleVerifyAndRegister} className="flex flex-col gap-3 sm:gap-4 w-full items-center my-auto max-w-[500px]">
+            <div className='w-full flex items-center gap-2.5 sm:gap-3'>
               <button type="button" onClick={() => setStep('form')} className="text-[#00235A] hover:text-[#7F60EA] transition-colors">
-                <ArrowLeft size={26} />
+                <ArrowLeft size={22} className="sm:w-6 sm:h-6" />
               </button>
               <AuthHeading>
                 {t('auth.verify_otp', 'Verify Verification Code')}
               </AuthHeading>
             </div>
 
-            <p className="text-gray-600 text-sm text-left w-full">
+            <p className="text-gray-600 text-xs sm:text-sm text-left w-full">
               {t('auth.otp_sent_to', 'We sent a 6-digit verification code to')} <strong className="text-purple-900">{formData.email}</strong>
             </p>
 
             {error && <ErrorAlert message={error} />}
             {message && (
-              <div className="w-full bg-green-50 text-green-700 p-3 rounded-lg text-sm border border-green-200 text-center font-medium">
+              <div className="w-full bg-green-50 text-green-700 p-2.5 sm:p-3 rounded-lg text-xs sm:text-sm border border-green-200 text-center font-medium">
                 {message}
               </div>
             )}
 
-            <div className="w-full flex flex-col gap-2 my-2">
-              <label className="text-[#18181B] text-[15px] font-medium">
+            <div className="w-full flex flex-col gap-1.5 sm:gap-2 my-1 sm:my-2">
+              <label className="text-[#18181B] text-xs sm:text-[15px] font-medium">
                 {t('auth.enter_otp_label', 'Enter 6-Digit OTP')}
               </label>
               <OtpInput length={6} value={otp} onChange={setOtp} />
