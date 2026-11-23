@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, Lock, Eye, FileText, Star, X, CheckCircle } from 'lucide-react';
+import { Search, Download, Lock, Eye, FileText, Star, X, CheckCircle, Calendar } from 'lucide-react';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import { PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/Pagination';
 import axiosInstance from '@/api/axiosInstance';
@@ -11,6 +11,49 @@ import { Loader } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import CertificateCard from '@/features/courses/components/CertificateCard';
 import { useTranslation } from 'react-i18next';
+
+const CertificateCardsSkeleton = () => {
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                    key={i}
+                    className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-xs"
+                >
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-12 h-12 rounded-xl bg-gray-200 shrink-0"></div>
+                            <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                            </div>
+                        </div>
+                        <div className="h-5 bg-gray-200 rounded-full w-16 shrink-0"></div>
+                    </div>
+
+                    <div className="flex flex-col gap-2.5 bg-gray-50/80 rounded-xl p-3">
+                        <div className="flex items-center justify-between">
+                            <div className="h-3 bg-gray-200 rounded w-14"></div>
+                            <div className="h-3 bg-gray-200 rounded w-28"></div>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between">
+                                <div className="h-3 bg-gray-200 rounded w-16"></div>
+                                <div className="h-3 bg-gray-200 rounded w-8"></div>
+                            </div>
+                            <div className="w-full h-2 bg-gray-200 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <div className="pt-1 flex items-center gap-2">
+                        <div className="flex-1 h-9 bg-gray-200 rounded-xl"></div>
+                        <div className="w-16 h-9 bg-gray-200 rounded-xl"></div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
 
 const CertificateTableRowsSkeleton = () => {
     return (
@@ -20,43 +63,42 @@ const CertificateTableRowsSkeleton = () => {
                     key={i}
                     className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div className="grid grid-cols-12 gap-3 xl:gap-4 items-center">
                         {/* Course Info */}
-                        <div className="md:col-span-3 flex items-center gap-3 min-w-0">
-                            <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg bg-gray-200 shrink-0"></div>
+                        <div className="col-span-4 xl:col-span-3 flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-gray-200 shrink-0"></div>
                             <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                <div className="h-3 bg-gray-200 rounded w-1/3 md:hidden"></div>
                             </div>
                         </div>
 
                         {/* Title */}
-                        <div className="md:col-span-2 flex justify-start md:justify-center">
+                        <div className="hidden xl:flex xl:col-span-2 justify-center">
                             <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                         </div>
 
                         {/* Start & End Date */}
-                        <div className="md:col-span-2 flex flex-col items-start md:items-center gap-1.5">
-                            <div className="h-3 bg-gray-200 rounded w-20"></div>
-                            <div className="h-3 bg-gray-200 rounded w-20 hidden md:block"></div>
+                        <div className="col-span-2 xl:col-span-2 flex flex-col items-center gap-1">
+                            <div className="h-3 bg-gray-200 rounded w-16"></div>
+                            <div className="h-2.5 bg-gray-200 rounded w-14"></div>
                         </div>
 
                         {/* Progress */}
-                        <div className="md:col-span-1">
-                            <div className="flex items-center gap-2 justify-end md:justify-center w-full">
-                                <div className="w-full md:w-14 h-1.5 bg-gray-200 rounded-full"></div>
-                                <div className="h-3 bg-gray-200 rounded w-7"></div>
+                        <div className="col-span-2 xl:col-span-1">
+                            <div className="flex items-center gap-2 justify-center w-full">
+                                <div className="w-10 xl:w-10 h-1.5 bg-gray-200 rounded-full"></div>
+                                <div className="h-3 bg-gray-200 rounded w-6"></div>
                             </div>
                         </div>
 
                         {/* Status */}
-                        <div className="md:col-span-2 flex justify-start md:justify-center items-center">
+                        <div className="col-span-2 xl:col-span-2 flex justify-center items-center">
                             <div className="h-6 bg-gray-200 rounded-full w-20"></div>
                         </div>
 
                         {/* Action */}
-                        <div className="md:col-span-2 flex justify-start md:justify-center items-center">
-                            <div className="h-8 bg-gray-200 rounded-xl md:rounded-lg w-full md:w-28"></div>
+                        <div className="col-span-2 xl:col-span-2 flex justify-center items-center">
+                            <div className="h-8 bg-gray-200 rounded-lg w-24"></div>
                         </div>
                     </div>
                 </div>
@@ -459,12 +501,12 @@ const Certificates = () => {
                         <div className="py-4 pr-2 flex flex-col gap-6">
 
                             {/* ── Metric Cards ── */}
-                            <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
+                            <div className="flex lg:grid lg:grid-cols-4 gap-3.5 xl:gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
                                 {metricCards.map((metric, index) => (
-                                    <div key={index} className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
+                                    <div key={index} className="bg-white p-3.5 sm:p-4 xl:p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
                                         <div>
-                                            <h3 className="text-gray-900 font-semibold mb-2">{metric.label}</h3>
-                                            <div className="flex items-baseline gap-2 mb-2">
+                                            <h3 className="text-gray-900 font-semibold mb-1.5 xl:mb-2 text-xs sm:text-sm truncate" title={metric.label}>{metric.label}</h3>
+                                            <div className="flex items-baseline gap-1.5 xl:gap-2 mb-2 flex-wrap">
                                                 {loading ? (
                                                     <>
                                                         <div className="h-8 bg-gray-200 rounded w-10 animate-pulse"></div>
@@ -475,7 +517,7 @@ const Certificates = () => {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="text-3xl font-bold text-gray-900">{metric.value}</span>
+                                                        <span className="text-2xl xl:text-3xl font-bold text-gray-900">{metric.value}</span>
                                                         <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
                                                         {metric.change && (
                                                             <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded">{metric.change}</span>
@@ -483,14 +525,14 @@ const Certificates = () => {
                                                     </>
                                                 )}
                                             </div>
-                                            <p className="text-gray-400 text-[11px] leading-tight">{metric.desc}</p>
+                                            <p className="text-gray-400 text-[11px] leading-tight line-clamp-2">{metric.desc}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
                             {/* ── Certificates Table ── */}
-                            <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-6 shadow-sm">
+                            <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-4 shadow-sm">
                                 <div className="flex flex-col justify-between mb-6 gap-4">
                                     <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
                                         <div>
@@ -508,7 +550,7 @@ const Certificates = () => {
                                                     className="w-full pl-9 pr-4 h-[40px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                 />
                                             </div>
-                                            <GradiantButton className={"h-[40px] px-3 md:px-4 rounded"}>
+                                            <GradiantButton className={"h-[40px] px-3 md:px-4 rounded-lg"}>
                                                 <Search className="h-4 w-4" />
                                                 <span className="hidden md:inline">{t('search', 'Search')}</span>
                                             </GradiantButton>
@@ -516,187 +558,353 @@ const Certificates = () => {
                                     </div>
                                 </div>
 
-                                <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
-                                    <div className="w-full min-w-[960px]">
-                                        {/* Table Header - Desktop Only */}
-                                        <div className="hidden md:grid grid-cols-12 gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
-                                            <div className="col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
-                                            <div className="col-span-2">{t('title', 'Title')}</div>
-                                            <div className="col-span-2">{t('start_end_date', 'Start & End Date')}</div>
-                                            <div className="col-span-1">{t('progress', 'Progress')}</div>
-                                            <div className="col-span-2">{t('status', 'Status')}</div>
-                                            <div className="col-span-2">{t('action', 'Action')}</div>
+                                {loading ? (
+                                    <>
+                                        <div className="lg:hidden">
+                                            <CertificateCardsSkeleton />
                                         </div>
-
-                                        {/* Table Rows or States */}
-                                        {loading ? (
-                                            <CertificateTableRowsSkeleton />
-                                        ) : filtered.length === 0 ? (
-                                            <div className="text-center py-16 text-gray-400">
-                                                <div className="text-5xl mb-4">🎓</div>
-                                                <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
-                                                <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
-                                                <button onClick={() => navigate('/courses')} className="mt-4 px-6 py-2 bg-[#3758EE] text-white rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer">
-                                                    {t('browse_courses', 'Browse Courses')}
-                                                </button>
+                                        <div className="hidden lg:block w-full overflow-x-auto pb-2 scrollbar-thin">
+                                            <div className="w-full min-w-[720px] xl:min-w-0">
+                                                <div className="grid grid-cols-12 gap-3 xl:gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
+                                                    <div className="col-span-4 xl:col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
+                                                    <div className="hidden xl:block xl:col-span-2">{t('title', 'Title')}</div>
+                                                    <div className="col-span-2 xl:col-span-2 whitespace-nowrap">{t('start_end_date', 'Start & End Date')}</div>
+                                                    <div className="col-span-2 xl:col-span-1">{t('progress', 'Progress')}</div>
+                                                    <div className="col-span-2 xl:col-span-2">{t('status', 'Status')}</div>
+                                                    <div className="col-span-2 xl:col-span-2">{t('action', 'Action')}</div>
+                                                </div>
+                                                <CertificateTableRowsSkeleton />
                                             </div>
-                                        ) : (
-                                            <div className="flex flex-col gap-4 md:gap-2">
-                                                {currentData.map((item) => (
-                                                    <div key={item.enrollmentId} className="bg-white md:bg-transparent border md:border-0 md:border-b border-gray-100 rounded-xl md:rounded-none p-4 md:p-0 md:py-4 transition-colors hover:bg-gray-50/50">
-                                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-
-                                                            {/* Course Info */}
-                                                            <div className="md:col-span-3 flex items-center gap-3 min-w-0">
-                                                                <div className="shrink-0">
-                                                                    {item.thumbnail ? (
-                                                                        <img src={item.thumbnail} alt={item.course} className="w-10 h-10 md:w-8 md:h-8 rounded-lg object-cover" />
-                                                                    ) : (
-                                                                        <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-[#A892FF] to-[#3758EE]" />
-                                                                    )}
-                                                                </div>
-                                                                <div className="min-w-0">
-                                                                    <span className="block font-bold md:font-medium text-gray-900 md:text-gray-800 truncate text-sm md:text-xs lg:text-sm">
-                                                                        {t(item.course?.trim(), item.course)}
-                                                                    </span>
-                                                                    <span className="md:hidden text-xs text-gray-500">{t('course', 'Course')}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Title - Desktop only or as secondary info on mobile */}
-                                                            <div className="md:col-span-2 text-left md:text-center">
-                                                                <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-0.5">{t('title', 'Title')}</span>
-                                                                <span className="text-gray-600 text-sm md:text-xs lg:text-sm truncate block">{t(item.title?.trim(), item.title)}</span>
-                                                            </div>
-
-                                                            {/* Start & End Date */}
-                                                            <div className="md:col-span-2 flex flex-row md:flex-col justify-between md:justify-center items-center md:items-center gap-2">
-                                                                <div className="md:hidden">
-                                                                    <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">{t('duration', 'Duration')}</span>
-                                                                </div>
-                                                                <div className="text-right md:text-center text-[11px] md:text-[10px] lg:text-xs text-gray-500">
-                                                                    <span className="md:block">{item.startDate}</span>
-                                                                    <span className="hidden md:block"> - </span>
-                                                                    <span className="md:block">{item.endDate}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Progress */}
-                                                            <div className="md:col-span-1">
-                                                                <div className="flex flex-row md:flex-col items-center md:justify-center gap-3 md:gap-1">
-                                                                    <div className="md:hidden shrink-0">
-                                                                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('progress', 'Progress')}</span>
-                                                                    </div>
-                                                                    <div className="flex-1 md:flex-initial flex items-center gap-2 justify-end md:justify-center w-full">
-                                                                        <div className="w-full md:w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                                            <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.progress}%` }} />
-                                                                        </div>
-                                                                        <span className="text-xs font-bold text-gray-700 min-w-[32px]">{item.progress}%</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Status */}
-                                                            <div className="md:col-span-2 flex justify-between md:justify-center items-center">
-                                                                <span className="md:hidden text-[10px] uppercase tracking-wider text-gray-400 font-bold">{t('status', 'Status')}</span>
-                                                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${item.status === 'Completed' || item.isCompleted
-                                                                    ? 'text-blue-600 bg-blue-50'
-                                                                    : (item.status === 'Course Incomplete' || item.isCourseDeleted)
-                                                                        ? 'text-red-600 bg-red-50 border border-red-200'
-                                                                        : item.status === 'Active'
-                                                                            ? 'text-green-600 bg-green-50'
-                                                                            : 'text-gray-500 bg-gray-100'
-                                                                    }`}>
-                                                                    {(item.isCourseDeleted || item.status === 'Course Incomplete') && !item.isCompleted
-                                                                        ? t('course_incomplete', 'Course Incomplete')
-                                                                        : t(item.status.toLowerCase(), item.status)}
-                                                                </span>
-                                                            </div>
-
-                                                            {/* Action */}
-                                                            <div className="md:col-span-2 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-0 border-gray-50 flex flex-col md:flex-row items-center justify-center gap-1.5 flex-wrap">
-                                                                {item.isCertEligible ? (
-                                                                    <>
-                                                                        {item.certificateUrl ? (
-                                                                            <button
-                                                                                onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
-                                                                                disabled={generatingId === item.enrollmentId}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl md:rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap shadow-md md:shadow-none shadow-purple-200 cursor-pointer disabled:opacity-50"
-                                                                            >
-                                                                                {generatingId === item.enrollmentId ? (
-                                                                                    <>
-                                                                                        <Loader className="w-3.5 h-3.5 animate-spin text-white" />
-                                                                                        {t('generating', 'Generating...')}
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <Download className="w-3.5 h-3.5" />
-                                                                                        {t('download', 'Download')}
-                                                                                    </>
-                                                                                )}
-                                                                            </button>
-                                                                        ) : (
-                                                                            <button
-                                                                                onClick={() => handleGenerateCertificate(item)}
-                                                                                disabled={generatingId === item.enrollmentId}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl md:rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer"
-                                                                            >
-                                                                                {generatingId === item.enrollmentId ? (
-                                                                                    <>
-                                                                                        <Loader className="w-3.5 h-3.5 animate-spin text-blue-500" />
-                                                                                        {t('generating', 'Generating...')}
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <Lock className="w-3.5 h-3.5" />
-                                                                                        {t('generate_certificate', 'Generate')}
-                                                                                    </>
-                                                                                )}
-                                                                            </button>
-                                                                        )}
-
-                                                                        {/* Review Button or Reviewed Status Badge */}
-                                                                        {item.hasReviewed ? (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => openViewReview(item)}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-1 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl md:rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-                                                                                title="View Your Submitted Review"
-                                                                            >
-                                                                                <Star className="w-3.5 h-3.5 fill-purple-400 text-purple-600" />
-                                                                                <span>{item.review?.rating || 5}★ {t('reviewed', 'Reviewed')}</span>
-                                                                            </button>
-                                                                        ) : (
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => openSubmitReview(item)}
-                                                                                className="w-full md:w-auto flex items-center justify-center gap-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold rounded-xl md:rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-xs"
-                                                                                title="Leave a Review for this Course Batch"
-                                                                            >
-                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                                                                                <span>{t('review', 'Review')}</span>
-                                                                            </button>
-                                                                        )}
-                                                                    </>
-                                                                ) : (item.isCourseDeleted || item.status === 'Course Incomplete') ? (
-                                                                    <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl md:rounded-lg cursor-not-allowed select-none border border-red-200">
-                                                                        <Lock className="w-4 h-4 md:w-3 md:h-3 text-red-500" />
-                                                                        {t('course_incomplete', 'Course Incomplete')}
-                                                                    </div>
+                                        </div>
+                                    </>
+                                ) : filtered.length === 0 ? (
+                                    <div className="text-center py-16 text-gray-400">
+                                        <div className="text-5xl mb-4">🎓</div>
+                                        <p className="font-medium text-gray-600">{t('no_certificates', 'No certificates yet')}</p>
+                                        <p className="text-sm mt-1">{t('complete_course_earn_cert', 'Complete a course to earn your first certificate!')}</p>
+                                        <button onClick={() => navigate('/courses')} className="mt-4 px-6 py-2 bg-[#3758EE] text-white rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer">
+                                            {t('browse_courses', 'Browse Courses')}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Small Screens: Cards View (< lg) */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
+                                            {currentData.map((item) => (
+                                                <div
+                                                    key={item.enrollmentId}
+                                                    className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col justify-between gap-4 shadow-xs hover:shadow-md hover:border-blue-100 transition-all duration-200 group"
+                                                >
+                                                    {/* Header: Thumbnail + Course name + Status */}
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                            <div className="shrink-0 relative">
+                                                                {item.thumbnail ? (
+                                                                    <img
+                                                                        src={item.thumbnail}
+                                                                        alt={item.course}
+                                                                        className="w-12 h-12 rounded-xl object-cover border border-gray-100 shadow-2xs"
+                                                                    />
                                                                 ) : (
-                                                                    <div className="w-full md:w-auto flex items-center justify-center gap-2 px-6 md:px-3 py-2.5 md:py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl md:rounded-lg cursor-not-allowed select-none border border-gray-100">
-                                                                        <Lock className="w-4 h-4 md:w-3 md:h-3" />
-                                                                        {t('progress_pending', 'Progress Pending')}
+                                                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#A892FF] to-[#3758EE] flex items-center justify-center text-white font-bold text-base shadow-2xs">
+                                                                        {item.course?.charAt(0) || 'C'}
                                                                     </div>
                                                                 )}
                                                             </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <h4 className="font-bold text-gray-900 text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-[#3758EE] transition-colors" title={item.course}>
+                                                                    {t(item.course?.trim(), item.course)}
+                                                                </h4>
+                                                                {item.title && (
+                                                                    <p className="text-gray-400 text-xs truncate mt-0.5" title={item.title}>
+                                                                        {t(item.title?.trim(), item.title)}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap ${item.status === 'Completed' || item.isCompleted
+                                                            ? 'text-blue-600 bg-blue-50 border border-blue-100'
+                                                            : (item.status === 'Course Incomplete' || item.isCourseDeleted)
+                                                                ? 'text-red-600 bg-red-50 border border-red-200'
+                                                                : item.status === 'Active'
+                                                                    ? 'text-green-600 bg-green-50 border border-green-100'
+                                                                    : 'text-gray-500 bg-gray-100 border border-gray-200'
+                                                            }`}>
+                                                            {(item.isCourseDeleted || item.status === 'Course Incomplete') && !item.isCompleted
+                                                                ? t('course_incomplete', 'Course Incomplete')
+                                                                : t(item.status.toLowerCase(), item.status)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Details: Duration & Progress */}
+                                                    <div className="bg-gray-50/80 rounded-xl p-3 flex flex-col gap-2.5 border border-gray-100/60">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                            <span className="text-gray-400 flex items-center gap-1.5 font-medium">
+                                                                <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                                                                {t('duration', 'Duration')}
+                                                            </span>
+                                                            <span className="text-gray-700 font-medium">
+                                                                {item.startDate} &minus; {item.endDate}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <div className="flex items-center justify-between text-xs">
+                                                                <span className="text-gray-400 font-medium">{t('progress', 'Progress')}</span>
+                                                                <span className="font-bold text-gray-800">{item.progress}%</span>
+                                                            </div>
+                                                            <div className="w-full h-2 bg-gray-200/80 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-300"
+                                                                    style={{ width: `${item.progress}%` }}
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                ))}
+
+                                                    {/* Actions */}
+                                                    <div className="pt-1 flex items-center gap-2 flex-wrap">
+                                                        {item.isCertEligible ? (
+                                                            <>
+                                                                {item.certificateUrl ? (
+                                                                    <button
+                                                                        onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
+                                                                        disabled={generatingId === item.enrollmentId}
+                                                                        className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-xl hover:opacity-95 transition-all active:scale-95 whitespace-nowrap shadow-sm shadow-purple-200 cursor-pointer disabled:opacity-50"
+                                                                    >
+                                                                        {generatingId === item.enrollmentId ? (
+                                                                            <>
+                                                                                <Loader className="w-3.5 h-3.5 animate-spin text-white" />
+                                                                                <span>{t('generating', 'Generating...')}</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Download className="w-3.5 h-3.5" />
+                                                                                <span>{t('download', 'Download')}</span>
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => handleGenerateCertificate(item)}
+                                                                        disabled={generatingId === item.enrollmentId}
+                                                                        className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-xl hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer shadow-2xs"
+                                                                    >
+                                                                        {generatingId === item.enrollmentId ? (
+                                                                            <>
+                                                                                <Loader className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                                                                                <span>{t('generating', 'Generating...')}</span>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Lock className="w-3.5 h-3.5" />
+                                                                                <span>{t('generate_certificate', 'Generate')}</span>
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                )}
+
+                                                                {item.hasReviewed ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openViewReview(item)}
+                                                                        className="shrink-0 flex items-center justify-center gap-1 px-3 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                                                                        title="View Your Submitted Review"
+                                                                    >
+                                                                        <Star className="w-3.5 h-3.5 fill-purple-400 text-purple-600" />
+                                                                        <span>{item.review?.rating || 5}★</span>
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => openSubmitReview(item)}
+                                                                        className="shrink-0 flex items-center justify-center gap-1 px-3 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-2xs"
+                                                                        title="Leave a Review"
+                                                                    >
+                                                                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                                                        <span>{t('review', 'Review')}</span>
+                                                                    </button>
+                                                                )}
+                                                            </>
+                                                        ) : (item.isCourseDeleted || item.status === 'Course Incomplete') ? (
+                                                            <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 font-bold text-xs rounded-xl cursor-not-allowed select-none border border-red-200">
+                                                                <Lock className="w-3.5 h-3.5 text-red-500" />
+                                                                <span>{t('course_incomplete', 'Course Incomplete')}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-xl cursor-not-allowed select-none border border-gray-100">
+                                                                <Lock className="w-3.5 h-3.5" />
+                                                                <span>{t('progress_pending', 'Progress Pending')}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Desktop / Laptop Table View (lg+) */}
+                                        <div className="hidden lg:block w-full overflow-x-auto pb-2 scrollbar-thin">
+                                            <div className="w-full min-w-[720px] xl:min-w-0">
+                                                {/* Table Header */}
+                                                <div className="grid grid-cols-12 gap-3 xl:gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
+                                                    <div className="col-span-4 xl:col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
+                                                    <div className="hidden xl:block xl:col-span-2">{t('title', 'Title')}</div>
+                                                    <div className="col-span-2 xl:col-span-2 whitespace-nowrap">{t('start_end_date', 'Start & End Date')}</div>
+                                                    <div className="col-span-2 xl:col-span-1">{t('progress', 'Progress')}</div>
+                                                    <div className="col-span-2 xl:col-span-2">{t('status', 'Status')}</div>
+                                                    <div className="col-span-2 xl:col-span-2">{t('action', 'Action')}</div>
+                                                </div>
+
+                                                {/* Table Rows */}
+                                                <div className="flex flex-col gap-2">
+                                                    {currentData.map((item) => (
+                                                        <div key={item.enrollmentId} className="border-b border-gray-100 py-4 transition-colors hover:bg-gray-50/50">
+                                                            <div className="grid grid-cols-12 gap-3 xl:gap-4 items-center">
+
+                                                                {/* Course Info */}
+                                                                <div className="col-span-4 xl:col-span-3 flex items-center gap-3 min-w-0">
+                                                                    <div className="shrink-0">
+                                                                        {item.thumbnail ? (
+                                                                            <img src={item.thumbnail} alt={item.course} className="w-10 h-10 rounded-lg object-cover" />
+                                                                        ) : (
+                                                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#A892FF] to-[#3758EE] flex items-center justify-center text-white font-bold text-xs">
+                                                                                {item.course?.charAt(0) || 'C'}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <span className="block font-medium text-gray-800 truncate text-xs lg:text-sm" title={item.course}>
+                                                                            {t(item.course?.trim(), item.course)}
+                                                                        </span>
+                                                                        {item.title && item.title !== item.course && (
+                                                                            <span className="block xl:hidden text-[11px] text-gray-400 truncate mt-0.5" title={item.title}>
+                                                                                {t(item.title?.trim(), item.title)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Title (visible on xl screens >= 1280px) */}
+                                                                <div className="hidden xl:block xl:col-span-2 text-center min-w-0">
+                                                                    <span className="text-gray-600 text-xs lg:text-sm truncate block" title={item.title}>{t(item.title?.trim(), item.title)}</span>
+                                                                </div>
+
+                                                                {/* Start & End Date */}
+                                                                <div className="col-span-2 xl:col-span-2 text-center text-xs text-gray-500">
+                                                                    <span className="block whitespace-nowrap">{item.startDate}</span>
+                                                                    <span className="block text-[11px] text-gray-400 whitespace-nowrap mt-0.5">{item.endDate}</span>
+                                                                </div>
+
+                                                                {/* Progress */}
+                                                                <div className="col-span-2 xl:col-span-1">
+                                                                    <div className="flex items-center gap-1.5 xl:gap-2 justify-center w-full">
+                                                                        <div className="w-10 lg:w-12 xl:w-10 h-1.5 bg-gray-100 rounded-full overflow-hidden shrink-0">
+                                                                            <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.progress}%` }} />
+                                                                        </div>
+                                                                        <span className="text-xs font-bold text-gray-700 min-w-[28px]">{item.progress}%</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Status */}
+                                                                <div className="col-span-2 xl:col-span-2 flex justify-center items-center">
+                                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${item.status === 'Completed' || item.isCompleted
+                                                                        ? 'text-blue-600 bg-blue-50'
+                                                                        : (item.status === 'Course Incomplete' || item.isCourseDeleted)
+                                                                            ? 'text-red-600 bg-red-50 border border-red-200'
+                                                                            : item.status === 'Active'
+                                                                                ? 'text-green-600 bg-green-50'
+                                                                                : 'text-gray-500 bg-gray-100'
+                                                                        }`}>
+                                                                        {(item.isCourseDeleted || item.status === 'Course Incomplete') && !item.isCompleted
+                                                                            ? t('course_incomplete', 'Course Incomplete')
+                                                                            : t(item.status.toLowerCase(), item.status)}
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Action */}
+                                                                <div className="col-span-2 flex items-center justify-center gap-1.5 flex-wrap">
+                                                                    {item.isCertEligible ? (
+                                                                        <>
+                                                                            {item.certificateUrl ? (
+                                                                                <button
+                                                                                    onClick={() => downloadAsPDF(item.certificateUrl, item.course, item)}
+                                                                                    disabled={generatingId === item.enrollmentId}
+                                                                                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#A892FF] to-[#3758EE] text-white text-xs font-bold rounded-lg hover:opacity-90 transition-all active:scale-95 whitespace-nowrap cursor-pointer disabled:opacity-50"
+                                                                                >
+                                                                                    {generatingId === item.enrollmentId ? (
+                                                                                        <>
+                                                                                            <Loader className="w-3.5 h-3.5 animate-spin text-white" />
+                                                                                            {t('generating', 'Generating...')}
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <Download className="w-3.5 h-3.5" />
+                                                                                            {t('download', 'Download')}
+                                                                                        </>
+                                                                                    )}
+                                                                                </button>
+                                                                            ) : (
+                                                                                <button
+                                                                                    onClick={() => handleGenerateCertificate(item)}
+                                                                                    disabled={generatingId === item.enrollmentId}
+                                                                                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-blue-600 border border-blue-200 text-xs font-bold rounded-lg hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap cursor-pointer"
+                                                                                >
+                                                                                    {generatingId === item.enrollmentId ? (
+                                                                                        <>
+                                                                                            <Loader className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                                                                                            {t('generating', 'Generating...')}
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <Lock className="w-3.5 h-3.5" />
+                                                                                            {t('generate_certificate', 'Generate')}
+                                                                                        </>
+                                                                                    )}
+                                                                                </button>
+                                                                            )}
+
+                                                                            {item.hasReviewed ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => openViewReview(item)}
+                                                                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                                                                                    title="View Your Submitted Review"
+                                                                                >
+                                                                                    <Star className="w-3.5 h-3.5 fill-purple-400 text-purple-600" />
+                                                                                    <span>{item.review?.rating || 5}★ {t('reviewed', 'Reviewed')}</span>
+                                                                                </button>
+                                                                            ) : (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => openSubmitReview(item)}
+                                                                                    className="flex items-center justify-center gap-1 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold rounded-lg transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-xs"
+                                                                                    title="Leave a Review for this Course Batch"
+                                                                                >
+                                                                                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                                                                    <span>{t('review', 'Review')}</span>
+                                                                                </button>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (item.isCourseDeleted || item.status === 'Course Incomplete') ? (
+                                                                        <div className="flex items-center justify-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg cursor-not-allowed select-none border border-red-200">
+                                                                            <Lock className="w-3 h-3 text-red-500" />
+                                                                            <span>{t('course_incomplete', 'Course Incomplete')}</span>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed select-none border border-gray-100">
+                                                                            <Lock className="w-3 h-3" />
+                                                                            <span>{t('progress_pending', 'Progress Pending')}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
+                                        </div>
+                                    </>
+                                )}
 
                                 {/* Pagination */}
                                 {!loading && totalPages > 1 && (
@@ -773,11 +981,10 @@ const Certificates = () => {
                                             className="p-1 transition-transform hover:scale-110 focus:outline-none"
                                         >
                                             <Star
-                                                className={`w-7 h-7 ${
-                                                    star <= (hoverRating || reviewRating)
-                                                        ? 'fill-amber-400 text-amber-500'
-                                                        : 'text-gray-300'
-                                                }`}
+                                                className={`w-7 h-7 ${star <= (hoverRating || reviewRating)
+                                                    ? 'fill-amber-400 text-amber-500'
+                                                    : 'text-gray-300'
+                                                    }`}
                                             />
                                         </button>
                                     ))}
@@ -863,11 +1070,10 @@ const Certificates = () => {
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <Star
                                             key={star}
-                                            className={`w-5 h-5 ${
-                                                star <= (viewReviewModalItem.review?.rating || 5)
-                                                    ? 'fill-amber-400 text-amber-500'
-                                                    : 'text-gray-300'
-                                            }`}
+                                            className={`w-5 h-5 ${star <= (viewReviewModalItem.review?.rating || 5)
+                                                ? 'fill-amber-400 text-amber-500'
+                                                : 'text-gray-300'
+                                                }`}
                                         />
                                     ))}
                                 </div>
