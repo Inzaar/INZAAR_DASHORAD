@@ -19,6 +19,19 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
     const [selectedCSV, setSelectedCSV] = useState(null);
     const [validationModal, setValidationModal] = useState({ isOpen: false, message: '' });
     const [method, setMethod] = useState('manual');
+    const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
+    const lectureDropdownRef = useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (lectureDropdownRef.current && !lectureDropdownRef.current.contains(e.target)) {
+                setIsLectureDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const [quizData, setQuizData] = useState({
         title: initialData?.title || '',
         description: initialData?.shortDescription || initialData?.description || '',
@@ -536,25 +549,68 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                 {/* Lectures Field & Dropdown */}
                                 <div>
                                     <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Lectures *</label>
-                                    <div className="relative">
-                                        <select
-                                            value={quizData.selectedLecture}
-                                            onChange={(e) => handleInputChange('selectedLecture', e.target.value)}
-                                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm appearance-none font-medium text-[#0f172a] cursor-pointer"
+                                    <div className="relative z-20" ref={lectureDropdownRef}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
+                                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm font-medium text-[#0f172a] cursor-pointer flex items-center justify-between text-left"
                                         >
-                                            <option value="">Select a lecture</option>
-                                            {lectures.map((lec, idx) => {
-                                                const lId = lec.id || lec._id || idx;
-                                                const lTitle = lec.title || `Lecture ${idx + 1}`;
-                                                const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
-                                                return (
-                                                    <option key={lId} value={lId}>
-                                                        {lNo}{lTitle}
-                                                    </option>
-                                                );
-                                            })}
-                                        </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                                            <span className={!quizData.selectedLecture ? 'text-gray-400' : 'text-[#0f172a]'}>
+                                                {(() => {
+                                                    if (!quizData.selectedLecture) return 'Select a lecture';
+                                                    const selected = lectures.find((lec, idx) => {
+                                                        const lId = lec.id || lec._id || idx;
+                                                        return String(lId) === String(quizData.selectedLecture);
+                                                    });
+                                                    if (selected) {
+                                                        const lNo = selected.lectureNo ? `Lecture ${selected.lectureNo}: ` : '';
+                                                        const lTitle = selected.title || 'Untitled Lecture';
+                                                        return `${lNo}${lTitle}`;
+                                                    }
+                                                    return 'Select a lecture';
+                                                })()}
+                                            </span>
+                                            <ChevronDown className={`text-gray-400 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`} size={18} />
+                                        </button>
+                                        {isLectureDropdownOpen && (
+                                            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1.5 max-h-60 overflow-y-auto">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleInputChange('selectedLecture', '');
+                                                        setIsLectureDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-4 sm:px-5 py-2.5 text-[14px] text-gray-400 hover:bg-gray-50 cursor-pointer ${
+                                                        !quizData.selectedLecture ? 'bg-blue-50/60 font-semibold text-blue-600' : ''
+                                                    }`}
+                                                >
+                                                    Select a lecture
+                                                </button>
+                                                {lectures.map((lec, idx) => {
+                                                    const lId = lec.id || lec._id || idx;
+                                                    const lTitle = lec.title || `Lecture ${idx + 1}`;
+                                                    const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
+                                                    const fullText = `${lNo}${lTitle}`;
+                                                    const isSelected = String(quizData.selectedLecture) === String(lId);
+                                                    return (
+                                                        <button
+                                                            key={lId}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                handleInputChange('selectedLecture', lId);
+                                                                setIsLectureDropdownOpen(false);
+                                                            }}
+                                                            className={`w-full text-left px-4 sm:px-5 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
+                                                                isSelected ? 'bg-blue-50 font-semibold text-[#3758EE]' : 'text-[#0f172a] hover:bg-gray-50'
+                                                            }`}
+                                                        >
+                                                            <span>{fullText}</span>
+                                                            {isSelected && <Check size={16} className="text-[#3758EE]" />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

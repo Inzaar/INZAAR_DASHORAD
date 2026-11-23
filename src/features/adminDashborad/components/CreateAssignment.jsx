@@ -25,6 +25,18 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
     const [uploadingFile, setUploadingFile] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef(null);
+    const [isLectureDropdownOpen, setIsLectureDropdownOpen] = useState(false);
+    const lectureDropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (lectureDropdownRef.current && !lectureDropdownRef.current.contains(e.target)) {
+                setIsLectureDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         if (initialData) {
@@ -175,25 +187,68 @@ const CreateAssignment = ({ onBackToSelection, onComplete, courseId, nextAssignm
                         {/* Lectures Dropdown */}
                         <div className="mb-8">
                             <label className="block text-[13px] font-bold text-[#0f172a] mb-2">Lectures *</label>
-                            <div className="relative">
-                                <select
-                                    value={assignmentData.selectedLecture || ''}
-                                    onChange={(e) => handleInputChange('selectedLecture', e.target.value)}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:ring-2 focus:ring-[#3758EE]/20 transition-all text-[14px] shadow-sm font-medium text-[#0f172a] appearance-none cursor-pointer"
+                            <div className="relative z-20" ref={lectureDropdownRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:ring-2 focus:ring-[#3758EE]/20 transition-all text-[14px] shadow-sm font-medium text-[#0f172a] cursor-pointer flex items-center justify-between text-left"
                                 >
-                                    <option value="">Select a lecture</option>
-                                    {lectures.map((lec, idx) => {
-                                        const lId = lec.id || lec._id || idx;
-                                        const lTitle = lec.title || `Lecture ${idx + 1}`;
-                                        const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
-                                        return (
-                                            <option key={lId} value={lId}>
-                                                {lNo}{lTitle}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                                    <span className={!assignmentData.selectedLecture ? 'text-gray-400' : 'text-[#0f172a]'}>
+                                        {(() => {
+                                            if (!assignmentData.selectedLecture) return 'Select a lecture';
+                                            const selected = lectures.find((lec, idx) => {
+                                                const lId = lec.id || lec._id || idx;
+                                                return String(lId) === String(assignmentData.selectedLecture);
+                                            });
+                                            if (selected) {
+                                                const lNo = selected.lectureNo ? `Lecture ${selected.lectureNo}: ` : '';
+                                                const lTitle = selected.title || 'Untitled Lecture';
+                                                return `${lNo}${lTitle}`;
+                                            }
+                                            return 'Select a lecture';
+                                        })()}
+                                    </span>
+                                    <ChevronDown className={`text-gray-400 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`} size={18} />
+                                </button>
+                                {isLectureDropdownOpen && (
+                                    <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1.5 max-h-60 overflow-y-auto">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                handleInputChange('selectedLecture', '');
+                                                setIsLectureDropdownOpen(false);
+                                            }}
+                                            className={`w-full text-left px-4 py-2.5 text-[14px] text-gray-400 hover:bg-gray-50 cursor-pointer ${
+                                                !assignmentData.selectedLecture ? 'bg-blue-50/60 font-semibold text-blue-600' : ''
+                                            }`}
+                                        >
+                                            Select a lecture
+                                        </button>
+                                        {lectures.map((lec, idx) => {
+                                            const lId = lec.id || lec._id || idx;
+                                            const lTitle = lec.title || `Lecture ${idx + 1}`;
+                                            const lNo = lec.lectureNo ? `Lecture ${lec.lectureNo}: ` : '';
+                                            const fullText = `${lNo}${lTitle}`;
+                                            const isSelected = String(assignmentData.selectedLecture) === String(lId);
+                                            return (
+                                                <button
+                                                    key={lId}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        handleInputChange('selectedLecture', lId);
+                                                        setIsLectureDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
+                                                        isSelected ? 'bg-blue-50 font-semibold text-[#3758EE]' : 'text-[#0f172a] hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <span>{fullText}</span>
+                                                    {isSelected && <Check size={16} className="text-[#3758EE]" />}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

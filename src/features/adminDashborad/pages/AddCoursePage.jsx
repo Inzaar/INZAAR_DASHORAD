@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, ChevronDown, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, Trash2, Pencil, FileText, HelpCircle, X, Minus, Plus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
@@ -248,10 +248,11 @@ const LectureCard = ({ item, courseThumbnail, onEdit, onDelete, onDeleteResource
                         <button
                             type="button"
                             onClick={onEdit}
-                            className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1"
+                            className="px-3 py-1.5 bg-blue-50 text-[#3b82f6] hover:bg-blue-100 transition-colors text-xs font-bold rounded-lg flex items-center gap-1 whitespace-nowrap"
                         >
                             <Pencil size={12} />
-                            Edit Lecture
+                            <span className="xl:hidden">Edit</span>
+                            <span className="hidden xl:inline">Edit Lecture</span>
                         </button>
                     )}
                     {onDelete && (
@@ -408,6 +409,24 @@ const AddCoursePage = () => {
     const [certificateUploading, setCertificateUploading] = useState(false);
     const [certificatePreview, setCertificatePreview] = useState('');
     const certificateInputRef = useRef(null);
+
+    const [isLectureTypeOpen, setIsLectureTypeOpen] = useState(false);
+    const lectureTypeDropdownRef = useRef(null);
+    const [isSectionOpen, setIsSectionOpen] = useState(false);
+    const sectionDropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (lectureTypeDropdownRef.current && !lectureTypeDropdownRef.current.contains(e.target)) {
+                setIsLectureTypeOpen(false);
+            }
+            if (sectionDropdownRef.current && !sectionDropdownRef.current.contains(e.target)) {
+                setIsSectionOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const audioInputRef = useRef(null);
     const mainAudioInputRef = useRef(null);
@@ -597,6 +616,8 @@ const AddCoursePage = () => {
         setIsPdfUploading(false);
         setIsModalOpen(false);
         setShowLectureCloseWarning(false);
+        setIsLectureTypeOpen(false);
+        setIsSectionOpen(false);
     };
 
     const handleAttemptCloseLecture = () => {
@@ -1810,38 +1831,95 @@ const AddCoursePage = () => {
                             <div className="px-8 pb-8 pt-4 max-h-[75vh] overflow-y-auto no-scrollbar">
                                 <div className="space-y-6">
                                     {/* Section and Lecture Type Dropdown */}
-                                    <div className={`grid grid-cols-1 ${(courseForm.hasSections && courseForm.sections.length > 0) && (newItem.type !== 'Assignment' && newItem.type !== 'Quiz') ? 'sm:grid-cols-2' : ''} gap-5`}>
+                                    <div className={`grid grid-cols-1 ${(courseForm.hasSections && courseForm.sections.length > 0) && (newItem.type !== 'Assignment' && newItem.type !== 'Quiz') ? 'sm:grid-cols-2' : ''} gap-5 relative z-30`}>
                                         {courseForm.hasSections && courseForm.sections.length > 0 && (
                                             <div>
                                                 <label className="block text-[13px] font-bold text-gray-700 mb-2">Select Section</label>
-                                                <div className="relative group">
-                                                    <select
-                                                        value={newItem.section || ''}
-                                                        onChange={e => setNewItem({ ...newItem, section: e.target.value })}
-                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                <div className="relative" ref={sectionDropdownRef}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setIsSectionOpen(!isSectionOpen);
+                                                            setIsLectureTypeOpen(false);
+                                                        }}
+                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm cursor-pointer flex items-center justify-between text-left"
                                                     >
-                                                        <option value="">-- Select a Section --</option>
-                                                        {courseForm.sections.map((section, idx) => (
-                                                            <option key={idx} value={section}>{section}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                        <span className={!newItem.section ? 'text-gray-400' : 'text-gray-700 font-medium'}>
+                                                            {newItem.section || '-- Select a Section --'}
+                                                        </span>
+                                                        <ChevronDown className={`text-gray-400 transition-transform duration-200 ${isSectionOpen ? 'rotate-180' : ''}`} size={16} />
+                                                    </button>
+                                                    {isSectionOpen && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 max-h-48 overflow-y-auto">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setNewItem({ ...newItem, section: '' });
+                                                                    setIsSectionOpen(false);
+                                                                }}
+                                                                className={`w-full text-left px-4 py-2 text-[14px] text-gray-400 hover:bg-gray-50 cursor-pointer ${!newItem.section ? 'bg-blue-50/60 font-medium text-blue-600' : ''}`}
+                                                            >
+                                                                -- Select a Section --
+                                                            </button>
+                                                            {courseForm.sections.map((section, idx) => (
+                                                                <button
+                                                                    key={idx}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setNewItem({ ...newItem, section });
+                                                                        setIsSectionOpen(false);
+                                                                    }}
+                                                                    className={`w-full text-left px-4 py-2.5 text-[14px] hover:bg-gray-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        newItem.section === section ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700'
+                                                                    }`}
+                                                                >
+                                                                    <span>{section}</span>
+                                                                    {newItem.section === section && <CheckCircle size={15} className="text-blue-600" />}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
                                         {newItem.type !== 'Assignment' && newItem.type !== 'Quiz' && (
                                             <div>
                                                 <label className="block text-[13px] font-bold text-gray-700 mb-2">Lecture Type</label>
-                                                <div className="relative group">
-                                                    <select
-                                                        value={newItem.mediaType || 'Video'}
-                                                        onChange={e => setNewItem({ ...newItem, mediaType: e.target.value })}
-                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 appearance-none bg-white shadow-sm cursor-pointer"
+                                                <div className="relative" ref={lectureTypeDropdownRef}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setIsLectureTypeOpen(!isLectureTypeOpen);
+                                                            setIsSectionOpen(false);
+                                                        }}
+                                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] text-gray-600 bg-white shadow-sm cursor-pointer flex items-center justify-between text-left"
                                                     >
-                                                        <option value="Video">Video</option>
-                                                        <option value="Audio">Audio</option>
-                                                    </select>
-                                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                                        <span className="text-gray-700 font-medium">{newItem.mediaType || 'Video'}</span>
+                                                        <ChevronDown className={`text-gray-400 transition-transform duration-200 ${isLectureTypeOpen ? 'rotate-180' : ''}`} size={16} />
+                                                    </button>
+                                                    {isLectureTypeOpen && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 overflow-hidden">
+                                                            {['Video', 'Audio'].map((type) => {
+                                                                const isSelected = (newItem.mediaType || 'Video') === type;
+                                                                return (
+                                                                    <button
+                                                                        key={type}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setNewItem({ ...newItem, mediaType: type });
+                                                                            setIsLectureTypeOpen(false);
+                                                                        }}
+                                                                        className={`w-full text-left px-4 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
+                                                                            isSelected ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                                                                        }`}
+                                                                    >
+                                                                        <span>{type}</span>
+                                                                        {isSelected && <CheckCircle size={15} className="text-blue-600" />}
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}

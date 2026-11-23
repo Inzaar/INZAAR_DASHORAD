@@ -387,9 +387,9 @@ const ManagementDashboard = () => {
                             </div>
 
                             {/* 3. System KPI Metric Cards (Matching StatsCard Theme) */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0">
                                 {/* Total Registrations */}
-                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] w-[270px] xl:w-full min-w-[270px] xl:min-w-0 shrink-0 xl:shrink transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                                     <div className="flex justify-between items-start gap-2">
                                         <span className="text-[13px] font-semibold text-gray-500 uppercase tracking-wider">
                                             TOTAL REGISTRATIONS
@@ -410,7 +410,7 @@ const ManagementDashboard = () => {
                                 </div>
 
                                 {/* Unique Students */}
-                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] w-[270px] xl:w-full min-w-[270px] xl:min-w-0 shrink-0 xl:shrink transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                                     <div className="flex justify-between items-start gap-2">
                                         <span className="text-[13px] font-semibold text-gray-500 uppercase tracking-wider">
                                             UNIQUE STUDENTS
@@ -431,7 +431,7 @@ const ManagementDashboard = () => {
                                 </div>
 
                                 {/* Supporter Willingness */}
-                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] w-[270px] xl:w-full min-w-[270px] xl:min-w-0 shrink-0 xl:shrink transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                                     <div className="flex justify-between items-start gap-2">
                                         <span className="text-[13px] font-semibold text-gray-500 uppercase tracking-wider">
                                             SUPPORTER WILLINGNESS
@@ -452,7 +452,7 @@ const ManagementDashboard = () => {
                                 </div>
 
                                 {/* Top Enrolled Course */}
-                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                                <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[135px] w-[270px] xl:w-full min-w-[270px] xl:min-w-0 shrink-0 xl:shrink transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
                                     <div className="flex justify-between items-start gap-2">
                                         <span className="text-[13px] font-semibold text-gray-500 uppercase tracking-wider">
                                             TOP ENROLLED COURSE

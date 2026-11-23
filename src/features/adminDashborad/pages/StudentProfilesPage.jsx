@@ -365,7 +365,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                             </div>
 
                             {/* 4 Basic Stats Grid (Always shown) */}
-                            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible mb-8">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
                                         key={index}
@@ -376,7 +376,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                             setStatusFilter(stat.type);
                                             setCurrentPage(1);
                                         }}
-                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[115px] min-w-[220px] sm:min-w-[240px]" : "h-[115px] min-w-[220px] sm:min-w-[240px]"}
+                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[105px] sm:h-[115px] w-[190px] sm:w-[270px] xl:w-full min-w-[190px] sm:min-w-[270px] xl:min-w-0 shrink-0 xl:shrink" : "h-[105px] sm:h-[115px] w-[190px] sm:w-[270px] xl:w-full min-w-[190px] sm:min-w-[270px] xl:min-w-0 shrink-0 xl:shrink"}
                                     />
                                 ))}
                             </div>
@@ -672,13 +672,13 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                 </div>
 
                                 {/* Students Table */}
-                                <div className="overflow-x-auto relative flex-1 min-h-[400px]">
+                                <div className="overflow-x-auto relative flex-1 min-h-[400px] custom-scrollbar-thin">
                                     {isLoading && (
                                         <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
                                             <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                         </div>
                                     )}
-                                    <table className="w-full min-w-[1000px]" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
+                                    <table className="w-full min-w-[780px] xl:min-w-full" style={{ borderCollapse: 'separate', borderSpacing: '0 10px' }}>
                                         <thead>
                                             <tr>
                                                 <th className="text-center font-bold text-[14px] text-gray-800 pb-2">Categories</th>
@@ -720,12 +720,27 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                             </span>
                                                         </td>
                                                         <td className="py-4 text-center">
-                                                            <span className="text-[14px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
+                                                            <span 
+                                                                className="text-[14px] text-gray-800 block max-w-[140px] truncate mx-auto"
+                                                                title={student.name}
+                                                            >
+                                                                {t(student.name?.trim().replace(/\s+/g, ' '), student.name)}
+                                                            </span>
                                                         </td>
                                                         <td className="py-4 text-center">
                                                             <div className="flex flex-col items-center justify-center">
-                                                                <span className="text-[13px] text-gray-800 leading-tight">{student.email}</span>
-                                                                <span className="text-[13px] text-gray-800">{student.phone}</span>
+                                                                <span 
+                                                                    className="text-[13px] text-gray-800 leading-tight block max-w-[160px] truncate mx-auto"
+                                                                    title={student.email}
+                                                                >
+                                                                    {student.email}
+                                                                </span>
+                                                                <span 
+                                                                    className="text-[13px] text-gray-800 block max-w-[130px] truncate mx-auto"
+                                                                    title={student.phone}
+                                                                >
+                                                                    {student.phone}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                         <td className="py-4 text-center">
@@ -734,11 +749,21 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                     <span className="text-gray-400 text-[13px]">Not Enrolled</span>
                                                                 ) : (
                                                                     <>
-                                                                        {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                                            <span key={idx} className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                                {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
-                                                                            </span>
-                                                                        ))}
+                                                                        {student.enrollments.slice(0, 3).map((course, idx) => {
+                                                                            const rawTitle = course.title || course.name || course;
+                                                                            const fullTitle = rawTitle === "new" ? t("new_badge", "new") : t(rawTitle, rawTitle);
+                                                                            const words = String(fullTitle).trim().split(/\s+/);
+                                                                            const displayTitle = words.length > 2 ? `${words.slice(0, 2).join(' ')}...` : fullTitle;
+                                                                            return (
+                                                                                <span 
+                                                                                    key={idx} 
+                                                                                    title={fullTitle}
+                                                                                    className="text-[13px] text-[#6366F1] underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2 block max-w-[150px] truncate mx-auto"
+                                                                                >
+                                                                                    {displayTitle}
+                                                                                </span>
+                                                                            );
+                                                                        })}
                                                                         {student.enrollments.length > 3 && (
                                                                             <span className="text-[11px] text-gray-400 font-medium mt-0.5">
                                                                                 {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
@@ -764,7 +789,7 @@ const StudentProfilesPage = ({ genderFilter: propGenderFilter = "All" }) => {
                                                                 <div className="flex justify-center items-center w-full">
                                                                     <button
                                                                         onClick={() => navigate(`/admin/student-details/${student.id}`)}
-                                                                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm"
+                                                                        className="inline-flex items-center px-2.5 py-1 xl:px-4 xl:py-2 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-[12px] xl:text-[13px] font-medium rounded-md hover:opacity-90 transition-all shadow-sm whitespace-nowrap"
                                                                     >
                                                                         View Profile
                                                                     </button>

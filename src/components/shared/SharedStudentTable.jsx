@@ -60,6 +60,17 @@ const SharedStudentTable = ({
         return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
     };
 
+    // Truncate course name or text to maxWords with dots
+    const truncateWords = (text, maxWords = 2) => {
+        if (!text) return '';
+        const str = String(text).trim();
+        const words = str.split(/\s+/);
+        if (words.length > maxWords) {
+            return `${words.slice(0, maxWords).join(' ')}...`;
+        }
+        return str;
+    };
+
     // Generate page numbers for pagination
     const getPageNumbers = () => {
         const pages = [];
@@ -82,8 +93,8 @@ const SharedStudentTable = ({
     const content = (
         <>
             {showTitle && (
-                <div className="mb-6 flex justify-between items-center">
-                    <h3 className="text-[20px] font-bold text-gray-900 mb-1">{title}</h3>
+                <div className="mb-3 sm:mb-6 flex justify-between items-center">
+                    <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-900 mb-1">{title}</h3>
                 </div>
             )}
 
@@ -97,8 +108,8 @@ const SharedStudentTable = ({
                 </div>
             ) : (
                 <>
-                    <div className="overflow-x-auto flex-1">
-                        <table className="w-full min-w-[1000px] print:min-w-0 print:w-full border-separate border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
+                    <div className="overflow-x-auto flex-1 custom-scrollbar-thin">
+                        <table className="w-full min-w-[760px] xl:min-w-full print:min-w-0 print:w-full border-separate border-spacing-y-[3px] sm:border-spacing-y-[5px] xl:border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
                             <thead>
                                 <tr>
                                     {visibleColumns.name && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
@@ -126,35 +137,64 @@ const SharedStudentTable = ({
                                 {students.map((student) => (
                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                         {visibleColumns.name && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800">{t(student.name?.trim().replace(/\s+/g, ' '), student.name)}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span 
+                                                    className="text-[16px] print:text-[10px] text-gray-800 block max-w-[140px] truncate mx-auto" 
+                                                    title={student.name}
+                                                >
+                                                    {t(student.name?.trim().replace(/\s+/g, ' '), student.name)}
+                                                </span>
                                             </td>
                                         )}
                                         {visibleColumns.studentId && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.studentId || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span 
+                                                    className="text-[15px] print:text-[10px] text-gray-800 block max-w-[110px] truncate mx-auto" 
+                                                    title={student.studentId || '-'}
+                                                >
+                                                    {student.studentId || '-'}
+                                                </span>
                                             </td>
                                         )}
                                         {visibleColumns.contact && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 leading-tight">{student.email}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span 
+                                                    className="text-[15px] print:text-[10px] text-gray-800 leading-tight block max-w-[160px] truncate mx-auto" 
+                                                    title={student.email}
+                                                >
+                                                    {student.email}
+                                                </span>
                                             </td>
                                         )}
                                         {visibleColumns.phone && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.phone}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span 
+                                                    className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" 
+                                                    title={student.phone}
+                                                >
+                                                    {student.phone}
+                                                </span>
                                             </td>
                                         )}
                                         {visibleColumns.enrollments && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     {(student.enrollments || []).length > 0 ? (
                                                         <>
-                                                            {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                                <span key={idx} className="text-[15px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2">
-                                                                    {(course.title || course.name || course) === "new" ? t("new_badge", "new") : t((course.title || course.name || course), (course.title || course.name || course))}
-                                                                </span>
-                                                            ))}
+                                                            {student.enrollments.slice(0, 3).map((course, idx) => {
+                                                                const rawTitle = course.title || course.name || course;
+                                                                const fullTitle = rawTitle === "new" ? t("new_badge", "new") : t(rawTitle, rawTitle);
+                                                                const displayTitle = truncateWords(fullTitle, 2);
+                                                                return (
+                                                                    <span 
+                                                                        key={idx} 
+                                                                        title={fullTitle}
+                                                                        className="text-[15px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2 block max-w-[150px] truncate mx-auto"
+                                                                    >
+                                                                        {displayTitle}
+                                                                    </span>
+                                                                );
+                                                            })}
                                                             {student.enrollments.length > 3 && (
                                                                 <span className="text-[13px] print:text-[9px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
                                                                     {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
@@ -168,79 +208,79 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.progress && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.progress || '0%'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.progress || '0%'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.lastLogin && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800">{formatDate(student.lastLogin) || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{formatDate(student.lastLogin) || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.lastLearningActivity && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.lastLearningActivity || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.lastLearningActivity || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.status && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className={`text-[16px] print:text-[10px] ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className={`text-[16px] print:text-[10px] whitespace-nowrap ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                                                     {t(student.status.toLowerCase(), student.status)}
                                                 </span>
                                             </td>
                                         )}
                                         {visibleColumns.gender && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.gender || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.gender || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.age && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.age || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.age || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.ageGroup && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.ageGroup || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.ageGroup || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.region && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.region || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.region || '-'}>{student.region || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.country && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.country || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.country || '-'}>{student.country || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.education && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.education || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.education || '-'}>{student.education || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.profession && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.profession || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.profession || '-'}>{student.profession || '-'}</span>
                                             </td>
                                         )}
 
 
                                         {visibleColumns.loginFrequency && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800">{student.loginFrequency || '-'}</span>
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.loginFrequency || '-'}>{student.loginFrequency || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.courseCompletionRate && (
-                                            <td className="py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <span className="text-[16px] print:text-[10px] text-gray-800">{student.courseCompletionRate || '0%'}</span>
                                             </td>
                                         )}
                                         {showAction && (
-                                            <td className="py-4 print:hidden text-center first:rounded-l-xl last:rounded-r-xl print:rounded-none">
+                                            <td className="py-2 sm:py-2.5 xl:py-4 print:hidden text-center first:rounded-l-xl last:rounded-r-xl print:rounded-none">
                                                 <div className="flex justify-center items-center w-full">
                                                     <GradiantButton
-                                                        className="text-[15px] print:text-[10px] px-4 py-2 print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black"
+                                                        className="text-[12px] xl:text-[14px] px-2.5 py-1 xl:px-4 xl:py-2 print:text-[10px] print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black whitespace-nowrap"
                                                         onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                     >
                                                         {t("view_profile", "View Profile")}
@@ -255,7 +295,7 @@ const SharedStudentTable = ({
                     </div>
                     {/* Pagination */}
                     {!hidePagination && pagination && pagination.totalPages > 1 && (
-                        <div className="flex justify-end items-center mt-auto print:hidden">
+                        <div className="flex justify-end items-center mt-4 sm:mt-6 xl:mt-auto print:hidden">
                             <CustomPagination 
                                 currentPage={pagination.page} 
                                 totalPages={pagination.totalPages} 
@@ -273,7 +313,7 @@ const SharedStudentTable = ({
     }
 
     return (
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 mt-6 flex flex-col flex-1 min-h-[600px] print:rounded-none print:border-none print:shadow-none print:p-0 print:m-0">
+        <div className="bg-white rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 mb-4 sm:mb-6 xl:mb-8 mt-4 sm:mt-6 flex flex-col min-h-fit xl:flex-1 xl:min-h-[600px] print:rounded-none print:border-none print:shadow-none print:p-0 print:m-0">
             {content}
         </div>
     );

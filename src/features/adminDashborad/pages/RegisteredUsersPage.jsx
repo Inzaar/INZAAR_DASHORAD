@@ -273,8 +273,8 @@ const RegisteredUsersPage = () => {
                                 </div>
 
                                 {/* Results Table */}
-                                <div className="overflow-x-auto">
-                                    <table className="w-full min-w-[1000px]">
+                                <div className="overflow-x-auto custom-scrollbar-thin">
+                                    <table className="w-full min-w-[780px] xl:min-w-full">
                                         <thead>
                                             <tr className="border-b border-gray-50 uppercase text-[12px] font-bold text-gray-800">
                                                 <th className="text-left pb-4 pl-4 font-bold">{t("name", "Name")}</th>
@@ -298,18 +298,31 @@ const RegisteredUsersPage = () => {
                                             ) : (
                                                 displayedUsers.map((user) => (
                                                     <tr key={user.id} className="hover:bg-gray-50/40 transition-colors">
-                                                        <td className="py-6 pl-4 font-medium text-gray-800">{user.name}</td>
+                                                        <td className="py-6 pl-4 font-medium text-gray-800">
+                                                            <span className="block max-w-[140px] truncate" title={user.name}>{user.name}</span>
+                                                        </td>
                                                         <td className="py-6">
                                                             <div className="flex flex-col">
-                                                                <span className="text-[13px] text-gray-500">{user.email}</span>
-                                                                <span className="text-[13px] text-gray-400">{user.phone}</span>
+                                                                <span className="text-[13px] text-gray-500 block max-w-[160px] truncate" title={user.email}>{user.email}</span>
+                                                                <span className="text-[13px] text-gray-400 block max-w-[130px] truncate" title={user.phone}>{user.phone}</span>
                                                             </div>
                                                         </td>
                                                         <td className="py-6 text-center">
                                                             <div className="flex flex-col gap-0.5 items-center">
-                                                                {user.enrollments.slice(0, 3).map((course, idx) => (
-                                                                    <span key={idx} className="text-[12px] text-blue-500 underline underline-offset-2 hover:text-blue-700 cursor-pointer">{course}</span>
-                                                                ))}
+                                                                {user.enrollments.slice(0, 3).map((course, idx) => {
+                                                                    const rawTitle = String(course || '');
+                                                                    const words = rawTitle.trim().split(/\s+/);
+                                                                    const displayTitle = words.length > 2 ? `${words.slice(0, 2).join(' ')}...` : rawTitle;
+                                                                    return (
+                                                                        <span 
+                                                                            key={idx} 
+                                                                            title={rawTitle}
+                                                                            className="text-[12px] text-blue-500 underline underline-offset-2 hover:text-blue-700 cursor-pointer block max-w-[150px] truncate mx-auto"
+                                                                        >
+                                                                            {displayTitle}
+                                                                        </span>
+                                                                    );
+                                                                })}
                                                                 {user.enrollments.length > 3 && (
                                                                     <span className="text-[12px] text-gray-400 font-bold">...</span>
                                                                 )}
@@ -329,7 +342,7 @@ const RegisteredUsersPage = () => {
                                                             <div className="flex justify-center items-center w-full">
                                                                 <GradiantButton
                                                                     onClick={() => navigate(`/admin/student-details/${user.id}`)}
-                                                                    className="text-[12px] px-5 py-2 rounded-lg font-bold shadow-lg shadow-blue-200/50"
+                                                                    className="text-[11px] xl:text-[12px] px-3 py-1.5 xl:px-5 xl:py-2 rounded-lg font-bold shadow-lg shadow-blue-200/50 whitespace-nowrap"
                                                                 >
                                                                     View Profile
                                                                 </GradiantButton>

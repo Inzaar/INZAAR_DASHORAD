@@ -171,8 +171,8 @@ export default function InstructorRecordComponent({ profileData, onEditClick, in
                             <div className="w-8 h-8 border-4 border-[#8B5CF6] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     )}
-                    <div className="overflow-x-auto w-full">
-                        <table className="w-full min-w-[800px] text-left border-separate border-spacing-y-3">
+                    <div className="overflow-x-auto w-full custom-scrollbar-thin">
+                        <table className="w-full min-w-[750px] xl:min-w-full text-left border-separate border-spacing-y-3">
                             <thead>
                                 <tr>
                                     <th className="pb-2 px-6 text-[13px] font-bold w-[15%] text-gray-500 uppercase tracking-wider">{t("name", "Name")}</th>
@@ -187,16 +187,18 @@ export default function InstructorRecordComponent({ profileData, onEditClick, in
                                 {students.length > 0 ? (
                                     students.map((student) => (
                                         <tr key={student.id} className="bg-[#F8F9FA] hover:bg-gray-100 transition-colors shadow-sm">
-                                            <td className="py-4 px-6 text-[13px] font-medium text-gray-700 rounded-l-[8px]">{student.name}</td>
+                                            <td className="py-4 px-6 text-[13px] font-medium text-gray-700 rounded-l-[8px]">
+                                                <span className="block max-w-[140px] truncate" title={student.name}>{student.name}</span>
+                                            </td>
                                             <td className="py-4 px-6">
                                                 <div className="flex flex-col gap-[2px]">
-                                                    <span className="text-[13px] font-medium text-gray-700">{student.email}</span>
-                                                    <span className="text-[12px] text-gray-500">{student.phone}</span>
+                                                    <span className="text-[13px] font-medium text-gray-700 block max-w-[160px] truncate" title={student.email}>{student.email}</span>
+                                                    <span className="text-[12px] text-gray-500 block max-w-[130px] truncate" title={student.phone}>{student.phone}</span>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-6 text-[13px] text-gray-700 text-center font-medium">{student.progress}</td>
-                                            <td className="py-4 px-6 text-[13px] text-gray-600">{student.lastLogin}</td>
-                                            <td className="py-4 px-6 text-[13px] font-medium">
+                                            <td className="py-4 px-6 text-[13px] text-gray-700 text-center font-medium whitespace-nowrap">{student.progress}</td>
+                                            <td className="py-4 px-6 text-[13px] text-gray-600 whitespace-nowrap">{student.lastLogin}</td>
+                                            <td className="py-4 px-6 text-[13px] font-medium whitespace-nowrap">
                                                 <span className={student.status === 'Active' ? 'text-green-500' : 'text-red-500'}>
                                                     {student.status}
                                                 </span>

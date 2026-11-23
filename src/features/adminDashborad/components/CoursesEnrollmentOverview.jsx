@@ -36,27 +36,40 @@ const CoursesEnrollmentOverview = ({
 }) => {
     const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+
+    const getTwoRowsLimit = () => {
+        if (typeof window === 'undefined') return 12;
+        const width = window.innerWidth;
+        if (width < 640) return 4;   // 2 cols * 2 rows
+        if (width < 768) return 6;   // 3 cols * 2 rows
+        if (width < 1024) return 8;  // 4 cols * 2 rows
+        if (width < 1280) return 10; // 5 cols * 2 rows
+        return 12;                   // 6 cols * 2 rows
+    };
+
+    const [twoRowsLimit, setTwoRowsLimit] = useState(getTwoRowsLimit);
 
     React.useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 640);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        const handleResize = () => {
+            setTwoRowsLimit(getTwoRowsLimit());
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const effectiveLimit = isMobile ? 4 : limit;
+    const effectiveLimit = Math.min(limit, twoRowsLimit);
     const displayedStats = isExpanded ? courseStats : courseStats.slice(0, effectiveLimit);
-    const shouldShowViewMore = (isMobile && courseStats.length > 4) || (showViewMore && courseStats.length > limit);
+    const shouldShowViewMore = showViewMore && courseStats.length > effectiveLimit;
 
     return (
         <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 font-sans mt-4">
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <h3 className="text-[14px] font-medium text-[#64748b] truncate pr-2">{t('courses_enrollment_overview', 'Courses Enrollment Overview')}</h3>
+            <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4">
+                <h3 className="text-[13px] sm:text-[14px] font-medium text-[#64748b] truncate pr-2">{t('courses_enrollment_overview', 'Courses Enrollment Overview')}</h3>
                 {showViewAll && (
                     <GradiantButton
                         onClick={onViewAllClick}
-                        className="w-fit px-5 py-2 text-[12px] font-bold rounded-lg shadow-sm"
+                        className="w-fit shrink-0 px-2.5 sm:px-5 py-1 sm:py-2 text-[11px] sm:text-[12px] font-bold rounded-md sm:rounded-lg shadow-sm whitespace-nowrap"
                     >
                         {t('view_all_courses', 'View All courses')}
                     </GradiantButton>
