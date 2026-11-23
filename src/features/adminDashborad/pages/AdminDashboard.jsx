@@ -152,7 +152,7 @@ const AdminDashboard = () => {
                                 <div className=" flex flex-col gap-6">
 
                                     {/* Stats Cards Section */}
-                                    <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-2 scrollbar-thin md:overflow-visible">
+                                    <div className="flex xl:grid xl:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0">
                                         <StatsCard
                                             title="Total Registered Students"
                                             value={studentCount.toString()}
@@ -186,9 +186,9 @@ const AdminDashboard = () => {
                                         />
                                     </div>
 
-                                    <div className="flex gap-6 flex-col lg:flex-row">
-                                        <HoursSpentCard className="w-full lg:w-[68%] shadow-sm" name="Moderator Performance" moderators={moderatorsData} />
-                                        <PerformanceCard name="Course completion rate" className="w-full lg:w-[32%]" />
+                                    <div className="flex gap-4 sm:gap-6 flex-col md:flex-row items-stretch">
+                                        <HoursSpentCard className="w-full md:w-[58%] xl:w-[60%] shadow-sm h-[290px]" name="Moderator Performance" moderators={moderatorsData} />
+                                        <PerformanceCard name="Course completion rate" className="w-full md:w-[42%] xl:w-[40%] shadow-sm h-[290px]" />
                                     </div>
 
                                     {/* Courses Enrollment Overview */}

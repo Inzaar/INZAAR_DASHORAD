@@ -233,8 +233,8 @@ const GroupStudentsPage = () => {
                                     </span>
                                 </div>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full min-w-[900px]">
+                                <div className="overflow-x-auto custom-scrollbar-thin">
+                                    <table className="w-full min-w-[780px] xl:min-w-full">
                                         <thead>
                                             <tr className="border-b border-gray-50 uppercase text-[12px] font-bold text-gray-800">
                                                 <th className="text-left pb-4 pl-4 font-bold">Student Name</th>
@@ -252,8 +252,12 @@ const GroupStudentsPage = () => {
                                                 <tr><td colSpan={6} className="py-20 text-center text-gray-400 font-medium">No students match your filter.</td></tr>
                                             ) : filteredStudents.map((student) => (
                                                 <tr key={student._id} className="hover:bg-gray-50/40 transition-colors">
-                                                    <td className="py-6 pl-4 font-medium text-gray-800">{student.name}</td>
-                                                    <td className="py-6 text-[13px] text-gray-500">{student.email}</td>
+                                                    <td className="py-6 pl-4 font-medium text-gray-800">
+                                                        <span className="block max-w-[150px] truncate" title={student.name}>{student.name}</span>
+                                                    </td>
+                                                    <td className="py-6 text-[13px] text-gray-500">
+                                                        <span className="block max-w-[180px] truncate" title={student.email}>{student.email}</span>
+                                                    </td>
                                                     <td className="py-6 text-[13px] text-gray-500">{student.gender}</td>
                                                     <td className="py-6 text-[13px] text-gray-500 text-center">
                                                         {new Date(student.joiningDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')}

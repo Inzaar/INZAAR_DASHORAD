@@ -36,7 +36,7 @@ const PerformanceCard = ({
 
     return (
         <div className={cn(
-            "w-full min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col items-center gap-[18px]",
+            "w-full min-h-[150px] bg-white rounded-[16px] border border-[#EAEDF2] p-5 sm:p-6 flex flex-col items-center justify-between",
             className
         )}>
             <h3 className="text-[18px] font-bold text-black leading-normal pb-1 text-center">

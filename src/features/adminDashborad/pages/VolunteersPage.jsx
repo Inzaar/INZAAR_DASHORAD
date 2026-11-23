@@ -308,7 +308,7 @@ const VolunteersPage = () => {
                             </div>
 
                             {/* Top KPI Metric Cards (Simple - No Graphs) */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-6">
                                 <StatsCard
                                     title="Total Volunteers"
                                     value={statsData.total.toString()}

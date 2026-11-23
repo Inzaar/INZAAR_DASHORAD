@@ -79,28 +79,28 @@ const NewBatchAlert = () => {
     const renderAlertCard = (batchData) => (
         <div key={batchData._id} className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden flex-shrink-0 w-full h-auto min-h-fit">
             {/* Top Section */}
-            <div className="p-4 sm:p-5 md:p-6 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
-                <div className="flex gap-4 sm:gap-6 items-start flex-1 min-w-0">
+            <div className="p-4 sm:p-5 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 xl:gap-6">
+                <div className="flex gap-3 sm:gap-4 md:gap-5 items-start flex-1 min-w-0">
                     <div className="bg-red-50 p-2 sm:p-2.5 rounded-lg flex-shrink-0">
                         <AlertCircle className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-tight">New Group Created</h3>
-                        <p className="text-gray-500 text-xs sm:text-sm mt-1 max-w-full lg:max-w-2xl break-words">
+                        <p className="text-gray-500 text-xs sm:text-sm mt-1 max-w-full sm:max-w-[280px] md:max-w-[340px] lg:max-w-[340px] xl:max-w-2xl break-words">
                             A new group has been created for Course: {batchData.courseName}. This group currently has no moderator assigned.
                         </p>
                     </div>
                 </div>
-                <div className="flex flex-row justify-end gap-2 sm:gap-3 w-full xl:w-auto flex-shrink-0">
+                <div className="flex flex-row justify-start sm:justify-end gap-2 sm:gap-2.5 lg:gap-2 xl:gap-3 w-full sm:w-auto flex-shrink-0">
                     <button
                         onClick={() => handleOpenModal('assign', batchData)}
-                        className="flex-1 sm:flex-none sm:w-auto px-1 sm:px-6 py-2.5 border-2 border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-xs sm:text-sm hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 shadow-lg shadow-[#5D5FEF]/5 whitespace-nowrap text-center"
+                        className="flex-1 sm:flex-none sm:w-auto max-w-[160px] sm:max-w-none px-2 sm:px-3.5 xl:px-6 py-1 sm:py-1.5 xl:py-2.5 border border-[#5D5FEF] sm:border-2 text-[#5D5FEF] rounded-md sm:rounded-lg font-bold text-[11px] sm:text-xs xl:text-sm hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 shadow-md shadow-[#5D5FEF]/5 whitespace-nowrap text-center cursor-pointer"
                     >
                         Assign Moderator
                     </button>
                     <button
                         onClick={() => handleOpenModal('students', batchData)}
-                        className="flex-1 sm:flex-none sm:w-auto px-1 sm:px-6 py-2.5 bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white rounded-lg font-bold text-xs sm:text-sm hover:shadow-lg transition-all active:scale-95 whitespace-nowrap text-center"
+                        className="flex-1 sm:flex-none sm:w-auto max-w-[160px] sm:max-w-none px-2 sm:px-3.5 xl:px-6 py-1 sm:py-1.5 xl:py-2.5 bg-gradient-to-r from-[#3758EE] via-[#B666E7] to-[#3758EE] bg-[length:200%_auto] hover:bg-right text-white rounded-md sm:rounded-lg font-bold text-[11px] sm:text-xs xl:text-sm hover:shadow-lg transition-all active:scale-95 whitespace-nowrap text-center cursor-pointer"
                     >
                         Adjust Students
                     </button>

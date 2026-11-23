@@ -122,7 +122,7 @@ const HoursSpentCard = ({
 
     return (
         <div className={cn(
-            "w-full bg-white rounded-[16px] border border-[#EAEDF2] p-6 flex flex-col gap-6",
+            "w-full bg-white rounded-[16px] border border-[#EAEDF2] p-5 sm:p-6 flex flex-col justify-between gap-4",
             className
         )}>
             {/* Header & Legend */}
@@ -148,7 +148,7 @@ const HoursSpentCard = ({
             </div>
 
             {/* Chart Area */}
-            <div className="flex gap-4 min-h-[150px] h-full">
+            <div className="flex gap-4 min-h-[140px] flex-1 min-h-0">
                 {/* Y-Axis */}
                 <div className="flex flex-col justify-between text-xs text-gray-400 py-1">
                     {yAxisLabels.map((label, i) => (

@@ -436,8 +436,8 @@ const AdminCourseDetailPage = () => {
                                     <h3 className="text-lg font-bold text-gray-900">{t("student_table", "Student Table")}</h3>
                                 </div>
 
-                                <div className="max-h-[400px] overflow-y-auto custom-scrollbar-thin">
-                                    <table className="w-full text-left border-collapse min-w-[900px]">
+                                <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar-thin">
+                                    <table className="w-full text-left border-collapse min-w-[780px] xl:min-w-full">
                                         <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
                                             <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
                                                 <th className="px-6 py-4 w-[15%]">{t("name", "Name")}</th>
@@ -453,21 +453,30 @@ const AdminCourseDetailPage = () => {
                                             {paginatedStudents.map((student) => (
                                                 <tr key={student.id} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
                                                     <td className="px-6 py-4">
-                                                        <span className="font-medium text-gray-900">{student.name}</span>
+                                                        <span className="font-medium text-gray-900 block max-w-[140px] truncate" title={student.name}>{student.name}</span>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex flex-col">
-                                                            <span className="text-gray-800 font-medium">{student.email}</span>
-                                                            <span className="text-gray-500">{student.phone}</span>
+                                                            <span className="text-gray-800 font-medium block max-w-[160px] truncate" title={student.email}>{student.email}</span>
+                                                            <span className="text-gray-500 block max-w-[130px] truncate" title={student.phone}>{student.phone}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
                                                         <div className="flex flex-col gap-1 items-center">
-                                                            {student.enrollments.slice(0, 3).map((course, idx) => (
-                                                                <span key={idx} className="text-[11px] text-blue-500 underline cursor-pointer hover:text-blue-700">
-                                                                    {course}
-                                                                </span>
-                                                            ))}
+                                                            {student.enrollments.slice(0, 3).map((course, idx) => {
+                                                                const rawTitle = String(course || '');
+                                                                const words = rawTitle.trim().split(/\s+/);
+                                                                const displayTitle = words.length > 2 ? `${words.slice(0, 2).join(' ')}...` : rawTitle;
+                                                                return (
+                                                                    <span 
+                                                                        key={idx} 
+                                                                        title={rawTitle}
+                                                                        className="text-[11px] text-blue-500 underline cursor-pointer hover:text-blue-700 block max-w-[150px] truncate mx-auto"
+                                                                    >
+                                                                        {displayTitle}
+                                                                    </span>
+                                                                );
+                                                            })}
                                                             {student.enrollments.length > 3 && (
                                                                 <span className="text-[11px] text-gray-400 font-medium mt-0.5">
                                                                     + {student.enrollments.length - 3} more
