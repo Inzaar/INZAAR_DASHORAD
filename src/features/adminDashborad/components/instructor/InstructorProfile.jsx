@@ -127,64 +127,58 @@ function InstructorProfile({ profileData, type = 'instructor', pendingProfileIma
     <>
 
 
-      <form key={user._id ? `profile-form-${user._id}` : 'form'} onSubmit={handleSave} className="w-full rounded-[10px] border border-[#ECECEC] p-[14px]">
+      <form key={user._id ? `profile-form-${user._id}` : 'form'} onSubmit={handleSave} className="w-full rounded-xl border border-[#ECECEC] p-3.5 sm:p-6 bg-white shadow-sm">
         <div className="w-full mx-auto">
 
           {/* Header */}
-          <div className="w-full flex justify-between items-center mb-6">
-            <h3 className="text-[18px] font-medium">Profile Details</h3>
-
-            <div className="flex gap-[12px] items-center">
-
-
-
-            </div>
+          <div className="w-full flex justify-between items-center mb-3 sm:mb-5">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800">Profile Details</h3>
           </div>
 
-          {/* Flex Form */}
-          <div className="w-full mt-[20px] flex flex-wrap gap-[20px]">
+          {/* Grid Form */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
 
             {/* First Name / Full Name */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-1 lg:order-1">
-              <label className="font-medium text-[14px]">{isStudent ? "Full Name" : "First name"}</label>
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">{isStudent ? "Full Name" : "First name"}</label>
               <input
                 type="text"
                 name="firstname"
                 placeholder="Enter first name"
                 defaultValue={user.firstname || user.username || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
               />
             </div>
 
             {/* Last Name (for non-students) */}
             {!isStudent && (
-              <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-2 lg:order-2">
-                <label className="font-medium text-[14px]">Last name</label>
+              <div className="flex flex-col gap-1.5 w-full">
+                <label className="font-medium text-xs sm:text-sm text-gray-700">Last name</label>
                 <input
                   type="text"
                   name="lastname"
                   placeholder="Enter last name"
                   defaultValue={user.lastname || ""}
-                  className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
+                  className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
                 />
               </div>
             )}
 
             {/* Email */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-5 lg:order-2">
-              <label className="font-medium text-[14px]">Email</label>
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">Email</label>
               <input
                 type="text"
                 name="email"
                 placeholder="Enter email"
                 defaultValue={user.email || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
               />
             </div>
 
             {/* Number */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-2 lg:order-3">
-              <label className="font-medium text-[14px]">Number</label>
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">Number</label>
               <PhoneInput
                 name="phone"
                 value={phone}
@@ -194,145 +188,81 @@ function InstructorProfile({ profileData, type = 'instructor', pendingProfileIma
               />
             </div>
 
+            {/* CNIC */}
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">CNIC / Passport</label>
+              <input
+                type="text"
+                name="cnic"
+                placeholder="23456-2389-1"
+                defaultValue={user.cnic || ""}
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
+              />
+            </div>
+
+            {/* Nationality */}
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">Nationality</label>
+              <input
+                type="text"
+                name="nationality"
+                placeholder="Enter Your Nationality"
+                defaultValue={user.nationality || ""}
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
+              />
+            </div>
+
             {/* Gender */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-6 lg:order-4">
-              <label className="font-medium text-[14px]">Gender</label>
-              <select name="gender" className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none" defaultValue={user.gender || "Choose"}>
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">Gender</label>
+              <select
+                name="gender"
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none bg-white transition-all"
+                defaultValue={user.gender || "Choose"}
+              >
                 <option>Choose</option>
                 <option>Male</option>
                 <option>Female</option>
               </select>
             </div>
 
-            {/* CNIC */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-3 lg:order-5">
-              <label className="font-medium text-[14px]">CNIC / Passport</label>
-              <input
-                type="text"
-                name="cnic"
-                placeholder="23456-2389-1"
-                defaultValue={user.cnic || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
-              />
-            </div>
-
             {/* Address */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-7 lg:order-6">
-              <label className="font-medium text-[14px]">Address</label>
+            <div className="flex flex-col gap-1.5 w-full">
+              <label className="font-medium text-xs sm:text-sm text-gray-700">Address</label>
               <input
                 type="text"
                 name="permanentAddress"
+                placeholder="Enter address"
                 defaultValue={user.permanentAddress || user.city || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
-              />
-            </div>
-
-            {/* Nationality */}
-            <div className="flex flex-col gap-[8px] w-full lg:w-[48%] order-4 lg:order-7">
-              <label className="font-medium text-[14px]">Nationality</label>
-              <input
-                type="text"
-                name="nationality"
-                placeholder="Enter Your Nationality"
-                defaultValue={user.nationality || ""}
-                className="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none"
+                className="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs sm:text-sm outline-none transition-all"
               />
             </div>
 
             {/* Educational Qualification */}
-            <EducationalQualificationInput
-              value={educationQualification}
-              onChange={setEducationQualification}
-              label="Educational Qualification"
-              labelClassName="font-medium text-[14px]"
-              containerClassName="flex flex-col gap-[8px] w-full lg:w-[48%] order-8 lg:order-8"
-              selectClassName="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none bg-white"
-              inputClassName="w-full h-[48px] rounded-md px-3 border border-[#E4E4E7] outline-none mt-2"
-              placeholder="Select Educational Qualification"
-              otherPlaceholder="Specify your qualification"
-              name="educationQualification"
-            />
-
-
-
-            {/* Front CNIC */}
-            {/* 
-            <div className="w-full lg:w-[48%] order-9 lg:order-9">
-              <p className="mb-2 text-[14px] font-medium">Front CNIC</p>
-              <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
-                {cnicFrontPreview ? (
-                  <>
-                    <img src={cnicFrontPreview} alt="Front CNIC Preview" className="w-full h-full object-cover" />
-                    <a href={cnicFrontPreview} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 hover:bg-black/80 text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 backdrop-blur-sm">
-                      View File
-                    </a>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
-                    <p className="text-[10px] text-[#666666]">
-                      Upload Front CNIC
-                    </p>
-                  </div>
-                )}
-                <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
-                  Browse
-                  <input
-                    type="file"
-                    name="cnicFrontImageFile"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setCnicFrontPreview(URL.createObjectURL(file));
-                    }}
-                  />
-                </label>
-              </div>
+            <div className="w-full md:col-span-2">
+              <EducationalQualificationInput
+                value={educationQualification}
+                onChange={setEducationQualification}
+                label="Educational Qualification"
+                labelClassName="font-medium text-xs sm:text-sm text-gray-700"
+                containerClassName="flex flex-col gap-1.5 w-full"
+                selectClassName="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] outline-none bg-white text-xs sm:text-sm"
+                inputClassName="w-full h-[42px] sm:h-[46px] rounded-lg px-3 border border-[#E4E4E7] outline-none mt-2 text-xs sm:text-sm"
+                placeholder="Select Educational Qualification"
+                otherPlaceholder="Specify your qualification"
+                name="educationQualification"
+              />
             </div>
-            */}
-
-            {/* Back CNIC */}
-            {/* 
-            <div className="w-full lg:w-[48%] order-10 lg:order-10">
-              <p className="mb-2 text-[14px] font-medium">Back CNIC</p>
-              <div className="w-full aspect-[1.58/1] rounded-[10px] border border-[#E4E4E7] flex justify-center items-center overflow-hidden relative group">
-                {cnicBackPreview ? (
-                  <>
-                    <img src={cnicBackPreview} alt="Back CNIC Preview" className="w-full h-full object-cover" />
-                    <a href={cnicBackPreview} target="_blank" rel="noopener noreferrer" className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 hover:bg-black/80 text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 backdrop-blur-sm">
-                      View File
-                    </a>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <FaIdCard className="w-[46px] h-[30px] text-[#A7A7A7]" />
-                    <p className="text-[10px] text-[#666666]">
-                      Upload Back CNIC
-                    </p>
-                  </div>
-                )}
-                <label className="absolute bottom-3 bg-[#265CEB] rounded-[6px] text-white w-[80px] h-[30px] text-[12px] flex items-center justify-center cursor-pointer opacity-90 hover:opacity-100 z-10 font-medium">
-                  Browse
-                  <input
-                    type="file"
-                    name="cnicBackImageFile"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) setCnicBackPreview(URL.createObjectURL(file));
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
-            */}
           </div>
         </div>
-        <div className="flex justify-end mt-[10px]">
-          <button type="submit" disabled={isSaving} className="w-[90px] h-[40px] rounded-[4px] text-sm text-white font-medium bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center">
-            {isSaving ? "Saving" : "Save"}
+
+        <div className="flex justify-end mt-4 sm:mt-6">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all flex items-center justify-center disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save"}
           </button>
         </div>
       </form>

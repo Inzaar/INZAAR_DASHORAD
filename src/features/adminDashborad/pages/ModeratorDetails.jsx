@@ -154,7 +154,7 @@ const ModeratorDetails = () => {
       <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
         <Navbar onMenuClick={toggleSidebar} />
 
-        <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
+        <div className="flex flex-col lg:flex-row px-2 sm:px-4 gap-4 flex-1 overflow-hidden relative pb-4">
           {isSidebarOpen && (
             <div
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -176,19 +176,17 @@ const ModeratorDetails = () => {
             className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide"
             style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
           >
-            <div className="py-4 pr-2">
-              <div className="bg-white shadow rounded-lg p-4">
-                <div className="hidden md:flex justify-between items-center mb-4">
-                  <h1 className="flex items-center gap-3 text-xl font-semibold text-gray-700">
-                    <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[13px] font-bold rounded-lg shadow-sm tracking-wide">
+            <div className="py-2 sm:py-4 px-1 sm:px-0 sm:pr-2 flex-1 flex flex-col min-h-full">
+              <div className="bg-white shadow rounded-lg p-3 sm:p-5 flex-1 flex flex-col">
+                {/* Top Header - Always visible and responsive on all screens */}
+                <div className="flex flex-row items-center justify-between gap-2 mb-4 flex-wrap">
+                  <h1 className="flex items-center gap-2 text-base sm:text-xl font-semibold text-gray-700 shrink-0">
+                    <span className="px-2.5 sm:px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-[12px] sm:text-[13px] font-bold rounded-lg shadow-sm tracking-wide">
                       {profileData?.user?.moderatorTier || "Junior"}
                     </span>
-                    Profile
+                    <span>Profile</span>
                   </h1>
-                  <div className="flex flex-wrap items-center gap-3">
-                    {/* <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
-                      Send Message <BsChatDotsFill className="text-white/90" size={14} />
-                    </button> */}
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 w-auto justify-end shrink-0">
                     <button
                       onClick={() => {
                         if (profileData?.user?.phone) {
@@ -198,24 +196,24 @@ const ModeratorDetails = () => {
                           toast.error("Phone number not available");
                         }
                       }}
-                      className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm"
+                      className="flex items-center gap-1 sm:gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors shadow-sm shrink-0"
                     >
-                      WhatsApp <FaWhatsapp size={16} />
+                      <span>WhatsApp</span> <FaWhatsapp size={14} className="sm:w-[15px] sm:h-[15px]" />
                     </button>
-                    <GradiantButton
+                    <button
                       onClick={() => navigate('/admin-moderators')}
-                      className="bg-[#A892FF] hover:bg-[#937aff] text-white px-5 py-2 rounded-[4px] text-sm md:mt-0 font-medium shadow-sm"
+                      className="flex items-center justify-center bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium shadow-sm transition-all shrink-0"
                     >
                       Back to list
-                    </GradiantButton>
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex flex-row justify-between items-center w-full gap-2 mt-4 sm:mt-0">
-                  <div className="flex bg-gray-100 p-1 rounded-md flex-wrap items-center w-fit justify-start">
+                <div className="flex flex-row justify-between items-center w-full gap-1.5 sm:gap-2 mt-2 sm:mt-0">
+                  <div className="flex bg-gray-100 p-0.5 sm:p-1 rounded-md items-center w-full sm:w-fit justify-start overflow-x-auto no-scrollbar scrollbar-hide py-0.5 sm:py-1">
                     <button
                       onClick={() => setProfileButton('Profile')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'Profile'
+                      className={`px-2 min-[360px]:px-3 sm:px-4 xl:px-5 py-1 sm:py-1.5 text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-[14px] font-medium rounded-md transition-all duration-200 shrink-0 ${profileButton === 'Profile'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -224,7 +222,7 @@ const ModeratorDetails = () => {
                     </button>
                     <button
                       onClick={() => setProfileButton('batchs')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'batchs'
+                      className={`px-2 min-[360px]:px-3 sm:px-4 xl:px-5 py-1 sm:py-1.5 text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-[14px] font-medium rounded-md transition-all duration-200 shrink-0 ${profileButton === 'batchs'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -233,7 +231,7 @@ const ModeratorDetails = () => {
                     </button>
                     <button
                       onClick={() => setProfileButton('records')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'records'
+                      className={`px-2 min-[360px]:px-3 sm:px-4 xl:px-5 py-1 sm:py-1.5 text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-[14px] font-medium rounded-md transition-all duration-200 shrink-0 ${profileButton === 'records'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -242,7 +240,7 @@ const ModeratorDetails = () => {
                     </button>
                     <button
                       onClick={() => setProfileButton('upgradation')}
-                      className={`px-2 min-[400px]:px-3 sm:px-6 py-1.5 sm:py-2 text-[11px] min-[400px]:text-[13px] sm:text-[14px] font-medium rounded-md transition-all duration-200 ${profileButton === 'upgradation'
+                      className={`px-2 min-[360px]:px-3 sm:px-4 xl:px-5 py-1 sm:py-1.5 text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-[14px] font-medium rounded-md transition-all duration-200 shrink-0 ${profileButton === 'upgradation'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
@@ -289,12 +287,12 @@ const ModeratorDetails = () => {
                   </div>
 
                   {/* responsive 3 dot icon */}
-                  <div ref={dropdownRef} className="relative xl:hidden ml-auto">
+                  <div ref={dropdownRef} className="relative xl:hidden ml-auto shrink-0">
                     <button
                       onClick={() => setOpen(!open)}
-                      className="p-2 rounded-md hover:bg-gray-200 transition-colors"
+                      className="p-1.5 sm:p-2 rounded-md hover:bg-gray-200 transition-colors"
                     >
-                      <BsThreeDotsVertical size={20} />
+                      <BsThreeDotsVertical size={18} className="sm:w-5 sm:h-5 text-gray-600" />
                     </button>
 
                     {open && (

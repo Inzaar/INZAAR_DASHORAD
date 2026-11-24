@@ -152,13 +152,14 @@ const AdminDashboard = () => {
                                 <div className=" flex flex-col gap-6">
 
                                     {/* Stats Cards Section */}
-                                    <div className="flex xl:grid xl:grid-cols-4 gap-3 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0">
+                                    <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible">
                                         <StatsCard
                                             title="Total Registered Students"
                                             value={studentCount.toString()}
                                             trend="2.4%"
                                             trendDirection="up"
                                             onClick={() => navigate('/registered-users?type=all_students')}
+                                            className="w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                         />
                                         <StatsCard
                                             title="Inactive Students"
@@ -167,6 +168,7 @@ const AdminDashboard = () => {
                                             trendDirection="up"
                                             trendText="vs last week"
                                             onClick={() => navigate('/registered-users?type=inactive_students')}
+                                            className="w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                         />
                                         <StatsCard
                                             title="Total Courses"
@@ -175,6 +177,7 @@ const AdminDashboard = () => {
                                             trendDirection="down"
                                             trendText="vs last month"
                                             onClick={() => navigate('/registered-courses?type=all')}
+                                            className="w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                         />
                                         <StatsCard
                                             title="Total Moderator"
@@ -183,6 +186,7 @@ const AdminDashboard = () => {
                                             trendDirection="up"
                                             trendText="vs last month"
                                             onClick={() => navigate('/registered-users?type=moderators')}
+                                            className="w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                         />
                                     </div>
 

@@ -78,7 +78,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         '/admin-dashboard': 'Dashboard',
         '/admin-calendar': 'Calendar',
         '/admin-notifications': 'Notification',
-        '/admin-moderators': 'Moderators',
+        '/admin-moderators': 'All Moderators',
         '/admin-moderators/all': 'All Moderators',
         '/admin-moderators/male': 'Male Moderators',
         '/admin-moderators/female': 'Female Moderators',

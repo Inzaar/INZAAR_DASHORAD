@@ -49,7 +49,7 @@ function InstructorBatchesComponent({ profileData, onEditClick, onViewDetails })
         <div >
             {/* Top Section: Roll + Session */}
             <div className="mt-[20px] w-full">
-                <div className="sm:flex-row lg:flex  gap-[16px]">
+                <div className="flex flex-col xl:flex-row w-full gap-[16px]">
                     <InstructorRoll profileData={profileData} />
                     <SessionActivity profileData={profileData} />
                 </div>
@@ -60,21 +60,21 @@ function InstructorBatchesComponent({ profileData, onEditClick, onViewDetails })
                 <div className="w-full rounded-[10px]">
                     <div className="w-full">
                         {/* heading */}
-                        <div className="w-full h-[40px] flex justify-between items-center pt-[24px] pr-[14px] pb-[24px] pl-[14px]">
-                            <h3 className="">Assigned Groups</h3>
-                            <div className="flex gap-[12px]">
-                                <GradiantButton
+                        <div className="w-full flex flex-row items-center justify-between gap-3 py-3 px-1 sm:px-2 flex-wrap">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-800 shrink-0">Assigned Groups</h3>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
                                     onClick={onEditClick}
-                                    className="bg-gray-200 text-gray-700 hover:bg-gray-300 w-[63px] h-[37px] rounded-sm"
+                                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm"
                                 >
-                                    <span className="text-[14px]">Edit</span>
-                                </GradiantButton>
-                                <GradiantButton
+                                    Edit
+                                </button>
+                                <button
                                     onClick={() => setShowBatchModal(true)}
-                                    className="bg-indigo-500 text-white hover:bg-indigo-600 w-[161px] h-[37px] rounded-sm"
+                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition-all"
                                 >
-                                    <span className="text-[14px]">Assign new group</span>
-                                </GradiantButton>
+                                    Assign new group
+                                </button>
                             </div>
                         </div>
 

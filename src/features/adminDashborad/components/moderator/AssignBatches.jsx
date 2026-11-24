@@ -18,7 +18,7 @@ function AssignBatches({
     return (
         <div className=" w-full flex flex-col rounded-2xl shadow-md bg-white p-3">
             {/* Image */}
-            <div className="relative">
+            <div className="relative w-full overflow-hidden rounded-xl">
                 <img
                     src={image || course2}
                     alt={title}
@@ -26,12 +26,12 @@ function AssignBatches({
                 />
 
                 {/* Top Overlay */}
-                <div className="w-[95%] flex justify-between absolute top-2 left-3">
-                    <span className="bg-white/90 text-gray-800 font-bold text-[11px] px-2 py-1 rounded flex items-center gap-1">
+                <div className="w-full px-2.5 flex justify-between absolute top-2 left-0">
+                    <span className="bg-white/95 backdrop-blur-sm text-gray-800 font-bold text-[11px] px-2 py-1 rounded-md shadow-xs flex items-center gap-1">
                         <PiStudentBold size={14} className="text-blue-600" />
                         {students}
                     </span>
-                    <span className="bg-white/90 text-gray-800 font-bold text-[11px] px-2 py-1 rounded flex items-center gap-1">
+                    <span className="bg-white/95 backdrop-blur-sm text-gray-800 font-bold text-[11px] px-2 py-1 rounded-md shadow-xs flex items-center gap-1">
                         <RiShieldUserLine size={14} className="text-purple-600" />
                         {moderators}
                     </span>

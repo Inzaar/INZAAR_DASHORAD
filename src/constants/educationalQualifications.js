@@ -27,6 +27,10 @@ export const parseQualification = (rawVal) => {
     return { selected: "", custom: "" };
   }
   const trimmed = String(rawVal).trim();
+  const lower = trimmed.toLowerCase();
+  if (["n/a", "na", "none", "null", "undefined", "-", "not available", "not applicable"].includes(lower)) {
+    return { selected: "", custom: "" };
+  }
   if (PREDEFINED_QUALIFICATIONS.includes(trimmed)) {
     return { selected: trimmed, custom: "" };
   }

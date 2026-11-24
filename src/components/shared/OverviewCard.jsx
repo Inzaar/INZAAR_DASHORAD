@@ -47,6 +47,9 @@ const OverviewCard = ({
     const getShortLabel = (label) => {
         if (!label) return "";
         const str = String(label).toLowerCase();
+        if (str.includes("in active") || str.includes("inactive")) return t("inactive", "Inactive");
+        if (str.includes("active student") || str.includes("active")) return t("active", "Active");
+        if (str.includes("spend rate") || str.includes("average spend")) return t("avg_spend", "Avg Spend");
         if (str.includes("completed")) return t("completed", "Completed");
         if (str.includes("progress")) return t("in_progress", "In Progress");
         if (str.includes("time spent")) return t("time_spent", "Time Spent");
@@ -59,31 +62,31 @@ const OverviewCard = ({
         const short = col.shortLabel || getShortLabel(col.label);
 
         return (
-            <div className="flex items-center gap-1.5 sm:gap-2.5 md:gap-3.5 min-w-0 shrink-0">
+            <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2.5 md:gap-3.5 min-w-0 w-full">
                 {/* Vertical accent bar with top & bottom dots */}
-                <div className="flex flex-col items-center h-8 sm:h-10 md:h-12 w-1.5 shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
-                    <div className="flex-1 w-[1.5px]" style={{ backgroundColor: col.color, opacity: 0.8 }}></div>
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                <div className="flex flex-col items-center h-7 min-[360px]:h-8 sm:h-10 md:h-12 w-1 sm:w-1.5 shrink-0">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                    <div className="flex-1 w-[1px] sm:w-[1.5px]" style={{ backgroundColor: col.color, opacity: 0.8 }}></div>
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
                 </div>
 
                 {/* Stat details */}
-                <div className="flex flex-col min-w-0 justify-center">
+                <div className="flex flex-col min-w-0 flex-1 justify-center leading-tight">
                     {loading ? (
                         <div className="h-5 sm:h-6 md:h-7 w-8 sm:w-12 bg-gray-200 rounded animate-pulse" />
                     ) : (
-                        <span className="text-sm min-[360px]:text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight leading-none truncate">
+                        <span className="text-xs min-[360px]:text-sm sm:text-xl md:text-2xl xl:text-3xl font-bold text-gray-900 tracking-tight leading-none truncate">
                             {col.value}
                         </span>
                     )}
                     <div
-                        className="flex items-center gap-1 sm:gap-1.5 text-[9.5px] min-[360px]:text-[10px] min-[420px]:text-[11px] sm:text-xs md:text-sm font-semibold sm:font-bold leading-tight mt-0.5 sm:mt-1 min-w-0"
+                        className="flex items-center gap-0.5 min-[360px]:gap-1 sm:gap-1.5 text-[8px] min-[360px]:text-[9.5px] min-[420px]:text-[11px] sm:text-xs xl:text-sm font-semibold xl:font-bold leading-tight mt-0.5 sm:mt-1 min-w-0"
                         style={{ color: col.color }}
                     >
-                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full shrink-0" style={{ backgroundColor: col.color }}></div>
+                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full shrink-0 hidden min-[380px]:block" style={{ backgroundColor: col.color }}></div>
                         <span className="truncate" title={col.label}>
-                            <span className="inline min-[520px]:hidden">{short}</span>
-                            <span className="hidden min-[520px]:inline">{col.label}</span>
+                            <span className="inline xl:hidden">{short}</span>
+                            <span className="hidden xl:inline">{col.label}</span>
                         </span>
                     </div>
                 </div>
@@ -91,17 +94,20 @@ const OverviewCard = ({
         );
     };
 
+    const activeCols = [stats.col1, stats.col2, stats.col3].filter(Boolean);
+    const colCount = activeCols.length;
+
     return (
         <div className={cn(
-            "bg-white border border-gray-100 rounded-[16px] p-3.5 sm:p-5 md:p-6 shadow-sm flex flex-col gap-2.5 sm:gap-4 md:gap-6 min-w-0 w-full",
+            "bg-white border border-gray-100 rounded-xl sm:rounded-[16px] p-3 sm:p-5 md:p-6 shadow-sm flex flex-col gap-2 sm:gap-4 md:gap-6 min-w-0 w-full",
             className
         )}>
             {/* Title */}
-            <p className="text-gray-400 text-xs sm:text-sm font-medium">{t("overview", "Overview")}</p>
+            <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">{t("overview", "OVERVIEW")}</p>
 
-            {/* Stats Row: Always in a single line, evenly spaced across the card */}
+            {/* Stats Row: 100% responsive grid, never overflows or clips */}
             <div className="w-full">
-                <div className="flex flex-row items-center justify-between w-full">
+                <div className={`grid ${colCount === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-1 min-[360px]:gap-1.5 sm:gap-4 md:gap-6 w-full items-center`}>
                     {stats.col1 && renderColumn(stats.col1)}
                     {stats.col2 && renderColumn(stats.col2)}
                     {stats.col3 && renderColumn(stats.col3)}

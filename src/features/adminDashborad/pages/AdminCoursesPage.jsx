@@ -199,7 +199,7 @@ const AdminCoursesPage = () => {
                             />
 
                             {/* Stats Grid */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-8">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-8">
                                 {stats.map((stat, index) => {
                                     const types = ['all', 'active', 'inactive', 'draft'];
                                     return (

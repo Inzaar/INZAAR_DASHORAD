@@ -80,22 +80,20 @@ function SessionActivity({ profileData }) {
     }, [userId, fromDate]);
 
     return (
-        <div className="bg-white p-6 rounded-[4px] shadow-sm border border-gray-100 h-[301px] lg:w-[50%] sm:w-full">
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-                <h3 className="text-gray-900 font-medium">{t('auth.session_activity', 'Session Activity')}</h3>
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                        <label className="text-xs text-gray-500">From:</label>
-                        <input 
-                            type="date" 
-                            value={fromDate}
-                            onChange={(e) => setFromDate(e.target.value)}
-                            className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50" 
-                        />
-                    </div>
+        <div className="bg-white p-3.5 sm:p-5 rounded-[12px] shadow-sm border border-[#ECECEC] min-h-[300px] w-full xl:w-[50%] flex flex-col justify-between">
+            <div className="flex justify-between items-center mb-3 sm:mb-4 flex-wrap gap-2">
+                <h3 className="text-gray-900 font-bold text-sm sm:text-base">{t('auth.session_activity', 'Session Activity')}</h3>
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <label className="text-xs text-gray-500 font-medium shrink-0">From:</label>
+                    <input 
+                        type="date" 
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        className="border border-gray-200 rounded-md px-2 py-1 text-xs text-gray-700 outline-none bg-gray-50 focus:border-blue-400 max-w-[130px] sm:max-w-none" 
+                    />
                 </div>
             </div>
-            <div className="h-[220px] w-full">
+            <div className="h-[200px] sm:h-[220px] w-full min-h-0">
                 {loading ? (
                     <div className="flex items-center justify-center h-full text-gray-400 text-sm">
                         {t('auth.loading_session_data', 'Loading session data...')}
@@ -104,8 +102,8 @@ function SessionActivity({ profileData }) {
                     <ResponsiveContainer width="100%" height="100%" minWidth={1}>
                         <LineChart data={sessionData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
-                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} allowDecimals={false} />
+                            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 10 }} dy={8} interval="preserveStartEnd" />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} allowDecimals={false} width={25} />
                             <Tooltip
                                 contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                                 formatter={(value) => [`${value} ${t('auth.sessions', 'sessions')}`, t('auth.sessions', 'Sessions')]}
@@ -116,7 +114,7 @@ function SessionActivity({ profileData }) {
                                     return label;
                                 }}
                             />
-                            <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }} />
+                            <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3.5, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }} />
                         </LineChart>
                     </ResponsiveContainer>
                 )}

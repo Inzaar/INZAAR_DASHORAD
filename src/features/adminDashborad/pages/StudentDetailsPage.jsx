@@ -149,7 +149,7 @@ const StudentDetailsPage = () => {
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className="flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4">
+                <div className="flex flex-col lg:flex-row px-2 sm:px-4 gap-4 flex-1 overflow-hidden relative pb-4">
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -167,25 +167,22 @@ const StudentDetailsPage = () => {
                         `}
                     />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide">
-                        <div className="py-4 pr-2">
-                            <div className="bg-white shadow rounded-lg p-4">
+                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}>
+                        <div className="py-2 sm:py-4 px-1 sm:px-0 sm:pr-2">
+                            <div className="bg-white shadow-sm rounded-xl p-3 sm:p-5">
                                 {/* Header Title and Back Button */}
-                                <div className="hidden sm:flex sm:flex-row justify-between items-start sm:items-center mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                <div className="flex flex-row items-center justify-between gap-3 mb-4 flex-wrap">
+                                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                                        <h1 className="text-base sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
                                             Profile
                                             {selectedCategory && (
-                                                <span className="px-2 py-0.5 rounded bg-blue-100 text-[#3758EE] text-sm font-semibold">
+                                                <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-[#3758EE] text-xs sm:text-sm font-semibold">
                                                     {selectedCategory}
                                                 </span>
                                             )}
                                         </h1>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        {/* <button className="flex items-center gap-2 bg-[#4E6BFF] hover:bg-[#3f5be0] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm">
-                                            Send Message <BsChatDotsFill className="text-white/90" size={14} />
-                                        </button> */}
+                                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                                         <button
                                             onClick={() => {
                                                 if (profileData?.user?.phone) {
@@ -195,27 +192,27 @@ const StudentDetailsPage = () => {
                                                     toast.error("Phone number not available");
                                                 }
                                             }}
-                                            className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm"
+                                            className="flex items-center gap-1.5 sm:gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors shadow-sm"
                                         >
-                                            WhatsApp <FaWhatsapp size={16} />
+                                            <span>WhatsApp</span> <FaWhatsapp size={14} className="sm:w-[15px] sm:h-[15px]" />
                                         </button>
-                                        <GradiantButton
+                                        <button
                                             onClick={() => navigate(-1)}
-                                            className="bg-[#A892FF] hover:bg-[#937aff] text-white px-5 py-2 rounded-[4px] text-sm mt-2 sm:mt-0 font-medium shadow-sm"
+                                            className="flex items-center justify-center bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium shadow-sm transition-all"
                                         >
                                             Back to list
-                                        </GradiantButton>
+                                        </button>
                                     </div>
                                 </div>
 
                                 {/* Tabs and Actions Bar */}
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-4 mb-4">
-                                    <div className="hidden md:flex items-center bg-gray-100 rounded-[4px] p-1 w-auto shrink-0">
+                                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 border-b border-gray-100 pb-3 sm:pb-4 mb-4">
+                                    <div className="flex items-center bg-gray-100 rounded-lg p-1 w-full xl:w-auto shrink-0 overflow-x-auto no-scrollbar scrollbar-hide py-1">
                                         {tabs.map((tab) => (
                                             <button
                                                 key={tab}
                                                 onClick={() => setActiveTab(tab)}
-                                                className={`px-4 py-2 text-sm font-medium transition-all whitespace-nowrap rounded-[4px] ${activeTab === tab
+                                                className={`px-2.5 min-[360px]:px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md shrink-0 ${activeTab === tab
                                                     ? 'bg-white text-gray-800 shadow-sm'
                                                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
                                                     }`}
@@ -225,17 +222,17 @@ const StudentDetailsPage = () => {
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-                                        <span className="text-sm text-gray-500 font-medium whitespace-nowrap">
-                                            Joining: <span className="text-gray-800">10/04/2025</span>
+                                    <div className="flex items-center justify-between xl:justify-end gap-2.5 sm:gap-3.5 w-full xl:w-auto">
+                                        <span className="text-xs sm:text-sm text-gray-500 font-medium whitespace-nowrap">
+                                            Joining: <span className="text-gray-800 font-semibold">{profileData?.user?.createdAt ? new Date(profileData.user.createdAt).toLocaleDateString() : '10/04/2025'}</span>
                                         </span>
 
-                                        {user?.role === 'admin' && (
-                                            <div className="flex items-center">
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                            {user?.role === 'admin' && (
                                                 <select
                                                     value={selectedCategory}
                                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    className="px-3 py-1.5 border border-gray-200 rounded-[4px] text-sm text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-[#3758EE] focus:border-[#3758EE] bg-white transition-colors cursor-pointer w-40"
+                                                    className="px-2.5 sm:px-3 py-1 sm:py-1.5 border border-gray-200 rounded-md text-xs sm:text-sm text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-[#3758EE] focus:border-[#3758EE] bg-white transition-colors cursor-pointer w-28 sm:w-36"
                                                 >
                                                     <option value="" disabled>Set Category</option>
                                                     <option value="A">Category A</option>
@@ -243,125 +240,131 @@ const StudentDetailsPage = () => {
                                                     <option value="C">Category C</option>
                                                     <option value="D">Category D</option>
                                                 </select>
-                                            </div>
-                                        )}
-
-                                        <div className="hidden xl:flex items-center gap-4">
-                                            {!profileData?.user?.isDeleted ? (
-                                                <button
-                                                    onClick={() => setIsDeleteModalOpen(true)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-[#B1B1B1] text-white rounded-[4px] text-sm font-medium hover:bg-gray-400 transition-all shadow-sm"
-                                                >
-                                                    <img src={deactivate} alt="Deactivate" className="w-4 h-4 object-contain" />
-                                                    Deactivate
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => setIsRestoreModalOpen(true)}
-                                                    className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-4 py-2 rounded-[4px] text-sm transition flex items-center justify-center gap-2 shadow-sm shadow-red-500/30"
-                                                >
-                                                    <RiDeleteBin6Fill className="rotate-180" /> Restore
-                                                </button>
                                             )}
 
-                                            {user?.role === 'admin' && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`text-sm font-medium whitespace-nowrap ${profileData?.user?.isDeleted ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                        Switch as Moderator
-                                                    </span>
-                                                    <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-90`}>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="sr-only peer"
-                                                            checked={isModerator}
-                                                            disabled={profileData?.user?.isDeleted}
-                                                            onChange={() => {
-                                                                handleSwitchAsModeratorClick();
-                                                            }}
-                                                        />
-                                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
-                                                    </label>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* 3-dot actions — hidden on xl+ */}
-                                        <div ref={dropdownRef} className="relative xl:hidden">
-                                            <button onClick={() => setOpen(!open)} className="p-2 rounded-md hover:bg-gray-100 text-gray-500 transition-colors">
-                                                <BsThreeDotsVertical size={20} />
-                                            </button>
-                                            {open && (
-                                                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-xl z-50 p-2 animate-in fade-in zoom-in duration-200 origin-top-right">
-                                                    {/* Navigation Section — hidden on md+ since tabs show outside */}
-                                                    <div className="md:hidden mb-2 pb-2 border-b border-gray-100">
-                                                        <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Navigation</p>
-                                                        {tabs.map((tab) => (
-                                                            <button
-                                                                key={tab}
-                                                                onClick={() => {
-                                                                    setActiveTab(tab);
-                                                                    setOpen(false);
-                                                                }}
-                                                                className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${activeTab === tab
-                                                                    ? 'bg-blue-50 text-[#3758EE]'
-                                                                    : 'text-gray-600 hover:bg-gray-50'
-                                                                    }`}
-                                                            >
-                                                                {tab}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-
-                                                    {/* Actions Section */}
-                                                    <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
-                                                    {!profileData?.user?.isDeleted ? (
-                                                        <button
-                                                            onClick={() => { setIsDeleteModalOpen(true); setOpen(false); }}
-                                                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
-                                                        >
-                                                            Deactivate Profile
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => { setIsRestoreModalOpen(true); setOpen(false); }}
-                                                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors text-left font-sans"
-                                                        >
-                                                            <RiDeleteBin6Fill className="w-4 h-4 rotate-180" /> Restore Profile
-                                                        </button>
-                                                    )}
-                                                    {user?.role === 'admin' && (
-                                                        <div className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md transition-colors ${profileData?.user?.isDeleted ? 'text-gray-400 hover:bg-transparent' : 'text-gray-600 hover:bg-gray-50'}`}>
-                                                            <span>Switch as Moderator</span>
-                                                            <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-[0.8]`}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="sr-only peer"
-                                                                    checked={isModerator}
-                                                                    disabled={profileData?.user?.isDeleted}
-                                                                    onChange={() => {
-                                                                        handleSwitchAsModeratorClick();
-                                                                    }}
-                                                                />
-                                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
-                                                            </label>
-                                                        </div>
-                                                    )}
+                                            {/* Direct action buttons on 2xl+ */}
+                                            <div className="hidden 2xl:flex items-center gap-3">
+                                                {!profileData?.user?.isDeleted ? (
                                                     <button
-                                                        onClick={() => {
-                                                            if (profileData?.user?.phone) {
-                                                                const phone = profileData.user.phone.replace(/\D/g, '');
-                                                                window.open(`https://wa.me/${phone}`, '_blank');
-                                                                setOpen(false);
-                                                            } else {
-                                                                toast.error("Phone number not available");
-                                                            }
-                                                        }}
-                                                        className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
+                                                        onClick={() => setIsDeleteModalOpen(true)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-xs sm:text-sm font-medium transition-all shadow-xs"
                                                     >
-                                                        WhatsApp <FaWhatsapp size={16} className="text-[#25D366]" />
+                                                        <img src={deactivate} alt="Deactivate" className="w-3.5 h-3.5 object-contain" />
+                                                        Deactivate
                                                     </button>
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setIsRestoreModalOpen(true)}
+                                                        className="bg-gradient-to-r from-[#FF4E4E] to-[#E52222] hover:opacity-90 text-white px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition flex items-center justify-center gap-1.5 shadow-sm shadow-red-500/30"
+                                                    >
+                                                        <RiDeleteBin6Fill className="rotate-180" size={14} /> Restore
+                                                    </button>
+                                                )}
+
+                                                {user?.role === 'admin' && (
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-xs sm:text-sm font-medium whitespace-nowrap ${profileData?.user?.isDeleted ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            Switch as Moderator
+                                                        </span>
+                                                        <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-85`}>
+                                                            <input
+                                                                type="checkbox"
+                                                                className="sr-only peer"
+                                                                checked={isModerator}
+                                                                disabled={profileData?.user?.isDeleted}
+                                                                onChange={() => {
+                                                                    handleSwitchAsModeratorClick();
+                                                                }}
+                                                            />
+                                                            <div className="w-10 h-5.5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#3758EE]"></div>
+                                                        </label>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* 3-dot actions — visible on screens < 2xl */}
+                                            <div ref={dropdownRef} className="relative 2xl:hidden">
+                                                <button
+                                                    onClick={() => setOpen(!open)}
+                                                    className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 text-gray-500 transition-colors"
+                                                    aria-label="More actions"
+                                                >
+                                                    <BsThreeDotsVertical size={18} className="sm:w-5 sm:h-5 text-gray-600" />
+                                                </button>
+                                                {open && (
+                                                    <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-gray-100 rounded-xl shadow-xl z-50 p-2 animate-in fade-in zoom-in duration-200 origin-top-right">
+                                                        {/* Navigation Section — hidden on md+ since tabs show outside */}
+                                                        <div className="md:hidden mb-2 pb-2 border-b border-gray-100">
+                                                            <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Navigation</p>
+                                                            {tabs.map((tab) => (
+                                                                <button
+                                                                    key={tab}
+                                                                    onClick={() => {
+                                                                        setActiveTab(tab);
+                                                                        setOpen(false);
+                                                                    }}
+                                                                    className={`flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-md transition-colors ${activeTab === tab
+                                                                        ? 'bg-blue-50 text-[#3758EE]'
+                                                                        : 'text-gray-600 hover:bg-gray-50'
+                                                                        }`}
+                                                                >
+                                                                    {tab}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Actions Section */}
+                                                        <p className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
+                                                        {!profileData?.user?.isDeleted ? (
+                                                            <button
+                                                                onClick={() => { setIsDeleteModalOpen(true); setOpen(false); }}
+                                                                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
+                                                            >
+                                                                <img src={deactivate} alt="Deactivate" className="w-4 h-4 object-contain opacity-70" />
+                                                                Deactivate Profile
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => { setIsRestoreModalOpen(true); setOpen(false); }}
+                                                                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors text-left font-sans"
+                                                            >
+                                                                <RiDeleteBin6Fill className="w-4 h-4 rotate-180" /> Restore Profile
+                                                            </button>
+                                                        )}
+                                                        {user?.role === 'admin' && (
+                                                            <div className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md transition-colors ${profileData?.user?.isDeleted ? 'text-gray-400 hover:bg-transparent' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                                                <span>Switch as Moderator</span>
+                                                                <label className={`relative inline-flex items-center ${profileData?.user?.isDeleted ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} scale-[0.8]`}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="sr-only peer"
+                                                                        checked={isModerator}
+                                                                        disabled={profileData?.user?.isDeleted}
+                                                                        onChange={() => {
+                                                                            handleSwitchAsModeratorClick();
+                                                                        }}
+                                                                    />
+                                                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3758EE]"></div>
+                                                                </label>
+                                                            </div>
+                                                        )}
+                                                        <button
+                                                            onClick={() => {
+                                                                if (profileData?.user?.phone) {
+                                                                    const phone = profileData.user.phone.replace(/\D/g, '');
+                                                                    window.open(`https://wa.me/${phone}`, '_blank');
+                                                                    setOpen(false);
+                                                                } else {
+                                                                    toast.error("Phone number not available");
+                                                                }
+                                                            }}
+                                                            className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md transition-colors text-left font-sans"
+                                                        >
+                                                            WhatsApp <FaWhatsapp size={16} className="text-[#25D366]" />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

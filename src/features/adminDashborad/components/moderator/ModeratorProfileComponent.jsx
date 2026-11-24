@@ -25,7 +25,7 @@ function ModeratorProfileComponent({ profileData, setProfileData, type = 'modera
     return (
         <div className="w-full">
             <div className="mt-[20px] w-full">
-                <div className="flex flex-col lg:flex-row w-full gap-[10px]">
+                <div className="flex flex-col xl:flex-row w-full gap-[16px]">
                     <ModeratorRoll
                         profileData={profileData}
                         type={type}

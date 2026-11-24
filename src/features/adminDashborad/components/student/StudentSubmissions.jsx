@@ -434,13 +434,13 @@ const StudentSubmissions = ({ profileData }) => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-[#FCFCFD] border-b border-gray-100">
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-16">#</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-32">Type</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Title</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-40 whitespace-nowrap">Submitted Date</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-32">Score/Marks</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-32">Status</th>
-                                    <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-32 text-center">Action</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-12 sm:w-16">#</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-24 sm:w-32">Type</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider">Title</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-32 sm:w-40 whitespace-nowrap">Submitted Date</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-24 sm:w-32">Score/Marks</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-24 sm:w-32">Status</th>
+                                    <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-24 sm:w-32 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -454,22 +454,22 @@ const StudentSubmissions = ({ profileData }) => {
                                     </tr>
                                 ) : paginatedSubmissions.map((sub, index) => (
                                     <tr key={sub.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 px-6 text-sm text-gray-500 font-medium">{startIndex + index + 1}</td>
-                                        <td className="py-4 px-6">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-bold ${getTypeStyle(sub.type)}`}>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-sm text-gray-500 font-medium">{startIndex + index + 1}</td>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6">
+                                            <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-[4px] text-[10px] font-bold ${getTypeStyle(sub.type)}`}>
                                                 {sub.type}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-6 text-[13px] text-gray-700 font-semibold">{sub.title}</td>
-                                        <td className="py-4 px-6 text-[13px] text-gray-500 font-medium">{sub.date}</td>
-                                        <td className="py-4 px-6 text-[13px] text-gray-800 font-bold">{sub.score}</td>
-                                        <td className="py-4 px-6">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-bold ${getStatusStyle(sub.status)}`}>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-[13px] text-gray-700 font-semibold">{sub.title}</td>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-[13px] text-gray-500 font-medium">{sub.date}</td>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6 text-xs sm:text-[13px] text-gray-800 font-bold">{sub.score}</td>
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6">
+                                            <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-[4px] text-[10px] font-bold ${getStatusStyle(sub.status)}`}>
                                                 {sub.status}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-6">
-                                            <div className="flex justify-center min-w-[80px]">
+                                        <td className="py-2.5 sm:py-4 px-3 sm:px-6">
+                                            <div className="flex justify-center min-w-[70px] sm:min-w-[80px]">
                                                 {sub.action === 'View' ? (
                                                     <button onClick={() => handleView(sub)} className="px-5 py-1.5 border border-[#3B82F6]/30 text-[#3B82F6] bg-white hover:bg-blue-50 rounded-[4px] text-[12px] font-bold transition-colors shadow-sm w-full max-w-[80px]">
                                                         View

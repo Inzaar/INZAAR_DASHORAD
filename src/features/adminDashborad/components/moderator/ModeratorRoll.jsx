@@ -126,10 +126,10 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
   };
 
   return (
-    <div className="w-full lg:w-[50%] h-auto lg:h-[301px] sm:w-full border border-[#ECECEC] rounded-[12px] pr-[10px] pl-[20px] flex lg:flex-row max-[620px]:flex-col bg-white shadow-sm text-gray-900">
-      <div className="w-full lg:w-[230px] h-auto lg:h-[301px] pt-[10px] pb-[10px] gap-[8px] flex flex-col items-center shrink-0">
+    <div className="w-full xl:w-[50%] h-auto min-h-[301px] border border-[#ECECEC] rounded-[12px] p-3.5 sm:p-5 flex flex-col sm:flex-row gap-4 bg-white shadow-sm text-gray-900">
+      <div className="w-full sm:w-[180px] md:w-[200px] xl:w-[220px] shrink-0 flex flex-col items-center gap-2">
         <h3 className="text-center text-[12px] font-bold text-gray-500 uppercase tracking-wider">PROFILE IMAGE</h3>
-        <div className="relative w-full h-[236px]">
+        <div className="relative w-[150px] sm:w-full aspect-square sm:aspect-auto sm:h-[180px] md:h-[200px] xl:h-[220px] max-w-[220px]">
           <img
             src={currentImage}
             onError={(e) => {
@@ -140,7 +140,7 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
             alt="ProfilePreview"
           />
         </div>
-        <label className="text-blue-600 text-sm font-bold cursor-pointer text-center block mt-[2px] hover:text-blue-700 transition-all active:scale-95">
+        <label className="text-blue-600 text-xs sm:text-sm font-bold cursor-pointer text-center block mt-[2px] hover:text-blue-700 transition-all active:scale-95">
           Change Profile Image
           <input
             type="file"
@@ -152,91 +152,87 @@ function ModeratorRoll({ profileData, type = 'moderator', pendingProfileImage, s
         </label>
       </div>
 
-      <div className="flex-1 h-auto lg:h-[301px] rounded-[8px] pt-4 pr-[4px] pb-[11px] pl-[14px] overflow-hidden">
-        <div className="w-full h-full flex flex-col gap-3">
-
-          {/* Full Name / Role */}
-          <div>
-            <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">
-              {isStudent ? "Full Name" : "Role"}
-            </h6>
-            <div className="w-full h-[36px] bg-[#F8F9FA] rounded-[6px] text-gray-900 flex items-center px-[10px] text-sm font-medium capitalize border border-gray-200">
-              {isStudent ? (
-                <span>{user.firstname || user.username || "Muhammad Zain"}</span>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold rounded-md shadow-sm tracking-wide">
-                    {user.moderatorTier || "Junior"}
-                  </span>
-                  <span className="text-gray-800 font-semibold">{user.role || "Moderator"}</span>
-                </div>
-              )}
-            </div>
+      <div className="flex-1 w-full min-w-0 flex flex-col justify-between gap-3">
+        {/* Full Name / Role */}
+        <div>
+          <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">
+            {isStudent ? "Full Name" : "Role"}
+          </h6>
+          <div className="w-full min-h-[38px] bg-[#F8F9FA] rounded-[6px] text-gray-900 flex items-center px-[10px] py-1 text-sm font-medium capitalize border border-gray-200">
+            {isStudent ? (
+              <span className="truncate">{user.firstname || user.username || "Muhammad Zain"}</span>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold rounded-md shadow-sm tracking-wide shrink-0">
+                  {user.moderatorTier || "Junior"}
+                </span>
+                <span className="text-gray-800 font-semibold">{user.role || "Moderator"}</span>
+              </div>
+            )}
           </div>
-
-          {/* Enroll Courses / System Roll */}
-          <div className="flex-1 flex flex-col gap-2 min-h-0">
-            <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">
-              {isStudent ? "Enroll Courses" : "System Roll"}
-            </h6>
-            <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[120px] custom-scrollbar-thin">
-              {isStudent ? (
-                <>
-                  {(profileData?.enrolledBatches || []).length > 0 ? (
-                    profileData.enrolledBatches.map((pair, idx) => (
-                      <div key={idx} className="w-full h-[40px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-gray-50 shadow-sm">
-                        <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all truncate block">
-                          {pair.courseName} ( {pair.batchName} )
-                        </a>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="w-full h-[40px] bg-gray-50 rounded-[6px] flex items-center px-[10px] text-gray-500 italic text-sm border border-gray-200">
-                      No courses enrolled
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {batchCoursePairs.length > 0 ? (
-                    batchCoursePairs.map((pair, idx) => (
-                      <div key={idx} className="w-full h-[40px] bg-blue-50 text-blue-600 rounded-[6px] flex items-center px-[10px] flex-shrink-0 border border-blue-100 shadow-sm font-bold">
-                        {pair.courseName} ( {pair.batchName} )
-                      </div>
-                    ))
-                  ) : (
-                    <div className="w-full h-[40px] bg-gray-50 rounded-[6px] flex items-center px-[10px] flex-shrink-0 text-gray-500 italic text-sm border border-gray-200">
-                      No groups assigned
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          <style dangerouslySetInnerHTML={{
-            __html: `
-            .custom-scrollbar-thin::-webkit-scrollbar { width: 4px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-            .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-          `}} />
-
-          {/* Employment Type (moderator only) */}
-          {!isStudent && (
-            <div className="mt-auto pb-1">
-              <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">Employment Type</h6>
-              <select
-                className="w-full h-[36px] bg-white text-[#1A1A1A] rounded-[6px] text-sm font-bold outline-none border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-all focus:ring-2 focus:ring-blue-300"
-                defaultValue={user.employmentType || "Full-time"}
-              >
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-              </select>
-            </div>
-          )}
-
         </div>
+
+        {/* Enroll Courses / System Roll */}
+        <div className="flex-1 flex flex-col gap-1 min-h-0">
+          <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">
+            {isStudent ? "Enroll Courses" : "System Roll"}
+          </h6>
+          <div className="flex flex-col gap-2 overflow-y-auto pr-1 max-h-[110px] custom-scrollbar-thin">
+            {isStudent ? (
+              <>
+                {(profileData?.enrolledBatches || []).length > 0 ? (
+                  profileData.enrolledBatches.map((pair, idx) => (
+                    <div key={idx} className="w-full min-h-[38px] bg-[#F6F6F6] rounded-[6px] flex items-center px-[10px] py-1 flex-shrink-0 border border-gray-50 shadow-sm">
+                      <a href="#" className="text-[#3758EE] text-[13px] font-medium underline underline-offset-4 decoration-1 decoration-blue-200 hover:decoration-blue-500 transition-all truncate block">
+                        {pair.courseName} ( {pair.batchName} )
+                      </a>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full min-h-[38px] bg-gray-50 rounded-[6px] flex items-center px-[10px] text-gray-500 italic text-sm border border-gray-200">
+                    No courses enrolled
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {batchCoursePairs.length > 0 ? (
+                  batchCoursePairs.map((pair, idx) => (
+                    <div key={idx} className="w-full min-h-[38px] bg-blue-50 text-blue-600 rounded-[6px] flex items-center px-[10px] py-1 flex-shrink-0 border border-blue-100 shadow-sm font-bold text-xs sm:text-sm">
+                      <span className="truncate">{pair.courseName} ( {pair.batchName} )</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full min-h-[38px] bg-gray-50 rounded-[6px] flex items-center px-[10px] flex-shrink-0 text-gray-500 italic text-sm border border-gray-200">
+                    No groups assigned
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        <style dangerouslySetInnerHTML={{
+          __html: `
+          .custom-scrollbar-thin::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+          .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+          .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        `}} />
+
+        {/* Employment Type (moderator only) */}
+        {!isStudent && (
+          <div className="mt-auto">
+            <h6 className="text-[12px] font-bold text-gray-500 uppercase mb-1 tracking-wider opacity-90">Employment Type</h6>
+            <select
+              className="w-full h-[36px] bg-white text-[#1A1A1A] rounded-[6px] text-sm font-bold outline-none border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-all focus:ring-2 focus:ring-blue-300 px-2"
+              defaultValue={user.employmentType || "Full-time"}
+            >
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Crop Modal */}

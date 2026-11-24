@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MetricCard from '@/components/shared/MetricCard';
+import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import CourseCard from '@/components/shared/CourseCard';
@@ -60,77 +61,50 @@ const StudentPerformance = ({ profileData }) => {
     const paginatedData = tableData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
-        <div className="flex flex-col gap-6 py-4">
+        <div className="flex flex-col gap-4 sm:gap-6 py-2 sm:py-4">
             {/* Top Row: Stats, Performance Overview */}
-            <div className="flex flex-col xl:flex-row gap-6">
-                <div className="flex flex-col gap-6 flex-1">
-                    <MetricCard
-                        title="Total Enrolled Courses"
-                        value={stats.totalEnrolled.toString()}
-                        trendValue={`${stats.weeklyTrendPercentage ?? 0}%`}
-                        trendLabel="Improvement From last Week"
-                        className="h-full"
-                    />
+            <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
+                <div className="w-full flex flex-col gap-4 sm:gap-6 justify-between flex-1 min-w-0">
+                    <div className="w-full">
+                        <MetricCard
+                            title="Total Enrolled Courses"
+                            value={stats.totalEnrolled.toString()}
+                            trendValue={`${stats.weeklyTrendPercentage ?? 0}%`}
+                            trendLabel="Improvement From last Week"
+                            className="w-full"
+                        />
+                    </div>
 
-                    {/* Overview items row */}
-                    <div className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm flex flex-col gap-6 min-w-0 w-full">
-                        <span className="text-gray-400 text-[10px] sm:text-xs font-medium uppercase tracking-wider">OVERVIEW</span>
-                        <div className="overflow-x-auto no-scrollbar">
-                            <div className="flex flex-row items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0 w-full">
-                                {/* Completed */}
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#22C55E]"></div>
-                                        <div className="flex-1 w-[2px] bg-[#22C55E]/80"></div>
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#22C55E]"></div>
-                                    </div>
-                                    <div className="flex flex-col gap-1 min-w-0">
-                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{completedCount}</span>
-                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#22C55E]">
-                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#22C55E]"></div>
-                                            Completed
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* In Progress */}
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#3758EE]"></div>
-                                        <div className="flex-1 w-[2px] bg-[#3758EE]/80"></div>
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#3758EE]"></div>
-                                    </div>
-                                    <div className="flex flex-col gap-1 min-w-0">
-                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{inProgressCount}</span>
-                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#3758EE]">
-                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#3758EE]"></div>
-                                            In Progress
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Time Spent */}
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center h-14 w-2 shrink-0">
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#B666E7]"></div>
-                                        <div className="flex-1 w-[2px] bg-[#B666E7]/80"></div>
-                                        <div className="w-2 h-2 rounded-full shrink-0 bg-[#B666E7]"></div>
-                                    </div>
-                                    <div className="flex flex-col gap-1 min-w-0">
-                                        <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{stats.timeSpent || "12h 30m"}</span>
-                                        <div className="flex items-center gap-2 text-sm font-bold whitespace-nowrap text-[#B666E7]">
-                                            <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-[#B666E7]"></div>
-                                            Time Spent Last week
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Overview Card */}
+                    <div className="w-full">
+                        <OverviewCard
+                            className="w-full max-w-full shadow-sm"
+                            statsOverride={{
+                                col1: {
+                                    value: completedCount,
+                                    label: "Completed",
+                                    shortLabel: "Completed",
+                                    color: "#22C55E"
+                                },
+                                col2: {
+                                    value: inProgressCount,
+                                    label: "In Progress",
+                                    shortLabel: "In Progress",
+                                    color: "#3758EE"
+                                },
+                                col3: {
+                                    value: stats.timeSpent || "12h 30m",
+                                    label: "Time Spent Last week",
+                                    shortLabel: "Time Spent",
+                                    color: "#B666E7"
+                                }
+                            }}
+                        />
                     </div>
                 </div>
 
                 <PerformanceCard
-                    className="xl:w-[400px]"
+                    className="shadow-sm w-full xl:w-[400px] shrink-0"
                     name="Performance Overview"
                     percentageOverride={stats.performance}
                     trendOverride={stats.weeklyTrendPercentage !== undefined ? stats.weeklyTrendPercentage : 0}
@@ -138,11 +112,11 @@ const StudentPerformance = ({ profileData }) => {
             </div>
 
             {/* Middle Section: Enrolled Courses Horizontal Scroll and Hours Spent Chart */}
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="flex flex-col gap-4 flex-[0.65] min-w-0">
-                    <h3 className="text-lg font-bold text-gray-900 shrink-0">Enrolled Courses</h3>
-                    <div className="overflow-x-auto pb-4 custom-scrollbar-thin">
-                        <div className="flex gap-5 min-w-max pb-2">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+                <div className="flex flex-col gap-3 sm:gap-4 flex-[0.65] min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 shrink-0">Enrolled Courses</h3>
+                    <div className="overflow-x-auto pb-2 custom-scrollbar-thin">
+                        <div className="flex gap-3 sm:gap-4 min-w-max pb-1">
                             {enrolledCourses.length > 0 ? enrolledCourses.map(course => (
                                 <CourseCard
                                     key={course.id}
@@ -150,18 +124,18 @@ const StudentPerformance = ({ profileData }) => {
                                     completed={course.completedLectures}
                                     total={course.totalLectures}
                                     image={course.thumbnail || performance}
-                                    className="w-[280px] shrink-0 h-auto"
+                                    className="w-[230px] sm:w-[270px] shrink-0 h-auto"
                                 />
                             )) : (
-                                <div className="w-full py-10 text-center text-gray-400 bg-white rounded-xl border border-dashed">
+                                <div className="w-full py-8 sm:py-10 text-center text-gray-400 bg-white rounded-xl border border-dashed text-xs sm:text-sm">
                                     No courses enrolled yet.
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
-                <div className="lg:flex-[0.35] lg:min-w-[350px] flex flex-col gap-4 shrink-0">
-                    <h3 className="text-lg font-bold text-gray-900 shrink-0">Hours Spent</h3>
+                <div className="lg:flex-[0.35] lg:min-w-[320px] xl:min-w-[350px] flex flex-col gap-3 sm:gap-4 shrink-0">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 shrink-0">Hours Spent</h3>
                     <HoursSpentCard
                         className="h-full"
                         name="Hours Spent"
@@ -180,58 +154,59 @@ const StudentPerformance = ({ profileData }) => {
 
             {/* Bottom Section: Enrolled Courses Table */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6">
-                <div className="p-6 border-b border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-900">Enrolled Courses Table</h3>
+                <div className="p-3.5 sm:p-5 border-b border-gray-100">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900">Enrolled Courses Table</h3>
                 </div>
-                <div className="max-h-[400px] overflow-y-auto overflow-x-auto no-scrollbar">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
-                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
-                                <th className="px-6 py-4">Course Name</th>
-                                <th className="px-6 py-4">Moderators</th>
-                                <th className="px-6 py-4">Start & End Date</th>
-                                <th className="px-6 py-4">Lectures</th>
-                                <th className="px-6 py-4 text-center">Performance</th>
-                                <th className="px-6 py-4">{t("status", "Status")}</th>
-                                <th className="px-6 py-4 text-center">{t("action", "Action")}</th>
+                <div className="overflow-x-auto custom-scrollbar-thin">
+                    <table className="w-full min-w-[580px] xl:min-w-full text-left border-collapse">
+                        <thead className="bg-[#FCFCFD] border-b border-gray-100 sticky top-0 z-10">
+                            <tr className="text-[10px] sm:text-[11px] xl:text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th className="px-2.5 sm:px-3.5 xl:px-5 py-2.5 sm:py-3.5 min-w-[130px] sm:min-w-[170px]">Course Name</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5">Moderators</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 whitespace-nowrap">Start & End Date</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">Lectures</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">Performance</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">{t("status", "Status")}</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">{t("action", "Action")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {paginatedData.length > 0 ? paginatedData.map((row) => (
-                                <tr key={row.id} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-gray-900">{row.courseName}</td>
-                                    <td className="px-6 py-4">
+                                <tr key={row.id} className="text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-2.5 sm:px-3.5 xl:px-5 py-2 sm:py-2.5 xl:py-3.5 font-semibold text-gray-800 leading-snug">
+                                        <div className="max-w-[180px] sm:max-w-none">{row.courseName}</div>
+                                    </td>
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5">
                                         <div className="flex flex-col">
                                             {row.moderators.length > 0 ? row.moderators.map((mod, i) => {
                                                 const modName = typeof mod === 'string' ? mod : (mod?.firstname || mod?.lastname ? `${mod.firstname || ""} ${mod.lastname || ""}`.trim() : (mod?.name || mod?.username || "Unknown"));
                                                 return (
-                                                    <span key={i} className="text-[#3758EE] underline cursor-pointer">
+                                                    <span key={i} className="text-[#3758EE] underline hover:text-blue-700 transition-colors cursor-pointer text-[11px] sm:text-xs">
                                                         {modName}
                                                     </span>
                                                 );
-                                            }) : <span className="text-gray-400 italic">None</span>}
+                                            }) : <span className="text-gray-400 italic text-[11px]">None</span>}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col text-[11px]">
-                                            <span>{row.startDate}</span>
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 whitespace-nowrap">
+                                        <div className="flex flex-col text-[10px] sm:text-[11px] leading-tight">
+                                            <span className="font-medium text-gray-700">{row.startDate}</span>
                                             <span className="text-gray-400">{row.endDate}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 font-medium text-gray-900">{row.lectures}</td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 font-medium text-gray-900 text-center whitespace-nowrap">{row.lectures}</td>
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <span className="text-[#3758EE] font-bold">{row.performance}</span>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${row.status === 'Active' ? 'text-emerald-500 bg-emerald-50' : 'text-blue-500 bg-blue-50'
-                                            }`}>
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
+                                        <span className={`inline-flex px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold ${row.status === 'Active' ? 'text-emerald-500 bg-emerald-50' : 'text-blue-500 bg-blue-50'}`}>
                                             {row.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <GradiantButton
                                             onClick={() => navigate(`/admin-course-play?id=${row.courseId || row.id}&userId=${user._id || user.id}`)}
-                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
+                                            className="bg-[#3758EE] text-white text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-md hover:bg-blue-600 transition-colors shadow-xs"
                                         >
                                             View Details
                                         </GradiantButton>
@@ -239,14 +214,14 @@ const StudentPerformance = ({ profileData }) => {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan="7" className="py-10 text-center text-gray-400 italic">No enrollment data found in table.</td>
+                                    <td colSpan="7" className="py-8 text-center text-gray-400 italic text-xs sm:text-sm">No enrollment data found in table.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
                 {totalPages > 1 && (
-                    <div className="flex justify-end items-center p-4 border-t border-gray-100 w-full">
+                    <div className="flex justify-end items-center p-3 sm:p-4 border-t border-gray-100 w-full">
                         <CustomPagination
                             currentPage={currentPage}
                             totalPages={totalPages}

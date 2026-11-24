@@ -501,7 +501,7 @@ const Certificates = () => {
                         <div className="py-4 pr-2 flex flex-col gap-6">
 
                             {/* ── Metric Cards ── */}
-                            <div className="flex lg:grid lg:grid-cols-4 gap-3.5 xl:gap-4 overflow-x-auto pb-2 scrollbar-thin lg:overflow-visible">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 xl:gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible">
                                 {metricCards.map((metric, index) => (
                                     <div key={index} className="bg-white p-3.5 sm:p-4 xl:p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
                                         <div>

@@ -417,7 +417,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-8">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
                                         key={index}
@@ -428,7 +428,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                             setStatusFilter(stat.type);
                                             setCurrentPage(1);
                                         }}
-                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[105px] sm:h-[115px] w-[190px] sm:w-[270px] xl:w-full min-w-[190px] sm:min-w-[270px] xl:min-w-0 shrink-0 xl:shrink" : "h-[105px] sm:h-[115px] w-[190px] sm:w-[270px] xl:w-full min-w-[190px] sm:min-w-[270px] xl:min-w-0 shrink-0 xl:shrink"}
+                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[125px] sm:h-[135px] w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink" : "h-[125px] sm:h-[135px] w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"}
                                     />
                                 ))}
                             </div>

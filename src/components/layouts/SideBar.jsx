@@ -134,7 +134,7 @@ function Sidebar({ className, onClose }) {
     '/admin-dashboard': 'Dashboard',
     '/admin-calendar': 'Calendar',
     '/admin-notifications': 'Notification',
-    '/admin-moderators': 'Moderators',
+    '/admin-moderators': 'All Moderators',
     '/admin-moderators/all': 'All Moderators',
     '/admin-moderators/male': 'Male Moderators',
     '/admin-moderators/female': 'Female Moderators',
@@ -251,6 +251,10 @@ function Sidebar({ className, onClose }) {
 
     if (itemName === 'Moderators') {
       setIsModeratorsExpanded(!isModeratorsExpanded);
+      if (!location.pathname.startsWith('/admin-moderators')) {
+        navigate('/admin-moderators/all');
+        if (onClose) onClose();
+      }
       return;
     }
 
@@ -383,19 +387,27 @@ function Sidebar({ className, onClose }) {
             </div>
           </Sideabrbbutton>
           {isReportsExpanded && (
-            <div className="flex flex-col gap-1 transition-all">
+            <div className="flex flex-col gap-1 transition-all pl-2">
               {(user?.role === 'admin' || user?.assignedFeatures?.includes('Student Reports')) && (
                 <>
                   <button
                     onClick={() => handleItemClick('Student Reports')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'Student Reports' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Student Reports'
+                        ? 'bg-[#265CEB]/10 text-[#265CEB] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#265CEB] hover:bg-gray-50 font-medium'
+                    }`}
                   >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${activeItem === 'Student Reports' ? 'bg-[#265CEB] scale-125' : 'bg-[#6A6F78]'}`}></span>
                     <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
                   </button>
                   <button
                     onClick={() => handleItemClick('Export Student Reports')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#4B4F56] hover:text-[#374151] ${activeItem === 'Export Student Reports' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Export Student Reports'
+                        ? 'bg-[#265CEB]/10 text-[#265CEB] font-semibold'
+                        : 'text-[#4B4F56] hover:text-[#265CEB] hover:bg-gray-50 font-medium'
+                    }`}
                   >
                     <Download size={14} className="shrink-0" />
                     <span className="truncate whitespace-nowrap text-left">{t('student_reports', 'Student Reports')}</span>
@@ -406,14 +418,22 @@ function Sidebar({ className, onClose }) {
                 <>
                   <button
                     onClick={() => handleItemClick('Moderator Reports')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Moderator Reports' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Moderator Reports'
+                        ? 'bg-[#3758EE]/10 text-[#3758EE] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#3758EE] hover:bg-blue-50/50 font-medium'
+                    }`}
                   >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${activeItem === 'Moderator Reports' ? 'bg-[#3758EE] scale-125' : 'bg-[#3758EE]'}`}></span>
                     <span className="truncate whitespace-nowrap text-left">{t('moderator_reports', 'Moderator Reports')}</span>
                   </button>
                   <button
                     onClick={() => handleItemClick('Export Moderator Reports')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#2540B3] hover:text-[#1E3A8A] ${activeItem === 'Export Moderator Reports' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Export Moderator Reports'
+                        ? 'bg-[#3758EE]/10 text-[#3758EE] font-semibold'
+                        : 'text-[#2540B3] hover:text-[#3758EE] hover:bg-blue-50/50 font-medium'
+                    }`}
                   >
                     <Download size={14} className="shrink-0" />
                     <span className="truncate whitespace-nowrap text-left">{t('moderator_reports', 'Moderator Reports')}</span>
@@ -423,9 +443,13 @@ function Sidebar({ className, onClose }) {
               {(user?.role === 'admin' || user?.assignedFeatures?.includes('Course Reports')) && (
                 <button
                   onClick={() => handleItemClick('Course Reports')}
-                  className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Course Reports' ? 'font-bold' : 'font-medium'}`}
+                  className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                    activeItem === 'Course Reports'
+                      ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
+                      : 'text-[#6A6F78] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
+                  }`}
                 >
-                  <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
+                  <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${activeItem === 'Course Reports' ? 'bg-[#A269FF] scale-125' : 'bg-[#A269FF]'}`}></span>
                   <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
                 </button>
               )}
@@ -436,7 +460,11 @@ function Sidebar({ className, onClose }) {
     }
 
     if (item === 'Moderators') {
-      const isAnyModeratorActive = ['All Moderators', 'Male Moderators', 'Female Moderators', 'Moderators'].includes(activeItem);
+      const isAnyModeratorActive = ['All Moderators', 'Male Moderators', 'Female Moderators', 'Moderators'].includes(activeItem) || location.pathname.startsWith('/admin-moderators');
+      const isAllActive = activeItem === 'All Moderators' || (!['Male Moderators', 'Female Moderators'].includes(activeItem) && location.pathname.startsWith('/admin-moderators'));
+      const isMaleActive = activeItem === 'Male Moderators';
+      const isFemaleActive = activeItem === 'Female Moderators';
+
       return (
         <div key={item} className="w-full flex flex-col gap-1">
           <Sideabrbbutton
@@ -452,26 +480,38 @@ function Sidebar({ className, onClose }) {
             </div>
           </Sideabrbbutton>
           {isModeratorsExpanded && (
-            <div className="flex flex-col gap-1 transition-all">
+            <div className="flex flex-col gap-1 transition-all pl-2">
               <button
                 onClick={() => handleItemClick('All Moderators')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Moderators' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isAllActive
+                    ? 'bg-[#265CEB]/10 text-[#265CEB] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#265CEB] hover:bg-gray-50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isAllActive ? 'bg-[#265CEB] scale-125' : 'bg-[#6A6F78]'}`}></span>
                 {t('all_moderators', 'All Moderators')}
               </button>
               <button
                 onClick={() => handleItemClick('Male Moderators')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Moderators' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isMaleActive
+                    ? 'bg-[#3758EE]/10 text-[#3758EE] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#3758EE] hover:bg-blue-50/50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isMaleActive ? 'bg-[#3758EE] scale-125' : 'bg-[#3758EE]'}`}></span>
                 {t('male_moderators', 'Male Moderators')}
               </button>
               <button
                 onClick={() => handleItemClick('Female Moderators')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Moderators' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isFemaleActive
+                    ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isFemaleActive ? 'bg-[#A269FF] scale-125' : 'bg-[#A269FF]'}`}></span>
                 {t('female_moderators', 'Female Moderators')}
               </button>
             </div>
@@ -482,6 +522,10 @@ function Sidebar({ className, onClose }) {
 
     if (item === 'Batches') {
       const isAnyBatchActive = ['All Batches', 'Running Batches', 'Completed Batches', 'Batches'].includes(activeItem);
+      const isAllActive = activeItem === 'All Batches';
+      const isRunningActive = activeItem === 'Running Batches';
+      const isCompletedActive = activeItem === 'Completed Batches';
+
       return (
         <div key={item} className="w-full flex flex-col gap-1">
           <Sideabrbbutton
@@ -497,26 +541,38 @@ function Sidebar({ className, onClose }) {
             </div>
           </Sideabrbbutton>
           {isBatchesExpanded && (
-            <div className="flex flex-col gap-1 transition-all">
+            <div className="flex flex-col gap-1 transition-all pl-2">
               <button
                 onClick={() => handleItemClick('All Batches')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Batches' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isAllActive
+                    ? 'bg-[#265CEB]/10 text-[#265CEB] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#265CEB] hover:bg-gray-50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isAllActive ? 'bg-[#265CEB] scale-125' : 'bg-[#6A6F78]'}`}></span>
                 {t('all_batches', 'All Batches')}
               </button>
               <button
                 onClick={() => handleItemClick('Running Batches')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Running Batches' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isRunningActive
+                    ? 'bg-[#3758EE]/10 text-[#3758EE] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#3758EE] hover:bg-blue-50/50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isRunningActive ? 'bg-[#3758EE] scale-125' : 'bg-[#3758EE]'}`}></span>
                 {t('running_batches', 'Running Batches')}
               </button>
               <button
                 onClick={() => handleItemClick('Completed Batches')}
-                className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#10B981] hover:text-[#059669] ${activeItem === 'Completed Batches' ? 'font-bold' : 'font-medium'}`}
+                className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                  isCompletedActive
+                    ? 'bg-[#10B981]/10 text-[#10B981] font-semibold'
+                    : 'text-[#6A6F78] hover:text-[#10B981] hover:bg-emerald-50/50 font-medium'
+                }`}
               >
-                <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#10B981]"></span>
+                <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isCompletedActive ? 'bg-[#10B981] scale-125' : 'bg-[#10B981]'}`}></span>
                 {t('completed_batches', 'Completed Batches')}
               </button>
             </div>
@@ -543,6 +599,10 @@ function Sidebar({ className, onClose }) {
       }
 
       const isAnyStudentActive = ['All Students', 'Male Students', 'Female Students', 'Student Profiles'].includes(activeItem);
+      const isAllStudentsActive = activeItem === 'All Students';
+      const isMaleStudentsActive = activeItem === 'Male Students';
+      const isFemaleStudentsActive = activeItem === 'Female Students';
+
       return (
         <div key={item} className="w-full flex flex-col gap-1">
           <Sideabrbbutton
@@ -558,28 +618,40 @@ function Sidebar({ className, onClose }) {
             </div>
           </Sideabrbbutton>
           {isStudentsExpanded && (
-            <div className="flex flex-col gap-1 transition-all">
+            <div className="flex flex-col gap-1 transition-all pl-2">
               {user?.role === 'admin' && (
                 <>
                   <button
                     onClick={() => handleItemClick('All Students')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#6A6F78] hover:text-[#4B4F56] ${activeItem === 'All Students' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      isAllStudentsActive
+                        ? 'bg-[#265CEB]/10 text-[#265CEB] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#265CEB] hover:bg-gray-50 font-medium'
+                    }`}
                   >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#6A6F78]"></span>
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isAllStudentsActive ? 'bg-[#265CEB] scale-125' : 'bg-[#6A6F78]'}`}></span>
                     {t('all_students', 'All Students')}
                   </button>
                   <button
                     onClick={() => handleItemClick('Male Students')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#3758EE] hover:text-[#2540B3] ${activeItem === 'Male Students' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      isMaleStudentsActive
+                        ? 'bg-[#3758EE]/10 text-[#3758EE] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#3758EE] hover:bg-blue-50/50 font-medium'
+                    }`}
                   >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#3758EE]"></span>
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isMaleStudentsActive ? 'bg-[#3758EE] scale-125' : 'bg-[#3758EE]'}`}></span>
                     {t('male_students', 'Male Students')}
                   </button>
                   <button
                     onClick={() => handleItemClick('Female Students')}
-                    className={`w-full flex items-center gap-2 justify-start text-left px-6 py-2.5 text-[14px] cursor-pointer transition-colors text-[#A269FF] hover:text-[#7C3AED] ${activeItem === 'Female Students' ? 'font-bold' : 'font-medium'}`}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      isFemaleStudentsActive
+                        ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
+                    }`}
                   >
-                    <span className="w-[8px] h-[8px] rounded-full shrink-0 bg-[#A269FF]"></span>
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${isFemaleStudentsActive ? 'bg-[#A269FF] scale-125' : 'bg-[#A269FF]'}`}></span>
                     {t('female_students', 'Female Students')}
                   </button>
                 </>
