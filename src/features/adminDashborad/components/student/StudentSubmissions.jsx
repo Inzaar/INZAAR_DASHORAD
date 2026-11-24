@@ -430,8 +430,8 @@ const StudentSubmissions = ({ profileData }) => {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto custom-scrollbar-thin">
+                        <table className="w-full min-w-[650px] xl:min-w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-[#FCFCFD] border-b border-gray-100">
                                     <th className="py-2.5 sm:py-4 px-3 sm:px-6 text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-wider w-12 sm:w-16">#</th>

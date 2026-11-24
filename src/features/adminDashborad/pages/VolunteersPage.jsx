@@ -284,37 +284,38 @@ const VolunteersPage = () => {
 
                     {/* Main Content Area */}
                     <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-10">
-                        <div className="py-2 sm:py-4 px-2 sm:pr-2 space-y-6">
+                        <div className="py-2 sm:py-4 px-1 sm:px-2 sm:pr-2 space-y-4 sm:space-y-6">
                             {/* Header */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                                 <div>
-                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Volunteers</h1>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Volunteers</h1>
+                                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
                                         Manage and review all Inzaar volunteer applications and skill profiles.
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                                     <button
                                         onClick={() => {
                                             fetchVolunteersData(currentPage);
                                             fetchStats();
                                         }}
-                                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-sm rounded-xl shadow-xs hover:bg-gray-50 transition-colors"
+                                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-xs sm:text-sm rounded-xl shadow-xs hover:bg-gray-50 transition-colors"
                                     >
-                                        <RefreshCw size={15} className={isLoading ? "animate-spin" : ""} />
+                                        <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
                                         Refresh Data
                                     </button>
                                 </div>
                             </div>
 
                             {/* Top KPI Metric Cards (Simple - No Graphs) */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto pb-3 custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-6">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-3 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible xl:pb-0 mb-4 sm:mb-6">
                                 <StatsCard
                                     title="Total Volunteers"
                                     value={statsData.total.toString()}
                                     trend="Total"
                                     trendDirection="up"
                                     trendText="Registered applications"
+                                    className="h-[120px] sm:h-[135px] w-[220px] min-[360px]:w-[240px] sm:w-[260px] min-w-[220px] min-[360px]:min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                 />
                                 <StatsCard
                                     title="Pending Review"
@@ -322,6 +323,7 @@ const VolunteersPage = () => {
                                     trend="Awaiting"
                                     trendDirection="up"
                                     trendText="Needs initial screening"
+                                    className="h-[120px] sm:h-[135px] w-[220px] min-[360px]:w-[240px] sm:w-[260px] min-w-[220px] min-[360px]:min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                 />
                                 <StatsCard
                                     title="Contacted"
@@ -329,6 +331,7 @@ const VolunteersPage = () => {
                                     trend="In Touch"
                                     trendDirection="up"
                                     trendText="Outreach ongoing"
+                                    className="h-[120px] sm:h-[135px] w-[220px] min-[360px]:w-[240px] sm:w-[260px] min-w-[220px] min-[360px]:min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                 />
                                 <StatsCard
                                     title="Accepted"
@@ -336,255 +339,256 @@ const VolunteersPage = () => {
                                     trend="Active"
                                     trendDirection="up"
                                     trendText="Approved Inzaar volunteers"
+                                    className="h-[120px] sm:h-[135px] w-[220px] min-[360px]:w-[240px] sm:w-[260px] min-w-[220px] min-[360px]:min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"
                                 />
                             </div>
 
                             {/* Volunteers Section Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-5 sm:p-6 space-y-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg font-bold text-gray-900">Volunteers List</h2>
-                                <span className="bg-purple-50 text-purple-700 font-semibold text-xs px-2.5 py-0.5 rounded-full border border-purple-100">
-                                    {totalCount} total
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Search & Filters Bar */}
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                            {/* Search */}
-                            <div className="md:col-span-4 flex flex-col gap-1.5">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-                                    Search
-                                </span>
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Search by Name, WhatsApp, Email, or City..."
-                                        value={searchText}
-                                        onChange={(e) => setSearchText(e.target.value)}
-                                        onKeyDown={handleSearchKeyDown}
-                                        className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
-                                    />
-                                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-xs p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+                                <div className="flex flex-row items-center justify-between gap-2 border-b border-gray-100 pb-3 sm:pb-4">
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-base sm:text-lg font-bold text-gray-900">Volunteers List</h2>
+                                        <span className="bg-purple-50 text-purple-700 font-semibold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full border border-purple-100">
+                                            {totalCount} total
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Department Filter */}
-                            <div className="md:col-span-3 flex flex-col gap-1.5">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-                                    Department
-                                </span>
-                                <div className="relative">
-                                    <select
-                                        value={departmentFilter}
-                                        onChange={(e) => {
-                                            setDepartmentFilter(e.target.value);
-                                            setCurrentPage(1);
-                                        }}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 appearance-none cursor-pointer pr-8"
-                                    >
-                                        <option value="All">All Departments</option>
-                                        {DEPARTMENTS.filter(d => d !== "All").map((d) => (
-                                            <option key={d} value={d}>{d}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                {/* Search & Filters Bar */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-3 items-end">
+                                    {/* Search */}
+                                    <div className="sm:col-span-2 lg:col-span-4 flex flex-col gap-1 sm:gap-1.5">
+                                        <span className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                            Search
+                                        </span>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Search by Name, WhatsApp, Email, or City..."
+                                                value={searchText}
+                                                onChange={(e) => setSearchText(e.target.value)}
+                                                onKeyDown={handleSearchKeyDown}
+                                                className="w-full pl-9 pr-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                            />
+                                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        </div>
+                                    </div>
+
+                                    {/* Department Filter */}
+                                    <div className="sm:col-span-1 lg:col-span-3 flex flex-col gap-1 sm:gap-1.5">
+                                        <span className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                            Department
+                                        </span>
+                                        <div className="relative">
+                                            <select
+                                                value={departmentFilter}
+                                                onChange={(e) => {
+                                                    setDepartmentFilter(e.target.value);
+                                                    setCurrentPage(1);
+                                                }}
+                                                className="w-full px-3 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 appearance-none cursor-pointer pr-8"
+                                            >
+                                                <option value="All">All Departments</option>
+                                                {DEPARTMENTS.filter(d => d !== "All").map((d) => (
+                                                    <option key={d} value={d}>{d}</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+
+                                    {/* Status Filter */}
+                                    <div className="sm:col-span-1 lg:col-span-3 flex flex-col gap-1 sm:gap-1.5">
+                                        <span className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">
+                                            Status
+                                        </span>
+                                        <div className="relative">
+                                            <select
+                                                value={statusFilter}
+                                                onChange={(e) => {
+                                                    setStatusFilter(e.target.value);
+                                                    setCurrentPage(1);
+                                                }}
+                                                className="w-full px-3 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 appearance-none cursor-pointer pr-8"
+                                            >
+                                                {STATUSES.map((s) => (
+                                                    <option key={s} value={s}>
+                                                        {s === "All" ? "All Statuses" : s}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="sm:col-span-2 lg:col-span-2 flex items-center gap-2">
+                                        <button
+                                            onClick={handleSearchClick}
+                                            className="flex-1 py-2 sm:py-2.5 bg-[#3758EE] hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl transition-colors shadow-xs"
+                                        >
+                                            Search
+                                        </button>
+                                        <button
+                                            onClick={handleClearFilters}
+                                            title="Clear all filters"
+                                            className="px-3 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-colors"
+                                        >
+                                            <BiFilterAlt size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Status Filter */}
-                            <div className="md:col-span-3 flex flex-col gap-1.5">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
-                                    Status
-                                </span>
-                                <div className="relative">
-                                    <select
-                                        value={statusFilter}
-                                        onChange={(e) => {
-                                            setStatusFilter(e.target.value);
-                                            setCurrentPage(1);
-                                        }}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 appearance-none cursor-pointer pr-8"
-                                    >
-                                        {STATUSES.map((s) => (
-                                            <option key={s} value={s}>
-                                                {s === "All" ? "All Statuses" : s}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="md:col-span-2 flex items-center gap-2">
-                                <button
-                                    onClick={handleSearchClick}
-                                    className="flex-1 py-2.5 bg-[#3758EE] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-colors shadow-xs"
-                                >
-                                    Search
-                                </button>
-                                <button
-                                    onClick={handleClearFilters}
-                                    title="Clear all filters"
-                                    className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-colors"
-                                >
-                                    <BiFilterAlt size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="overflow-x-auto relative min-h-[380px]">
-                            {isLoading && (
-                                <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
-                                    <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
-                                </div>
-                            )}
-
-                            <table className="w-full min-w-[950px]" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                                <thead>
-                                    <tr>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Full Name</th>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Contact</th>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">City & Education</th>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Profession</th>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Departments</th>
-                                        <th className="text-left font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Availability</th>
-                                        <th className="text-center font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Status</th>
-                                        <th className="text-center font-bold text-[13px] text-gray-500 uppercase tracking-wider px-4 pb-2">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {volunteers.length === 0 ? (
-                                        !isLoading && (
-                                            <tr>
-                                                <td colSpan={8} className="py-16 text-center bg-[#F8F9FA] rounded-xl">
-                                                    <div className="flex flex-col items-center gap-2 text-gray-400">
-                                                        <Search size={40} className="opacity-25" />
-                                                        <p className="font-semibold text-base text-gray-700">No volunteers found</p>
-                                                        <p className="text-sm text-gray-400">No applications match your current filters.</p>
-                                                        <button
-                                                            onClick={handleClearFilters}
-                                                            className="text-blue-600 text-sm font-bold hover:underline mt-2"
-                                                        >
-                                                            Clear all filters
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    ) : (
-                                        volunteers.map((vol) => (
-                                            <tr key={vol._id} className="bg-[#F8F9FA] hover:bg-gray-100/70 transition-colors group">
-                                                {/* Name */}
-                                                <td className="py-3 px-4 rounded-l-xl">
-                                                    <div className="font-bold text-gray-900 text-sm">{vol.fullName}</div>
-                                                    <div className="text-xs text-gray-400">
-                                                        {vol.createdAt ? new Date(vol.createdAt).toLocaleDateString() : ""}
-                                                    </div>
-                                                </td>
-
-                                                {/* Contact */}
-                                                <td className="py-3 px-4">
-                                                    <div className="flex items-center gap-1.5 text-xs text-gray-800 font-medium">
-                                                        <a
-                                                            href={getCleanWhatsAppLink(vol.whatsappNumber)}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold"
-                                                            title="Chat on WhatsApp"
-                                                        >
-                                                            <FaWhatsapp size={14} />
-                                                            {vol.whatsappNumber}
-                                                        </a>
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 truncate max-w-[180px]">
-                                                        {vol.email}
-                                                    </div>
-                                                </td>
-
-                                                {/* City & Education */}
-                                                <td className="py-3 px-4">
-                                                    <div className="text-sm text-gray-800 font-medium">
-                                                        {vol.city} {vol.cityOther ? `(${vol.cityOther})` : ""}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {vol.education === "Other" && vol.educationOther ? vol.educationOther : vol.education}
-                                                    </div>
-                                                </td>
-
-                                                {/* Profession */}
-                                                <td className="py-3 px-4">
-                                                    <div className="text-sm text-gray-800">
-                                                        {vol.profession === "Other" && vol.professionOther ? vol.professionOther : vol.profession}
-                                                    </div>
-                                                </td>
-
-                                                {/* Departments */}
-                                                <td className="py-3 px-4">
-                                                    <div className="flex flex-wrap gap-1 max-w-[220px]">
-                                                        {(vol.interestedDepartments || []).slice(0, 2).map((dept) => (
-                                                            <span
-                                                                key={dept}
-                                                                className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md text-[11px] font-semibold border border-purple-100"
-                                                            >
-                                                                {dept}
-                                                            </span>
-                                                        ))}
-                                                        {(vol.interestedDepartments || []).length > 2 && (
-                                                            <span className="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-md text-[10px] font-semibold">
-                                                                +{vol.interestedDepartments.length - 2} more
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-
-                                                {/* Availability */}
-                                                <td className="py-3 px-4">
-                                                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-xs font-medium border border-blue-100">
-                                                        {(vol.availability || []).join(", ")}
-                                                    </span>
-                                                </td>
-
-                                                {/* Status */}
-                                                <td className="py-3 px-4 text-center">
-                                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeClass(vol.status)}`}>
-                                                        {vol.status || "Pending"}
-                                                    </span>
-                                                </td>
-
-                                                {/* Action */}
-                                                <td className="py-3 px-4 rounded-r-xl text-center">
-                                                    <GradiantButton
-                                                        onClick={() => handleViewDetails(vol._id)}
-                                                        className="px-3.5 py-1.5 rounded-lg text-xs font-bold shadow-xs whitespace-nowrap"
-                                                    >
-                                                        View Details
-                                                    </GradiantButton>
-                                                </td>
-                                            </tr>
-                                        ))
+                                {/* Table */}
+                                <div className="overflow-x-auto custom-scrollbar-thin relative min-h-[360px]">
+                                    {isLoading && (
+                                        <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                                            <Loader className="w-8 h-8 text-[#3758EE] animate-spin" />
+                                        </div>
                                     )}
-                                </tbody>
-                            </table>
-                        </div>
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                                <span className="text-xs text-gray-500">
-                                    Showing page {currentPage} of {totalPages} ({totalCount} total)
-                                </span>
-                                <CustomPagination
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    onPageChange={(page) => setCurrentPage(page)}
-                                />
+                                    <table className="w-full min-w-[780px] xl:min-w-full border-separate border-spacing-y-1 sm:border-spacing-y-1.5">
+                                        <thead>
+                                            <tr>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Full Name</th>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Contact</th>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">City & Education</th>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Profession</th>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Departments</th>
+                                                <th className="text-left font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Availability</th>
+                                                <th className="text-center font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Status</th>
+                                                <th className="text-center font-bold text-[10px] sm:text-[11px] xl:text-xs text-gray-500 uppercase tracking-wider px-2.5 sm:px-3.5 pb-2">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {volunteers.length === 0 ? (
+                                                !isLoading && (
+                                                    <tr>
+                                                        <td colSpan={8} className="py-16 text-center bg-[#F8F9FA] rounded-xl">
+                                                            <div className="flex flex-col items-center gap-2 text-gray-400">
+                                                                <Search size={40} className="opacity-25" />
+                                                                <p className="font-semibold text-base text-gray-700">No volunteers found</p>
+                                                                <p className="text-sm text-gray-400">No applications match your current filters.</p>
+                                                                <button
+                                                                    onClick={handleClearFilters}
+                                                                    className="text-blue-600 text-sm font-bold hover:underline mt-2"
+                                                                >
+                                                                    Clear all filters
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            ) : (
+                                                volunteers.map((vol) => (
+                                                    <tr key={vol._id} className="bg-[#F8F9FA] hover:bg-gray-100/70 transition-colors group">
+                                                        {/* Name */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5 rounded-l-xl">
+                                                            <div className="font-bold text-gray-900 text-xs sm:text-sm">{vol.fullName}</div>
+                                                            <div className="text-[10px] sm:text-xs text-gray-400">
+                                                                {vol.createdAt ? new Date(vol.createdAt).toLocaleDateString() : ""}
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Contact */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5">
+                                                            <div className="flex items-center gap-1 text-[11px] sm:text-xs text-gray-800 font-medium">
+                                                                <a
+                                                                    href={getCleanWhatsAppLink(vol.whatsappNumber)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold"
+                                                                    title="Chat on WhatsApp"
+                                                                >
+                                                                    <FaWhatsapp size={13} />
+                                                                    {vol.whatsappNumber}
+                                                                </a>
+                                                            </div>
+                                                            <div className="text-[10px] sm:text-xs text-gray-500 truncate max-w-[130px] sm:max-w-[160px]">
+                                                                {vol.email}
+                                                            </div>
+                                                        </td>
+
+                                                        {/* City & Education */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5">
+                                                            <div className="text-xs sm:text-sm text-gray-800 font-medium">
+                                                                {vol.city} {vol.cityOther ? `(${vol.cityOther})` : ""}
+                                                            </div>
+                                                            <div className="text-[10px] sm:text-xs text-gray-500">
+                                                                {vol.education === "Other" && vol.educationOther ? vol.educationOther : vol.education}
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Profession */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5">
+                                                            <div className="text-xs sm:text-sm text-gray-800">
+                                                                {vol.profession === "Other" && vol.professionOther ? vol.professionOther : vol.profession}
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Departments */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5">
+                                                            <div className="flex flex-wrap gap-1 max-w-[180px] sm:max-w-[220px]">
+                                                                {(vol.interestedDepartments || []).slice(0, 2).map((dept) => (
+                                                                    <span
+                                                                        key={dept}
+                                                                        className="px-1.5 sm:px-2 py-0.5 bg-purple-50 text-purple-700 rounded-md text-[9px] sm:text-[10px] xl:text-[11px] font-semibold border border-purple-100"
+                                                                    >
+                                                                        {dept}
+                                                                    </span>
+                                                                ))}
+                                                                {(vol.interestedDepartments || []).length > 2 && (
+                                                                    <span className="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-md text-[9px] sm:text-[10px] font-semibold">
+                                                                        +{vol.interestedDepartments.length - 2} more
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Availability */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5">
+                                                            <span className="px-1.5 sm:px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[10px] sm:text-xs font-medium border border-blue-100 whitespace-nowrap">
+                                                                {(vol.availability || []).join(", ")}
+                                                            </span>
+                                                        </td>
+
+                                                        {/* Status */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5 text-center whitespace-nowrap">
+                                                            <span className={`inline-flex px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-semibold border ${getStatusBadgeClass(vol.status)}`}>
+                                                                {vol.status || "Pending"}
+                                                            </span>
+                                                        </td>
+
+                                                        {/* Action */}
+                                                        <td className="py-2 sm:py-2.5 xl:py-3 px-2.5 sm:px-3.5 rounded-r-xl text-center whitespace-nowrap">
+                                                            <GradiantButton
+                                                                onClick={() => handleViewDetails(vol._id)}
+                                                                className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold shadow-xs whitespace-nowrap"
+                                                            >
+                                                                View Details
+                                                            </GradiantButton>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-gray-100 pt-3 sm:pt-4 overflow-x-auto">
+                                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                                            Showing page {currentPage} of {totalPages} ({totalCount} total)
+                                        </span>
+                                        <CustomPagination
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={(page) => setCurrentPage(page)}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
                         </div>
                     </main>
                 </div>

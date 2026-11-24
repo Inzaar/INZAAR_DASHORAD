@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState, useEffect, useRef } from 'react';
 import MetricCard from '@/components/shared/MetricCard';
+import OverviewCard from '@/components/shared/OverviewCard';
 import PerformanceCard from '@/components/shared/PerformanceCard';
 import HoursSpentCard from '@/components/shared/HoursSpentCard';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -291,12 +292,12 @@ const StudentCourseDashboard = ({ profileData }) => {
             )}
 
             {/* Header: Course Selection */}
-            <div className="flex flex-row justify-between items-center gap-2 sm:gap-4 py-2">
-                <h2 className="text-[16px] sm:text-[20px] font-bold text-gray-900 truncate flex-1">{selectedCourseData?.courseTitle || currentCourse.title || "No Course Selected"}</h2>
-                <div className="relative inline-block w-auto shrink-0" ref={dropdownRef}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-4 py-1 sm:py-2">
+                <h2 className="text-sm sm:text-lg md:text-[20px] font-bold text-gray-900 truncate max-w-full">{selectedCourseData?.courseTitle || currentCourse.title || "No Course Selected"}</h2>
+                <div className="relative inline-block w-full sm:w-auto shrink-0" ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center justify-between gap-2 px-3 py-1.5 sm:gap-3 sm:px-4 sm:py-2 bg-[#6366F1] text-white rounded-lg text-xs sm:text-sm font-medium max-w-[140px] sm:max-w-none sm:w-[320px] hover:bg-blue-600 transition-all shadow-md group"
+                        className="flex items-center justify-between gap-2 px-3 py-1.5 sm:gap-3 sm:px-4 sm:py-2 bg-[#6366F1] text-white rounded-lg text-xs sm:text-sm font-medium w-full sm:w-[280px] md:w-[320px] hover:bg-blue-600 transition-all shadow-sm group"
                     >
                         <span className="truncate">{selectedCourseData?.courseTitle || "Select Course"}</span>
                         <ChevronDown size={16} className={cn("transition-transform duration-200 shrink-0", isDropdownOpen && "rotate-180")} />
@@ -312,15 +313,15 @@ const StudentCourseDashboard = ({ profileData }) => {
                                         setIsDropdownOpen(false);
                                     }}
                                     className={cn(
-                                        "w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-gray-50 flex items-center gap-3",
+                                        "w-full text-left px-4 py-2.5 text-xs sm:text-sm transition-colors hover:bg-gray-50 flex items-center gap-3",
                                         selectedEnrollmentId === course.id ? "text-[#6366F1] font-bold bg-blue-50/50" : "text-gray-600 font-medium"
                                     )}
                                 >
-                                    <div className={cn("w-1.5 h-1.5 rounded-full", selectedEnrollmentId === course.id ? "bg-[#6366F1]" : "bg-gray-200")} />
+                                    <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", selectedEnrollmentId === course.id ? "bg-[#6366F1]" : "bg-gray-200")} />
                                     <span className="truncate">{course.title} ({course.groupName})</span>
                                 </button>
                             )) : (
-                                <div className="px-4 py-3 text-sm text-gray-400 italic">No courses found.</div>
+                                <div className="px-4 py-3 text-xs sm:text-sm text-gray-400 italic">No courses found.</div>
                             )}
                         </div>
                     )}
@@ -328,70 +329,72 @@ const StudentCourseDashboard = ({ profileData }) => {
             </div>
 
             {/* Row 1: Progress+Overview (left) | Performance (right) */}
-            <div className="flex flex-col xl:flex-row gap-6">
-                <div className="flex flex-col gap-6 flex-1 min-w-0">
-                    <MetricCard
-                        title="Progress"
-                        value={stats.progress}
-                        trendValue={stats.improvement}
-                        trendLabel="Improvement From last Week"
-                        className="bg-white border rounded-[16px] p-6 shadow-sm"
-                    />
+            <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
+                <div className="w-full flex flex-col gap-4 sm:gap-6 justify-between flex-1 min-w-0">
+                    <div className="w-full">
+                        <MetricCard
+                            title="Progress"
+                            value={stats.progress}
+                            trendValue={stats.improvement}
+                            trendLabel="Improvement From last Week"
+                            className="w-full"
+                        />
+                    </div>
 
-                    <div className="bg-white border border-gray-100 rounded-[16px] p-6 shadow-sm flex flex-col gap-6 min-w-0">
-                        <p className="text-gray-400 text-sm font-medium">Overview</p>
-                        <div className="overflow-x-auto no-scrollbar">
-                            <div className="flex flex-row items-center justify-between gap-8 md:gap-x-10 lg:gap-x-16 min-w-max md:min-w-0">
-                                {overviewStats.map((stat, i) => (
-                                    <div key={i} className="flex items-center gap-4">
-                                        <div className="flex flex-col items-center h-14 w-2 shrink-0">
-                                            <div className={cn("w-2 h-2 rounded-full shrink-0", stat.lineColor)} />
-                                            <div className={cn("flex-1 w-[2px]", stat.lineColor)} />
-                                            <div className={cn("w-2 h-2 rounded-full shrink-0", stat.lineColor)} />
-                                        </div>
-                                        <div className="flex flex-col gap-1 min-w-0">
-                                            <span className="text-3xl font-medium text-gray-900 tracking-tight whitespace-nowrap">{stat.value}</span>
-                                            <div className={cn("flex items-center gap-2 text-sm font-bold whitespace-nowrap", stat.labelColor)}>
-                                                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", stat.dotColor)} />
-                                                {stat.label}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="w-full">
+                        <OverviewCard
+                            className="w-full max-w-full shadow-sm"
+                            statsOverride={{
+                                col1: {
+                                    value: stats.quizScore || "0%",
+                                    label: "Quiz Score",
+                                    shortLabel: "Quiz Score",
+                                    color: "#22C55E"
+                                },
+                                col2: {
+                                    value: displayLecturesCompleted.toString(),
+                                    label: "Lectures Completed",
+                                    shortLabel: "Lectures",
+                                    color: "#3758EE"
+                                },
+                                col3: {
+                                    value: stats.timeSpent || "0h 0m",
+                                    label: "Time Spent Last week",
+                                    shortLabel: "Time Spent",
+                                    color: "#B666E7"
+                                }
+                            }}
+                        />
                     </div>
                 </div>
 
-                <div className="xl:w-[400px] shrink-0">
-                    <PerformanceCard
-                        name="Overall Performance"
-                        percentageOverride={parseInt(stats.progress) || 0}
-                        trendOverride={stats.improvement?.replace('%', '')}
-                        className="border rounded-[16px] h-full w-full"
-                    />
-                </div>
+                <PerformanceCard
+                    name="Overall Performance"
+                    percentageOverride={parseInt(stats.progress) || 0}
+                    trendOverride={stats.improvement?.replace('%', '')}
+                    className="shadow-sm w-full xl:w-[400px] shrink-0"
+                />
             </div>
 
             {/* Row 2: Hours Spent (left) | Student Info (right) */}
-            <div className="flex flex-col xl:flex-row gap-6 xl:h-[400px]">
-                <div className="flex-1 min-w-0 xl:h-full min-h-[300px]">
+            <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
+                <div className="flex-1 min-w-0">
                     <HoursSpentCard
                         name="Hours Spent"
                         userCourses={userCoursesData}
-                        className="h-full border rounded-[16px]"
+                        className="h-full border rounded-xl sm:rounded-[16px] shadow-sm"
                     />
                 </div>
 
-                <div className="xl:w-[400px] shrink-0 xl:h-full bg-white border border-[#EAEDF2] rounded-[16px] p-6 shadow-sm relative min-w-0 overflow-hidden flex flex-col">
+                <div className="w-full xl:w-[400px] shrink-0 bg-white border border-[#EAEDF2] rounded-xl sm:rounded-[16px] p-4 sm:p-6 shadow-sm relative min-w-0 flex flex-col justify-between">
                     <div className="absolute top-4 right-4 text-gray-400 cursor-pointer">
                         <MoreVertical size={20} />
                     </div>
 
                     {selectedCourseData?.moderator ? (
                         <>
-                            <div className="flex items-start gap-4 mb-4">
-                                <div className="w-16 h-16 rounded-full overflow-hidden p-0.5 shrink-0 border-2 border-blue-100">
+                            <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden p-0.5 shrink-0 border-2 border-blue-100">
                                     <img
                                         src={selectedCourseData.moderator.profileImageUrl || CoursesPage}
                                         alt="moderator"
@@ -399,52 +402,52 @@ const StudentCourseDashboard = ({ profileData }) => {
                                     />
                                 </div>
                                 <div className="flex flex-col min-w-0 pr-6">
-                                    <h4 className="text-[16px] font-bold text-gray-900 truncate">
+                                    <h4 className="text-sm sm:text-[16px] font-bold text-gray-900 truncate">
                                         {selectedCourseData.moderator.name}
                                     </h4>
-                                    <span className="text-gray-400 text-sm">#{selectedCourseData.moderator.id?.slice(-6) || 'N/A'}</span>
+                                    <span className="text-gray-400 text-xs sm:text-sm">#{selectedCourseData.moderator.id?.slice(-6) || 'N/A'}</span>
                                 </div>
                             </div>
 
-                            <div className="bg-blue-50/50 rounded-xl p-4 flex flex-col gap-3 mb-4">
-                                <div className="flex justify-between items-center text-[11px]">
+                            <div className="bg-blue-50/50 rounded-xl p-3 sm:p-4 flex flex-col gap-2.5 sm:gap-3 mb-4">
+                                <div className="flex justify-between items-center text-[10px] sm:text-[11px]">
                                     <span className="text-blue-600 font-bold uppercase tracking-tight">Course Moderator</span>
                                     <span className="text-blue-800 font-bold">Joining Date</span>
                                 </div>
-                                <div className="flex justify-between items-center text-[12px] font-bold">
+                                <div className="flex justify-between items-center text-[11px] sm:text-[12px] font-bold">
                                     <span className="text-blue-900 truncate pr-2">Active Official</span>
                                     <span className="text-blue-900">
                                         {selectedCourseData.moderator.joiningDate ? new Date(selectedCourseData.moderator.joiningDate).toLocaleDateString() : "N/A"}
                                     </span>
                                 </div>
-                                <div className="flex flex-col gap-1 mt-2 min-w-0 border-t border-blue-100/50 pt-2">
-                                    <div className="flex items-center gap-2 text-[11px] text-blue-600 font-medium min-w-0">
+                                <div className="flex flex-col gap-1 mt-1.5 sm:mt-2 min-w-0 border-t border-blue-100/50 pt-2">
+                                    <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-blue-600 font-medium min-w-0">
                                         <span className="truncate">{selectedCourseData.moderator.email || "No email available"}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[11px] text-blue-600 font-medium">
+                                    <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-blue-600 font-medium">
                                         <span>{selectedCourseData.moderator.phone || "No phone available"}</span>
                                     </div>
                                 </div>
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-8">
-                            <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-200">
-                                <Search className="text-gray-300" size={32} />
+                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 sm:gap-4 py-6 sm:py-8">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-200">
+                                <Search className="text-gray-300" size={28} />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <h4 className="text-gray-900 font-bold">No Moderator Found</h4>
-                                <p className="text-xs text-gray-400 max-w-[200px]">There is no instructor assigned to this course batch yet.</p>
+                                <h4 className="text-sm sm:text-base text-gray-900 font-bold">No Moderator Found</h4>
+                                <p className="text-[11px] sm:text-xs text-gray-400 max-w-[200px]">There is no instructor assigned to this course batch yet.</p>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex justify-center mt-auto">
+                    <div className="flex justify-center mt-auto pt-2">
                         <GradiantButton
                             disabled={!selectedCourseData?.moderator}
                             onClick={() => selectedCourseData?.moderator?.id && navigate(`/moderator-details/${selectedCourseData.moderator.id}`, { state: { moderator: selectedCourseData.moderator } })}
                             className={cn(
-                                "w-full py-2.5 rounded-lg text-sm font-bold transition-all uppercase tracking-wide",
+                                "w-full py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all uppercase tracking-wide",
                                 selectedCourseData?.moderator
                                     ? "bg-[#6366F1] text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                                     : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -458,76 +461,65 @@ const StudentCourseDashboard = ({ profileData }) => {
 
             {/* Bottom Section: Lecture List Table */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6 mt-2">
-                <div className="p-6 border-b border-gray-100">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="p-3.5 sm:p-5 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-4">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Lecture List</h3>
-                            <p className="text-xs text-gray-400 mt-1">View performance for each lecture</p>
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900">Lecture List</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">View performance for each lecture</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="max-h-[400px] overflow-y-auto overflow-x-auto no-scrollbar">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
-                            <tr className="text-[12px] font-bold text-gray-900 uppercase tracking-wider">
-                                <th className="px-6 py-4">Lecture No</th>
-                                <th className="px-6 py-4">Title</th>
-                                <th className="px-6 py-4 text-center">Progress & Score</th>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">{t("status", "Status")}</th>
-                                <th className="px-6 py-4 text-center">Comments</th>
-                                <th className="px-6 py-4 text-center">{t("action", "Action")}</th>
+                <div className="overflow-x-auto custom-scrollbar-thin">
+                    <table className="w-full min-w-[700px] xl:min-w-full text-left border-collapse">
+                        <thead className="bg-[#FCFCFD] border-b border-gray-100 sticky top-0 z-10">
+                            <tr className="text-[10px] sm:text-[11px] xl:text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th className="px-2.5 sm:px-3.5 xl:px-4 py-2.5 sm:py-3.5 text-center w-14">Lecture No</th>
+                                <th className="px-2.5 sm:px-3.5 xl:px-5 py-2.5 sm:py-3.5 min-w-[160px] sm:min-w-[200px]">Title</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center whitespace-nowrap">Progress & Score</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center whitespace-nowrap">Date</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">{t("status", "Status")}</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">Comments</th>
+                                <th className="px-2 sm:px-3 xl:px-4 py-2.5 sm:py-3.5 text-center">{t("action", "Action")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {paginatedLectures.length > 0 ? paginatedLectures.map((lecture, i) => (
-                                <tr key={i} className="text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-gray-900">{lecture.no}</td>
-                                    <td className="px-6 py-4 font-medium text-gray-800 max-w-[280px] sm:max-w-[340px]">
-                                        <div
-                                            className="leading-snug"
-                                            style={{
-                                                display: '-webkit-box',
-                                                WebkitLineClamp: 3,
-                                                WebkitBoxOrient: 'vertical',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                wordBreak: 'break-word',
-                                            }}
-                                            title={lecture.title}
-                                        >
+                                <tr key={i} className="text-[11px] min-[360px]:text-xs sm:text-[13px] xl:text-sm text-gray-600 hover:bg-gray-50/50 transition-colors">
+                                    <td className="px-2.5 sm:px-3.5 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 font-medium text-gray-900 text-center whitespace-nowrap">{lecture.no}</td>
+                                    <td className="px-2.5 sm:px-3.5 xl:px-5 py-2 sm:py-2.5 xl:py-3.5 font-medium text-gray-800">
+                                        <div className="max-w-[180px] sm:max-w-xs xl:max-w-md line-clamp-2 leading-snug" title={lecture.title}>
                                             {lecture.title}
                                         </div>
                                         {lecture.type !== 'Lecture' && (
-                                            <span className="mt-1 inline-block text-[10px] uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                            <span className="mt-1 inline-block text-[9px] sm:text-[10px] uppercase bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
                                                 {lecture.type}
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <span className="text-[#3758EE] font-bold">{lecture.progress}</span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-500">{lecture.date}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center text-gray-500 whitespace-nowrap">{lecture.date}</td>
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <span className={cn(
-                                            "px-2.5 py-1 rounded-full text-[11px] font-bold",
+                                            "inline-flex px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold",
                                             lecture.status === 'Completed' ? 'text-emerald-500 bg-emerald-50' : 'text-blue-500 bg-blue-50'
                                         )}>
                                             {lecture.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <button
-                                            className="text-[#3758EE] underline font-medium text-[12px] hover:text-blue-800 transition-colors whitespace-nowrap"
+                                            className="text-[#3758EE] underline font-medium text-[11px] sm:text-xs hover:text-blue-800 transition-colors"
                                             onClick={() => handleViewComments(lecture)}
                                         >
                                             View Comments
                                         </button>
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-2 sm:px-3 xl:px-4 py-2 sm:py-2.5 xl:py-3.5 text-center whitespace-nowrap">
                                         <GradiantButton
-                                            className="bg-[#3758EE] text-white text-[11px] font-bold px-4 py-1.5 rounded-[4px] hover:bg-blue-600 transition-colors whitespace-nowrap"
+                                            className="bg-[#3758EE] text-white text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-md hover:bg-blue-600 transition-colors shadow-xs"
                                             onClick={() => navigate(`/admin-course-play?id=${currentCourse?.courseId}&userId=${userId}&lectureId=${lecture.id}`)}
                                         >
                                             View Detail
@@ -536,14 +528,14 @@ const StudentCourseDashboard = ({ profileData }) => {
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan="6" className="py-10 text-center text-gray-400 italic">No lectures available for this course.</td>
+                                    <td colSpan="7" className="py-8 text-center text-gray-400 italic text-xs sm:text-sm">No lectures available for this course.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
                 {totalPages > 1 && (
-                    <div className="flex justify-end items-center p-4 border-t border-gray-100 w-full">
+                    <div className="flex justify-end items-center p-3 sm:p-4 border-t border-gray-100 w-full overflow-x-auto">
                         <CustomPagination
                             currentPage={currentPage}
                             totalPages={totalPages}
@@ -813,7 +805,7 @@ const StudentCourseDashboard = ({ profileData }) => {
                 __html: `
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
                 .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
