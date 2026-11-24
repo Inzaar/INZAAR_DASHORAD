@@ -1142,10 +1142,10 @@ const AddCoursePage = () => {
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4 font-['Public_Sans']">
                 <Navbar onMenuClick={toggleSidebar} hideMenu={true} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-1.5 sm:px-4 gap-2 sm:gap-4 flex-1 overflow-hidden relative pb-1.5 sm:pb-4'>
                     <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
                         <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar pb-0 relative">
-                            <div className="py-4 flex-1 flex flex-col min-h-full">
+                            <div className="py-1.5 sm:py-4 flex-1 flex flex-col min-h-full">
                                 {showAssignmentFlow ? (
                                     <CreateAssignment
                                         courseId={courseId}
@@ -1201,36 +1201,36 @@ const AddCoursePage = () => {
                                 ) : (
                                     <div className="flex-1 flex flex-col min-h-full bg-white shadow-sm border border-gray-100/80">
                                         {/* Header Row */}
-                                        <div className="px-4 sm:px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-4 bg-white">
-                                            <div className="flex items-center gap-3.5 w-full md:w-auto">
-                                                <div className="w-10 h-10 bg-[#EEF2FF] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
+                                        <div className="px-3.5 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-100 gap-2.5 sm:gap-4 bg-white">
+                                            <div className="flex items-center gap-2.5 sm:gap-3 md:gap-3.5 w-full md:w-auto flex-shrink-0">
+                                                <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-[#EEF2FF] rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-4.5 sm:h-4.5 md:w-5.5 md:h-5.5">
                                                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                                         <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                                                         <line x1="12" y1="22.08" x2="12" y2="12" />
                                                     </svg>
                                                 </div>
-                                                <h2 className="text-[18px] font-bold text-gray-800 tracking-tight">
+                                                <h2 className="text-[14px] sm:text-[16px] md:text-[18px] font-bold text-gray-800 tracking-tight whitespace-nowrap">
                                                     {isEditMode ? 'Edit Course' : 'Add New Course'}
                                                 </h2>
                                             </div>
 
                                             {/* Stepper */}
-                                            <div className="flex items-center w-full md:w-auto max-w-[850px] gap-4 sm:gap-6 md:ml-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
+                                            <div className="flex items-center w-full md:w-auto max-w-[850px] gap-2 sm:gap-4 md:gap-6 md:ml-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
                                                 {steps.map((step) => {
                                                     const isActive = currentStep === step.id;
                                                     const isCompleted = currentStep > step.id;
                                                     return (
-                                                        <div key={step.id} className="flex-1 min-w-[130px] sm:min-w-[180px] md:min-w-[240px] flex flex-col">
+                                                        <div key={step.id} className="flex-1 min-w-[90px] sm:min-w-[130px] md:min-w-[180px] lg:min-w-[240px] flex flex-col">
                                                             {/* Top Bar Indicator */}
-                                                            <div className={`h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
+                                                            <div className={`h-[2.5px] sm:h-[3px] w-full transition-all duration-300 ${isActive || isCompleted ? 'bg-[#3758EE]' : 'bg-gray-200'}`} />
 
                                                             {/* Circle + Label */}
-                                                            <div className="mt-3 flex items-center justify-center gap-2">
-                                                                <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isActive || isCompleted ? 'border-[#3758EE]' : 'border-gray-300'}`}>
-                                                                    {(isActive || isCompleted) && <div className="w-2 h-2 bg-[#3758EE] rounded-full" />}
+                                                            <div className="mt-2 sm:mt-2.5 md:mt-3 flex items-center justify-center gap-1.5 sm:gap-2">
+                                                                <div className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 rounded-full border-[1.5px] sm:border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isActive || isCompleted ? 'border-[#3758EE]' : 'border-gray-300'}`}>
+                                                                    {(isActive || isCompleted) && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[#3758EE] rounded-full" />}
                                                                 </div>
-                                                                <span className={`text-[12px] font-bold tracking-wide whitespace-nowrap transition-all duration-300 ${isActive || isCompleted ? 'text-[#3758EE]' : 'text-gray-400'}`}>
+                                                                <span className={`text-[10px] sm:text-[11.5px] md:text-[12px] font-bold tracking-tight whitespace-nowrap transition-all duration-300 ${isActive || isCompleted ? 'text-[#3758EE]' : 'text-gray-400'}`}>
                                                                     {step.label}
                                                                 </span>
                                                             </div>
@@ -1242,7 +1242,7 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 1: Course Setup ── */}
                                         {currentStep === 1 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full text-left bg-white">
+                                            <div className="px-2 sm:px-6 md:px-8 py-4 sm:py-6 md:py-10 pb-4 sm:pb-6 flex-1 flex flex-col min-h-full text-left bg-white">
                                                 <div className="w-full">
                                                     <div className="mb-6 md:mb-10">
                                                         <h3 className="text-[18px] sm:text-[20px] font-bold text-gray-800 mb-1">Course Setup</h3>
@@ -1569,14 +1569,14 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 2: Add Course Content ── */}
                                         {currentStep === 2 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full bg-white">
+                                            <div className="px-2 sm:px-6 md:px-8 py-4 sm:py-6 md:py-10 pb-4 sm:pb-6 flex-1 flex flex-col min-h-full bg-white">
                                                 <div className="w-full">
-                                                    <div className="mb-6 md:mb-10 text-left">
-                                                        <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-2">Add Course Content</h3>
-                                                        <p className="text-[#64748b] font-medium text-[13px] sm:text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
+                                                    <div className="mb-4 sm:mb-6 md:mb-10 text-left">
+                                                        <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] mb-1 sm:mb-2">Add Course Content</h3>
+                                                        <p className="text-[#64748b] font-medium text-[12.5px] sm:text-[13px] md:text-[15px]">Upload lectures, quizzes, and assignments. Each item will auto-generate numbering and structure.</p>
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 mt-4">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 md:gap-8 mt-3 sm:mt-4">
                                                         {courseItems.map((item, idx) => {
                                                             let globalQuizNo = 0;
                                                             let globalAssignmentNo = 0;
@@ -1624,30 +1624,30 @@ const AddCoursePage = () => {
 
                                         {/* ── STEP 3: Review & Publish ── */}
                                         {currentStep === 3 && (
-                                            <div className="px-4 sm:px-6 md:px-8 py-6 md:py-10 pb-6 flex-1 flex flex-col min-h-full space-y-8 md:space-y-12 bg-white">
+                                            <div className="px-1.5 sm:px-6 md:px-8 py-3.5 sm:py-6 md:py-10 pb-4 sm:pb-6 flex-1 flex flex-col min-h-full space-y-5 sm:space-y-8 md:space-y-12 bg-white">
                                                 <div className="w-full text-left">
 
                                                     {/* Success / Error Alerts */}
                                                     {submitSuccess && (
-                                                        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 mb-6">
+                                                        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 sm:px-5 py-3 sm:py-4 mb-4 sm:mb-6">
                                                             <CheckCircle size={20} className="flex-shrink-0" />
                                                             <span className="font-bold text-[13px] sm:text-[14px]">{isEditMode ? 'Course updated successfully!' : 'Course created successfully!'} Redirecting…</span>
                                                         </div>
                                                     )}
                                                     {submitError && (
-                                                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 mb-6">
+                                                        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 sm:px-5 py-3 sm:py-4 mb-4 sm:mb-6">
                                                             <AlertCircle size={20} className="flex-shrink-0" />
                                                             <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
                                                         </div>
                                                     )}
 
                                                     {/* Course Setup Review */}
-                                                    <div className="bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                        <div className="flex items-center justify-between mb-6 sm:mb-8">
-                                                            <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
-                                                            <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[14px] sm:text-[16px] hover:underline">Edit</button>
+                                                    <div className="bg-white rounded-[14px] sm:rounded-[24px] p-3.5 sm:p-6 md:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                        <div className="flex items-center justify-between mb-4 sm:mb-8">
+                                                            <h3 className="text-[17px] sm:text-[22px] font-bold text-[#0f172a]">Course Setup</h3>
+                                                            <button onClick={() => setCurrentStep(1)} className="text-[#3b82f6] font-bold text-[13px] sm:text-[16px] hover:underline cursor-pointer">Edit</button>
                                                         </div>
-                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-10 gap-x-10 sm:gap-x-20">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-10 gap-x-6 sm:gap-x-20">
                                                             {[
                                                                 { label: 'Course Title', value: courseForm.title || '—' },
                                                                 { label: 'Course Description', value: courseForm.description || '—' },
@@ -1662,46 +1662,46 @@ const AddCoursePage = () => {
                                                                 { label: 'Certificate Eligibility (%)', value: courseForm.certificateCriteria !== '' ? `${courseForm.certificateCriteria}%` : '90% (Default)' },
                                                                 { label: 'Certificate File', value: courseForm.certificateFile || '—' },
                                                             ].map((field, idx) => (
-                                                                <div key={idx} className="space-y-2 overflow-hidden">
-                                                                    <span className="text-[12px] text-[#64748b] font-medium block">{field.label}</span>
+                                                                <div key={idx} className="space-y-1 sm:space-y-2 overflow-hidden">
+                                                                    <span className="text-[11.5px] sm:text-[12px] text-[#64748b] font-medium block">{field.label}</span>
                                                                     {field.label === 'Certificate File' && field.value !== '—' ? (
-                                                                        <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
+                                                                        <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-[14px] sm:text-[15px] text-[#3b82f6] hover:underline font-bold block truncate" title={field.value}>
                                                                             {field.value}
                                                                         </a>
                                                                     ) : (
-                                                                        <span className="text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
+                                                                        <span className="text-[14px] sm:text-[15px] text-[#0f172a] font-bold block">{field.value}</span>
                                                                     )}
                                                                 </div>
                                                             ))}
                                                         </div>
                                                         {courseForm.thumbnail && (
-                                                            <div className="mt-10">
-                                                                <span className="text-[12px] text-[#64748b] font-medium block mb-4">Upload Course Thumbnail</span>
+                                                            <div className="mt-6 sm:mt-10">
+                                                                <span className="text-[11.5px] sm:text-[12px] text-[#64748b] font-medium block mb-2 sm:mb-4">Upload Course Thumbnail</span>
                                                                 <div
-                                                                    className="w-full py-10 flex items-center justify-center bg-white"
+                                                                    className="w-full py-6 sm:py-10 flex items-center justify-center bg-white"
                                                                     style={{
                                                                         backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239CA3AF' stroke-width='2.5' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
                                                                         borderRadius: '20px'
                                                                     }}
                                                                 >
-                                                                    <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-44 rounded-xl object-cover shadow-lg border border-white" />
+                                                                    <img src={courseForm.thumbnail} alt="Thumbnail" className="max-h-36 sm:max-h-44 rounded-xl object-cover shadow-lg border border-white" />
                                                                 </div>
                                                             </div>
                                                         )}
                                                     </div>
 
                                                     {/* Lectures Review */}
-                                                    <div className="mt-8 sm:mt-10 bg-white rounded-[16px] sm:rounded-[24px] p-5 sm:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                                                        <div className="flex items-center justify-between mb-6 sm:mb-8">
-                                                            <h3 className="text-[18px] sm:text-[22px] font-bold text-[#0f172a] flex flex-col sm:flex-row sm:items-center">
-                                                                Lectures Content <span className="text-[14px] sm:text-[16px] text-[#64748b] font-medium sm:ml-2 mt-1 sm:mt-0">({courseItems.length} lectures)</span>
+                                                    <div className="mt-5 sm:mt-8 md:mt-10 bg-white rounded-[14px] sm:rounded-[24px] p-2.5 sm:p-6 md:p-10 border border-gray-50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                                                        <div className="flex items-center justify-between mb-4 sm:mb-8">
+                                                            <h3 className="text-[17px] sm:text-[22px] font-bold text-[#0f172a] flex flex-col sm:flex-row sm:items-center">
+                                                                Lectures Content <span className="text-[13px] sm:text-[16px] text-[#64748b] font-medium sm:ml-2 mt-0.5 sm:mt-0">({courseItems.length} lectures)</span>
                                                             </h3>
-                                                            <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[16px] hover:underline">Edit</button>
+                                                            <button onClick={() => setCurrentStep(2)} className="text-[#3b82f6] font-bold text-[14px] sm:text-[16px] hover:underline cursor-pointer">Edit</button>
                                                         </div>
                                                         {courseItems.length === 0 ? (
-                                                            <p className="text-[#64748b] text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
+                                                            <p className="text-[#64748b] text-[13px] sm:text-[14px] font-medium">No lectures added yet. Go to Step 2 to add lectures.</p>
                                                         ) : (
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 md:gap-8">
                                                                 {courseItems.map((item, idx) => {
                                                                     let globalQuizNo = 0;
                                                                     let globalAssignmentNo = 0;
@@ -1789,22 +1789,22 @@ const AddCoursePage = () => {
                 />
 
                 {isModalOpen && modalStep === 'item-form' && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 font-sans" onClick={handleAttemptCloseLecture}>
-                        <div className="bg-white w-full max-w-[850px] rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                            <div className="px-8 pt-8 pb-4 bg-white flex justify-between items-start">
-                                <div className="flex items-center gap-4 mb-1">
-                                    <div className="w-12 h-12 bg-[#EEF2FF] rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-3 sm:p-4 font-sans" onClick={handleAttemptCloseLecture}>
+                        <div className="bg-white w-full max-w-[850px] rounded-[18px] sm:rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                            <div className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-4 md:px-8 md:pt-8 md:pb-4 bg-white flex justify-between items-start">
+                                <div className="flex items-center gap-3 sm:gap-3.5 md:gap-4 mb-1">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-[#EEF2FF] rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 md:w-6 md:h-6">
                                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                                             <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                                             <line x1="12" y1="22.08" x2="12" y2="12" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h2 className="text-[20px] font-bold text-gray-800 tracking-tight">
+                                        <h2 className="text-[16px] sm:text-[18px] md:text-[20px] font-bold text-gray-800 tracking-tight">
                                             {editingIndex !== null ? 'Edit' : 'Add New'} {newItem.type === 'Assignment' ? 'Assignment' : 'Course Item'}
                                         </h2>
-                                        <p className="text-gray-400 text-[13px] font-medium leading-relaxed">
+                                        <p className="text-gray-400 text-[11.5px] sm:text-[12.5px] md:text-[13px] font-medium leading-relaxed">
                                             Select the type of content you want to add and upload the required files.
                                         </p>
                                     </div>
@@ -1812,24 +1812,24 @@ const AddCoursePage = () => {
                                 <button
                                     type="button"
                                     onClick={handleAttemptCloseLecture}
-                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 cursor-pointer"
+                                    className="p-1 sm:p-1.5 md:p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 cursor-pointer flex-shrink-0 ml-1.5 sm:ml-2"
                                     aria-label="Close"
                                 >
-                                    <X size={20} />
+                                    <X size={18} className="sm:w-5 sm:h-5" />
                                 </button>
                             </div>
 
                             {submitError && (
-                                <div className="px-8 mt-2">
-                                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4">
-                                        <AlertCircle size={20} className="flex-shrink-0" />
-                                        <span className="font-bold text-[13px] sm:text-[14px]">{submitError}</span>
+                                <div className="px-4 sm:px-6 md:px-8 mt-2">
+                                    <div className="flex items-center gap-2.5 sm:gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-3.5 py-2.5 sm:px-5 sm:py-4">
+                                        <AlertCircle size={18} className="flex-shrink-0 sm:w-5 sm:h-5" />
+                                        <span className="font-bold text-[12px] sm:text-[13px] md:text-[14px]">{submitError}</span>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="px-8 pb-8 pt-4 max-h-[75vh] overflow-y-auto no-scrollbar">
-                                <div className="space-y-6">
+                            <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-6 md:px-8 md:pb-8 md:pt-4 max-h-[82vh] sm:max-h-[75vh] overflow-y-auto no-scrollbar">
+                                <div className="space-y-4 sm:space-y-5 md:space-y-6">
                                     {/* Section and Lecture Type Dropdown */}
                                     <div className={`grid grid-cols-1 ${(courseForm.hasSections && courseForm.sections.length > 0) && (newItem.type !== 'Assignment' && newItem.type !== 'Quiz') ? 'sm:grid-cols-2' : ''} gap-5 relative z-30`}>
                                         {courseForm.hasSections && courseForm.sections.length > 0 && (
@@ -1869,9 +1869,8 @@ const AddCoursePage = () => {
                                                                         setNewItem({ ...newItem, section });
                                                                         setIsSectionOpen(false);
                                                                     }}
-                                                                    className={`w-full text-left px-4 py-2.5 text-[14px] hover:bg-gray-50 cursor-pointer flex items-center justify-between transition-colors ${
-                                                                        newItem.section === section ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700'
-                                                                    }`}
+                                                                    className={`w-full text-left px-4 py-2.5 text-[14px] hover:bg-gray-50 cursor-pointer flex items-center justify-between transition-colors ${newItem.section === section ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700'
+                                                                        }`}
                                                                 >
                                                                     <span>{section}</span>
                                                                     {newItem.section === section && <CheckCircle size={15} className="text-blue-600" />}
@@ -1909,9 +1908,8 @@ const AddCoursePage = () => {
                                                                             setNewItem({ ...newItem, mediaType: type });
                                                                             setIsLectureTypeOpen(false);
                                                                         }}
-                                                                        className={`w-full text-left px-4 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
-                                                                            isSelected ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                                                                        }`}
+                                                                        className={`w-full text-left px-4 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${isSelected ? 'bg-blue-50 font-semibold text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                                                                            }`}
                                                                     >
                                                                         <span>{type}</span>
                                                                         {isSelected && <CheckCircle size={15} className="text-blue-600" />}
@@ -1926,24 +1924,24 @@ const AddCoursePage = () => {
                                     </div>
 
                                     {/* Row 1: Lecture name and Lecture Number */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">{newItem.type === 'Assignment' ? 'Assignment Name' : 'Lecture name'}</label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-1.5 sm:mb-2">{newItem.type === 'Assignment' ? 'Assignment Name' : 'Lecture name'}</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter title"
                                                 value={newItem.title}
                                                 onChange={e => setNewItem({ ...newItem, title: e.target.value })}
-                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                                className="w-full px-3.5 py-2 sm:px-4 sm:py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] sm:text-[14px] placeholder:text-gray-300 shadow-sm"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-2">{newItem.type === 'Assignment' ? 'Assignment Number' : 'Lecture Number'}<span className="text-gray-400 font-normal text-[11px]">(Auto-Generated)</span></label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-1.5 sm:mb-2">{newItem.type === 'Assignment' ? 'Assignment Number' : 'Lecture Number'}<span className="text-gray-400 font-normal text-[11px]">(Auto-Generated)</span></label>
                                             <input
                                                 type="text"
                                                 readOnly
                                                 value={newItem.lectureNo || (editingIndex !== null ? (editingIndex + 1) : (courseItems.length + 1))}
-                                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
+                                                className="w-full px-3.5 py-2 sm:px-4 sm:py-2.5 border border-gray-200 rounded-lg outline-none text-[13px] sm:text-[14px] text-gray-400 bg-gray-50/50 shadow-sm cursor-not-allowed"
                                             />
                                         </div>
                                     </div>
@@ -1951,7 +1949,7 @@ const AddCoursePage = () => {
                                     {/* Upload Video Lecture Section */}
                                     {(!newItem.mediaType || newItem.mediaType === 'Video' || newItem.type === 'Assignment') && (
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-2 sm:mb-3">{newItem.type === 'Assignment' ? 'Upload Assignment Instructions (Video)' : 'Upload Video Lecture'}</label>
                                             <input
                                                 ref={videoInputRef}
                                                 type="file"
@@ -1963,7 +1961,7 @@ const AddCoursePage = () => {
                                                 onClick={() => !isVideoUploading && videoInputRef.current?.click()}
                                                 onMouseEnter={() => setIsModalVideoHovered(true)}
                                                 onMouseLeave={() => setIsModalVideoHovered(false)}
-                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-5 sm:py-6 md:py-8 cursor-pointer group bg-white
                                             ${isVideoUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
                                                 style={{
                                                     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalVideoHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
@@ -1971,7 +1969,7 @@ const AddCoursePage = () => {
                                                 }}
                                             >
                                                 {newItem.videoUrl && !isVideoUploading ? (
-                                                    <div className="w-full flex flex-col items-center gap-3 px-4">
+                                                    <div className="w-full flex flex-col items-center gap-2 sm:gap-3 px-3 sm:px-4">
                                                         <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
                                                             <CheckCircle size={12} /> Video Attached Successfully
                                                         </span>
@@ -1985,29 +1983,28 @@ const AddCoursePage = () => {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black mb-2 sm:mb-3 transition-transform group-hover:scale-105 duration-300">
                                                             <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
                                                             <path d="M12 12v9" />
                                                             <path d="m16 16-4-4-4 4" />
                                                         </svg>
                                                         <button
                                                             type="button"
-                                                            className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                            className="px-4 py-1.5 sm:px-5 sm:py-1.5 md:px-6 md:py-2 bg-gray-100 text-black text-[12px] sm:text-[13px] font-normal rounded-lg mb-1.5 sm:mb-2 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer"
                                                         >
                                                             Browse file
                                                         </button>
-                                                        <span className="text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">MP4 / MOV</span>
                                                     </>
                                                 )}
                                             </div>
                                         </div>
-
                                     )}
 
                                     {/* Upload Audio Lecture Section (Main) */}
                                     {newItem.mediaType === 'Audio' && (
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">Upload Audio Lecture</label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-2 sm:mb-3">Upload Audio Lecture</label>
                                             <input
                                                 ref={mainAudioInputRef}
                                                 type="file"
@@ -2019,7 +2016,7 @@ const AddCoursePage = () => {
                                                 onClick={() => !isAudioUploading && mainAudioInputRef.current?.click()}
                                                 onMouseEnter={() => setIsModalAudioHovered(true)}
                                                 onMouseLeave={() => setIsModalAudioHovered(false)}
-                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-8 cursor-pointer group bg-white
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-5 sm:py-6 md:py-8 cursor-pointer group bg-white
                                             ${isAudioUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
                                                 style={{
                                                     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
@@ -2033,18 +2030,18 @@ const AddCoursePage = () => {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-3 transition-transform group-hover:scale-105 duration-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 text-black mb-2 sm:mb-3 transition-transform group-hover:scale-105 duration-300">
                                                             <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
                                                             <path d="M12 12v9" />
                                                             <path d="m16 16-4-4-4 4" />
                                                         </svg>
                                                         <button
                                                             type="button"
-                                                            className="px-6 py-2 bg-gray-100 text-black text-[13px] font-normal rounded-lg mb-2 hover:bg-gray-200 transition-colors shadow-sm"
+                                                            className="px-4 py-1.5 sm:px-5 sm:py-1.5 md:px-6 md:py-2 bg-gray-100 text-black text-[12px] sm:text-[13px] font-normal rounded-lg mb-1.5 sm:mb-2 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer"
                                                         >
                                                             Browse file
                                                         </button>
-                                                        <span className="text-[11px] text-gray-400 font-medium">MP3 / WAV</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-gray-400 font-medium">MP3 / WAV</span>
                                                     </>
                                                 )}
                                             </div>
@@ -2091,21 +2088,21 @@ const AddCoursePage = () => {
 
                                     {/* Or Upload URL */}
                                     <div>
-                                        <label className="block text-[13px] font-bold text-gray-700 mb-2">Or Upload URL</label>
+                                        <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-1.5 sm:mb-2">Or Upload URL</label>
                                         <input
                                             type="text"
                                             placeholder="https://example.com/media"
                                             value={newItem.videoUrl}
                                             onChange={e => setNewItem({ ...newItem, videoUrl: e.target.value })}
-                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[14px] placeholder:text-gray-300 shadow-sm"
+                                            className="w-full px-3.5 py-2 sm:px-4 sm:py-2.5 border border-gray-200 rounded-lg outline-none focus:border-blue-500 transition-all text-[13px] sm:text-[14px] placeholder:text-gray-300 shadow-sm"
                                         />
                                     </div>
 
                                     {/* Audio and PDF Optional Section */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
                                         {/* Optional Audio Upload */}
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment Audio Instructions' : 'Optional Audio Upload'}</label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-2 sm:mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment Audio Instructions' : 'Optional Audio Upload'}</label>
                                             <input
                                                 ref={audioInputRef}
                                                 type="file"
@@ -2117,7 +2114,7 @@ const AddCoursePage = () => {
                                                 onClick={() => !isAudioUploading && audioInputRef.current?.click()}
                                                 onMouseEnter={() => setIsModalAudioHovered(true)}
                                                 onMouseLeave={() => setIsModalAudioHovered(false)}
-                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-6 cursor-pointer group bg-white
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-4 sm:py-5 md:py-6 cursor-pointer group bg-white
                                                 ${isAudioUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
                                                 style={{
                                                     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalAudioHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
@@ -2131,14 +2128,14 @@ const AddCoursePage = () => {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-2 transition-transform group-hover:scale-105 duration-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-black mb-1.5 sm:mb-2 transition-transform group-hover:scale-105 duration-300">
                                                             <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
                                                             <path d="M12 12v9" />
                                                             <path d="m16 16-4-4-4 4" />
                                                         </svg>
                                                         <button
                                                             type="button"
-                                                            className="px-4 py-1.5 bg-gray-100 text-black text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm"
+                                                            className="px-3.5 py-1 sm:px-4 sm:py-1.5 bg-gray-100 text-black text-[11px] sm:text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer"
                                                         >
                                                             Browse file
                                                         </button>
@@ -2236,7 +2233,7 @@ const AddCoursePage = () => {
 
                                         {/* Optional PDF/Resource Upload */}
                                         <div>
-                                            <label className="block text-[13px] font-bold text-gray-700 mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment PDF Instructions' : 'Optional PDF Upload'}</label>
+                                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-700 mb-2 sm:mb-3">{newItem.type === 'Assignment' ? 'Optional Assignment PDF Instructions' : 'Optional PDF Upload'}</label>
                                             <input
                                                 ref={pdfInputRef}
                                                 type="file"
@@ -2248,7 +2245,7 @@ const AddCoursePage = () => {
                                                 onClick={() => !isPdfUploading && pdfInputRef.current?.click()}
                                                 onMouseEnter={() => setIsModalPdfHovered(true)}
                                                 onMouseLeave={() => setIsModalPdfHovered(false)}
-                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-6 cursor-pointer group bg-white
+                                                className={`w-full transition-all duration-200 flex flex-col items-center justify-center py-4 sm:py-5 md:py-6 cursor-pointer group bg-white
                                                 ${isPdfUploading ? 'cursor-wait bg-indigo-50/20' : 'hover:bg-gray-50/30'}`}
                                                 style={{
                                                     backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='${isModalPdfHovered ? '%23111827' : '%239CA3AF'}' stroke-width='2' stroke-dasharray='10%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
@@ -2262,14 +2259,14 @@ const AddCoursePage = () => {
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-black mb-2 transition-transform group-hover:scale-105 duration-300">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 text-black mb-1.5 sm:mb-2 transition-transform group-hover:scale-105 duration-300">
                                                             <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
                                                             <path d="M12 12v9" />
                                                             <path d="m16 16-4-4-4 4" />
                                                         </svg>
                                                         <button
                                                             type="button"
-                                                            className="px-4 py-1.5 bg-gray-100 text-black text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm"
+                                                            className="px-3.5 py-1 sm:px-4 sm:py-1.5 bg-gray-100 text-black text-[11px] sm:text-[12px] font-normal rounded-lg mb-1 hover:bg-gray-200 transition-colors shadow-sm cursor-pointer"
                                                         >
                                                             Browse file
                                                         </button>
@@ -2368,18 +2365,18 @@ const AddCoursePage = () => {
                                 </div>
 
                                 {/* Modal Footer */}
-                                <div className="mt-8 flex justify-between items-center bg-white gap-4">
+                                <div className="mt-5 sm:mt-6 md:mt-8 flex justify-between items-center bg-white gap-3 sm:gap-4">
                                     <button
                                         type="button"
                                         onClick={handleAttemptCloseLecture}
-                                        className="px-12 py-3 bg-[#f3f4f6] text-[#0f172a] font-normal rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[14px]"
+                                        className="px-6 sm:px-10 md:px-12 py-2.5 sm:py-3 bg-[#f3f4f6] text-[#0f172a] font-normal rounded-xl hover:bg-gray-200 transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px]"
                                     >
                                         Cancel
                                     </button>
                                     <GradiantButton
                                         onClick={handleSaveItem}
                                         disabled={isVideoUploading || isAudioUploading || isPdfUploading}
-                                        className="px-16 py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-8 sm:px-12 md:px-16 py-2.5 sm:py-3 font-bold rounded-xl transition-all active:scale-95 shadow-sm text-[13px] sm:text-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Save
                                     </GradiantButton>

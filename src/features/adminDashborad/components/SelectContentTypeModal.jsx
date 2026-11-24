@@ -70,46 +70,46 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue, hasLectures = fal
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-gray-600 transition-colors z-20"
+                    className="absolute top-4 right-4 md:top-5 md:right-5 lg:top-6 lg:right-6 text-gray-400 hover:text-gray-600 transition-colors z-20"
                 >
-                    <X size={20} className="md:w-6 md:h-6" />
+                    <X size={20} className="w-5 h-5 md:w-5 md:h-5 lg:w-6 lg:h-6" />
                 </button>
 
-                <div className="px-6 py-6 md:px-10 md:py-10">
-                    <div className="mb-6 md:mb-10">
-                        <h2 className="text-[20px] md:text-[24px] font-bold text-[#0f172a] mb-2 tracking-tight">Select Content Type</h2>
-                        <p className="text-[#64748b] text-[13px] md:text-[15px] font-medium leading-relaxed">Choose what you want to add inside this course structure.</p>
+                <div className="px-4 py-4 sm:px-6 sm:py-5 md:px-7 md:py-6 lg:px-10 lg:py-10">
+                    <div className="mb-4 md:mb-5 lg:mb-10">
+                        <h2 className="text-[20px] md:text-[22px] lg:text-[24px] font-bold text-[#0f172a] mb-1.5 md:mb-2 tracking-tight">Select Content Type</h2>
+                        <p className="text-[#64748b] text-[13px] md:text-[13.5px] lg:text-[15px] font-medium leading-relaxed">Choose what you want to add inside this course structure.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 md:gap-4 lg:gap-6 mb-5 md:mb-6 lg:mb-10">
                         {options.map((option) => (
                             <div
                                 key={option.id}
                                 onClick={() => handleSelectOption(option.id)}
                                 className={`
-                                    relative p-8 rounded-[20px] border-2 transition-all duration-300 cursor-pointer group flex flex-col items-start
+                                    relative p-4 md:p-[18px] lg:p-8 rounded-[16px] md:rounded-[18px] lg:rounded-[20px] border-2 transition-all duration-300 cursor-pointer group flex flex-col items-start
                                     ${selectedType === option.id
                                         ? 'border-[#4f46e5] bg-[#f5f3ff] shadow-md shadow-[#4f46e5]/5'
                                         : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'}
                                 `}
                             >
                                 <div className={`
-                                    w-12 h-12 md:w-14 md:h-14 rounded-[14px] flex items-center justify-center mb-4 md:mb-6 transition-all duration-300
+                                    w-10 h-10 md:w-11 md:h-11 lg:w-14 lg:h-14 rounded-[10px] md:rounded-[12px] lg:rounded-[14px] flex items-center justify-center mb-3 md:mb-3.5 lg:mb-6 transition-all duration-300
                                     ${selectedType === option.id ? 'bg-[#4f46e5] text-white shadow-lg' : 'bg-gray-50 text-gray-400 group-hover:bg-gray-100'}
                                 `}>
-                                    <option.icon size={24} className="md:w-7 md:h-7" strokeWidth={2.5} />
+                                    <option.icon size={20} className="w-5 h-5 md:w-[22px] md:h-[22px] lg:w-7 lg:h-7" strokeWidth={2.5} />
                                 </div>
 
-                                <h3 className={`text-[18px] md:text-[20px] font-bold mb-2 md:mb-3 transition-colors ${selectedType === option.id ? 'text-[#0f172a]' : 'text-gray-400'}`}>
+                                <h3 className={`text-[16px] md:text-[17px] lg:text-[20px] font-bold mb-1.5 md:mb-2 lg:mb-3 transition-colors ${selectedType === option.id ? 'text-[#0f172a]' : 'text-gray-400'}`}>
                                     {option.title}
                                 </h3>
-                                <p className={`text-[13px] md:text-[14px] leading-relaxed transition-colors ${selectedType === option.id ? 'text-gray-600 font-medium' : 'text-gray-300 font-medium'}`}>
+                                <p className={`text-[12px] md:text-[12.5px] lg:text-[14px] leading-snug md:leading-relaxed transition-colors ${selectedType === option.id ? 'text-gray-600 font-medium' : 'text-gray-300 font-medium'}`}>
                                     {option.description}
                                 </p>
 
                                 {selectedType === option.id && (
-                                    <div className="absolute top-4 right-4">
-                                        <div className="w-5 h-5 bg-[#4f46e5] rounded-full flex items-center justify-center p-1">
+                                    <div className="absolute top-3 right-3 md:top-3.5 md:right-3.5 lg:top-4 lg:right-4">
+                                        <div className="w-4 h-4 md:w-4.5 md:h-4.5 lg:w-5 lg:h-5 bg-[#4f46e5] rounded-full flex items-center justify-center p-0.5 md:p-1">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
                                                 <polyline points="20 6 9 17 4 12" />
                                             </svg>
@@ -120,17 +120,17 @@ const SelectContentTypeModal = ({ isOpen, onClose, onContinue, hasLectures = fal
                         ))}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2.5 sm:gap-4 lg:gap-5">
                         <button
                             onClick={onClose}
-                            className="w-full sm:w-auto px-10 py-3 text-[#64748b] border-[2px] border-gray-200 rounded-xl font-bold text-[14px] md:text-[15px] hover:text-[#0f172a] transition-all active:scale-95 order-2 sm:order-1"
+                            className="w-full sm:w-auto px-6 py-2.5 md:px-8 md:py-2.5 lg:px-10 lg:py-3 text-[#64748b] border-[2px] border-gray-200 rounded-xl font-bold text-[13px] md:text-[14px] lg:text-[15px] hover:text-[#0f172a] transition-all active:scale-95 order-2 sm:order-1"
                         >
                             Cancel
                         </button>
                         <GradiantButton
                             onClick={() => onContinue(selectedType)}
                             disabled={isContinueDisabled}
-                            className="w-full sm:w-auto px-14 py-3 font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[14px] md:text-[15px] order-1 sm:order-2"
+                            className="w-full sm:w-auto px-10 py-2.5 md:px-11 md:py-2.5 lg:px-14 lg:py-3 font-bold rounded-xl shadow-lg shadow-blue-500/20 active:scale-95 transition-all text-[13px] md:text-[14px] lg:text-[15px] order-1 sm:order-2"
                         >
                             Continue
                         </GradiantButton>

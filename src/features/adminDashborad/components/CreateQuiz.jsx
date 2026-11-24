@@ -477,7 +477,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
     }
 
     return (
-        <div className="flex-1 flex flex-col w-full min-h-full overflow-y-auto custom-scrollbar font-sans bg-white border border-gray-100/80 shadow-sm relative">
+        <div className="flex-1 flex flex-col w-full min-h-full overflow-y-auto custom-scrollbar font-sans bg-white border border-gray-100/80 shadow-sm relative rounded-xl sm:rounded-2xl">
             {/* SVG Gradient Definition */}
             <svg width="0" height="0" className="absolute">
                 <defs>
@@ -489,33 +489,33 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
             </svg>
 
             {/* Header Area */}
-            <div className="mb-6 md:mb-8 px-6 md:px-10 pt-6 md:pt-8 text-left flex flex-col items-start">
+            <div className="mb-4 sm:mb-6 md:mb-8 px-3.5 sm:px-6 md:px-10 pt-4 sm:pt-6 md:pt-8 text-left flex flex-col items-start">
                 <button
                     onClick={onBackToSelection}
-                    className="flex items-center gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[13px] md:text-[14px] font-medium mb-3 md:mb-4 group cursor-pointer"
+                    className="flex items-center gap-1.5 sm:gap-2 text-[#64748b] hover:text-[#0f172a] transition-all text-[12px] sm:text-[13px] md:text-[14px] font-medium mb-2.5 sm:mb-3 md:mb-4 group cursor-pointer"
                 >
                     <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Selection
                 </button>
-                <h1 className="text-[22px] md:text-[28px] font-bold text-[#0f172a] mb-1 md:mb-2 tracking-tight">{quizId ? 'Edit Quiz' : 'Create New Quiz'}</h1>
-                <p className="text-[#64748b] text-[13px] md:text-[15px] font-medium leading-relaxed">Set up your quiz and choose how you want to add questions.</p>
+                <h1 className="text-[18px] sm:text-[22px] md:text-[28px] font-bold text-[#0f172a] mb-1 md:mb-2 tracking-tight">{quizId ? 'Edit Quiz' : 'Create New Quiz'}</h1>
+                <p className="text-[#64748b] text-[12px] sm:text-[13px] md:text-[15px] font-medium leading-relaxed">Set up your quiz and choose how you want to add questions.</p>
             </div>
 
             {/* Stepper */}
-            <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-6 mb-8 md:mb-12 max-w-[900px] mx-auto w-full px-2 sm:px-4 md:px-0">
+            <div className="flex items-center justify-center gap-1.5 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-12 max-w-[900px] mx-auto w-full px-2 sm:px-4 md:px-0">
                 {steps.map((s, idx) => (
                     <React.Fragment key={s.id}>
                         {/* Step Circle and Label */}
                         <div className="flex flex-col items-center gap-2 md:gap-3 relative">
                             <div className="flex flex-col items-center relative z-10">
-                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 shadow-sm
+                                <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 shadow-sm
                                     ${currentStep >= s.id
                                         ? 'bg-[#8b5cf6] border-transparent text-white shadow-[0_0_15px_rgba(139,92,246,0.2)]'
                                         : 'bg-white border-gray-100 text-gray-400'}`}
                                 >
-                                    {currentStep > s.id ? <Check size={18} /> : <span className="text-[13px] sm:text-[15px] font-bold">{s.id}</span>}
+                                    {currentStep > s.id ? <Check size={16} className="sm:w-[18px] sm:h-[18px]" /> : <span className="text-[12px] sm:text-[15px] font-bold">{s.id}</span>}
                                 </div>
-                                <span className={`absolute -bottom-7 sm:-bottom-8 text-[10px] sm:text-[13px] font-bold whitespace-nowrap transition-all duration-500
+                                <span className={`absolute -bottom-6 sm:-bottom-8 text-[9.5px] sm:text-[13px] font-bold whitespace-nowrap transition-all duration-500
                                     ${currentStep >= s.id ? 'text-[#0f172a]' : 'text-gray-400'} 
                                     left-1/2 -translate-x-1/2`}
                                 >
@@ -526,7 +526,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                         {/* Connecting Line (except for the last step) */}
                         {idx < steps.length - 1 && (
-                            <div className="w-6 sm:w-12 md:w-24 h-[2px] bg-gray-100 mb-5 sm:mb-6 relative rounded-full overflow-hidden">
+                            <div className="w-4 sm:w-12 md:w-24 h-[2px] bg-gray-100 mb-4 sm:mb-6 relative rounded-full overflow-hidden">
                                 <div
                                     className={`absolute left-0 top-0 h-full bg-[#8b5cf6] transition-all duration-700
                                         ${currentStep > s.id ? 'w-full' : 'w-0'}`}
@@ -538,22 +538,22 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
             </div>
 
             {/* Form Content Wrapper */}
-            <div className="flex-1 px-4 sm:px-6 mb-4">
+            <div className="flex-1 px-1 sm:px-4 md:px-6 mb-4">
                 {/* Form Content - Step 1: Setup */}
                 {currentStep === 1 && (
-                    <div className="flex-1 max-w-[1000px] mx-auto w-full px-4 md:px-0">
-                        <div className="bg-white rounded-[20px] md:rounded-[24px] p-5 sm:p-6 md:p-10 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-                            <h3 className="text-[16px] md:text-[18px] font-bold text-[#0f172a] mb-6 md:mb-8 text-center sm:text-left">Quiz Basic Details</h3>
+                    <div className="flex-1 max-w-[1000px] mx-auto w-full px-0 sm:px-2 md:px-0">
+                        <div className="bg-white rounded-[16px] sm:rounded-[20px] md:rounded-[24px] p-3.5 sm:p-6 md:p-10 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+                            <h3 className="text-[15px] sm:text-[16px] md:text-[18px] font-bold text-[#0f172a] mb-4 sm:mb-6 md:mb-8 text-center sm:text-left">Quiz Basic Details</h3>
 
-                            <div className="space-y-6 md:space-y-8">
+                            <div className="space-y-4 sm:space-y-6 md:space-y-8">
                                 {/* Lectures Field & Dropdown */}
                                 <div>
-                                    <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Lectures *</label>
+                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Lectures *</label>
                                     <div className="relative z-20" ref={lectureDropdownRef}>
                                         <button
                                             type="button"
                                             onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
-                                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm font-medium text-[#0f172a] cursor-pointer flex items-center justify-between text-left"
+                                            className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm font-medium text-[#0f172a] cursor-pointer flex items-center justify-between text-left"
                                         >
                                             <span className={!quizData.selectedLecture ? 'text-gray-400' : 'text-[#0f172a]'}>
                                                 {(() => {
@@ -580,7 +580,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                         handleInputChange('selectedLecture', '');
                                                         setIsLectureDropdownOpen(false);
                                                     }}
-                                                    className={`w-full text-left px-4 sm:px-5 py-2.5 text-[14px] text-gray-400 hover:bg-gray-50 cursor-pointer ${
+                                                    className={`w-full text-left px-3.5 sm:px-5 py-2 sm:py-2.5 text-[13px] sm:text-[14px] text-gray-400 hover:bg-gray-50 cursor-pointer ${
                                                         !quizData.selectedLecture ? 'bg-blue-50/60 font-semibold text-blue-600' : ''
                                                     }`}
                                                 >
@@ -600,7 +600,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                                 handleInputChange('selectedLecture', lId);
                                                                 setIsLectureDropdownOpen(false);
                                                             }}
-                                                            className={`w-full text-left px-4 sm:px-5 py-2.5 text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
+                                                            className={`w-full text-left px-3.5 sm:px-5 py-2 sm:py-2.5 text-[13px] sm:text-[14px] transition-colors cursor-pointer flex items-center justify-between ${
                                                                 isSelected ? 'bg-blue-50 font-semibold text-[#3758EE]' : 'text-[#0f172a] hover:bg-gray-50'
                                                             }`}
                                                         >
@@ -616,37 +616,37 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                                 {/* Quiz Title */}
                                 <div>
-                                    <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Quiz Title *</label>
+                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Quiz Title *</label>
                                     <input
                                         type="text"
                                         placeholder="Enter quiz title"
                                         value={quizData.title}
                                         onChange={(e) => handleInputChange('title', e.target.value)}
-                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm"
                                     />
                                 </div>
 
                                 {/* Short Description */}
                                 <div>
-                                    <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Quiz Short Description</label>
+                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Quiz Short Description</label>
                                     <textarea
                                         placeholder="Brief description of the quiz"
-                                        rows={4}
+                                        rows={3}
                                         value={quizData.description}
                                         onChange={(e) => handleInputChange('description', e.target.value)}
-                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm resize-none"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none"
                                     />
                                 </div>
 
                                 {/* Quiz Instructions */}
                                 <div>
-                                    <label className="block text-[14px] font-bold text-[#0f172a] mb-2.5">Quiz Instructions</label>
+                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Quiz Instructions</label>
                                     <textarea
                                         placeholder="Instructions for students taking this quiz"
-                                        rows={4}
+                                        rows={3}
                                         value={quizData.instructions}
                                         onChange={(e) => handleInputChange('instructions', e.target.value)}
-                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] shadow-sm resize-none"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none"
                                     />
                                 </div>
                             </div>
@@ -656,51 +656,51 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                 {/* Form Content - Step 2: Method */}
                 {!quizId && currentStep === 2 && (
-                    <div className="flex-1 max-w-[900px] mx-auto w-full px-4 md:px-0 bg-white rounded-[20px] md:rounded-[32px] p-6 md:p-12 border border-gray-50 shadow-[0_20px_50px_rgba(0,0,0,0.03)] mb-8 md:mb-12">
-                        <div className="text-center mb-8 md:mb-10">
-                            <h3 className="text-[20px] md:text-[24px] font-bold text-[#0f172a] mb-2 leading-tight">Quiz Creation Method</h3>
+                    <div className="flex-1 max-w-[900px] mx-auto w-full px-0 sm:px-2 md:px-0 bg-white rounded-[16px] sm:rounded-[20px] md:rounded-[32px] p-4 sm:p-6 md:p-12 border border-gray-50 shadow-[0_20px_50px_rgba(0,0,0,0.03)] mb-6 sm:mb-8 md:mb-12">
+                        <div className="text-center mb-5 sm:mb-8 md:mb-10">
+                            <h3 className="text-[17px] sm:text-[20px] md:text-[24px] font-bold text-[#0f172a] mb-1.5 md:mb-2 leading-tight">Quiz Creation Method</h3>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 md:px-8 lg:px-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6 md:gap-8 md:px-6 lg:px-12">
                             {[
                                 {
                                     id: 'manual',
                                     title: 'Manual Creation',
                                     line1: 'Add questions one by one',
                                     line2: 'Best for custom quizzes',
-                                    icon: <FileEdit size={30} />,
+                                    icon: <FileEdit size={24} className="sm:w-[30px] sm:h-[30px]" />,
                                 },
                                 {
                                     id: 'bulk',
                                     title: 'CSV Upload',
                                     line1: 'Bulk upload questions using CSV file',
                                     line2: 'Best for large assessments',
-                                    icon: <Upload size={30} />,
+                                    icon: <Upload size={24} className="sm:w-[30px] sm:h-[30px]" />,
                                 }
                             ].map((opt) => (
                                 <div
                                     key={opt.id}
                                     onClick={() => setMethod(opt.id)}
                                     className={`
-                                    group p-6 sm:p-10 rounded-[20px] md:rounded-[24px] border-2 cursor-pointer transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-left relative
+                                    group p-4 sm:p-7 md:p-10 rounded-[16px] sm:rounded-[20px] md:rounded-[24px] border-2 cursor-pointer transition-all duration-300 flex flex-col items-center md:items-start text-center md:text-left relative
                                     ${method === opt.id ? 'border-[#4f46e5]/40 bg-[#f5f3ff] shadow-xl shadow-[#4f46e5]/10' : 'border-gray-100 bg-white hover:border-gray-200'}
                                 `}
                                 >
-                                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[16px] flex items-center justify-center mb-4 md:mb-6 transition-all duration-300 shadow-xl
+                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-[12px] md:rounded-[16px] flex items-center justify-center mb-3 sm:mb-4 md:mb-6 transition-all duration-300 shadow-xl
                                     ${method === opt.id ? 'bg-[#8b5cf6] text-white shadow-[#8b5cf6]/30 scale-110' : 'bg-gray-50 text-[#64748b] group-hover:bg-gray-100'}
                                 `}>
                                         {opt.icon}
                                     </div>
-                                    <h4 className={`text-[16px] md:text-[18px] font-bold mb-2 md:mb-3 transition-colors ${method === opt.id ? 'text-[#0f172a]' : 'text-[#0f172a]'}`}>
+                                    <h4 className={`text-[15px] sm:text-[16px] md:text-[18px] font-bold mb-1.5 sm:mb-2 md:mb-3 transition-colors ${method === opt.id ? 'text-[#0f172a]' : 'text-[#0f172a]'}`}>
                                         {opt.title}
                                     </h4>
                                     <div className="space-y-1 md:space-y-1.5">
-                                        <p className="text-[12px] md:text-[13px] text-[#64748b] font-medium leading-relaxed">{opt.line1}</p>
-                                        <p className="text-[11px] md:text-[12px] text-gray-400 font-medium">{opt.line2}</p>
+                                        <p className="text-[11.5px] sm:text-[12px] md:text-[13px] text-[#64748b] font-medium leading-relaxed">{opt.line1}</p>
+                                        <p className="text-[10.5px] sm:text-[11px] md:text-[12px] text-gray-400 font-medium">{opt.line2}</p>
                                     </div>
                                     {method === opt.id && (
-                                        <div className="absolute top-4 right-4 md:top-6 md:right-6 w-6 h-6 md:w-7 md:h-7 rounded-full bg-[#3758EE] text-white flex items-center justify-center animate-in zoom-in shadow-md">
-                                            <Check size={14} strokeWidth={3} />
+                                        <div className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 md:top-6 md:right-6 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-[#3758EE] text-white flex items-center justify-center animate-in zoom-in shadow-md">
+                                            <Check size={12} className="sm:w-[14px] sm:h-[14px]" strokeWidth={3} />
                                         </div>
                                     )}
                                 </div>
@@ -711,13 +711,13 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                 {/* If method is bulk, show CSV Upload area */}
                 {!quizId && currentStep === 3 && method === 'bulk' && (
-                    <div className="flex-1 max-w-[800px] mx-auto w-full px-4 md:px-0">
-                        <div className="bg-white rounded-[12px] md:rounded-[16px] p-5 sm:p-6 md:p-8 border border-gray-200 shadow-sm">
-                            <h3 className="text-[16px] md:text-[17px] font-bold text-[#0f172a] mb-5 md:mb-6">Upload CSV File</h3>
+                    <div className="flex-1 max-w-[800px] mx-auto w-full px-0 sm:px-2 md:px-0">
+                        <div className="bg-white rounded-[12px] md:rounded-[16px] p-3.5 sm:p-6 md:p-8 border border-gray-200 shadow-sm">
+                            <h3 className="text-[15px] sm:text-[16px] md:text-[17px] font-bold text-[#0f172a] mb-4 sm:mb-5 md:mb-6">Upload CSV File</h3>
 
                             <div
                                 onClick={() => csvInputRef.current?.click()}
-                                className="border-[1.5px] border-dashed border-gray-300 rounded-[12px] md:rounded-[16px] py-10 md:py-16 px-4 flex flex-col items-center justify-center bg-white group hover:border-[#8b5cf6]/50 transition-all cursor-pointer"
+                                className="border-[1.5px] border-dashed border-gray-300 rounded-[12px] md:rounded-[16px] py-6 sm:py-10 md:py-16 px-3 sm:px-4 flex flex-col items-center justify-center bg-white group hover:border-[#8b5cf6]/50 transition-all cursor-pointer"
                             >
                                 <input
                                     ref={csvInputRef}
@@ -782,14 +782,14 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                 {/* Form Content - Questions List & Sidebar */}
                 {currentStep === (quizId ? 2 : 3) && (!quizId ? method === 'manual' : true) && (
-                    <div className="max-w-[1240px] mx-auto w-full flex flex-col lg:flex-row gap-6 md:gap-8 flex-1 min-h-0 overflow-hidden">
+                    <div className="max-w-[1240px] mx-auto w-full flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 flex-1 min-h-0 overflow-hidden px-0 sm:px-2 md:px-0">
                         {/* Left Column: Questions List */}
-                        <div className="flex-1 space-y-4 sm:space-y-6 pb-6 sm:pb-10 order-2 lg:order-1 min-w-0 overflow-y-auto custom-scrollbar pr-1 lg:pr-3">
+                        <div className="flex-1 space-y-3.5 sm:space-y-6 pb-4 sm:pb-10 order-2 lg:order-1 min-w-0 overflow-y-auto custom-scrollbar pr-0 sm:pr-1 lg:pr-3">
                             {questions.map((q, idx) => (
-                                <div key={q.id} className="bg-white rounded-[16px] sm:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300">
+                                <div key={q.id} className="bg-white rounded-[14px] sm:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300">
                                     {/* Question Header */}
                                     <div
-                                        className="px-3 sm:px-6 py-4 border-b border-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-50/50"
+                                        className="px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-50/50"
                                         onClick={() => handleQuestionChange(q.id, 'isExpanded', !q.isExpanded)}
                                     >
                                         <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
@@ -804,7 +804,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                             ) : (
                                                 <ChevronDown size={18} className="text-gray-400 flex-shrink-0" />
                                             )}
-                                            <span className="text-[14px] font-bold text-[#0f172a] truncate hidden sm:block">
+                                            <span className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] truncate hidden sm:block">
                                                 {q.text || 'Add your question title'}
                                             </span>
                                         </div>
@@ -825,34 +825,34 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                     </div>
 
                                     {q.isExpanded && (
-                                        <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-2 overflow-hidden">
+                                        <div className="p-3.5 sm:p-6 md:p-8 space-y-4 sm:space-y-6 md:space-y-8 animate-in fade-in slide-in-from-top-2 overflow-hidden">
                                             {/* Question Text */}
                                             <div>
-                                                <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Question Text *</label>
+                                                <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Question Text *</label>
                                                 <input
                                                     type="text"
                                                     placeholder="Enter your question"
                                                     value={q.text || ''}
                                                     onChange={(e) => handleQuestionChange(q.id, 'text', e.target.value)}
-                                                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm font-medium"
+                                                    className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm font-medium"
                                                 />
                                             </div>
 
                                             {/* Question Description */}
                                             <div>
-                                                <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Question Description (Optional)</label>
+                                                <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Question Description (Optional)</label>
                                                 <textarea
                                                     placeholder="Additional context or hints"
                                                     rows={2}
                                                     value={q.description || ''}
                                                     onChange={(e) => handleQuestionChange(q.id, 'description', e.target.value)}
-                                                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none font-medium"
+                                                    className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none font-medium"
                                                 />
                                             </div>
 
                                             {/* Media Upload */}
                                             <div>
-                                                <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Attach Media (Optional)</label>
+                                                <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Attach Media (Optional)</label>
 
                                                 {/* Hidden file input */}
                                                 <input
@@ -871,21 +871,21 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                 {!q.media && !mediaUploading[q.id] && (
                                                     <div
                                                         onClick={() => mediaInputRefs.current[q.id]?.click()}
-                                                        className="border-2 border-dashed border-gray-100 rounded-[16px] sm:rounded-[20px] p-5 sm:p-8 flex flex-col items-center justify-center bg-gray-50/30 group hover:border-[#3758EE]/30 hover:bg-blue-50/20 transition-all cursor-pointer"
+                                                        className="border-2 border-dashed border-gray-100 rounded-[14px] sm:rounded-[20px] p-3.5 sm:p-6 md:p-8 flex flex-col items-center justify-center bg-gray-50/30 group hover:border-[#3758EE]/30 hover:bg-blue-50/20 transition-all cursor-pointer"
                                                     >
-                                                        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-2 sm:mb-3 group-hover:text-[#3758EE] group-hover:scale-110 transition-all">
+                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-2 sm:mb-3 group-hover:text-[#3758EE] group-hover:scale-110 transition-all">
                                                             <ImageIcon size={18} />
                                                         </div>
                                                         <span className="text-[12px] sm:text-[14px] font-bold text-[#64748b] group-hover:text-[#3758EE] transition-all text-center">Click to upload image or video</span>
-                                                        <span className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-1">JPG, PNG, WEBP, MP4, MOV</span>
+                                                        <span className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-0.5 sm:mt-1">JPG, PNG, WEBP, MP4, MOV</span>
                                                     </div>
                                                 )}
 
                                                 {/* Uploading Spinner */}
                                                 {mediaUploading[q.id] && (
-                                                    <div className="border-2 border-dashed border-[#3758EE]/30 rounded-[16px] sm:rounded-[20px] p-5 sm:p-8 flex flex-col items-center justify-center bg-blue-50/20">
-                                                        <Loader2 size={28} className="animate-spin text-[#3758EE] mb-2" />
-                                                        <span className="text-[13px] font-bold text-[#3758EE]">Uploading to Cloudinary…</span>
+                                                    <div className="border-2 border-dashed border-[#3758EE]/30 rounded-[14px] sm:rounded-[20px] p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center bg-blue-50/20">
+                                                        <Loader2 size={24} className="animate-spin text-[#3758EE] mb-2 sm:w-[28px] sm:h-[28px]" />
+                                                        <span className="text-[12px] sm:text-[13px] font-bold text-[#3758EE]">Uploading to Cloudinary…</span>
                                                     </div>
                                                 )}
 
@@ -940,21 +940,21 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                             </div>
 
                                             {/* Answer Options */}
-                                            <div className="space-y-3 sm:space-y-4">
-                                                <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-1">Answer Options *</label>
+                                            <div className="space-y-2.5 sm:space-y-4">
+                                                <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1">Answer Options *</label>
                                                 {q.options.map((opt, optIndex) => (
                                                     <div key={opt.id} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 group w-full">
                                                         <div className="flex items-center gap-3">
                                                             <div
                                                                 onClick={() => handleCorrectOption(q.id, opt.id)}
-                                                                className={`min-w-[24px] w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all flex-shrink-0
+                                                                className={`min-w-[22px] w-[22px] h-[22px] sm:min-w-[24px] sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all flex-shrink-0
                                                                 ${opt.isCorrect
                                                                         ? 'border-[#3758EE] bg-[#3758EE]'
                                                                         : 'border-gray-200 bg-white group-hover:border-gray-300'}`}
                                                             >
-                                                                {opt.isCorrect && <div className="w-2 h-2 rounded-full bg-white shadow-sm" />}
+                                                                {opt.isCorrect && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white shadow-sm" />}
                                                             </div>
-                                                            <span className="sm:hidden text-[13px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
+                                                            <span className="sm:hidden text-[12px] font-bold text-[#64748b]">Option {String.fromCharCode(65 + optIndex)}</span>
                                                         </div>
                                                         <div className="flex-1 relative flex items-center gap-2">
                                                             <div className="flex-1 relative">
@@ -964,7 +964,7 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                                     placeholder={`Enter option ${String.fromCharCode(97 + optIndex)}`}
                                                                     value={opt.text || ''}
                                                                     onChange={(e) => handleOptionChange(q.id, opt.id, e.target.value)}
-                                                                    className="w-full px-4 sm:px-5 sm:pl-[90px] py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-medium shadow-sm"
+                                                                    className="w-full px-3.5 sm:px-5 sm:pl-[90px] py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-medium shadow-sm"
                                                                 />
                                                             </div>
                                                         </div>
@@ -972,34 +972,34 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                 ))}
                                                 
                                                 {q.options.length < 4 && (
-                                                    <div className="pt-2">
+                                                    <div className="pt-1 sm:pt-2">
                                                         <button
                                                             onClick={() => handleAddOption(q.id)}
-                                                            className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-[#64748b] font-bold hover:bg-white hover:border-[#3758EE]/30 hover:text-[#3758EE] transition-all group active:scale-95 text-[14px]"
+                                                            className="w-full py-2.5 sm:py-4 border-2 border-dashed border-gray-200 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 text-[#64748b] font-bold hover:bg-white hover:border-[#3758EE]/30 hover:text-[#3758EE] transition-all group active:scale-95 text-[12.5px] sm:text-[14px]"
                                                         >
-                                                            <PlusCircle size={18} className="group-hover:scale-110 transition-all" /> Add Option
+                                                            <PlusCircle size={16} className="sm:w-[18px] sm:h-[18px] group-hover:scale-110 transition-all" /> Add Option
                                                         </button>
                                                     </div>
                                                 )}
-                                                <p className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-2 ml-1">Select the circle to mark the correct answer</p>
+                                                <p className="text-[10px] sm:text-[11px] font-medium text-gray-400 mt-1.5 sm:mt-2 ml-1">Select the circle to mark the correct answer</p>
                                             </div>
 
                                             {/* Explanation / Feedback */}
                                             <div>
-                                                <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Explanation / Feedback (Optional)</label>
+                                                <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Explanation / Feedback (Optional)</label>
                                                 <textarea
                                                     placeholder="Explain why this is the correct answer"
                                                     rows={3}
                                                     value={q.explanation || ''}
                                                     onChange={(e) => handleQuestionChange(q.id, 'explanation', e.target.value)}
-                                                    className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none font-medium"
+                                                    className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] shadow-sm resize-none font-medium"
                                                 />
                                             </div>
 
-                                            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+                                            <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-8">
                                                 {/* Points */}
                                                 <div className="flex-1">
-                                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Points</label>
+                                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Points</label>
                                                     <input
                                                         type="number"
                                                         min="0"
@@ -1024,18 +1024,18 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                                 handleQuestionChange(q.id, 'points', 0);
                                                             }
                                                         }}
-                                                        className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                     />
                                                 </div>
 
                                                 {/* Difficulty */}
                                                 <div className="flex-1">
-                                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-2.5">Difficulty</label>
+                                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-1.5 sm:mb-2.5">Difficulty</label>
                                                     <div className="relative">
                                                         <select
                                                             value={q.difficulty}
                                                             onChange={(e) => handleQuestionChange(q.id, 'difficulty', e.target.value)}
-                                                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm appearance-none cursor-pointer"
+                                                            className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] font-bold shadow-sm appearance-none cursor-pointer"
                                                         >
                                                             <option value="Easy">Easy</option>
                                                             <option value="Medium">Medium</option>
@@ -1046,20 +1046,20 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
                                                 </div>
                                             </div>
 
-                                            <div className="flex flex-col space-y-6 sm:space-y-8">
+                                            <div className="flex flex-col space-y-4 sm:space-y-8">
                                                 {/* Shuffle Toggle */}
-                                                <div className="w-full flex items-center justify-between px-4 sm:px-6 py-4 bg-[#f8fafc] border border-gray-100 rounded-2xl">
+                                                <div className="w-full flex items-center justify-between px-3.5 sm:px-6 py-3 sm:py-4 bg-[#f8fafc] border border-gray-100 rounded-xl sm:rounded-2xl">
                                                     <div className="pr-2">
-                                                        <p className="text-[13px] sm:text-[14px] font-bold text-[#0f172a]">Shuffle Answer Options</p>
+                                                        <p className="text-[12.5px] sm:text-[14px] font-bold text-[#0f172a]">Shuffle Answer Options</p>
                                                         <p className="text-[10px] sm:text-[12px] font-medium text-gray-400 leading-tight">Randomize order for each student</p>
                                                     </div>
                                                     <div
                                                         onClick={() => handleQuestionChange(q.id, 'shuffle', !q.shuffle)}
-                                                        className={`min-w-[44px] sm:min-w-[48px] h-5 sm:h-6 rounded-full relative cursor-pointer transition-all duration-300 
+                                                        className={`min-w-[40px] sm:min-w-[48px] h-5 sm:h-6 rounded-full relative cursor-pointer transition-all duration-300 
                                                         ${q.shuffle ? 'bg-[#3758EE]' : 'bg-gray-200'}`}
                                                     >
                                                         <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300
-                                                        ${q.shuffle ? 'left-6 sm:left-7' : 'left-1'}`}
+                                                        ${q.shuffle ? 'left-5 sm:left-7' : 'left-1'}`}
                                                         />
                                                     </div>
                                                 </div>
@@ -1071,32 +1071,32 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                             <button
                                 onClick={addQuestion}
-                                className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-[#64748b] font-bold hover:bg-white hover:border-[#3758EE]/30 hover:text-[#3758EE] transition-all group active:scale-95 text-[14px]"
+                                className="w-full py-3 sm:py-4 border-2 border-dashed border-gray-200 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 text-[#64748b] font-bold hover:bg-white hover:border-[#3758EE]/30 hover:text-[#3758EE] transition-all group active:scale-95 text-[13px] sm:text-[14px]"
                             >
-                                <PlusCircle size={18} className="group-hover:scale-110 transition-all" />
+                                <PlusCircle size={16} className="sm:w-[18px] sm:h-[18px] group-hover:scale-110 transition-all" />
                                 Add Another Question
                             </button>
                         </div>
 
                         {/* Right Column: Sidebar Preview */}
-                        <div className="w-full lg:w-[350px] order-1 lg:order-2 flex-shrink-0 h-full overflow-y-auto custom-scrollbar pr-1 bg-white rounded-[20px] sm:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] self-start sticky top-0">
-                            <div className="p-5 sm:p-6">
-                                <h3 className="text-[16px] sm:text-[18px] font-bold text-[#0f172a] mb-4 sm:mb-6">Quiz Preview</h3>
+                        <div className="w-full lg:w-[350px] order-1 lg:order-2 flex-shrink-0 h-full overflow-y-auto custom-scrollbar pr-1 bg-white rounded-[16px] sm:rounded-[20px] md:rounded-[24px] border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] self-start sticky top-0">
+                            <div className="p-3.5 sm:p-5 md:p-6">
+                                <h3 className="text-[15px] sm:text-[18px] font-bold text-[#0f172a] mb-3 sm:mb-6">Quiz Preview</h3>
 
                                 {/* Stats Summary */}
-                                <div className="p-4 sm:p-5 bg-[#f8fafc] rounded-xl sm:rounded-2xl border border-gray-50 mb-6 sm:mb-8 space-y-3 sm:space-y-4">
-                                    <h4 className="text-[15px] sm:text-[16px] font-bold text-[#0f172a] truncate">{quizData.title || 'Untitled Quiz'}</h4>
+                                <div className="p-3 sm:p-4 md:p-5 bg-[#f8fafc] rounded-xl sm:rounded-2xl border border-gray-50 mb-4 sm:mb-8 space-y-2.5 sm:space-y-4">
+                                    <h4 className="text-[14px] sm:text-[16px] font-bold text-[#0f172a] truncate">{quizData.title || 'Untitled Quiz'}</h4>
                                     <div className="space-y-2 sm:space-y-3">
-                                        <div className="flex items-center justify-between text-[12px] sm:text-[13px] font-medium">
+                                        <div className="flex items-center justify-between text-[11.5px] sm:text-[13px] font-medium">
                                             <span className="text-[#64748b]">Total Questions:</span>
                                             <span className="text-[#0f172a] font-bold">{questions.length}</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-[12px] sm:text-[13px] font-medium">
+                                        <div className="flex items-center justify-between text-[11.5px] sm:text-[13px] font-medium">
                                             <span className="text-[#64748b]">Total Points:</span>
                                             <span className="text-[#0f172a] font-bold">{questions.reduce((acc, q) => acc + (parseInt(q.points, 10) || 0), 0)}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[11px] sm:text-[12px] font-medium text-gray-400 pt-1">
-                                            <HelpCircle size={14} />
+                                        <div className="flex items-center gap-2 text-[10.5px] sm:text-[12px] font-medium text-gray-400 pt-0.5 sm:pt-1">
+                                            <HelpCircle size={13} className="sm:w-[14px] sm:h-[14px]" />
                                             <span>Est. {questions.length * 2} minutes</span>
                                         </div>
                                     </div>
@@ -1118,14 +1118,14 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                                 {/* Individual Question Preview(s) */}
                                 {questions.length > 0 && (
-                                    <div className="mt-6 sm:mt-8 space-y-6">
+                                    <div className="mt-4 sm:mt-8 space-y-4 sm:space-y-6">
                                         {questions.map((q, qIdx) => (
-                                            <div key={q.id} className="pt-6 sm:pt-8 border-t border-gray-50">
-                                                <h4 className="text-[10px] sm:text-[11px] font-medium text-gray-400 mb-3 uppercase tracking-wider">Question {qIdx + 1} Preview</h4>
-                                                <p className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] mb-3 sm:mb-4">Question {qIdx + 1}</p>
-                                                <div className="space-y-2">
+                                            <div key={q.id} className="pt-4 sm:pt-8 border-t border-gray-50">
+                                                <h4 className="text-[10px] sm:text-[11px] font-medium text-gray-400 mb-2 sm:mb-3 uppercase tracking-wider">Question {qIdx + 1} Preview</h4>
+                                                <p className="text-[12.5px] sm:text-[14px] font-bold text-[#0f172a] mb-2 sm:mb-4">Question {qIdx + 1}</p>
+                                                <div className="space-y-1.5 sm:space-y-2">
                                                     {q.options.map((opt, optIndex) => (
-                                                        <div key={opt.id} className={`p-3 sm:p-3.5 rounded-xl border transition-all text-[12px] sm:text-[13px] font-bold
+                                                        <div key={opt.id} className={`p-2.5 sm:p-3.5 rounded-xl border transition-all text-[11.5px] sm:text-[13px] font-bold
                                                         ${opt.isCorrect
                                                                 ? 'bg-green-50 border-green-100 text-green-600'
                                                                 : 'bg-[#f8fafc] border-gray-100 text-[#64748b]'}`}>
@@ -1144,116 +1144,116 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
 
                 {/* Form Content - Settings */}
                 {currentStep === (quizId ? 3 : 4) && (
-                    <div className="flex-1 max-w-[800px] mx-auto w-full space-y-6 sm:space-y-8 px-4 md:px-0 pb-10">
+                    <div className="flex-1 max-w-[800px] mx-auto w-full space-y-4 sm:space-y-6 md:space-y-8 px-0 sm:px-2 md:px-0 pb-6 sm:pb-10">
                         {/* Quiz Behavior Card */}
-                        <div className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 md:p-10 border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                            <h3 className="text-[18px] sm:text-[20px] font-bold text-[#0f172a]">Quiz Behavior</h3>
+                        <div className="bg-white rounded-[16px] sm:rounded-[24px] md:rounded-[32px] p-3.5 sm:p-6 md:p-10 border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] space-y-5 sm:space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                            <h3 className="text-[16px] sm:text-[18px] md:text-[20px] font-bold text-[#0f172a]">Quiz Behavior</h3>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                                <div className="space-y-2.5">
-                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a]">Passing Score (%)</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                                <div className="space-y-2 sm:space-y-2.5">
+                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a]">Passing Score (%)</label>
                                     <input
                                         type="number"
                                         value={quizSettings.passingScore}
                                         onChange={(e) => handleSettingsChange('passingScore', parseInt(e.target.value))}
-                                        className="w-full px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] sm:text-[15px] font-bold shadow-sm"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] md:text-[15px] font-bold shadow-sm"
                                     />
                                 </div>
-                                <div className="space-y-2.5">
-                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a]">Total Marks</label>
+                                <div className="space-y-2 sm:space-y-2.5">
+                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a]">Total Marks</label>
                                     <input
                                         type="number"
                                         value={quizSettings.totalMarks}
                                         onChange={(e) => handleSettingsChange('totalMarks', parseInt(e.target.value))}
-                                        className="w-full px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] sm:text-[15px] font-bold shadow-sm"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] md:text-[15px] font-bold shadow-sm"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-6 pt-2">
+                            <div className="space-y-4 sm:space-y-6 pt-1 sm:pt-2">
                                 {/* Require Passing Score Toggle */}
-                                <div className="flex items-center justify-between gap-4 group cursor-pointer" onClick={() => handleSettingsChange('requirePassingScore', !quizSettings.requirePassingScore)}>
+                                <div className="flex items-center justify-between gap-3 sm:gap-4 group cursor-pointer" onClick={() => handleSettingsChange('requirePassingScore', !quizSettings.requirePassingScore)}>
                                     <div className="flex-1">
-                                        <p className="text-[14px] sm:text-[15px] font-bold text-[#0f172a]">Require Passing Score to Continue</p>
-                                        <p className="text-[12px] sm:text-[13px] font-medium text-gray-400">Students must pass to unlock next lecture</p>
+                                        <p className="text-[13px] sm:text-[14px] md:text-[15px] font-bold text-[#0f172a]">Require Passing Score to Continue</p>
+                                        <p className="text-[11px] sm:text-[12px] md:text-[13px] font-medium text-gray-400">Students must pass to unlock next lecture</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.requirePassingScore ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.requirePassingScore ? 'left-7' : 'left-1'}`} />
+                                    <div className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.requirePassingScore ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
+                                        <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.requirePassingScore ? 'left-5 sm:left-7' : 'left-1'}`} />
                                     </div>
                                 </div>
 
                                 {/* Lock Next Lecture Toggle */}
-                                <div className="flex items-center justify-between gap-4 group cursor-pointer" onClick={() => handleSettingsChange('lockNextLecture', !quizSettings.lockNextLecture)}>
+                                <div className="flex items-center justify-between gap-3 sm:gap-4 group cursor-pointer" onClick={() => handleSettingsChange('lockNextLecture', !quizSettings.lockNextLecture)}>
                                     <div className="flex-1">
-                                        <p className="text-[14px] sm:text-[15px] font-bold text-[#0f172a]">Lock Next Lecture Until Quiz Completed</p>
-                                        <p className="text-[12px] sm:text-[13px] font-medium text-gray-400">Students must complete quiz to proceed</p>
+                                        <p className="text-[13px] sm:text-[14px] md:text-[15px] font-bold text-[#0f172a]">Lock Next Lecture Until Quiz Completed</p>
+                                        <p className="text-[11px] sm:text-[12px] md:text-[13px] font-medium text-gray-400">Students must complete quiz to proceed</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.lockNextLecture ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.lockNextLecture ? 'left-7' : 'left-1'}`} />
+                                    <div className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.lockNextLecture ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
+                                        <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.lockNextLecture ? 'left-5 sm:left-7' : 'left-1'}`} />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Attempt Settings Card */}
-                        <div className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 md:p-10 border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] space-y-8 animate-in fade-in slide-in-from-bottom-4 transition-delay-150">
-                            <h3 className="text-[18px] sm:text-[20px] font-bold text-[#0f172a]">Attempt Settings</h3>
+                        <div className="bg-white rounded-[16px] sm:rounded-[24px] md:rounded-[32px] p-3.5 sm:p-6 md:p-10 border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] space-y-5 sm:space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 transition-delay-150">
+                            <h3 className="text-[16px] sm:text-[18px] md:text-[20px] font-bold text-[#0f172a]">Attempt Settings</h3>
 
-                            <div className="space-y-8">
+                            <div className="space-y-5 sm:space-y-8">
                                 {/* Allow Retry Toggle */}
-                                <div className="flex items-center justify-between gap-4 group cursor-pointer" onClick={() => handleSettingsChange('allowRetry', !quizSettings.allowRetry)}>
+                                <div className="flex items-center justify-between gap-3 sm:gap-4 group cursor-pointer" onClick={() => handleSettingsChange('allowRetry', !quizSettings.allowRetry)}>
                                     <div className="flex-1">
-                                        <p className="text-[14px] sm:text-[15px] font-bold text-[#0f172a]">Allow Retry</p>
-                                        <p className="text-[12px] sm:text-[13px] font-medium text-gray-400">Let students retake the quiz if they fail</p>
+                                        <p className="text-[13px] sm:text-[14px] md:text-[15px] font-bold text-[#0f172a]">Allow Retry</p>
+                                        <p className="text-[11px] sm:text-[12px] md:text-[13px] font-medium text-gray-400">Let students retake the quiz if they fail</p>
                                     </div>
-                                    <div className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.allowRetry ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.allowRetry ? 'left-7' : 'left-1'}`} />
+                                    <div className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.allowRetry ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
+                                        <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.allowRetry ? 'left-5 sm:left-7' : 'left-1'}`} />
                                     </div>
                                 </div>
 
-                                <div className="space-y-2.5 pt-2">
-                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a]">Maximum Attempts</label>
+                                <div className="space-y-2 sm:space-y-2.5 pt-1 sm:pt-2">
+                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a]">Maximum Attempts</label>
                                     <input
                                         type="number"
                                         value={quizSettings.maxAttempts}
                                         onChange={(e) => handleSettingsChange('maxAttempts', parseInt(e.target.value))}
-                                        className="w-full px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] sm:text-[15px] font-bold shadow-sm"
+                                        className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] md:text-[15px] font-bold shadow-sm"
                                     />
                                 </div>
 
-                                <div className="space-y-2.5">
-                                    <label className="block text-[13px] sm:text-[14px] font-bold text-[#0f172a]">Time Limit (minutes)</label>
-                                    <div className="space-y-2">
+                                <div className="space-y-2 sm:space-y-2.5">
+                                    <label className="block text-[12.5px] sm:text-[14px] font-bold text-[#0f172a]">Time Limit (minutes)</label>
+                                    <div className="space-y-1.5 sm:space-y-2">
                                         <input
                                             type="number"
                                             value={quizSettings.timeLimit}
                                             onChange={(e) => handleSettingsChange('timeLimit', parseInt(e.target.value))}
-                                            className="w-full px-5 py-3 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[14px] sm:text-[15px] font-bold shadow-sm"
+                                            className="w-full px-3.5 sm:px-5 py-2.5 sm:py-3.5 bg-[#f8fafc] border border-gray-200 rounded-xl outline-none focus:border-[#3758EE] focus:bg-white transition-all text-[13px] sm:text-[14px] md:text-[15px] font-bold shadow-sm"
                                         />
-                                        <p className="text-[11px] sm:text-[12px] font-medium text-gray-400">Set to 0 for no time limit</p>
+                                        <p className="text-[10.5px] sm:text-[12px] font-medium text-gray-400">Set to 0 for no time limit</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 pt-2">
+                                <div className="space-y-4 sm:space-y-6 pt-1 sm:pt-2">
                                     {/* Shuffle Questions Toggle */}
-                                    <div className="flex items-center justify-between gap-4 group cursor-pointer" onClick={() => handleSettingsChange('shuffleQuestions', !quizSettings.shuffleQuestions)}>
+                                    <div className="flex items-center justify-between gap-3 sm:gap-4 group cursor-pointer" onClick={() => handleSettingsChange('shuffleQuestions', !quizSettings.shuffleQuestions)}>
                                         <div className="flex-1">
-                                            <p className="text-[14px] sm:text-[15px] font-bold text-[#0f172a]">Shuffle Questions</p>
-                                            <p className="text-[12px] sm:text-[13px] font-medium text-gray-400">Randomize question order for each attempt</p>
+                                            <p className="text-[13px] sm:text-[14px] md:text-[15px] font-bold text-[#0f172a]">Shuffle Questions</p>
+                                            <p className="text-[11px] sm:text-[12px] md:text-[13px] font-medium text-gray-400">Randomize question order for each attempt</p>
                                         </div>
-                                        <div className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.shuffleQuestions ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
-                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.shuffleQuestions ? 'left-7' : 'left-1'}`} />
+                                        <div className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.shuffleQuestions ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
+                                            <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.shuffleQuestions ? 'left-5 sm:left-7' : 'left-1'}`} />
                                         </div>
                                     </div>
 
                                     {/* Shuffle Answer Options Toggle */}
-                                    <div className="flex items-center justify-between gap-4 group cursor-pointer" onClick={() => handleSettingsChange('shuffleAnswerOptions', !quizSettings.shuffleAnswerOptions)}>
+                                    <div className="flex items-center justify-between gap-3 sm:gap-4 group cursor-pointer" onClick={() => handleSettingsChange('shuffleAnswerOptions', !quizSettings.shuffleAnswerOptions)}>
                                         <div className="flex-1">
-                                            <p className="text-[14px] sm:text-[15px] font-bold text-[#0f172a]">Shuffle Answer Options</p>
-                                            <p className="text-[12px] sm:text-[13px] font-medium text-gray-400">Randomize answer order for each question</p>
+                                            <p className="text-[13px] sm:text-[14px] md:text-[15px] font-bold text-[#0f172a]">Shuffle Answer Options</p>
+                                            <p className="text-[11px] sm:text-[12px] md:text-[13px] font-medium text-gray-400">Randomize answer order for each question</p>
                                         </div>
-                                        <div className={`w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.shuffleAnswerOptions ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
-                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.shuffleAnswerOptions ? 'left-7' : 'left-1'}`} />
+                                        <div className={`w-10 sm:w-12 h-5 sm:h-6 rounded-full relative transition-all duration-300 flex-shrink-0 ${quizSettings.shuffleAnswerOptions ? 'bg-[#3758EE]' : 'bg-gray-200'}`}>
+                                            <div className={`absolute top-0.5 sm:top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${quizSettings.shuffleAnswerOptions ? 'left-5 sm:left-7' : 'left-1'}`} />
                                         </div>
                                     </div>
                                 </div>
@@ -1264,17 +1264,17 @@ const CreateQuiz = ({ onBackToSelection, onComplete, courseId, quizId, initialDa
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-4 px-4 md:px-6 py-5 border-t border-gray-100 bg-white z-20">
+            <div className="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between max-w-[1240px] mx-auto w-full gap-3 sm:gap-4 px-3 sm:px-4 md:px-6 py-3.5 sm:py-5 border-t border-gray-100 bg-white z-20">
                 <button
                     onClick={handleBack}
-                    className="w-full sm:w-auto px-8 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-[8px] hover:bg-gray-50 transition-all active:scale-95 text-[14px]"
+                    className="w-full sm:w-auto px-6 sm:px-8 py-2.5 bg-white border border-gray-200 text-gray-600 font-medium rounded-[8px] hover:bg-gray-50 transition-all active:scale-95 text-[13px] sm:text-[14px]"
                 >
                     Back
                 </button>
                 <button
                     onClick={handleContinue}
                     disabled={isSaving}
-                    className="w-full sm:w-auto px-8 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium rounded-[8px] active:scale-95 transition-all text-[14px] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-6 sm:px-8 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium rounded-[8px] active:scale-95 transition-all text-[13px] sm:text-[14px] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {isSaving ? (
                         <><Loader2 size={15} className="animate-spin" /> Saving...</>
