@@ -25,7 +25,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
   const [shouldNavigate, setShouldNavigate] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
-  
+
   // Batch selection states
   const [showBatchSelectionModal, setShowBatchSelectionModal] = useState(false);
   const [availableBatches, setAvailableBatches] = useState([]);
@@ -59,12 +59,12 @@ const CardCourse = ({ course, isAdmin = false }) => {
         getBatchesByCourse(courseId),
         getMyCourses()
       ]);
-      
+
       // Determine which batches the user is already enrolled in
       const myCourses = myCoursesRes?.data || [];
       const enrolledInThisCourse = myCourses.filter(c => String(c.courseId) === String(courseId));
       const enrolledIds = enrolledInThisCourse.map(c => String(c.batchId)).filter(Boolean);
-      
+
       const batchMap = {};
       enrolledInThisCourse.forEach(c => {
         if (c.batchId) {
@@ -74,7 +74,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
       const allBatches = Array.isArray(batches) ? batches : [];
       // Filter out completed batches (unless student is enrolled in that batch)
-      const activeBatches = allBatches.filter(b => 
+      const activeBatches = allBatches.filter(b =>
         new Date(b.endDate) > new Date() || enrolledIds.includes(String(b._id))
       );
 
@@ -84,7 +84,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
         enrolledIds.push(String(activeBatches[0]._id));
         batchMap[String(activeBatches[0]._id)] = fallbackEnrollmentId;
       }
-      
+
       setEnrolledBatchMap(batchMap);
       setEnrolledBatchIds(enrolledIds);
 
@@ -100,7 +100,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
         toast.error("No upcoming or running batches available for this course.");
         return;
       }
-      
+
       setAvailableBatches(activeBatches);
       setShowBatchSelectionModal(true);
     } catch (error) {
@@ -118,7 +118,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
       toast("You have already enrolled in it and it will be coming soon", { icon: "⏳" });
       return;
     }
-    
+
     setShowBatchSelectionModal(false);
     setIsEnrolling(true);
     try {
@@ -129,7 +129,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
         // Find if the selected batch is upcoming
         const selectedBatch = availableBatches.find(b => String(b._id) === String(batchId));
         const isUpcoming = selectedBatch && new Date(selectedBatch.startDate) > new Date();
-        
+
         if (isUpcoming) {
           toast.success("Successfully enrolled. Course batch is coming soon!");
         } else {
@@ -141,7 +141,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
     } catch (error) {
       console.error("Enrollment error:", error);
       const msg = error.response?.data?.message;
-      
+
       if (msg === "You are already enrolled in this course") {
         setShouldNavigate(true);
       } else {
@@ -181,15 +181,15 @@ const CardCourse = ({ course, isAdmin = false }) => {
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-col gap-2 px-1">
-          <div className="flex justify-between items-start gap-3">
-            <h3 className="font-bold text-[16px] leading-[1.3] text-gray-900 line-clamp-2 min-h-[42px]">{t(course.title?.trim(), course.title)}</h3>
-            <span className="text-[11px] text-gray-400 whitespace-nowrap pt-1 font-medium">{course.date}</span>
+        <div className="flex flex-col gap-1.5 sm:gap-2 px-1">
+          <div className="flex justify-between items-start gap-2 sm:gap-3">
+            <h3 className="font-bold text-[14.5px] sm:text-[16px] leading-[1.3] text-gray-900 line-clamp-2 min-h-[38px] sm:min-h-[42px]">{t(course.title?.trim(), course.title)}</h3>
+            <span className="text-[10.5px] sm:text-[11px] text-gray-400 whitespace-nowrap pt-1 font-medium">{course.date}</span>
           </div>
-          
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[12px] text-gray-500 font-medium tracking-tight">{t(course.time, course.time)}</p>
-            <p className="text-[12.5px] text-gray-600 line-clamp-2 leading-[1.5] font-normal min-h-[38px]">
+
+          <div className="flex flex-col gap-1 sm:gap-1.5">
+            <p className="text-[11px] sm:text-[12px] text-gray-500 font-medium tracking-tight">{t(course.time, course.time)}</p>
+            <p className="text-[11.5px] sm:text-[12.5px] text-gray-600 line-clamp-2 leading-[1.5] font-normal min-h-[34px] sm:min-h-[38px]">
               {course.description || t("course_desc_unavailable", "Course description unavailable")}
             </p>
           </div>
@@ -197,7 +197,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
 
         <div className="mt-1">
           <GradiantButton
-            className={`px-6 py-2.5 h-auto text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[140px] ${(isEnrolling || isLoadingBatches) ? 'opacity-80 pointer-events-none cursor-wait' : ''}`}
+            className={`px-3.5 py-1.5 sm:px-4 sm:py-2 lg:px-2.5 lg:py-1.5 xl:px-6 xl:py-2.5 h-auto text-[12px] sm:text-[13px] lg:text-[11.5px] xl:text-[14px] font-semibold rounded-lg shadow-none hover:opacity-90 active:scale-95 transition-all min-w-[90px] sm:min-w-[110px] lg:min-w-[85px] xl:min-w-[135px] ${(isEnrolling || isLoadingBatches) ? 'opacity-80 pointer-events-none cursor-wait' : ''}`}
             onClick={handleEnrollClick}
             disabled={isEnrolling || isLoadingBatches}
           >
@@ -235,8 +235,8 @@ const CardCourse = ({ course, isAdmin = false }) => {
                 {isEnrolling ? t("enrolling_in_course", "Enrolling in Course...") : t("checking_availability", "Checking Batches...")}
               </h3>
               <p className="text-xs text-gray-500">
-                {isEnrolling 
-                  ? t("enrolling_wait_msg", "Please wait while we complete your enrollment. Do not refresh or tap again.") 
+                {isEnrolling
+                  ? t("enrolling_wait_msg", "Please wait while we complete your enrollment. Do not refresh or tap again.")
                   : t("checking_batches_msg", "Finding available batches for this course...")}
               </p>
             </div>
@@ -291,7 +291,7 @@ const CardCourse = ({ course, isAdmin = false }) => {
             </button>
             <div className="flex flex-col items-center text-center gap-4 sm:gap-5 pt-1 sm:pt-2">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#F3E8FF] flex items-center justify-center text-[#B666E7] mb-1 sm:mb-2 border-4 border-[#F3E8FF]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-8 sm:h-8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-8 sm:h-8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" x2="19" y1="8" y2="14" /><line x1="22" x2="16" y1="11" y2="11" /></svg>
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">Account Required</h3>
@@ -363,30 +363,29 @@ const CardCourse = ({ course, isAdmin = false }) => {
                   {t("select_batch_desc", "Please select which batch you would like to enroll in for")} <span className="font-semibold text-gray-800">{course.title}</span>.
                 </p>
               </div>
-              
+
               <div className="flex flex-col gap-2.5 sm:gap-3 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar flex-1 min-h-0">
                 {availableBatches.map(batch => {
                   const now = new Date();
                   const isUpcoming = new Date(batch.startDate) > now;
                   const isBatchEnrolled = enrolledBatchIds.some(id => String(id) === String(batch._id));
-                  
+
                   const enrollmentStart = batch.enrollmentStartDate ? new Date(batch.enrollmentStartDate) : null;
                   const enrollmentEnd = batch.enrollmentEndDate ? new Date(batch.enrollmentEndDate) : null;
-                  
+
                   const isEnrollmentUpcoming = enrollmentStart && now < enrollmentStart;
                   const isEnrollmentClosed = enrollmentEnd && now > enrollmentEnd;
                   const isEnrollmentOpen = !isEnrollmentUpcoming && !isEnrollmentClosed;
-                  
+
                   const isDisabled = !isBatchEnrolled && (isEnrollmentUpcoming || isEnrollmentClosed);
 
                   return (
-                    <div 
-                      key={batch._id} 
-                      className={`border rounded-xl p-3 sm:p-4 flex flex-col gap-2 transition-colors ${
-                        isDisabled || isEnrolling || isLoadingBatches
-                          ? 'border-gray-300 bg-gray-100 opacity-80 cursor-not-allowed pointer-events-none' 
+                    <div
+                      key={batch._id}
+                      className={`border rounded-xl p-3 sm:p-4 flex flex-col gap-2 transition-colors ${isDisabled || isEnrolling || isLoadingBatches
+                          ? 'border-gray-300 bg-gray-100 opacity-80 cursor-not-allowed pointer-events-none'
                           : 'border-gray-200 hover:border-[#3758EE] bg-gray-50 hover:bg-white cursor-pointer active:scale-[0.99]'
-                      }`}
+                        }`}
                       onClick={() => {
                         if (isEnrolling || isLoadingBatches) return;
                         if (isBatchEnrolled) {
@@ -410,20 +409,19 @@ const CardCourse = ({ course, isAdmin = false }) => {
                       {/* Header with Title and Badge (No overlap!) */}
                       <div className="flex flex-row justify-between items-start gap-2 mb-1">
                         <span className="font-bold text-[13.5px] sm:text-[15px] text-gray-900 leading-snug break-words min-w-0 flex-1">
-                          {isBatchEnrolled 
-                            ? (batch.name ? `${batch.name} (Enrolled)` : 'Already Enrolled') 
+                          {isBatchEnrolled
+                            ? (batch.name ? `${batch.name} (Enrolled)` : 'Already Enrolled')
                             : (batch.name || (isUpcoming ? 'Upcoming Batch' : 'Running Batch'))}
                         </span>
-                        <span className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shrink-0 whitespace-nowrap text-center ${
-                          isBatchEnrolled ? 'bg-gray-200 text-gray-700' :
-                          (isEnrollmentClosed ? 'bg-red-100 text-red-600' :
-                           isEnrollmentUpcoming ? 'bg-orange-100 text-orange-600' :
-                           'bg-green-100 text-green-600')
-                        }`}>
-                          {isBatchEnrolled ? 'Enrolled' : 
-                           (isEnrollmentClosed ? 'Enrollment Closed' : 
-                            isEnrollmentUpcoming ? 'Enrollment Starts Soon' : 
-                            'Enrollment Open')}
+                        <span className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shrink-0 whitespace-nowrap text-center ${isBatchEnrolled ? 'bg-gray-200 text-gray-700' :
+                            (isEnrollmentClosed ? 'bg-red-100 text-red-600' :
+                              isEnrollmentUpcoming ? 'bg-orange-100 text-orange-600' :
+                                'bg-green-100 text-green-600')
+                          }`}>
+                          {isBatchEnrolled ? 'Enrolled' :
+                            (isEnrollmentClosed ? 'Enrollment Closed' :
+                              isEnrollmentUpcoming ? 'Enrollment Starts Soon' :
+                                'Enrollment Open')}
                         </span>
                       </div>
 

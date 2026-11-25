@@ -142,7 +142,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
     });
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-2.5 sm:p-4">
             {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity"
@@ -150,33 +150,33 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
             />
 
             {/* Modal Container */}
-            <div className="relative bg-white w-full max-w-3xl max-h-[85vh] rounded-[1.5rem] shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+            <div className="relative bg-white w-full max-w-3xl max-h-[92vh] sm:max-h-[85vh] rounded-2xl sm:rounded-[1.5rem] shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
 
                 {/* Header */}
-                <div className="p-6 border-b border-gray-100 flex justify-between items-start">
+                <div className="p-3.5 sm:p-6 border-b border-gray-100 flex justify-between items-start shrink-0">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 leading-tight">Batch Management</h2>
-                        <p className="text-gray-400 text-xs mt-0.5">Assign moderators or redistribute students across batches.</p>
+                        <h2 className="text-base sm:text-xl font-bold text-gray-900 leading-tight">Batch Management</h2>
+                        <p className="text-gray-400 text-[10px] sm:text-xs mt-0.5">Assign moderators or redistribute students across batches.</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors group"
+                        className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors group"
                     >
-                        <X className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                        <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-gray-600" />
                     </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 flex flex-col xl:min-h-0 overflow-y-auto xl:overflow-hidden px-4 sm:px-6 pt-6 no-scrollbar">
+                <div className="flex-1 flex flex-col xl:min-h-0 overflow-y-auto xl:overflow-hidden px-3 sm:px-6 pt-3 sm:pt-6 pb-3 sm:pb-6 custom-scrollbar">
 
                     {/* Batch Info Component */}
                     <BatchInformation data={batchData} />
 
                     {/* Tabs Navigation */}
-                    <div className="mt-6 border-b border-gray-100 flex gap-8">
+                    <div className="mt-3 sm:mt-6 border-b border-gray-100 flex gap-4 sm:gap-8 shrink-0">
                         <button
                             onClick={() => setActiveTab('assign')}
-                            className={`pb-3 text-sm font-bold transition-all relative ${activeTab === 'assign' ? 'text-[#5D5FEF]' : 'text-gray-400 hover:text-gray-600'}`}
+                            className={`pb-2.5 sm:pb-3 text-xs sm:text-sm font-bold transition-all relative ${activeTab === 'assign' ? 'text-[#5D5FEF]' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             Assign Moderator
                             {activeTab === 'assign' && (
@@ -185,7 +185,7 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                         </button>
                         <button
                             onClick={() => setActiveTab('students')}
-                            className={`pb-3 text-sm font-bold transition-all relative ${activeTab === 'students' ? 'text-[#5D5FEF]' : 'text-gray-400 hover:text-gray-600'}`}
+                            className={`pb-2.5 sm:pb-3 text-xs sm:text-sm font-bold transition-all relative ${activeTab === 'students' ? 'text-[#5D5FEF]' : 'text-gray-400 hover:text-gray-600'}`}
                         >
                             Adjust Students
                             {activeTab === 'students' && (
@@ -195,64 +195,66 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                     </div>
 
                     {/* Tab Content Area */}
-                    <div className="flex-1 xl:min-h-0 mt-6 relative flex flex-col overflow-visible xl:overflow-hidden">
+                    <div className="flex-1 xl:min-h-0 mt-3 sm:mt-6 relative flex flex-col overflow-visible xl:overflow-hidden">
                         {activeTab === 'assign' && (
                             <div className="flex-1 xl:min-h-0 flex flex-col overflow-visible xl:overflow-hidden">
-                                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3 sm:gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-gray-900 text-sm font-bold">Assign Moderator</h3>
-                                        <p className="text-gray-400 text-[10px] sm:text-[11px] mt-1 leading-relaxed max-w-sm">
+                                        <h3 className="text-gray-900 text-xs sm:text-sm font-bold">Assign Moderator</h3>
+                                        <p className="text-gray-400 text-[9px] sm:text-[11px] mt-1 leading-relaxed max-w-sm">
                                             Choose a moderator responsible for managing this batch. You can change or remove the assignment at any time.
                                         </p>
                                     </div>
                                     {/* Action buttons — only shown when a moderator is assigned and we're NOT in edit mode */}
                                     {assignedModId && !isEditMode && (
-                                        <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-500">
+                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 animate-in fade-in slide-in-from-right-4 duration-500">
                                             <button
                                                 onClick={() => setIsEditMode(true)}
-                                                className="flex items-center gap-2 px-3 py-2 bg-[#5D5FEF]/5 text-[#5D5FEF] rounded-xl text-[10px] font-bold hover:bg-[#5D5FEF]/10 transition-all active:scale-95 border border-[#5D5FEF]/10 hover:border-[#5D5FEF]/20"
+                                                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-[#5D5FEF]/5 text-[#5D5FEF] rounded-xl text-[9px] sm:text-[10px] font-bold hover:bg-[#5D5FEF]/10 transition-all active:scale-95 border border-[#5D5FEF]/10 hover:border-[#5D5FEF]/20"
                                             >
-                                                <Edit2 className="w-3.5 h-3.5" /> Change
+                                                <Edit2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Change
                                             </button>
                                             <button
                                                 onClick={handleRemove}
                                                 disabled={assigningId !== null}
-                                                className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-500 rounded-xl text-[10px] font-bold hover:bg-red-100 transition-all active:scale-95 border border-red-100/30 hover:border-red-200"
+                                                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-red-50 text-red-500 rounded-xl text-[9px] sm:text-[10px] font-bold hover:bg-red-100 transition-all active:scale-95 border border-red-100/30 hover:border-red-200"
                                             >
                                                 {assigningId === 'removing' ? (
-                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                    <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
                                                 ) : (
-                                                    <UserX className="w-3.5 h-3.5" />
+                                                    <UserX className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 )}
                                                 Remove Moderator
                                             </button>
                                             <button
                                                 onClick={onClose}
-                                                className="flex items-center gap-2 px-5 py-2 bg-[#5D5FEF] text-white rounded-xl text-[10px] font-bold hover:bg-blue-600 transition-all active:scale-95 shadow-md shadow-[#5D5FEF]/20"
+                                                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-[#5D5FEF] text-white rounded-xl text-[9px] sm:text-[10px] font-bold hover:bg-blue-600 transition-all active:scale-95 shadow-md shadow-[#5D5FEF]/20"
                                             >
-                                                <Check className="w-3.5 h-3.5" /> Done
+                                                <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Done
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Search Bar (Fixed at top of tab) */}
-                                <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                                <div className="mt-3 sm:mt-4 flex flex-row items-center gap-2 sm:gap-3">
                                     <div className="flex-1 relative group">
-                                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#5D5FEF] transition-colors" />
+                                        <Search className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 group-focus-within:text-[#5D5FEF] transition-colors" />
                                         <input
                                             type="text"
                                             placeholder="Search moderators..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D5FEF]/10 focus:bg-white focus:border-[#5D5FEF]/20 transition-all text-[11px]"
+                                            className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 bg-[#F8F9FA] border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5D5FEF]/10 focus:bg-white focus:border-[#5D5FEF]/20 transition-all text-[11px]"
                                         />
                                     </div>
                                     <button
                                         onClick={() => setIsCreateModalOpen(true)}
-                                        className="px-4 py-2 border border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-[11px] flex items-center justify-center gap-2 hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95"
+                                        className="px-2.5 sm:px-4 py-2 border border-[#5D5FEF] text-[#5D5FEF] rounded-lg font-bold text-[10px] sm:text-[11px] flex items-center justify-center gap-1.5 hover:bg-[#5D5FEF] hover:text-white transition-all active:scale-95 flex-shrink-0"
+                                        title="Add New"
                                     >
-                                        <PlusCircle className="w-4 h-4" /> Add New
+                                        <PlusCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                        <span className="hidden sm:inline">Add New</span>
                                     </button>
                                 </div>
                                 {/* Moderator List (Independently Scrollable on Desktop) */}
@@ -271,18 +273,18 @@ const BatchManagementModal = ({ isOpen, onClose, batchData, initialTab = 'assign
                                         filteredModerators.map((mod, i) => (
                                             <div
                                                 key={mod.id || i}
-                                                className="p-3 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 hover:border-[#5D5FEF]/30 hover:shadow-lg hover:shadow-gray-500/5 transition-all group"
+                                                className="p-3 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 hover:border-[#5D5FEF]/30 hover:shadow-lg hover:shadow-gray-500/5 transition-all group"
                                             >
-                                                <div className="flex gap-4 items-center w-full sm:flex-1 min-w-0">
-                                                    <div className={`rounded-full text-white shadow-md flex-shrink-0 flex items-center justify-center overflow-hidden w-10 h-10 ${!mod.imageUrl ? 'bg-[#3758EE]' : ''}`}>
+                                                <div className="flex gap-3 sm:gap-4 items-center w-full sm:flex-1 min-w-0">
+                                                    <div className={`rounded-full text-white shadow-md flex-shrink-0 flex items-center justify-center overflow-hidden w-9 h-9 sm:w-10 sm:h-10 ${!mod.imageUrl ? 'bg-[#3758EE]' : ''}`}>
                                                         {mod.imageUrl ? (
                                                             <img src={mod.imageUrl} alt={mod.name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <User className="w-5 h-5" />
+                                                            <User className="w-4 h-4 sm:w-5 sm:h-5" />
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <h4 className="font-bold text-gray-900 text-sm truncate">{mod.name}</h4>
+                                                        <h4 className="font-bold text-gray-900 text-xs sm:text-sm truncate">{mod.name}</h4>
                                                         <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-0.5">
                                                             <p className="text-gray-400 text-[10px] flex items-center gap-1.5 min-w-0">
                                                                 <span className="opacity-60 text-[8px]">📧</span> <span className="truncate">{mod.email}</span>

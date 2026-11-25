@@ -28,6 +28,7 @@ const AdminDashboard = () => {
     const [moderatorCount, setModeratorCount] = useState(0);
     const [courseCount, setCourseCount] = useState(0);
     const [courseStats, setCourseStats] = useState([]);
+    const [loadingCourses, setLoadingCourses] = useState(true);
     const [moderatorsData, setModeratorsData] = useState([]);
 
     // Students List Data
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
+            setLoadingCourses(true);
             try {
                 const usersRes = await getAllUsers();
                 if (usersRes?.data) {
@@ -72,6 +74,9 @@ const AdminDashboard = () => {
                     setCourseStats(stats);
                 } catch (err) { console.error('Error fetching enrollments:', err); }
             } catch (err) { console.error('Error fetching courses:', err); }
+            finally {
+                setLoadingCourses(false);
+            }
         };
         fetchDashboardData();
     }, []);
@@ -149,7 +154,7 @@ const AdminDashboard = () => {
                             <NewBatchAlert />
 
                             <div className="gap-6">
-                                <div className=" flex flex-col gap-6">
+                                <div className="flex flex-col gap-4 sm:gap-6">
 
                                     {/* Stats Cards Section */}
                                     <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible">
@@ -196,11 +201,12 @@ const AdminDashboard = () => {
                                     </div>
 
                                     {/* Courses Enrollment Overview */}
-                                    {courseStats.length > 0 && (
+                                    {(loadingCourses || courseStats.length > 0) && (
                                         <CoursesEnrollmentOverview
                                             courseStats={courseStats}
                                             limit={12}
                                             onViewAllClick={() => navigate('/admin-courses')}
+                                            loading={loadingCourses}
                                         />
                                     )}
                                 </div>
