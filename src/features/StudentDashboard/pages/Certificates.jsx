@@ -484,9 +484,9 @@ const Certificates = () => {
                 </div>
             )}
 
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
@@ -497,50 +497,49 @@ const Certificates = () => {
                         className={`transition-transform duration-300 ease-in-out z-40 lg:translate-x-0 lg:static lg:block fixed left-0 top-0 shadow-2xl ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
                     />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-                        <div className="py-4 pr-2 flex flex-col gap-6">
+                    <main className="flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar scrollbar-hide" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                        <div className="py-2 sm:py-4 px-1 sm:px-2 flex flex-col gap-4 sm:gap-6">
 
                             {/* ── Metric Cards ── */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 xl:gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible">
+                            <div className="flex xl:grid xl:grid-cols-4 items-stretch gap-3.5 xl:gap-4 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible">
                                 {metricCards.map((metric, index) => (
-                                    <div key={index} className="bg-white p-3.5 sm:p-4 xl:p-5 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-between h-full min-w-[250px] sm:min-w-[280px] lg:min-w-0 flex-shrink-0 lg:flex-shrink">
-                                        <div>
-                                            <h3 className="text-gray-900 font-semibold mb-1.5 xl:mb-2 text-xs sm:text-sm truncate" title={metric.label}>{metric.label}</h3>
-                                            <div className="flex items-baseline gap-1.5 xl:gap-2 mb-2 flex-wrap">
+                                    <div key={index} className="bg-white p-3.5 sm:p-4 xl:p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between w-[240px] sm:w-[265px] xl:w-auto min-w-[240px] sm:min-w-[265px] xl:min-w-0 shrink-0 xl:shrink">
+                                        <div className="flex flex-col gap-1.5 sm:gap-2">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h3 className="text-gray-900 font-semibold text-xs sm:text-sm leading-snug">{metric.label}</h3>
+                                                {metric.change && (
+                                                    <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0">{metric.change}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-baseline gap-1.5 xl:gap-2 flex-wrap">
                                                 {loading ? (
                                                     <>
-                                                        <div className="h-8 bg-gray-200 rounded w-10 animate-pulse"></div>
+                                                        <div className="h-7 sm:h-8 bg-gray-200 rounded w-10 animate-pulse"></div>
                                                         <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
-                                                        {metric.change && (
-                                                            <div className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
-                                                        )}
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <span className="text-2xl xl:text-3xl font-bold text-gray-900">{metric.value}</span>
+                                                        <span className="text-2xl xl:text-3xl font-bold text-gray-900 leading-none">{metric.value}</span>
                                                         <span className="text-xs font-medium text-gray-500">{metric.sub}</span>
-                                                        {metric.change && (
-                                                            <span className="bg-green-50 text-green-600 text-[10px] font-bold px-1.5 py-0.5 rounded">{metric.change}</span>
-                                                        )}
                                                     </>
                                                 )}
                                             </div>
-                                            <p className="text-gray-400 text-[11px] leading-tight line-clamp-2">{metric.desc}</p>
                                         </div>
+                                        <p className="text-gray-400 text-[11px] leading-relaxed mt-2">{metric.desc}</p>
                                     </div>
                                 ))}
                             </div>
 
                             {/* ── Certificates Table ── */}
-                            <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-4 shadow-sm">
-                                <div className="flex flex-col justify-between mb-6 gap-4">
-                                    <div className='flex flex-col md:flex-row justify-between items-start md:items-center'>
+                            <div className="bg-white rounded-[16px] border border-[#EAEDF2] p-3 sm:p-4 md:p-5 shadow-sm">
+                                <div className="flex flex-col justify-between mb-4 sm:mb-6 gap-4">
+                                    <div className='flex flex-col md:flex-row justify-between items-start md:items-center gap-3'>
                                         <div>
-                                            <h2 className="text-xl font-bold text-gray-900 leading-[1.8] pt-2 pb-2">{t('certificates_list', 'Certificates List')}</h2>
-                                            <p className="text-gray-500 text-sm leading-[1.8]">{t('manage_certificates', 'Manage your Certificates')}</p>
+                                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug pt-1 pb-1">{t('certificates_list', 'Certificates List')}</h2>
+                                            <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">{t('manage_certificates', 'Manage your Certificates')}</p>
                                         </div>
-                                        <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
-                                            <div className="relative w-full md:w-[300px]">
+                                        <div className="flex items-center gap-2 w-full md:w-auto">
+                                            <div className="relative flex-1 md:w-[280px] lg:w-[300px]">
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                                                 <input
                                                     type="text"
@@ -550,8 +549,8 @@ const Certificates = () => {
                                                     className="w-full pl-9 pr-4 h-[40px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                                 />
                                             </div>
-                                            <GradiantButton className={"h-[40px] px-3 md:px-4 rounded-lg"}>
-                                                <Search className="h-4 w-4" />
+                                            <GradiantButton className="h-[40px] px-3.5 md:px-4 rounded-lg shrink-0">
+                                                <Search className="h-4 w-4 md:mr-1.5 shrink-0" />
                                                 <span className="hidden md:inline">{t('search', 'Search')}</span>
                                             </GradiantButton>
                                         </div>
@@ -564,7 +563,7 @@ const Certificates = () => {
                                             <CertificateCardsSkeleton />
                                         </div>
                                         <div className="hidden lg:block w-full overflow-x-auto pb-2 scrollbar-thin">
-                                            <div className="w-full min-w-[720px] xl:min-w-0">
+                                            <div className="w-full min-w-[820px] xl:min-w-full">
                                                 <div className="grid grid-cols-12 gap-3 xl:gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
                                                     <div className="col-span-4 xl:col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>
                                                     <div className="hidden xl:block xl:col-span-2">{t('title', 'Title')}</div>
@@ -744,7 +743,7 @@ const Certificates = () => {
 
                                         {/* Desktop / Laptop Table View (lg+) */}
                                         <div className="hidden lg:block w-full overflow-x-auto pb-2 scrollbar-thin">
-                                            <div className="w-full min-w-[720px] xl:min-w-0">
+                                            <div className="w-full min-w-[820px] xl:min-w-full">
                                                 {/* Table Header */}
                                                 <div className="grid grid-cols-12 gap-3 xl:gap-4 border-b border-gray-100 pb-4 mb-4 text-sm font-semibold text-gray-900 text-center leading-[1.8]">
                                                     <div className="col-span-4 xl:col-span-3 text-left pl-4">{t('courses', 'Courses')}</div>

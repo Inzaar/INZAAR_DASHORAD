@@ -63,7 +63,7 @@ export function Calendar18() {
                             <button
                                 {...props}
                                 className={cn(
-                                    "h-9 w-9 p-0 font-normal transition-all flex items-center justify-center relative z-10",
+                                    "h-8 w-8 sm:h-9 sm:w-9 p-0 font-normal transition-all flex items-center justify-center relative z-10",
                                     bgClass,
                                     props.className
                                 )}
@@ -78,7 +78,7 @@ export function Calendar18() {
 
                                 {isToday && hasActive && (
                                     <span className={cn(
-                                        "absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full border border-white",
+                                        "absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full border border-white",
                                         activeEvents[0].color
                                     )} />
                                 )}

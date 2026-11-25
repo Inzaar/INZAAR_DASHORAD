@@ -21,7 +21,7 @@ const LectureCard = ({
         <div
             onClick={!isLocked ? onClick : undefined}
             className={cn(
-                "w-[220px] min-[380px]:w-[240px] sm:w-[273px] h-[130px] min-[380px]:h-[142px] sm:h-[161px] rounded-[16px] sm:rounded-[20px] md:rounded-[23px] relative overflow-hidden group shrink-0",
+                "w-[210px] min-[380px]:w-[235px] sm:w-[265px] h-[135px] min-[380px]:h-[145px] sm:h-[161px] rounded-[16px] sm:rounded-[20px] md:rounded-[23px] relative overflow-hidden group shrink-0",
                 isLocked ? "cursor-not-allowed opacity-85" : "cursor-pointer",
                 className
             )}

@@ -7,9 +7,9 @@ function EnrolledCourse({ userCourses = [], loading }) {
     return (
         <div className="w-full flex flex-col">
             <div 
-                className={`flex gap-3.5 sm:gap-5 pb-3 overflow-x-auto custom-scrollbar-courses ${
-                    !loading && userCourses?.length > 0 && userCourses.length < 3 
-                        ? 'justify-start min-[680px]:justify-center min-[680px]:items-center' 
+                className={`flex gap-3 sm:gap-4 xl:gap-5 pb-3 overflow-x-auto custom-scrollbar-courses ${
+                    !loading && userCourses?.length === 1
+                        ? 'justify-center items-center' 
                         : 'justify-start'
                 }`} 
             >
@@ -18,7 +18,7 @@ function EnrolledCourse({ userCourses = [], loading }) {
                         {[1, 2, 3].map((item) => (
                             <div 
                                 key={item}
-                                className="w-[220px] min-[380px]:w-[240px] sm:w-[301px] h-[215px] sm:h-[250px] bg-white rounded-[10px] border border-gray-200/80 p-[10px] flex flex-col gap-[8px] sm:gap-[10px] shadow-sm animate-pulse shrink-0"
+                                className="w-[210px] min-[380px]:w-[235px] sm:w-[265px] xl:w-[290px] h-[215px] sm:h-[245px] bg-white rounded-[10px] border border-gray-200/80 p-[10px] flex flex-col gap-[8px] sm:gap-[10px] shadow-sm animate-pulse shrink-0"
                             >
                                 {/* Image Skeleton */}
                                 <div className="w-full min-h-[110px] sm:min-h-[140px] flex-1 rounded-[6px] bg-gray-200"></div>
@@ -49,7 +49,7 @@ function EnrolledCourse({ userCourses = [], loading }) {
                             title={course.title} 
                             completed={course.completedLecturesCount} 
                             total={course.totalLectures} 
-                            className="w-[220px] min-[380px]:w-[240px] sm:w-[301px] min-w-[220px] min-[380px]:min-w-[240px] sm:min-w-[300px] shadow-sm shrink-0" 
+                            className="w-[210px] min-[380px]:w-[235px] sm:w-[265px] xl:w-[290px] min-w-[210px] min-[380px]:min-w-[235px] sm:min-w-[265px] xl:min-w-[290px] shadow-sm shrink-0" 
                             image={course.thumbnail} 
                             batchStartDate={course.batchStartDate} 
                         />

@@ -210,9 +210,9 @@ const DashboardPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] font-sans text-slate-800 h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-1 sm:pb-4'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -230,25 +230,25 @@ const DashboardPage = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar scrollbar-hide" style={{
+                    <main className="flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar scrollbar-hide" style={{
                         msOverflowStyle: 'none',
                         scrollbarWidth: 'none'
                     }}>
-                        <div className="pt-2 sm:pt-4 pb-1 sm:pb-4 pr-2">
-                            <div className="flex justify-between items-start mb-3 sm:mb-6 md:mb-8 gap-4 w-full">
-                                <div>
-                                    <h2 className="text-[15px] min-[430px]:text-[19px] min-[641px]:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 leading-tight pt-1 sm:pt-2 pb-0.5 sm:pb-1 flex items-center gap-1.5 flex-nowrap whitespace-nowrap">
-                                        <span>{t('welcome_user', 'Welcome, ')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')}</span>
+                        <div className="pt-2 sm:pt-4 pb-4 px-1 sm:px-2">
+                            <div className="flex justify-between items-start mb-3 sm:mb-6 md:mb-8 gap-2 sm:gap-4 w-full">
+                                <div className="min-w-0 flex-1">
+                                    <h2 className="text-[15px] min-[430px]:text-[19px] min-[641px]:text-2xl font-bold text-gray-900 mb-0.5 sm:mb-1 leading-tight pt-1 sm:pt-2 pb-0.5 sm:pb-1 flex items-center gap-1.5 flex-wrap">
+                                        <span className="truncate">{t('welcome_user', 'Welcome, ')} {t(userData?.firstname || userData?.name || user?.firstname || user?.name || 'User')}</span>
                                         <span>👋🏻</span>
                                     </h2>
                                     <p className="text-gray-500 text-xs min-[430px]:text-sm min-[641px]:text-base leading-relaxed">
                                         {t('lets_learn_something_new_today', "Let's learn something new today!")}
                                     </p>
                                 </div>
-                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
+                                <GradiantButton onClick={() => navigate('/courses')} className="max-[600px]:hidden shrink-0 px-5 sm:px-6 py-2.5 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 whitespace-nowrap">
                                     {t('enroll_new_course', 'Enroll New Course')}
                                 </GradiantButton>
-                                <div className="relative group max-[600px]:inline-flex hidden">
+                                <div className="relative group max-[600px]:inline-flex hidden shrink-0">
                                     <GradiantButton
                                         onClick={() => navigate('/courses')}
                                         className="items-center justify-center text-2xl w-9 h-9 p-0 bg-[#3758EE] text-white font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30"
@@ -266,34 +266,34 @@ const DashboardPage = () => {
                             </div>
 
                             <div className="gap-3.5 sm:gap-6">
-                                <div className=" flex flex-col gap-3.5 sm:gap-6">
+                                <div className="flex flex-col gap-3.5 sm:gap-6">
                                     <Analytics userCourses={userCourses} name={t('performance_overview', 'Performance Overview')} percentageOverride={progressPercentage} />
 
-                                    <div className='flex w-full gap-6'>
-                                        <div className="w-full min-[680px]:w-[55%] p-4 min-[850px]:w-[65%] min-[1250px]:w-[70%] min-[1400px]:w-[75%] bg-white rounded-lg flex flex-col pt-2 px-2 shadow-sm min-w-0">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-4 leading-[1.8] pt-2 pb-2">{t("enrolled_courses", "Enrolled Courses")}</h3>
+                                    <div className='flex flex-col min-[768px]:flex-row w-full gap-3.5 sm:gap-5 xl:gap-6 min-w-0'>
+                                        <div className="w-full min-[768px]:flex-1 min-w-0 bg-white rounded-xl sm:rounded-lg flex flex-col p-3 sm:p-4 shadow-sm">
+                                            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 leading-snug">{t("enrolled_courses", "Enrolled Courses")}</h3>
                                             <EnrolledCourse userCourses={userCourses?.enrolledCourses} loading={loading} />
                                         </div>
-                                        <div className="hidden min-[680px]:flex min-[680px]:w-[45%] min-[850px]:w-[35%] min-[1250px]:w-[30%] min-[1400px]:w-[25%] flex-col">
+                                        <div className="hidden min-[768px]:flex min-[768px]:w-[270px] lg:w-[260px] xl:w-[290px] shrink-0 flex-col">
                                             <Calendar18 className="w-full h-full flex-1" />
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-6 max-[900px]:flex-col">
-                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:w-[60%]" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
+                                    <div className="flex flex-col min-[900px]:flex-row gap-3.5 sm:gap-5 xl:gap-6 w-full min-w-0">
+                                        <HoursSpentCard className="w-full shadow-sm min-[900px]:flex-1 min-w-0" userCourses={userCourses} name={t('hours_spent', 'Hours Spent')} />
 
-                                        {/* Mobile Calendar - Visible only below 680px */}
-                                        <div className="min-[680px]:hidden w-full bg-white rounded-lg shadow-sm">
-                                            <Calendar18 className="w-full h-[350px]" />
+                                        {/* Mobile Calendar - Visible only below 768px */}
+                                        <div className="min-[768px]:hidden w-full bg-white rounded-xl shadow-sm">
+                                            <Calendar18 className="w-full h-auto min-h-[310px] sm:min-h-[340px]" />
                                         </div>
 
-                                        <div className="w-full min-[900px]:w-[45%] min-[1400px]:w-[60%] flex flex-col gap-3.5 sm:gap-6 bg-white rounded-lg p-3 sm:p-4">
-                                            <div className="flex justify-between items-center gap-2">
-                                                <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-[1.8] pt-1 pb-1 sm:pt-2 sm:pb-2">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
-                                                <div className="relative z-20" ref={lectureDropdownRef}>
+                                        <div className="w-full min-[900px]:w-[46%] xl:w-[44%] min-[1400px]:w-[48%] shrink-0 min-w-0 flex flex-col gap-3 sm:gap-5 bg-white rounded-xl sm:rounded-lg p-3 sm:p-4 shadow-sm">
+                                            <div className="flex justify-between items-center gap-2 min-w-0">
+                                                <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-snug shrink-0">{t("ongoing_lectures", "Ongoing Lectures")}</h3>
+                                                <div className="relative z-20 min-w-0 flex-1 flex justify-end" ref={lectureDropdownRef}>
                                                     <button
                                                         onClick={() => setIsLectureDropdownOpen(!isLectureDropdownOpen)}
-                                                        className="flex items-center gap-2 bg-gray-100/60 rounded-lg px-2.5 sm:px-4 py-1.5 sm:py-2 shadow-sm text-xs sm:text-sm text-gray-700 hover:bg-gray-100 transition-colors w-[110px] min-[450px]:w-full min-[900px]:w-[250px] justify-between"
+                                                        className="flex items-center gap-1.5 sm:gap-2 bg-gray-100/80 rounded-lg px-2.5 sm:px-3.5 py-1.5 sm:py-2 shadow-sm text-xs sm:text-sm text-gray-700 hover:bg-gray-100 transition-colors w-full max-w-[160px] sm:max-w-[210px] min-w-0 justify-between"
                                                     >
                                                         <span className="truncate flex-1 text-left">
                                                             {t(selectedCourseData?.title, selectedCourseData?.title) || t('select_course', 'Select Course')}
@@ -308,14 +308,14 @@ const DashboardPage = () => {
                                                             strokeWidth="2"
                                                             strokeLinecap="round"
                                                             strokeLinejoin="round"
-                                                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`}
+                                                            className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform duration-200 ${isLectureDropdownOpen ? 'rotate-180' : ''}`}
                                                         >
                                                             <path d="m6 9 6 6 6-6" />
                                                         </svg>
                                                     </button>
 
                                                     {isLectureDropdownOpen && (
-                                                        <div className="absolute top-full mt-1 right-0 w-[200px] min-[900px]:w-[280px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
+                                                        <div className="absolute top-full mt-1 right-0 w-[calc(100vw-3rem)] max-w-[260px] bg-white rounded-lg shadow-xl border border-gray-100 py-1 animate-in fade-in zoom-in-95 duration-100 z-50 max-h-[300px] overflow-y-auto no-scrollbar">
                                                             {lectureOptions.length > 0 ? (
                                                                 lectureOptions.map((option) => (
                                                                     <button
