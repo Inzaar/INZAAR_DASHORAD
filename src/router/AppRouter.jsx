@@ -37,6 +37,7 @@ import ModeratorReportsPage from '@/features/adminDashborad/pages/ModeratorRepor
 import CourseReportsPage from '@/features/adminDashborad/pages/CourseReportsPage';
 import ExportStudentReportsPage from '@/features/adminDashborad/pages/ExportStudentReportsPage';
 import ExportModeratorReportsPage from '@/features/adminDashborad/pages/ExportModeratorReportsPage';
+import ExportCourseReportsPage from '@/features/adminDashborad/pages/ExportCourseReportsPage';
 import RegisteredUsersPage from '@/features/adminDashborad/pages/RegisteredUsersPage';
 import RegisteredCoursesPage from '@/features/adminDashborad/pages/RegisteredCoursesPage';
 import BatchesPage from '@/features/adminDashborad/pages/BatchesPage';
@@ -108,6 +109,7 @@ const routes = createRoutesFromElements(
             <Route path="/course-reports" element={<CourseReportsPage />} />
             <Route path="/export-student-reports" element={<ExportStudentReportsPage />} />
             <Route path="/export-moderator-reports" element={<ExportModeratorReportsPage />} />
+            <Route path="/export-course-reports" element={<ExportCourseReportsPage />} />
             <Route path="/admin-course-view/:id" element={<AdminCourseDetailPage />} />
             <Route path="/admin-course-play" element={<CourseView />} />
             <Route path="/moderator-details/:id" element={<ModeratorDetails />} />

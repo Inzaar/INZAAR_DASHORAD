@@ -68,6 +68,7 @@ function Sidebar({ className, onClose }) {
     location.pathname.startsWith('/management-dashboard') ||
     location.pathname.startsWith('/export-student-reports') ||
     location.pathname.startsWith('/export-moderator-reports') ||
+    location.pathname.startsWith('/export-course-reports') ||
     location.pathname.startsWith('/student-profiles') ||
     location.pathname.startsWith('/moderator-details') ||
     location.pathname.startsWith('/instructor-details') ||
@@ -164,6 +165,7 @@ function Sidebar({ className, onClose }) {
     '/course-reports': 'Course Reports',
     '/export-student-reports': 'Export Student Reports',
     '/export-moderator-reports': 'Export Moderator Reports',
+    '/export-course-reports': 'Export Course Reports',
 
     '/admin/student-details': 'Student Profiles',
     '/admin/moderator-details': 'Moderators',
@@ -208,7 +210,7 @@ function Sidebar({ className, onClose }) {
     }
 
     if (currentName) {
-      if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(currentName) || currentName === 'Reports & Logs') {
+      if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports', 'Export Course Reports'].includes(currentName) || currentName === 'Reports & Logs') {
         setIsReportsExpanded(true);
       }
       if (['All Students', 'Male Students', 'Female Students'].includes(currentName) || currentName === 'Student Profiles') {
@@ -314,14 +316,15 @@ function Sidebar({ className, onClose }) {
       }
     }
 
-    if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(itemName)) {
+    if (['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports', 'Export Course Reports'].includes(itemName)) {
       // It handles the sub-items for reports
       const subRoutes = {
         'Student Reports': '/reports',
         'Moderator Reports': '/moderator-reports',
         'Course Reports': '/course-reports',
         'Export Student Reports': '/export-student-reports',
-        'Export Moderator Reports': '/export-moderator-reports'
+        'Export Moderator Reports': '/export-moderator-reports',
+        'Export Course Reports': '/export-course-reports'
       };
       navigate(subRoutes[itemName]);
       if (onClose) onClose();
@@ -371,7 +374,7 @@ function Sidebar({ className, onClose }) {
 
   const renderMenuItem = (item) => {
     if (item === 'Reports & Logs') {
-      const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports'].includes(activeItem);
+      const isAnyReportActive = ['Student Reports', 'Moderator Reports', 'Course Reports', 'Export Student Reports', 'Export Moderator Reports', 'Export Course Reports'].includes(activeItem);
       return (
         <div key={item} className="w-full flex flex-col gap-1">
           <Sideabrbbutton
@@ -441,17 +444,30 @@ function Sidebar({ className, onClose }) {
                 </>
               )}
               {(user?.role === 'admin' || user?.assignedFeatures?.includes('Course Reports')) && (
-                <button
-                  onClick={() => handleItemClick('Course Reports')}
-                  className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
-                    activeItem === 'Course Reports'
-                      ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
-                      : 'text-[#6A6F78] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
-                  }`}
-                >
-                  <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${activeItem === 'Course Reports' ? 'bg-[#A269FF] scale-125' : 'bg-[#A269FF]'}`}></span>
-                  <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => handleItemClick('Course Reports')}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Course Reports'
+                        ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
+                        : 'text-[#6A6F78] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
+                    }`}
+                  >
+                    <span className={`w-[8px] h-[8px] rounded-full shrink-0 transition-all ${activeItem === 'Course Reports' ? 'bg-[#A269FF] scale-125' : 'bg-[#A269FF]'}`}></span>
+                    <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
+                  </button>
+                  <button
+                    onClick={() => handleItemClick('Export Course Reports')}
+                    className={`w-full flex items-center gap-2 justify-start text-left px-4 py-2 text-[14px] rounded-lg cursor-pointer transition-all ${
+                      activeItem === 'Export Course Reports'
+                        ? 'bg-[#A269FF]/10 text-[#A269FF] font-semibold'
+                        : 'text-[#6A26C7] hover:text-[#A269FF] hover:bg-purple-50/50 font-medium'
+                    }`}
+                  >
+                    <Download size={14} className="shrink-0" />
+                    <span className="truncate whitespace-nowrap text-left">{t('course_reports', 'Course Reports')}</span>
+                  </button>
+                </>
               )}
             </div>
           )}

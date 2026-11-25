@@ -373,10 +373,10 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-3 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -394,30 +394,30 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
-                        <div className="py-2 sm:py-4 px-2 sm:pr-2">
+                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-6 sm:pb-10 min-h-0">
+                        <div className="py-2 sm:py-4 px-1 sm:px-2">
                             {/* Header */}
-                            <div className="flex justify-between items-start mb-8 gap-4">
-                                <div>
-                                    <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-1">{genderFilter === 'All' ? 'Moderators' : `${genderFilter} Moderators`}</h2>
-                                    <p className="text-gray-400 sm:text-gray-500 text-[14px] sm:text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Moderators</p>
+                            <div className="flex justify-between items-start mb-4 sm:mb-6 xl:mb-8 gap-2 sm:gap-4">
+                                <div className="min-w-0">
+                                    <h2 className="text-lg sm:text-[20px] md:text-[24px] font-bold text-gray-900 mb-0.5 sm:mb-1 truncate">{genderFilter === 'All' ? 'Moderators' : `${genderFilter} Moderators`}</h2>
+                                    <p className="text-gray-400 sm:text-gray-500 text-xs sm:text-[14px] md:text-[16px]">Manage All Your {genderFilter === 'All' ? '' : `${genderFilter} `}Moderators</p>
                                 </div>
                                 <GradiantButton
                                     onClick={() => {
                                         setIsAddModalOpen(true);
                                         setModalStep(1);
                                     }}
-                                    className="w-11 h-11 sm:w-auto sm:px-6 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+                                    className="w-9 h-9 sm:w-auto sm:px-5 sm:py-2.5 bg-[#3758EE] text-white font-medium rounded-xl sm:rounded-lg hover:bg-blue-700 shadow-md sm:shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
                                 >
                                     <div className="flex items-center justify-center">
-                                        <Plus size={20} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
+                                        <Plus size={18} strokeWidth={2.5} className="sm:bg-white sm:text-[#3758EE] sm:rounded-full sm:p-0.5" />
                                     </div>
-                                    <span className="hidden sm:block">Add New Moderator</span>
+                                    <span className="hidden sm:block text-xs sm:text-sm font-semibold">Add New Moderator</span>
                                 </GradiantButton>
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-8">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-3 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-4 sm:mb-6 xl:mb-8">
                                 {stats.map((stat, index) => (
                                     <StatsCard
                                         key={index}
@@ -428,14 +428,14 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                             setStatusFilter(stat.type);
                                             setCurrentPage(1);
                                         }}
-                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[125px] sm:h-[135px] w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink" : "h-[125px] sm:h-[135px] w-[240px] sm:w-[260px] min-w-[240px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"}
+                                        className={statusFilter === stat.type ? "border-2 border-blue-500 shadow-sm h-[115px] sm:h-[135px] w-[220px] sm:w-[260px] min-w-[220px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink" : "h-[115px] sm:h-[135px] w-[220px] sm:w-[260px] min-w-[220px] sm:min-w-[260px] shrink-0 xl:w-auto xl:min-w-0 xl:shrink"}
                                     />
                                 ))}
                             </div>
 
                             {/* Gender Stats Grid */}
                             {genderFilter === 'All' && (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5 xl:gap-6 mb-4 sm:mb-6 xl:mb-8">
                                     <GenderStatsCard
                                         title="Total Male Moderators"
                                         value={statsData?.totalMale || 0}
@@ -464,20 +464,20 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                             )}
 
                            {/* Moderators Grid/List */}
-                            <div className="bg-white rounded-[20px] sm:rounded-[24px] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[600px] relative">
+                            <div className="bg-white rounded-xl sm:rounded-2xl xl:rounded-[24px] p-3 sm:p-5 xl:p-6 shadow-sm border border-gray-100 flex flex-col flex-1 min-h-[500px] relative">
                                 {/* Header Controls */}{isLoading && (
-                                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-[24px]">
+                                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl sm:rounded-[24px]">
                                         <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
                                 )}
 
-                                <div className="mb-6 flex justify-between items-center">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Moderator List</h3>
+                                <div className="mb-3 sm:mb-5 flex justify-between items-center">
+                                    <h3 className="text-base sm:text-lg font-bold text-gray-900">Moderator List</h3>
                                 </div>
 
                                 {/* Filters */}
                                 {/* Filters - Desktop */}
-                                <div className="hidden xl:flex flex-row gap-4 mb-8">
+                                <div className="hidden xl:flex flex-row items-end gap-4 mb-6">
                                     <div className='flex-1 flex gap-2 flex-col'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">ADVANCED SEARCH</p>
                                         <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
@@ -588,10 +588,10 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                 </div>
 
                                 {/* Filters - Responsive (Mobile Only) */}
-                                <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
-                                    <div className='flex flex-col gap-4'>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
-                                        <div className="flex items-center justify-end gap-3">
+                                <div className="flex xl:hidden flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 relative">
+                                    <div className='flex flex-col gap-2 sm:gap-3'>
+                                        <p className="text-[11px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider">ADVANCED SEARCH</p>
+                                        <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => {
                                                     setSearchText("");
@@ -600,7 +600,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                     setToDate("");
                                                     setCurrentPage(1);
                                                 }}
-                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                                                className="flex-1 flex items-center justify-center gap-2 px-3 h-10 sm:h-11 bg-white border border-gray-200 text-gray-600 font-bold text-xs sm:text-sm rounded-xl shadow-xs hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
                                                 Clear Filter
@@ -608,21 +608,21 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                             <div className="relative" ref={filterDropdownRef}>
                                                 <button
                                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
+                                                    className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all shrink-0 ${isFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 hover:bg-gray-50'}`}
                                                 >
-                                                    {isFilterOpen ? <X size={20} /> : <MoreVertical size={20} />}
+                                                    {isFilterOpen ? <X size={18} /> : <MoreVertical size={18} />}
                                                 </button>
 
                                                 {isFilterOpen && (
-                                                    <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
-                                                        <div className="space-y-5">
+                                                    <div className="absolute right-0 top-full mt-2 w-[250px] sm:w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-4 sm:p-5 z-[50]">
+                                                        <div className="space-y-4">
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Status</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Status</label>
                                                                 <div className="relative">
                                                                     <select
                                                                         value={statusFilter}
                                                                         onChange={(e) => setStatusFilter(e.target.value)}
-                                                                        className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                                                                        className="w-full pl-3 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                                                                     >
                                                                         <option value="">All Statuses</option>
                                                                         <option value="Active">Active</option>
@@ -630,23 +630,23 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                                         <option value="Pool">Pool</option>
                                                                         <option value="Deleted">Deleted</option>
                                                                     </select>
-                                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">From</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">From</label>
                                                                 <input
                                                                     type="date"
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-700 focus:outline-none font-medium"
                                                                     value={fromDate}
                                                                     onChange={(e) => setFromDate(e.target.value)}
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">To</label>
+                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">To</label>
                                                                 <input
                                                                     type="date"
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-700 focus:outline-none font-medium"
                                                                     value={toDate}
                                                                     onChange={(e) => setToDate(e.target.value)}
                                                                 />
@@ -659,20 +659,20 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                     </div>
 
                                     {/* Advanced Search Segment UI as per request */}
-                                    <div className='flex flex-col gap-3'>
-                                        <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
-                                            <div className="flex items-center px-4 py-3 border-b border-gray-100">
-                                                <Search className="text-gray-400 w-5 h-5 mr-3" />
+                                    <div className='flex flex-col gap-2'>
+                                        <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-xs overflow-hidden">
+                                            <div className="flex items-center px-3 py-2 border-b border-gray-100">
+                                                <Search className="text-gray-400 w-4 h-4 mr-2 shrink-0" />
                                                 <input
                                                     type="text"
                                                     placeholder={`Search by ${searchType.toLowerCase()}`}
-                                                    className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
+                                                    className="w-full bg-transparent text-xs sm:text-sm font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={searchText}
                                                     onChange={(e) => handleSearchChange(e.target.value)}
                                                     onKeyDown={handleSearchKeyDown}
                                                 />
                                             </div>
-                                            <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
+                                            <div className="flex items-center p-1.5 gap-1.5 bg-[#F8FAFF]">
                                                 <button
                                                     onClick={() => {
                                                         if (searchType !== 'PHONE') {
@@ -682,7 +682,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-2 text-[10px] sm:text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'PHONE' ? 'bg-[#4E60FF] text-white shadow-xs' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     PHONE#
                                                 </button>
@@ -695,7 +695,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-2 text-[10px] sm:text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-xs' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -708,7 +708,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                                             handleSearchClick();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-2 text-[10px] sm:text-[11px] font-[900] rounded-lg transition-all duration-200 ${searchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-xs' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     EMAIL
                                                 </button>
@@ -718,16 +718,16 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
                                 </div>
 
                                 {/* Moderators Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-5 xl:gap-6 justify-items-center">
                                     {moderators.length === 0 ? (
                                         !isLoading && (
-                                            <div className="col-span-full py-20 text-center">
+                                            <div className="col-span-full py-16 sm:py-20 text-center">
                                                 <div className="flex flex-col items-center gap-2 text-gray-400">
-                                                    <Search size={48} className="opacity-20" />
-                                                    <p className="font-medium text-[16px]">No moderators found matching your criteria</p>
+                                                    <Search size={42} className="opacity-20" />
+                                                    <p className="font-medium text-sm sm:text-base">No moderators found matching your criteria</p>
                                                     <button
                                                         onClick={() => { setSearchText(""); setStatusFilter(""); fetchModeratorsData(); }}
-                                                        className="text-blue-500 text-sm font-bold hover:underline"
+                                                        className="text-blue-500 text-xs sm:text-sm font-bold hover:underline"
                                                     >
                                                         Clear all filters
                                                     </button>
@@ -755,7 +755,7 @@ const ModeratorsPage = ({ genderFilter = "All" }) => {
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="flex justify-end items-center mt-auto mb-2">
+                                    <div className="flex justify-center sm:justify-end items-center mt-4 sm:mt-6 xl:mt-auto mb-1">
                                         <CustomPagination 
                                             currentPage={currentPage} 
                                             totalPages={totalPages} 

@@ -317,12 +317,12 @@ const ExportModeratorReportsPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans print:block print:h-auto print:w-auto">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4 print:h-auto print:max-h-none print:max-w-none print:overflow-visible print:bg-white print:gap-0 print:block">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-2 sm:gap-4 print:h-auto print:max-h-none print:max-w-none print:overflow-visible print:bg-white print:gap-0 print:block">
                 <div className="print:hidden">
                     <Navbar onMenuClick={toggleSidebar} />
                 </div>
 
-                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-4 print:block print:overflow-visible print:px-0 print:pb-0'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-2 sm:pb-4 print:block print:overflow-visible print:px-0 print:pb-0'>
 
                     {isSidebarOpen && (
                         <div
@@ -356,71 +356,71 @@ const ExportModeratorReportsPage = () => {
                             </div>
 
                             {/* Top Filters */}
-                            <div className="flex flex-wrap items-end justify-between xl:justify-start gap-4 mb-6 relative w-full print:hidden">
-                                <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                            <div className="flex flex-wrap items-end justify-between xl:justify-start gap-2.5 sm:gap-4 mb-4 sm:mb-6 relative w-full print:hidden">
+                                <div className="hidden xl:flex flex-wrap gap-3 2xl:gap-4 items-end flex-1 w-full">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
-                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full h-[42px] pl-3.5 pr-8 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
                                             <option value="">{t("all_moderators_filter", "All Moderators")}</option>
                                             <option value="active">{t("active_moderators", "Active Moderators")}</option>
                                             <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
                                         </select>
                                     </div>
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full h-[42px] pl-3.5 pr-10 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
-                                            <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                            <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full h-[42px] pl-3.5 pr-10 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 items-center w-full justify-between xl:justify-start xl:w-auto">
-                                    <div className="xl:hidden w-[140px] shrink-0">
-                                        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-3 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer h-[42px]">
-                                            <option value="">{t("all_moderators_filter", "All Moderators")}</option>
-                                            <option value="active">{t("active_moderators", "Active Moderators")}</option>
-                                            <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <GradiantButton className="h-[42px] px-3 sm:px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shrink-0" onClick={handleTopSearch}>
-                                            <Search className="w-4 h-4" />
-                                            <span className="hidden sm:inline">Search</span>
+                                <div className="flex items-center justify-between xl:justify-start gap-2 w-full xl:w-auto">
+                                    <div className="flex gap-2 flex-1 sm:flex-initial">
+                                        <GradiantButton className="h-[38px] sm:h-[42px] px-3.5 sm:px-6 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center shrink-0 flex-1 sm:flex-initial" onClick={handleTopSearch}>
+                                            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 shrink-0" />
+                                            <span>Search</span>
                                         </GradiantButton>
-                                        <button className="h-[42px] px-3 sm:px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors shrink-0" onClick={handleTopClear}>
-                                            <BiFilterAlt className="w-4 h-4" />
-                                            <span className="hidden sm:inline">Clear Filter</span>
-                                        </button>
-                                        <button type="button" onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)} className="xl:hidden h-[42px] px-2 flex items-center justify-center border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors shrink-0">
-                                            <MoreVertical className="w-5 h-5 text-gray-600" />
+                                        <button className="h-[38px] sm:h-[42px] px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-1.5 sm:gap-2 transition-colors whitespace-nowrap shrink-0 flex-1 sm:flex-initial" onClick={handleTopClear}>
+                                            <BiFilterAlt className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                                            <span>Clear Filter</span>
                                         </button>
                                     </div>
+                                    <button type="button" onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)} className="xl:hidden h-[38px] w-[38px] sm:h-[42px] sm:w-[42px] flex items-center justify-center border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors shrink-0">
+                                        <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                                    </button>
                                 </div>
 
                                 {isFilterDropdownOpen && (
                                     <>
                                         <div className="fixed inset-0 z-40" onClick={() => setIsFilterDropdownOpen(false)} />
-                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
-
+                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[calc(100vw-2rem)] max-w-[280px] max-h-[80vh] overflow-y-auto p-3.5 sm:p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-3 sm:gap-4">
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
+                                                <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)} className="w-full pl-3.5 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
+                                                    <option value="">{t("all_moderators_filter", "All Moderators")}</option>
+                                                    <option value="active">{t("active_moderators", "Active Moderators")}</option>
+                                                    <option value="inactive">{t("inactive_moderators", "Inactive Moderators")}</option>
+                                                </select>
+                                            </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterFrom} onChange={(e) => handleFromChange(e.target.value)} className="w-full pl-3.5 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                                 <div className="relative">
-                                                    <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
+                                                    <input type="date" value={filterTo} onChange={(e) => handleToChange(e.target.value)} className="w-full pl-3.5 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors" />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
                                             </div>
@@ -613,26 +613,32 @@ const ExportModeratorReportsPage = () => {
                                                 </button>
 
                                                 {isTableFilterOpen && (
-                                                    <div className="absolute right-0 top-full mt-2 w-[260px] sm:w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-4 sm:p-5 z-[50]">
-                                                        <div className="space-y-4">
-                                                            <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("columns", "Columns")}</label>
-                                                                <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                                                                    {Object.keys(visibleColumns).map((col) => (
-                                                                        <label key={col} className="flex items-center gap-3 cursor-pointer">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={visibleColumns[col]}
-                                                                                onChange={() => toggleColumn(col)}
-                                                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
-                                                                            />
-                                                                            <span className="text-sm font-medium text-gray-700 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                                                        </label>
-                                                                    ))}
+                                                    <>
+                                                        <div
+                                                            className="fixed inset-0 z-40"
+                                                            onClick={() => setIsTableFilterOpen(false)}
+                                                        />
+                                                        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-3rem)] max-w-[280px] max-h-[75vh] overflow-y-auto bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-4 sm:p-5 z-[50]">
+                                                            <div className="space-y-4">
+                                                                <div>
+                                                                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("columns", "Columns")}</label>
+                                                                    <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                                                        {Object.keys(visibleColumns).map((col) => (
+                                                                            <label key={col} className="flex items-center gap-3 cursor-pointer">
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={visibleColumns[col]}
+                                                                                    onChange={() => toggleColumn(col)}
+                                                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+                                                                                />
+                                                                                <span className="text-sm font-medium text-gray-700 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                                            </label>
+                                                                        ))}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>

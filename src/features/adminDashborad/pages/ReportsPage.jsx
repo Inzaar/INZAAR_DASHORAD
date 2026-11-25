@@ -211,10 +211,10 @@ const ReportsPage = () => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans">
-            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative min-h-0 pb-4'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -232,83 +232,85 @@ const ReportsPage = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10 min-h-0">
-                        <div className="py-4 pr-2">
+                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-6 sm:pb-10 min-h-0">
+                        <div className="py-2 sm:py-4 px-1 sm:px-2">
                             {/* Header */}
-                            <div className="mb-6">
-                                <h2 className="text-[24px] font-bold text-gray-900 mb-1">{t("students_reports", "Students Reports")}</h2>
-                                <p className="text-gray-500 text-[16px]">{t("manage_students_reports", "Manage All Your Students Reports")}</p>
+                            <div className="mb-4 sm:mb-6">
+                                <h2 className="text-[18px] sm:text-[22px] md:text-[24px] font-bold text-gray-900 mb-0.5 sm:mb-1">{t("students_reports", "Students Reports")}</h2>
+                                <p className="text-gray-500 text-xs sm:text-sm md:text-[16px]">{t("manage_students_reports", "Manage All Your Students Reports")}</p>
                             </div>
 
                             {/* Top Filters */}
-                            <div className="flex flex-wrap items-end justify-between xl:justify-start gap-4 mb-6 relative w-full">
+                            <div className="flex flex-wrap items-end justify-between xl:justify-start gap-2.5 sm:gap-4 mb-4 sm:mb-6 relative w-full">
 
                                 {/* Desktop Inline Filters (Hidden on Mobile/Tablet) */}
-                                <div className="hidden xl:flex flex-wrap gap-4 items-end flex-1 w-full">
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                <div className="hidden xl:flex flex-wrap gap-3 2xl:gap-4 items-end flex-1 w-full">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                         <select
                                             value={filterStatus}
                                             onChange={(e) => handleStatusChange(e.target.value)}
-                                            className="w-full pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                            className="w-full h-[42px] pl-3.5 pr-8 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                         >
                                             <option value="">{t("all_students_filter", "All Students")}</option>
                                             <option value="active">{t("active_students", "Active Students")}</option>
                                             <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
                                         </select>
                                     </div>
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from_upper", "FROM")}</span>
                                         <div className="relative w-full">
                                             <input
                                                 type="date"
                                                 value={filterFrom}
                                                 onChange={(e) => handleFromChange(e.target.value)}
-                                                className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                className="w-full h-[42px] pl-3.5 pr-10 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
-                                    <div className="flex flex-col gap-1 flex-1 min-w-[200px]">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-[160px]">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to_upper", "TO")}</span>
                                         <div className="relative w-full">
                                             <input
                                                 type="date"
                                                 value={filterTo}
                                                 onChange={(e) => handleToChange(e.target.value)}
-                                                className="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                className="w-full h-[42px] pl-3.5 pr-10 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                             />
                                             <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Shared Search & Clear Buttons */}
-                                <div className="flex gap-2 flex-wrap">
-                                    <GradiantButton
-                                        className="h-[42px] px-6 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                                        onClick={handleTopSearch}
-                                    >
-                                        <Search className="w-4 h-4" />
-                                        Search
-                                    </GradiantButton>
+                                {/* Shared Search & Clear Buttons + Mobile 3-Dots */}
+                                <div className="flex items-center justify-between xl:justify-start gap-2 w-full xl:w-auto">
+                                    <div className="flex gap-2 flex-1 sm:flex-initial">
+                                        <GradiantButton
+                                            className="h-[38px] sm:h-[42px] px-3.5 sm:px-6 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center flex-1 sm:flex-initial"
+                                            onClick={handleTopSearch}
+                                        >
+                                            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 shrink-0" />
+                                            <span>Search</span>
+                                        </GradiantButton>
+                                        <button
+                                            className="h-[38px] sm:h-[42px] px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-1.5 sm:gap-2 transition-colors whitespace-nowrap flex-1 sm:flex-initial"
+                                            onClick={handleClear}
+                                        >
+                                            <BiFilterAlt className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                                            <span>Clear Filter</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Mobile 3-Dots Button */}
                                     <button
-                                        className="h-[42px] px-4 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors"
-                                        onClick={handleClear}
+                                        type="button"
+                                        onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                                        className="xl:hidden h-[38px] w-[38px] sm:h-[42px] sm:w-[42px] shrink-0 flex items-center justify-center border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors"
                                     >
-                                        <BiFilterAlt className="w-4 h-4" />
-                                        Clear Filter
+                                        <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                                     </button>
                                 </div>
-
-                                {/* Mobile 3-Dots Button */}
-                                <button
-                                    type="button"
-                                    onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-                                    className="xl:hidden p-2 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors"
-                                >
-                                    <MoreVertical className="w-5 h-5 text-gray-600" />
-                                </button>
 
                                 {/* Mobile Dropdown Popup */}
                                 {isFilterDropdownOpen && (
@@ -317,13 +319,13 @@ const ReportsPage = () => {
                                             className="fixed inset-0 z-40"
                                             onClick={() => setIsFilterDropdownOpen(false)}
                                         />
-                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[260px] p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-4">
+                                        <div className="xl:hidden absolute top-full right-0 mt-2 w-[calc(100vw-2rem)] max-w-[280px] max-h-[80vh] overflow-y-auto p-3.5 sm:p-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex flex-col gap-3 sm:gap-4">
                                             <div className="flex flex-col gap-1 w-full">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t("status_upper", "STATUS")}</span>
                                                 <select
                                                     value={filterStatus}
                                                     onChange={(e) => handleStatusChange(e.target.value)}
-                                                    className="w-full pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                                                    className="w-full pl-3.5 pr-8 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                                 >
                                                     <option value="">{t("all_students_filter", "All Students")}</option>
                                                     <option value="active">{t("active_students", "Active Students")}</option>
@@ -337,7 +339,7 @@ const ReportsPage = () => {
                                                         type="date"
                                                         value={filterFrom}
                                                         onChange={(e) => handleFromChange(e.target.value)}
-                                                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                        className="w-full pl-3.5 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
@@ -349,7 +351,7 @@ const ReportsPage = () => {
                                                         type="date"
                                                         value={filterTo}
                                                         onChange={(e) => handleToChange(e.target.value)}
-                                                        className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+                                                        className="w-full pl-3.5 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                                                     />
                                                     <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                                 </div>
@@ -361,15 +363,15 @@ const ReportsPage = () => {
 
 
                             {/* Stats & Charts Row 1 */}
-                            <div className="flex flex-col xl:flex-row gap-6 w-full pb-4">
-                                <div className="w-full flex flex-col gap-6 justify-between flex-1 min-w-0">
+                            <div className="flex flex-col xl:flex-row gap-3.5 sm:gap-5 xl:gap-6 w-full pb-4">
+                                <div className="w-full flex flex-col gap-3.5 sm:gap-5 xl:gap-6 justify-between flex-1 min-w-0">
                                     <div className="w-full">
                                         <MetricCard
                                             title={t("total_students", "Total Students")}
                                             value={String(totalStudents.count)}
                                             trendValue={totalStudents.trend?.replace('+', '') || "2.7%"}
                                             trendLabel={t("improvement_from_last_week", "Improvement From last Week")}
-                                            className="w-full h-[140px]"
+                                            className="w-full min-h-[116px] sm:h-[140px] h-auto p-3 sm:p-4 gap-2 sm:gap-4"
                                         />
                                     </div>
                                     <div className="w-full">
@@ -384,7 +386,7 @@ const ReportsPage = () => {
                                     </div>
                                 </div>
                                 <PerformanceCard
-                                    className="shadow-sm w-full xl:w-[40%] 2xl:w-[35%] min-w-0"
+                                    className="shadow-sm w-full xl:w-[40%] 2xl:w-[35%] min-w-0 p-4 sm:p-5 xl:p-6"
                                     name={t("overall_performance", "Overall Performance")}
                                     percentageOverride={performance.percentage}
                                     trendOverride={performance.trendingUp}
@@ -392,16 +394,16 @@ const ReportsPage = () => {
                             </div>
 
                             {/* Charts Row 2 */}
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8 w-full">
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3.5 sm:gap-5 xl:gap-6 mb-5 sm:mb-8 w-full">
                                 {/* Session Activity Chart */}
-                                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-100 min-h-[350px] min-w-0">
-                                    <h3 className="text-gray-900 font-medium mb-6">{t("session_activity", "Session Activity")}</h3>
-                                    <div className="h-[250px] w-full">
+                                <div className="bg-white p-3.5 sm:p-5 xl:p-6 rounded-xl sm:rounded-2xl xl:rounded-[24px] shadow-sm border border-gray-100 min-h-[260px] sm:min-h-[320px] xl:min-h-[350px] min-w-0 flex flex-col">
+                                    <h3 className="text-base sm:text-lg text-gray-900 font-semibold sm:font-medium mb-3 sm:mb-6">{t("session_activity", "Session Activity")}</h3>
+                                    <div className="h-[200px] sm:h-[230px] xl:h-[250px] w-full">
                                         <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart data={sessionData}>
+                                            <LineChart data={sessionData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={true} stroke="#E5E7EB" />
-                                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} dy={10} />
+                                                <YAxis width={36} axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 11 }} />
                                                 <Tooltip />
                                                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }} />
                                             </LineChart>
@@ -414,26 +416,26 @@ const ReportsPage = () => {
                             </div>
 
                             {/* Students List Table */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8 flex flex-col flex-1 min-h-[600px]">
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
+                            <div className="bg-white rounded-xl sm:rounded-2xl xl:rounded-[24px] p-3 sm:p-5 xl:p-6 shadow-sm border border-gray-100 mb-6 sm:mb-8 flex flex-col flex-1 min-h-[450px] sm:min-h-[550px]">
+                                <div className="mb-3 sm:mb-5 xl:mb-6">
+                                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{t("students_list", "Students List")}</h3>
                                 </div>
 
                                 {/* Filters - Desktop */}
-                                <div className="hidden xl:flex flex-row gap-4 mb-8">
-                                    <div className='flex-1 flex gap-2 flex-col'>
+                                <div className="hidden xl:flex flex-row items-end gap-3 2xl:gap-4 mb-6">
+                                    <div className='flex-1 flex gap-1.5 flex-col min-w-0'>
                                         <p className="text-xs text-gray-400 font-medium tracking-wide">{t("advanced_search", "ADVANCED SEARCH")}</p>
-                                        <div className="flex relative bg-gray-50 border border-gray-200 rounded transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                                        <div className="h-[42px] flex relative bg-gray-50 border border-gray-200 rounded-xl transition-all duration-200 group focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                                             <input
                                                 type="text"
                                                 placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_email", "Search by email")}
-                                                className="w-full pl-10 pr-32 py-2.5 bg-transparent text-sm focus:outline-none"
+                                                className="w-full min-w-0 pl-9 pr-2 bg-transparent text-sm focus:outline-none"
                                                 value={tableSearch}
                                                 onChange={(e) => setTableSearch(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
                                             />
-                                            <div className="flex items-center p-1 gap-2 border-l border-gray-200 ml-2">
+                                            <div className="flex items-center p-1 gap-1.5 border-l border-gray-200 shrink-0">
                                                 <button
                                                     onClick={() => {
                                                         if (tableSearchType !== 'EMAIL') {
@@ -443,7 +445,7 @@ const ReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     EMAIL
                                                 </button>
@@ -456,7 +458,7 @@ const ReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`px-4 py-2.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
+                                                    className={`px-3 py-1.5 text-[10px] whitespace-nowrap font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-gradient-to-r from-[#4E60FF] to-[#A269FF] text-white shadow-md' : 'bg-[#D6D9FF] text-white hover:bg-[#A8B1FF]'}`}
                                                 >
                                                     NAME
                                                 </button>
@@ -464,33 +466,33 @@ const ReportsPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1.5">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("from", "From")}</span>
                                         <input
                                             type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            className="h-[42px] px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:outline-none"
                                             value={filterFrom}
                                             onChange={(e) => handleFromChange(e.target.value)}
                                         />
                                     </div>
 
-                                    <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1.5">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("to", "To")}</span>
                                         <input
                                             type="date"
-                                            className="pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none"
+                                            className="h-[42px] px-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:outline-none"
                                             value={filterTo}
                                             onChange={(e) => handleToChange(e.target.value)}
                                         />
                                     </div>
 
-                                    <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1.5">
                                         <span className="text-xs font-bold text-gray-400 uppercase">{t("status", "Status")}</span>
                                         <div className="relative">
                                             <select
                                                 value={filterStatus}
                                                 onChange={(e) => handleStatusChange(e.target.value)}
-                                                className="w-full pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
+                                                className="h-[42px] w-full pl-3.5 pr-9 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600 focus:outline-none appearance-none cursor-pointer"
                                             >
                                                 <option value="">{t("all_students_filter", "All Students")}</option>
                                                 <option value="active">{t("active_students", "Active Students")}</option>
@@ -502,7 +504,7 @@ const ReportsPage = () => {
 
                                     <button
                                         onClick={handleClear}
-                                        className="flex items-center gap-2 px-4 h-10 self-end bg-gray-200 text-gray-500 font-bold text-sm rounded hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                        className="flex items-center gap-2 px-4 h-[42px] bg-gray-200 text-gray-600 font-bold text-sm rounded-xl hover:bg-gray-300 transition-colors whitespace-nowrap"
                                     >
                                         <BiFilterAlt className="w-4 h-4" />
                                         Clear
@@ -510,13 +512,13 @@ const ReportsPage = () => {
                                 </div>
 
                                 {/* Filters - Responsive (Mobile Only) */}
-                                <div className="flex xl:hidden flex-col gap-6 mb-8 relative">
-                                    <div className='flex flex-col gap-4'>
+                                <div className="flex xl:hidden flex-col gap-3 sm:gap-5 mb-5 sm:mb-7 relative">
+                                    <div className='flex flex-col gap-2.5 sm:gap-3.5'>
                                         <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("advanced_search", "ADVANCED SEARCH")}</p>
-                                        <div className="flex items-center justify-end gap-3">
+                                        <div className="flex items-center justify-end gap-2.5 sm:gap-3">
                                             <button
                                                 onClick={handleClear}
-                                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                                                className="flex-1 h-10 sm:h-11 flex items-center justify-center gap-2 px-3 sm:px-4 bg-white border border-gray-200 text-gray-600 font-bold text-xs sm:text-sm rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
                                             >
                                                 <BiFilterAlt className="w-4 h-4" />
                                                 Clear Filter
@@ -524,49 +526,55 @@ const ReportsPage = () => {
                                             <div className="relative">
                                                 <button
                                                     onClick={() => setIsTableFilterOpen(!isTableFilterOpen)}
-                                                    className={`w-11 h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isTableFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
+                                                    className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border border-gray-200 transition-all ${isTableFilterOpen ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400'}`}
                                                 >
-                                                    {isTableFilterOpen ? <X size={20} /> : <MoreVertical size={20} />}
+                                                    {isTableFilterOpen ? <X size={18} /> : <MoreVertical size={18} />}
                                                 </button>
 
                                                 {isTableFilterOpen && (
-                                                    <div className="absolute right-0 top-full mt-3 w-[280px] bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-5 z-[50]">
-                                                        <div className="space-y-5">
-                                                            <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("status", "Status")}</label>
-                                                                <div className="relative">
-                                                                    <select
-                                                                        value={filterStatus}
-                                                                        onChange={(e) => handleStatusChange(e.target.value)}
-                                                                        className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
-                                                                    >
-                                                                        <option value="">{t("all_students_filter", "All Students")}</option>
-                                                                        <option value="active">{t("active_students", "Active Students")}</option>
-                                                                        <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
-                                                                    </select>
-                                                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                    <>
+                                                        <div
+                                                            className="fixed inset-0 z-40"
+                                                            onClick={() => setIsTableFilterOpen(false)}
+                                                        />
+                                                        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-3rem)] max-w-[280px] max-h-[75vh] overflow-y-auto bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 p-4 sm:p-5 z-[50]">
+                                                            <div className="space-y-4">
+                                                                <div>
+                                                                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">{t("status", "Status")}</label>
+                                                                    <div className="relative">
+                                                                        <select
+                                                                            value={filterStatus}
+                                                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                                                            className="w-full pl-3.5 pr-9 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                                                                        >
+                                                                            <option value="">{t("all_students_filter", "All Students")}</option>
+                                                                            <option value="active">{t("active_students", "Active Students")}</option>
+                                                                            <option value="inactive">{t("inactive_students", "Inactive Students")}</option>
+                                                                        </select>
+                                                                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">{t("from", "From")}</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                        value={filterFrom}
+                                                                        onChange={(e) => handleFromChange(e.target.value)}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">{t("to", "To")}</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
+                                                                        value={filterTo}
+                                                                        onChange={(e) => handleToChange(e.target.value)}
+                                                                    />
                                                                 </div>
                                                             </div>
-                                                            <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("from", "From")}</label>
-                                                                <input
-                                                                    type="date"
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={filterFrom}
-                                                                    onChange={(e) => handleFromChange(e.target.value)}
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">{t("to", "To")}</label>
-                                                                <input
-                                                                    type="date"
-                                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none font-medium"
-                                                                    value={filterTo}
-                                                                    onChange={(e) => handleToChange(e.target.value)}
-                                                                />
-                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
@@ -575,18 +583,18 @@ const ReportsPage = () => {
                                     {/* Advanced Search Segment UI as per request */}
                                     <div className='flex flex-col gap-3'>
                                         <div className="flex flex-col bg-white border border-[#4E60FF] rounded-xl transition-all duration-200 shadow-sm overflow-hidden">
-                                            <div className="flex items-center px-4 py-3 border-b border-gray-100">
-                                                <Search className="text-gray-400 w-5 h-5 mr-3" />
+                                            <div className="flex items-center px-3 sm:px-4 py-2 sm:py-2.5 border-b border-gray-100">
+                                                <Search className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5 mr-2.5 sm:mr-3 shrink-0" />
                                                 <input
                                                     type="text"
                                                     placeholder={tableSearchType === "NAME" ? t("search_by_name", "Search by name") : t("search_by_email", "Search by email")}
-                                                    className="w-full bg-transparent text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
+                                                    className="w-full min-w-0 bg-transparent text-sm sm:text-[15px] font-medium text-gray-700 focus:outline-none placeholder:text-gray-300"
                                                     value={tableSearch}
                                                     onChange={(e) => setTableSearch(e.target.value)}
                                                     onKeyDown={(e) => e.key === 'Enter' && handleTableSearch()}
                                                 />
                                             </div>
-                                            <div className="flex items-center p-2 gap-2 bg-[#F8FAFF]">
+                                            <div className="flex items-center p-1.5 sm:p-2 gap-1.5 sm:gap-2 bg-[#F8FAFF]">
                                                 <button
                                                     onClick={() => {
                                                         if (tableSearchType !== 'EMAIL') {
@@ -596,7 +604,7 @@ const ReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-2 sm:py-2.5 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'EMAIL' ? 'bg-[#4E60FF] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     EMAIL
                                                 </button>
@@ -609,7 +617,7 @@ const ReportsPage = () => {
                                                             handleTableSearch();
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 text-[11px] font-[900] rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
+                                                    className={`flex-1 py-2 sm:py-2.5 text-[10px] sm:text-[11px] font-bold rounded-lg transition-all duration-200 ${tableSearchType === 'NAME' ? 'bg-[#6366F1] text-white shadow-lg shadow-blue-500/20' : 'bg-[#D6D9FF] text-white'}`}
                                                 >
                                                     NAME
                                                 </button>

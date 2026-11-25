@@ -93,6 +93,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
         '/course-reports': 'Course Reports',
         '/export-student-reports': 'Export Student Reports',
         '/export-moderator-reports': 'Export Moderator Reports',
+        '/export-course-reports': 'Export Course Reports',
 
         '/admin/student-details': 'Student Profiles',
         '/admin/moderator-details': 'Moderators',

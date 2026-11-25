@@ -117,17 +117,17 @@ const HoursSpentCard = ({
 
     // Bar width logic: thinner bars for Moderator due to higher count
     const barWidthClass = isModerator
-        ? "w-6 sm:w-7 md:w-8"
-        : "w-7 [400px]:w-8 sm:w-9 xl:w-10";
+        ? "w-5 sm:w-7 md:w-8"
+        : "w-5 min-[400px]:w-7 sm:w-9 xl:w-10";
 
     return (
         <div className={cn(
-            "w-full bg-white rounded-[16px] border border-[#EAEDF2] p-5 sm:p-6 flex flex-col justify-between gap-4",
+            "w-full min-w-0 bg-white rounded-xl sm:rounded-2xl xl:rounded-[16px] border border-[#EAEDF2] p-3.5 sm:p-5 xl:p-6 flex flex-col justify-between gap-3 sm:gap-4",
             className
         )}>
             {/* Header & Legend */}
-            <div className="flex justify-between items-center gap-4">
-                <h3 className="text-lg font-bold text-black leading-normal pb-1">{name}</h3>
+            <div className="flex justify-between items-center gap-2 sm:gap-4">
+                <h3 className="text-base sm:text-lg font-bold text-black leading-normal pb-0.5 sm:pb-1">{name}</h3>
                 {isModerator && (
                     <div className="relative">
                         <select
@@ -148,9 +148,9 @@ const HoursSpentCard = ({
             </div>
 
             {/* Chart Area */}
-            <div className="flex gap-4 min-h-[140px] flex-1 min-h-0">
+            <div className="flex gap-2 sm:gap-4 min-h-[160px] sm:min-h-[180px] flex-1">
                 {/* Y-Axis */}
-                <div className="flex flex-col justify-between text-xs text-gray-400 py-1">
+                <div className="flex flex-col justify-between text-[10px] sm:text-xs text-gray-400 py-1 shrink-0">
                     {yAxisLabels.map((label, i) => (
                         <span key={i}>{label === 0 && isModerator ? '00' : label}{unit}</span>
                     ))}
@@ -213,7 +213,7 @@ const HoursSpentCard = ({
                                 </div>
 
                                 {/* X-Axis Label */}
-                                <span className="text-xs mt-3 text-[#C154F2] font-semibold underline decoration-1 underline-offset-2 uppercase">
+                                <span className="text-[10px] sm:text-xs mt-2 sm:mt-3 text-[#C154F2] font-semibold underline decoration-1 underline-offset-2 uppercase truncate max-w-[40px] sm:max-w-none">
                                     {item.day.toUpperCase()}
                                 </span>
                             </div>
