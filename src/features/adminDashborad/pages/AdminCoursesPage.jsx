@@ -5,7 +5,7 @@ import GradiantButton from '@/components/ui/buttons/GradiantButton';
 import StatsCard from '../components/StatsCard';
 import CoursesEnrollmentOverview from '../components/CoursesEnrollmentOverview';
 import CardCourse from '@/features/courses/components/CardCourse';
-import { Plus, ChevronDown, Loader, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronDown, Loader, ChevronLeft, ChevronRight, Building2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getAllCourses } from '@/api/course';
 import { getAllEnrollments } from '@/api/enrollment';
@@ -17,6 +17,7 @@ const AdminCoursesPage = () => {
     const { t } = useTranslation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isDepartmentsModalOpen, setIsDepartmentsModalOpen] = useState(false);
+    const [hoveredButton, setHoveredButton] = useState(null); // 'departments' | 'add_course' | null
     const [searchParams] = useSearchParams();
     const courseIdParam = searchParams.get('courseId');
     const navigate = useNavigate();
@@ -147,7 +148,7 @@ const AdminCoursesPage = () => {
             <div className="relative w-full max-w-[1920px] max-h-[1680px] mx-auto flex flex-col bg-[#F8F9FA] h-screen overflow-hidden gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
 
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-2 sm:pb-4'>
 
                     {isSidebarOpen && (
                         <div
@@ -165,30 +166,86 @@ const AdminCoursesPage = () => {
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `} />
 
-                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
-                        <div className="py-4 pr-2">
+                    <main className="flex-1 overflow-y-auto no-scrollbar pb-2 sm:pb-10">
+                        <div className="pt-4 pb-1 sm:py-4 pr-2">
                             {/* Header */}
-                            <div className="flex justify-between items-start mb-8 gap-4">
+                            <div className="flex justify-between items-start mb-4 sm:mb-8 gap-3 sm:gap-4">
                                 <div>
-                                    <h2 className="text-[24px] font-bold text-gray-900 mb-1">{t('courses', 'Courses')}</h2>
-                                    <p className="text-gray-500 text-[16px]">{t('manage_all_your_courses', 'Manage All Your Courses')}</p>
+                                    <h2 className="text-[18px] sm:text-[20px] md:text-[24px] font-bold text-gray-900 mb-0.5 sm:mb-1">{t('courses', 'Courses')}</h2>
+                                    <p className="text-gray-500 text-xs sm:text-[14px] md:text-[16px]">{t('manage_all_your_courses', 'Manage All Your Courses')}</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => setIsDepartmentsModalOpen(true)}
-                                        className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl sm:rounded-lg hover:bg-gray-50 shadow-sm flex items-center justify-center transition-all active:scale-95"
+                                    {/* Departments Button with Tooltip */}
+                                    <div
+                                        className="relative group"
+                                        onMouseEnter={() => setHoveredButton('departments')}
+                                        onMouseLeave={() => setHoveredButton(null)}
+                                        onFocus={() => setHoveredButton('departments')}
+                                        onBlur={() => setHoveredButton(null)}
                                     >
-                                        <span className="hidden sm:block text-[14px]">Departments</span>
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/admin-add-course')}
-                                        className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-[#8B5CF6] text-white font-medium rounded-xl sm:rounded-lg hover:bg-purple-600 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
-                                    >
-                                        <div className="flex items-center justify-center bg-white rounded-full p-0.5">
-                                            <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsDepartmentsModalOpen(true)}
+                                            onMouseEnter={() => setHoveredButton('departments')}
+                                            onMouseLeave={() => setHoveredButton(null)}
+                                            title={t('departments', 'Departments')}
+                                            className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl sm:rounded-lg hover:bg-gray-50 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            <Building2 size={18} strokeWidth={2} className="text-gray-700 shrink-0" />
+                                            <span className="hidden sm:block text-[14px]">{t('departments', 'Departments')}</span>
+                                        </button>
+                                        {/* Hover White Tooltip / Toaster on bottom */}
+                                        <div
+                                            style={hoveredButton === 'departments' ? { opacity: 1, visibility: 'visible' } : {}}
+                                            className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 pointer-events-none transition-all duration-200 z-50 ${
+                                                hoveredButton === 'departments'
+                                                    ? 'opacity-100 translate-y-0 visible'
+                                                    : 'opacity-0 -translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible'
+                                            }`}
+                                        >
+                                            <div className="bg-white text-gray-800 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center relative border border-gray-200">
+                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                                                <span className="relative z-10">{t('departments', 'Departments')}</span>
+                                            </div>
                                         </div>
-                                        <span className="hidden sm:block text-[14px]">{t('add_new_course', 'Add New Course')}</span>
-                                    </button>
+                                    </div>
+
+                                    {/* Add New Course Button with Tooltip */}
+                                    <div
+                                        className="relative group"
+                                        onMouseEnter={() => setHoveredButton('add_course')}
+                                        onMouseLeave={() => setHoveredButton(null)}
+                                        onFocus={() => setHoveredButton('add_course')}
+                                        onBlur={() => setHoveredButton(null)}
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate('/admin-add-course')}
+                                            onMouseEnter={() => setHoveredButton('add_course')}
+                                            onMouseLeave={() => setHoveredButton(null)}
+                                            title={t('add_new_course', 'Add New Course')}
+                                            className="w-11 h-11 sm:w-auto sm:px-5 sm:py-2.5 bg-[#8B5CF6] text-white font-medium rounded-xl sm:rounded-lg hover:bg-purple-600 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            <div className="flex items-center justify-center bg-white rounded-full p-0.5 shrink-0">
+                                                <Plus size={16} strokeWidth={3} className="text-[#8B5CF6]" />
+                                            </div>
+                                            <span className="hidden sm:block text-[14px]">{t('add_new_course', 'Add New Course')}</span>
+                                        </button>
+                                        {/* Hover White Tooltip / Toaster on bottom */}
+                                        <div
+                                            style={hoveredButton === 'add_course' ? { opacity: 1, visibility: 'visible' } : {}}
+                                            className={`absolute top-full right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mt-2 pointer-events-none transition-all duration-200 z-50 ${
+                                                hoveredButton === 'add_course'
+                                                    ? 'opacity-100 translate-y-0 visible'
+                                                    : 'opacity-0 -translate-y-1 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible'
+                                            }`}
+                                        >
+                                            <div className="bg-white text-gray-800 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex items-center relative border border-gray-200">
+                                                <div className="absolute -top-1 right-[18px] sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                                                <span className="relative z-10">{t('add_new_course', 'Add New Course')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -199,7 +256,7 @@ const AdminCoursesPage = () => {
                             />
 
                             {/* Stats Grid */}
-                            <div className="flex xl:grid xl:grid-cols-4 gap-3.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-8">
+                            <div className="flex xl:grid xl:grid-cols-4 gap-2.5 sm:gap-4 xl:gap-6 overflow-x-auto pb-2.5 sm:pb-3 pt-1 scroll-smooth custom-scrollbar-thin xl:overflow-visible mb-5 sm:mb-8">
                                 {stats.map((stat, index) => {
                                     const types = ['all', 'active', 'inactive', 'draft'];
                                     return (
@@ -219,21 +276,42 @@ const AdminCoursesPage = () => {
                             </div>
 
                             {/* Enrollment Overview */}
-                            {courseStats.length > 0 && (
+                            {(loading || courseStats.length > 0) && (
                                 <CoursesEnrollmentOverview
                                     courseStats={courseStats}
                                     limit={12}
                                     showViewAll={false}
                                     showViewMore={true}
+                                    loading={loading}
                                 />
                             )}
 
                             {/* Main Content Card */}
-                            <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mt-8">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-gray-900">{t('all_courses', 'All Courses')}</h3>
+                            <div className="bg-white rounded-[24px] p-4 sm:p-6 pb-2 sm:pb-6 shadow-sm border border-gray-100 mt-8">
+                                <div className="flex justify-between items-center mb-4 sm:mb-6 gap-2">
+                                    <h3 className="text-base sm:text-lg font-bold text-gray-900 shrink-0">{t('all_courses', 'All Courses')}</h3>
 
-                                    <div className="relative">
+                                    {/* Mobile Filter Dropdown */}
+                                    <div className="sm:hidden relative min-w-[145px] max-w-[185px]">
+                                        <select
+                                            value={activeTab}
+                                            onChange={(e) => {
+                                                setActiveTab(e.target.value);
+                                                setCurrentPage(1);
+                                                navigate('/admin-courses', { replace: true });
+                                            }}
+                                            className="w-full pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 focus:outline-none appearance-none cursor-pointer shadow-sm truncate"
+                                        >
+                                            <option value="All">{t('all_registered_courses', 'All Registered Courses')}</option>
+                                            <option value="Active Courses">{t('active_courses', 'Active Courses')}</option>
+                                            <option value="Inactive Courses">{t('inactive_courses', 'Inactive Courses')}</option>
+                                            <option value="Draft Courses">{t('draft_courses', 'Draft Courses')}</option>
+                                        </select>
+                                        <ChevronDown size={15} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    </div>
+
+                                    {/* Desktop Sort Button */}
+                                    <div className="hidden sm:block relative">
                                         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
                                             {t('sort', 'Sort')}
                                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -263,27 +341,6 @@ const AdminCoursesPage = () => {
                                     ))}
                                 </div>
 
-                                {/* Mobile Filter Dropdown */}
-                                <div className="sm:hidden mb-8 relative">
-                                    <div className="relative">
-                                        <select
-                                            value={activeTab}
-                                            onChange={(e) => {
-                                                setActiveTab(e.target.value);
-                                                setCurrentPage(1);
-                                                navigate('/admin-courses', { replace: true });
-                                            }}
-                                            className="w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none appearance-none cursor-pointer shadow-sm"
-                                        >
-                                            <option value="All">{t('all_registered_courses', 'All Registered Courses')}</option>
-                                            <option value="Active Courses">{t('active_courses', 'Active Courses')}</option>
-                                            <option value="Inactive Courses">{t('inactive_courses', 'Inactive Courses')}</option>
-                                            <option value="Draft Courses">{t('draft_courses', 'Draft Courses')}</option>
-                                        </select>
-                                        <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
-
                                 {/* Courses Grid */}
                                 {loading ? (
                                     <div className="w-full py-24 flex items-center justify-center">
@@ -294,7 +351,7 @@ const AdminCoursesPage = () => {
                                         {t('no_course_registered', 'There is no any course registered for now')}
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 items-start justify-items-center">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 lg:gap-x-3.5 xl:gap-x-6 2xl:gap-x-8 gap-y-6 sm:gap-y-8 xl:gap-y-12 items-start justify-items-center">
                                         {filteredCourses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((course) => (
                                             <div key={course.id} id={`admin-course-${course.id}`} className="w-full max-w-[340px] transition-all duration-500">
                                                 <CardCourse
@@ -308,7 +365,7 @@ const AdminCoursesPage = () => {
 
                                 {/* Pagination */}
                                 {Math.ceil(filteredCourses.length / itemsPerPage) > 1 && (
-                                    <div className="flex justify-end items-center mt-12 w-full">
+                                    <div className="flex justify-center sm:justify-end items-center mt-5 sm:mt-12 w-full">
                                         <CustomPagination 
                                             currentPage={currentPage} 
                                             totalPages={Math.ceil(filteredCourses.length / itemsPerPage)} 

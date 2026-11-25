@@ -102,9 +102,9 @@ const DepartmentsModal = ({ isOpen, onClose }) => {
                         <button
                             type="submit"
                             disabled={!newName.trim()}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                            className="px-2.5 sm:px-3.5 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shrink-0 transition-all active:scale-95"
                         >
-                            <Plus size={20} />
+                            <Plus size={16} className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                         </button>
                     </form>
                 </div>
