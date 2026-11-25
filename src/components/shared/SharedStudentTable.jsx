@@ -109,37 +109,37 @@ const SharedStudentTable = ({
             ) : (
                 <>
                     <div className="overflow-x-auto flex-1 custom-scrollbar-thin">
-                        <table className="w-full min-w-[760px] xl:min-w-full print:min-w-0 print:w-full border-separate border-spacing-y-[3px] sm:border-spacing-y-[5px] xl:border-spacing-y-[10px] print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
+                        <table className="w-full min-w-[650px] sm:min-w-[760px] xl:min-w-full print:min-w-0 print:w-full border-separate border-spacing-y-1 sm:border-spacing-y-1.5 xl:border-spacing-y-2.5 print:border-collapse print:border-spacing-0 print:border print:border-black print:text-[10px]">
                             <thead>
                                 <tr>
-                                    {visibleColumns.name && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("name", "Name")}</th>}
-                                    {visibleColumns.studentId && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("student_id", "Student ID")}</th>}
-                                    {visibleColumns.contact && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("email", "Email")}</th>}
-                                    {visibleColumns.phone && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
-                                    {visibleColumns.enrollments && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
-                                    {visibleColumns.progress && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
-                                    {visibleColumns.lastLogin && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
-                                    {visibleColumns.lastLearningActivity && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("last_learning_activity", "Last Learning Activity")}</th>}
-                                    {visibleColumns.status && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("status", "Status")}</th>}
-                                    {visibleColumns.gender && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("gender", "Gender")}</th>}
-                                    {visibleColumns.age && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("age", "Age")}</th>}
-                                    {visibleColumns.ageGroup && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("age_group", "Age Group")}</th>}
-                                    {visibleColumns.region && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("region", "Region")}</th>}
-                                    {visibleColumns.country && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("country", "Country")}</th>}
-                                    {visibleColumns.education && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("education", "Education")}</th>}
-                                    {visibleColumns.profession && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("profession", "Profession")}</th>}
-                                    {visibleColumns.loginFrequency && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("login_frequency", "Login Frequency")}</th>}
-                                    {visibleColumns.courseCompletionRate && <th className="text-center font-bold text-[16px] print:text-[11px] text-gray-800 pb-2 print:border print:border-black print:p-1">{t("course_completion", "Course Completion Rate")}</th>}
-                                    {showAction && <th className="text-center font-bold text-[16px] print:hidden text-gray-800 pb-2">{t("action", "Action")}</th>}
+                                    {visibleColumns.name && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("name", "Name")}</th>}
+                                    {visibleColumns.studentId && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("student_id", "Student ID")}</th>}
+                                    {visibleColumns.contact && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("email", "Email")}</th>}
+                                    {visibleColumns.phone && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("phone", "Phone Number")}</th>}
+                                    {visibleColumns.enrollments && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("enrollments", "Enrollments")}</th>}
+                                    {visibleColumns.progress && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("progress_avg", "Progress")}</th>}
+                                    {visibleColumns.lastLogin && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("last_login", "Last Login")}</th>}
+                                    {visibleColumns.lastLearningActivity && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("last_learning_activity", "Last Learning Activity")}</th>}
+                                    {visibleColumns.status && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("status", "Status")}</th>}
+                                    {visibleColumns.gender && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("gender", "Gender")}</th>}
+                                    {visibleColumns.age && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("age", "Age")}</th>}
+                                    {visibleColumns.ageGroup && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("age_group", "Age Group")}</th>}
+                                    {visibleColumns.region && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("region", "Region")}</th>}
+                                    {visibleColumns.country && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("country", "Country")}</th>}
+                                    {visibleColumns.education && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("education", "Education")}</th>}
+                                    {visibleColumns.profession && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("profession", "Profession")}</th>}
+                                    {visibleColumns.loginFrequency && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("login_frequency", "Login Frequency")}</th>}
+                                    {visibleColumns.courseCompletionRate && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3 print:text-[11px] print:border print:border-black print:p-1">{t("course_completion", "Course Completion Rate")}</th>}
+                                    {showAction && <th className="text-center font-bold text-xs sm:text-[13px] xl:text-[14px] print:hidden text-gray-700 pb-1.5 sm:pb-2 px-2 sm:px-3">{t("action", "Action")}</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {students.map((student) => (
                                     <tr key={student.id} className="bg-[#F8F9FA] transition-colors group">
                                         {visibleColumns.name && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <span 
-                                                    className="text-[16px] print:text-[10px] text-gray-800 block max-w-[140px] truncate mx-auto" 
+                                                    className="text-xs sm:text-[13px] xl:text-[14px] font-medium text-gray-800 block max-w-[120px] sm:max-w-[140px] truncate mx-auto" 
                                                     title={student.name}
                                                 >
                                                     {t(student.name?.trim().replace(/\s+/g, ' '), student.name)}
@@ -147,9 +147,9 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.studentId && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <span 
-                                                    className="text-[15px] print:text-[10px] text-gray-800 block max-w-[110px] truncate mx-auto" 
+                                                    className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[100px] sm:max-w-[110px] truncate mx-auto" 
                                                     title={student.studentId || '-'}
                                                 >
                                                     {student.studentId || '-'}
@@ -157,9 +157,9 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.contact && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <span 
-                                                    className="text-[15px] print:text-[10px] text-gray-800 leading-tight block max-w-[160px] truncate mx-auto" 
+                                                    className="text-[11px] sm:text-xs xl:text-[13px] text-gray-800 leading-tight block max-w-[130px] sm:max-w-[160px] truncate mx-auto" 
                                                     title={student.email}
                                                 >
                                                     {student.email}
@@ -167,9 +167,9 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.phone && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <span 
-                                                    className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" 
+                                                    className="text-[11px] sm:text-xs xl:text-[13px] text-gray-800 block max-w-[110px] sm:max-w-[130px] truncate mx-auto" 
                                                     title={student.phone}
                                                 >
                                                     {student.phone}
@@ -177,7 +177,7 @@ const SharedStudentTable = ({
                                             </td>
                                         )}
                                         {visibleColumns.enrollments && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     {(student.enrollments || []).length > 0 ? (
                                                         <>
@@ -189,98 +189,98 @@ const SharedStudentTable = ({
                                                                     <span 
                                                                         key={idx} 
                                                                         title={fullTitle}
-                                                                        className="text-[15px] print:text-[10px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2 block max-w-[150px] truncate mx-auto"
+                                                                        className="text-[11px] sm:text-xs xl:text-[13px] text-[#6366F1] print:text-black underline cursor-pointer hover:text-blue-800 decoration-1 underline-offset-2 block max-w-[130px] sm:max-w-[150px] truncate mx-auto"
                                                                     >
                                                                         {displayTitle}
                                                                     </span>
                                                                 );
                                                             })}
                                                             {student.enrollments.length > 3 && (
-                                                                <span className="text-[13px] print:text-[9px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
+                                                                <span className="text-[10px] sm:text-[11px] text-gray-400 print:text-gray-700 font-medium mt-0.5">
                                                                     {t('more_count', { count: student.enrollments.length - 3, defaultValue: '+ {{count}} more' })}
                                                                 </span>
                                                             )}
                                                         </>
                                                     ) : (
-                                                        <span className="text-gray-400 print:text-gray-700 text-[15px] print:text-[10px]">{t("not_enrolled", "Not Enrolled")}</span>
+                                                        <span className="text-gray-400 print:text-gray-700 text-[11px] sm:text-xs xl:text-[13px]">{t("not_enrolled", "Not Enrolled")}</span>
                                                     )}
                                                 </div>
                                             </td>
                                         )}
                                         {visibleColumns.progress && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.progress || '0%'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{student.progress || '0%'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.lastLogin && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{formatDate(student.lastLogin) || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{formatDate(student.lastLogin) || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.lastLearningActivity && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.lastLearningActivity || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{student.lastLearningActivity || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.status && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className={`text-[16px] print:text-[10px] whitespace-nowrap ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className={`text-xs sm:text-[13px] xl:text-[14px] whitespace-nowrap font-medium ${student.status === 'Active' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                                                     {t(student.status.toLowerCase(), student.status)}
                                                 </span>
                                             </td>
                                         )}
                                         {visibleColumns.gender && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.gender || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{student.gender || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.age && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.age || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{student.age || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.ageGroup && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 whitespace-nowrap">{student.ageGroup || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 whitespace-nowrap">{student.ageGroup || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.region && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.region || '-'}>{student.region || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.region || '-'}>{student.region || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.country && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.country || '-'}>{student.country || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[120px] truncate mx-auto" title={student.country || '-'}>{student.country || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.education && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.education || '-'}>{student.education || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.education || '-'}>{student.education || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.profession && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.profession || '-'}>{student.profession || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.profession || '-'}>{student.profession || '-'}</span>
                                             </td>
                                         )}
 
 
                                         {visibleColumns.loginFrequency && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[15px] print:text-[10px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.loginFrequency || '-'}>{student.loginFrequency || '-'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800 block max-w-[130px] truncate mx-auto" title={student.loginFrequency || '-'}>{student.loginFrequency || '-'}</span>
                                             </td>
                                         )}
                                         {visibleColumns.courseCompletionRate && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
-                                                <span className="text-[16px] print:text-[10px] text-gray-800">{student.courseCompletionRate || '0%'}</span>
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:py-1 print:border print:border-black first:rounded-l-xl last:rounded-r-xl print:rounded-none text-center">
+                                                <span className="text-xs sm:text-[13px] xl:text-[14px] text-gray-800">{student.courseCompletionRate || '0%'}</span>
                                             </td>
                                         )}
                                         {showAction && (
-                                            <td className="py-2 sm:py-2.5 xl:py-4 print:hidden text-center first:rounded-l-xl last:rounded-r-xl print:rounded-none">
+                                            <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 print:hidden text-center first:rounded-l-xl last:rounded-r-xl print:rounded-none">
                                                 <div className="flex justify-center items-center w-full">
                                                     <GradiantButton
-                                                        className="text-[12px] xl:text-[14px] px-2.5 py-1 xl:px-4 xl:py-2 print:text-[10px] print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black whitespace-nowrap"
+                                                        className="text-[11px] sm:text-xs xl:text-[13px] px-2 sm:px-3 py-1 xl:px-4 xl:py-1.5 print:text-[10px] print:p-1 font-medium rounded-md print:rounded-none hover:opacity-90 transition-all shadow-sm bg-gradient-to-r from-[#6366F1] to-[#A855F7] print:bg-none print:text-black print:border print:border-black whitespace-nowrap"
                                                         onClick={() => navigate(`/admin/student-details/${student.id}`)}
                                                     >
                                                         {t("view_profile", "View Profile")}
@@ -295,7 +295,7 @@ const SharedStudentTable = ({
                     </div>
                     {/* Pagination */}
                     {!hidePagination && pagination && pagination.totalPages > 1 && (
-                        <div className="flex justify-end items-center mt-4 sm:mt-6 xl:mt-auto print:hidden">
+                        <div className="flex justify-center sm:justify-end items-center mt-4 sm:mt-6 xl:mt-auto print:hidden">
                             <CustomPagination 
                                 currentPage={pagination.page} 
                                 totalPages={pagination.totalPages} 

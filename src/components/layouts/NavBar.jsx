@@ -125,7 +125,7 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
     }
 
     return (
-        <div className="relative w-full h-auto md:min-h-[80px] py-3 md:py-0 flex items-center justify-center shadow-[0px_4px_4px_rgba(0,0,0,0.25)] px-4 sm:px-6 md:px-8">
+        <div className="relative w-full h-auto md:min-h-[80px] py-2 sm:py-3 md:py-0 flex items-center justify-center shadow-[0px_4px_4px_rgba(0,0,0,0.25)] px-2.5 sm:px-6 md:px-8">
             {/* Base Gradient Layer (Left to Right) */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#8B9CF1] to-[#B9A0EF]"></div>
             
@@ -133,36 +133,36 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
             <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-transparent pointer-events-none"></div>
 
             {/* Navbar Content */}
-            <div className="relative z-10 w-full flex flex-row justify-between items-center gap-2 sm:gap-4">
-                <div className="flex flex-row items-center gap-2 sm:gap-4 flex-1">
-                    <div className="flex items-center gap-1 sm:gap-3">
+            <div className="relative z-10 w-full flex flex-row justify-between items-center gap-1.5 sm:gap-4">
+                <div className="flex flex-row items-center gap-1.5 sm:gap-4 flex-1 min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-3 min-w-0">
                         {!hideMenu && (
                             <button
                                 onClick={onMenuClick}
-                                className="lg:hidden p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C]"
+                                className="lg:hidden p-1 sm:p-1.5 hover:bg-white/20 rounded-md transition-colors text-[#2C2C2C] shrink-0"
                             >
                                 <Menu size={20} className="sm:w-6 sm:h-6" />
                             </button>
                         )}
                         <div className="min-w-0 flex flex-col justify-center">
-                            <div className="font-['Roboto'] font-bold text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C]">
+                            <div className="font-['Roboto'] font-bold text-[14px] min-[380px]:text-[16px] sm:text-[18px] min-[500px]:text-[22px] leading-tight tracking-tight text-[#2C2C2C] truncate">
                                 {t((computedTitle).toLowerCase().replace(/ /g, '_'), computedTitle)}
                             </div>
-                            <div className="font-['Roboto'] font-medium text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-tight text-[#2C2C2C]/80 mt-0.5">
+                            <div className="font-['Roboto'] font-medium text-[9px] min-[380px]:text-[10px] sm:text-[11px] min-[500px]:text-[12px] leading-tight text-[#2C2C2C]/80 mt-0.5 truncate">
                                 {today}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-4 shrink-0 px-2 sm:px-0">
+                <div className="flex items-center gap-1.5 sm:gap-4 shrink-0 px-0 sm:px-0">
                     <div
                         onClick={() => user?.role === 'admin' ? navigate('/admin-notifications') : navigate('/notifications')}
                         className="relative w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] bg-white/10 flex items-center justify-center rounded-lg shadow-sm border border-white/10 hover:bg-white/20 transition-all cursor-pointer"
                     >
                         <CiBellOn className="text-[16px] sm:text-[20px] text-[#2C2C2C]" />
                         {unreadCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[9px] sm:text-[10px] font-black min-w-[18px] sm:min-w-[22px] h-[18px] sm:h-[22px] px-1 flex items-center justify-center rounded-full border-2 border-white shadow-md z-10 transition-all">
+                            <span className="absolute -top-1.5 -right-1.5 bg-gradient-to-br from-[#FF4D4D] to-[#FF0000] text-white text-[9px] sm:text-[10px] font-black min-w-[16px] sm:min-w-[22px] h-[16px] sm:h-[22px] px-1 flex items-center justify-center rounded-full border-2 border-white shadow-md z-10 transition-all">
                                 {unreadCount}
                             </span>
                         )}
@@ -171,26 +171,26 @@ function Navbar({ onMenuClick, hideMenu = false, title }) {
                     <div className="relative" ref={langDropdownRef}>
                         <div
                             onClick={() => setIsLangOpen(!isLangOpen)}
-                            className="bg-white/10 flex items-center justify-center rounded-lg shadow-sm cursor-pointer hover:bg-white/20 transition-all p-1.5 sm:px-3 gap-1.5 sm:gap-2 border border-white/10"
+                            className="bg-white/10 flex items-center justify-center rounded-lg shadow-sm cursor-pointer hover:bg-white/20 transition-all p-1 sm:p-1.5 sm:px-3 gap-1 sm:gap-2 border border-white/10"
                         >
                             <img
                                 src={currentLang.flag}
                                 alt=""
-                                className="w-[16px] sm:w-[18px] h-auto rounded-[2px] shadow-sm"
+                                className="w-[15px] sm:w-[18px] h-auto rounded-[2px] shadow-sm shrink-0"
                             />
-                            <span className="text-[#2C2C2C] text-[12px] sm:text-sm font-bold hidden min-[400px]:inline">{currentLang.code.toUpperCase()}</span>
+                            <span className="text-[#2C2C2C] text-[11px] sm:text-sm font-bold hidden min-[400px]:inline">{currentLang.code.toUpperCase()}</span>
                             <span className="text-[#2C2C2C] text-sm font-bold hidden sm:inline">{t(currentLang.name.toLowerCase(), currentLang.name)}</span>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="14"
-                                height="14"
+                                width="12"
+                                height="12"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="3"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                className={`text-[#2C2C2C] transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`}
+                                className={`text-[#2C2C2C] transition-transform duration-200 shrink-0 ${isLangOpen ? 'rotate-180' : ''}`}
                             >
                                 <path d="m6 9 6 6 6-6" />
                             </svg>
