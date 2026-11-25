@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
-import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown, Printer } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, MoreVertical, X, ChevronDown, Printer, Loader } from 'lucide-react';
 import { BiFilterAlt } from 'react-icons/bi';
 import SharedStudentTable from '@/components/shared/SharedStudentTable';
 import axiosInstance from '@/api/axiosInstance';
@@ -12,23 +11,20 @@ import { useAuth } from '@/context/AuthContext';
 
 const ExportStudentReportsPage = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [searchType, setSearchType] = useState('NAME');
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
-    // API Data State
-    const [students, setStudents] = useState([]);
-    const [totalStudents, setTotalStudents] = useState({ count: 0, trend: '+2.7%' });
-    const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-    const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
-
-    // Client-side Pagination State (10 items per page)
-    const [currentPage, setCurrentPage] = useState(1);
+    // Server-side Paginated API Data State (10 users per page)
     const itemsPerPage = 10;
+    const [students, setStudents] = useState([]);
+    const [printStudents, setPrintStudents] = useState([]);
+    const [pendingPrint, setPendingPrint] = useState(false);
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+    const latestRequestRef = useRef(0);
+    const skipNextSearchEffectRef = useRef(false);
 
     // Filter State
     const [filterStatus, setFilterStatus] = useState('');
@@ -100,70 +96,106 @@ const ExportStudentReportsPage = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    // Fetch report data from API
+    const buildReportParams = useCallback((page = 1, limit = itemsPerPage, customParams = {}) => {
+        const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+        const currentGender = customParams.gender !== undefined ? customParams.gender : filterGender;
+        const currentCourse = customParams.courseId !== undefined ? customParams.courseId : filterCourse;
+        const currentBatch = customParams.batchId !== undefined ? customParams.batchId : filterBatch;
+        const currentModerator = customParams.moderatorId !== undefined ? customParams.moderatorId : filterModerator;
+        const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+        const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+        const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+        const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
+
+        const params = new URLSearchParams();
+        params.append('page', page);
+        params.append('limit', limit);
+        params.append('includeStats', 'false');
+
+        if (user?.role === 'moderator' && user?.gender) {
+            params.append('gender', user.gender);
+        } else if (currentGender) {
+            params.append('gender', currentGender);
+        }
+
+        if (currentStatus) params.append('status', currentStatus);
+        if (currentFrom) params.append('from', currentFrom);
+        if (currentTo) params.append('to', currentTo);
+        if (currentCourse) params.append('courseId', currentCourse);
+        if (currentBatch) params.append('batchId', currentBatch);
+        if (currentModerator) params.append('moderatorId', currentModerator);
+
+        if (currentSearch && currentSearch.trim()) {
+            params.append('search', currentSearch.trim());
+            params.append('searchType', currentSearchType);
+        }
+
+        return params;
+    }, [filterStatus, filterGender, filterCourse, filterBatch, filterModerator, filterFrom, filterTo, tableSearch, tableSearchType, user, itemsPerPage]);
+
+    // Fetch paginated report data from API (10 users per page)
     const fetchReport = useCallback(async (page = 1, customParams = {}) => {
+        const requestId = ++latestRequestRef.current;
+        setPrintStudents([]);
         setLoading(true);
         try {
-            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
-            const currentGender = customParams.gender !== undefined ? customParams.gender : filterGender;
-            const currentCourse = customParams.courseId !== undefined ? customParams.courseId : filterCourse;
-            const currentBatch = customParams.batchId !== undefined ? customParams.batchId : filterBatch;
-            const currentModerator = customParams.moderatorId !== undefined ? customParams.moderatorId : filterModerator;
-            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
-            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
-            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
-            const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
-
-            const params = new URLSearchParams();
-            params.append('page', page);
-            params.append('limit', 100000); // Fetch all records for export view
-
-            if (user?.role === 'moderator' && user?.gender) {
-                params.append('gender', user.gender);
-            } else if (currentGender) {
-                params.append('gender', currentGender);
-            }
-
-            if (currentStatus) params.append('status', currentStatus);
-            if (currentFrom) params.append('from', currentFrom);
-            if (currentTo) params.append('to', currentTo);
-            if (currentCourse) params.append('courseId', currentCourse);
-            if (currentBatch) params.append('batchId', currentBatch);
-            if (currentModerator) params.append('moderatorId', currentModerator);
-
-            if (currentSearch && currentSearch.trim()) {
-                params.append('search', currentSearch.trim());
-                params.append('searchType', currentSearchType);
-            }
-
+            const params = buildReportParams(page, itemsPerPage, customParams);
             const res = await axiosInstance.get(`/admin/reports/students?${params.toString()}`);
-            const data = res.data.data;
+            if (requestId !== latestRequestRef.current) return;
 
+            const data = res.data?.data || {};
             setStudents(data.studentsList || []);
-            setTotalStudents(data.totalStudents || { count: 0, trend: '+2.7%' });
-            setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-            setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page, limit: itemsPerPage, total: 0, totalPages: 1 });
         } catch (err) {
-            console.error('Failed to fetch students report:', err);
+            if (requestId === latestRequestRef.current) {
+                console.error('Failed to fetch students report:', err);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === latestRequestRef.current) {
+                setLoading(false);
+            }
         }
-    }, [filterStatus, filterGender, filterCourse, filterBatch, filterModerator, filterFrom, filterTo, tableSearch, tableSearchType, user]);
+    }, [buildReportParams, itemsPerPage]);
+
+    const fetchReportRef = useRef(fetchReport);
+    useEffect(() => {
+        fetchReportRef.current = fetchReport;
+    }, [fetchReport]);
 
     // Initial mount and debounce for tableSearch / tableSearchType
     const isFirstMount = useRef(true);
     useEffect(() => {
         if (isFirstMount.current) {
             isFirstMount.current = false;
-            fetchReport(1);
+            fetchReportRef.current(1);
+            return;
+        }
+        if (skipNextSearchEffectRef.current) {
+            skipNextSearchEffectRef.current = false;
             return;
         }
         const timer = setTimeout(() => {
-            fetchReport(1);
+            fetchReportRef.current(1);
         }, 300);
         return () => clearTimeout(timer);
     }, [tableSearch, tableSearchType]);
+
+    // Trigger window.print() after full export records render in print container
+    useEffect(() => {
+        if (!pendingPrint) return;
+        const frame = requestAnimationFrame(() => {
+            setPendingPrint(false);
+            window.print();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [pendingPrint]);
+
+    // Clean up temporary print payload after print dialog closes
+    useEffect(() => {
+        const handleAfterPrint = () => setPrintStudents([]);
+        window.addEventListener('afterprint', handleAfterPrint);
+        return () => window.removeEventListener('afterprint', handleAfterPrint);
+    }, []);
 
     const handleStatusChange = (val) => {
         setFilterStatus(val);
@@ -218,6 +250,9 @@ const ExportStudentReportsPage = () => {
 
     // Handle top clear filter
     const handleTopClear = () => {
+        if (tableSearch !== '') {
+            skipNextSearchEffectRef.current = true;
+        }
         setFilterStatus('');
         setFilterGender('');
         setFilterCourse('');
@@ -246,162 +281,140 @@ const ExportStudentReportsPage = () => {
 
     // Handle table clear filter
     const handleTableClear = () => {
+        if (tableSearch !== '') {
+            skipNextSearchEffectRef.current = true;
+        }
         setTableSearch('');
         fetchReport(1, { search: '' });
     };
 
-    // Client-side filtering memo
-    const filteredStudents = useMemo(() => {
-        return (students || []).filter(student => {
-            // 1. Status Filter: strictly match Active vs In-active
-            if (filterStatus === 'active' && (student.status || '').toLowerCase() !== 'active') {
-                return false;
-            }
-            if (filterStatus === 'inactive' && (student.status || '').toLowerCase() === 'active') {
-                return false;
-            }
-
-            // 2. Gender Filter
-            if (filterGender && (student.gender || '').toLowerCase() !== filterGender.toLowerCase()) {
-                return false;
-            }
-
-            // 3. Date Filter: between filterFrom and filterTo (on lastLogin / createdAt)
-            if (filterFrom || filterTo) {
-                if (!student.lastLogin) return false;
-                const d = new Date(student.lastLogin);
-                if (isNaN(d.getTime())) return false;
-                const studentDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if (filterFrom && studentDateStr < filterFrom) return false;
-                if (filterTo && studentDateStr > filterTo) return false;
-            }
-
-            // 4. Search Filter
-            if (tableSearch && tableSearch.trim()) {
-                const q = tableSearch.trim().toLowerCase();
-                if (tableSearchType === 'NAME') {
-                    const name = (student.name || '').toLowerCase();
-                    const qWords = q.split(/\s+/).filter(Boolean);
-                    const matches = qWords.every(word => name.includes(word));
-                    if (!matches) return false;
-                } else if (tableSearchType === 'EMAIL') {
-                    const email = (student.email || '').toLowerCase();
-                    if (!email.includes(q)) return false;
-                } else if (tableSearchType === 'PHONE') {
-                    const phone = (student.phone || '').replace(/\D/g, '');
-                    const qPhone = q.replace(/\D/g, '');
-                    if (qPhone && !phone.includes(qPhone)) return false;
-                }
-            }
-
-            return true;
-        });
-    }, [students, filterStatus, filterGender, filterFrom, filterTo, tableSearch, tableSearchType]);
-
-    // Client-side pagination calculations
-    const totalPages = Math.ceil(filteredStudents.length / itemsPerPage) || 1;
-
-    // Reset to page 1 when any filter or search changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filterStatus, filterGender, filterCourse, filterBatch, filterModerator, filterFrom, filterTo, tableSearch, tableSearchType]);
-
-    // Ensure currentPage stays within valid range
-    useEffect(() => {
-        if (currentPage > totalPages) {
-            setCurrentPage(1);
-        }
-    }, [totalPages, currentPage]);
-
-    const paginatedStudents = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredStudents.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredStudents, currentPage, itemsPerPage]);
-
-    // Pagination handler
+    // Server-side pagination handler
     const goToPage = (page) => {
-        if (page >= 1 && page <= totalPages) {
-            setCurrentPage(page);
+        if (page >= 1 && page <= pagination.totalPages && page !== pagination.page) {
+            fetchReport(page);
         }
     };
 
-    const handleExportCSV = () => {
-        // Build headers dynamically from visibleColumns, skipping 'action'
-        const columnMap = {
-            name: "Name",
-            contact: "Email",
-            email: "Email",
-            phone: "Phone Number",
-            enrollments: "Enrollments",
-            progress: "Progress",
-            lastLogin: "Last Login",
-            status: "Status",
-            gender: "Gender",
-            age: "Age",
-            ageGroup: "Age Group",
-            region: "Region",
-            country: "Country",
-            education: "Education",
-            profession: "Profession",
-            loginFrequency: "Login Frequency",
-            lastLearningActivity: "Last Learning Activity",
-            courseCompletionRate: "Course Completion Rate"
-        };
-        
-        const activeKeys = Object.keys(visibleColumns).filter(col => visibleColumns[col] && col !== 'action');
-        const headers = activeKeys.map(key => `"${columnMap[key] || key}"`);
+    // Fetch all matching records on-demand only when exporting CSV or printing PDF
+    const fetchAllForExport = async () => {
+        if (pagination.total === 0 && students.length === 0) {
+            return [];
+        }
+        if (pagination.total > 0 && pagination.total <= students.length && pagination.page === 1) {
+            return students;
+        }
+        const exportLimit = Math.max(pagination.total || 0, 100000);
+        const params = buildReportParams(1, exportLimit);
+        const res = await axiosInstance.get(`/admin/reports/students?${params.toString()}`);
+        return res.data?.data?.studentsList || [];
+    };
 
-        const csvRows = [];
-        csvRows.push(headers.join(','));
-        
-        filteredStudents.forEach(student => {
-            const courses = Array.isArray(student.enrollments)
-                ? student.enrollments.filter(Boolean)
-                : (student.enrollments ? [student.enrollments] : []);
+    const handleExportCSV = async () => {
+        setIsPrintDropdownOpen(false);
+        setExporting(true);
+        try {
+            const exportRecords = await fetchAllForExport();
 
-            const enrollmentEntries = courses.length > 0 ? courses : ["Not Enrolled"];
-            const rowsToOutput = visibleColumns.enrollments ? enrollmentEntries : [null];
+            // Build headers dynamically from visibleColumns, skipping 'action'
+            const columnMap = {
+                name: "Name",
+                contact: "Email",
+                email: "Email",
+                phone: "Phone Number",
+                enrollments: "Enrollments",
+                progress: "Progress",
+                lastLogin: "Last Login",
+                status: "Status",
+                gender: "Gender",
+                age: "Age",
+                ageGroup: "Age Group",
+                region: "Region",
+                country: "Country",
+                education: "Education",
+                profession: "Profession",
+                loginFrequency: "Login Frequency",
+                lastLearningActivity: "Last Learning Activity",
+                courseCompletionRate: "Course Completion Rate"
+            };
+            
+            const activeKeys = Object.keys(visibleColumns).filter(col => visibleColumns[col] && col !== 'action');
+            const headers = activeKeys.map(key => `"${columnMap[key] || key}"`);
 
-            rowsToOutput.forEach(courseName => {
-                const rowValues = [];
-                activeKeys.forEach(key => {
-                    if (key === 'enrollments') {
-                        rowValues.push(`"${(courseName || '').toString().replace(/"/g, '""')}"`);
-                    } else if (key === 'phone') {
-                        let p = String(student.phone || '').trim();
-                        if (p && !p.startsWith('+') && p.startsWith('92')) {
-                            p = '+' + p;
+            const csvRows = [];
+            csvRows.push(headers.join(','));
+            
+            exportRecords.forEach(student => {
+                const courses = Array.isArray(student.enrollments)
+                    ? student.enrollments.filter(Boolean)
+                    : (student.enrollments ? [student.enrollments] : []);
+
+                const enrollmentEntries = courses.length > 0 ? courses : ["Not Enrolled"];
+                const rowsToOutput = visibleColumns.enrollments ? enrollmentEntries : [null];
+
+                rowsToOutput.forEach(courseName => {
+                    const rowValues = [];
+                    activeKeys.forEach(key => {
+                        if (key === 'enrollments') {
+                            rowValues.push(`"${(courseName || '').toString().replace(/"/g, '""')}"`);
+                        } else if (key === 'phone') {
+                            let p = String(student.phone || '').trim();
+                            if (p && !p.startsWith('+') && p.startsWith('92')) {
+                                p = '+' + p;
+                            }
+                            const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
+                            rowValues.push(cleanP ? `\u200C${cleanP}` : '""');
+                        } else if (key === 'contact' || key === 'email') {
+                            const email = student.email || student.contact?.email || student.contact || '';
+                            rowValues.push(`"${(email || '').toString().replace(/"/g, '""')}"`);
+                        } else if (key === 'progress') {
+                            const prog = student.progress || '0%';
+                            rowValues.push(`"${prog.toString().replace(/"/g, '""')}"`);
+                        } else if (key === 'lastLogin') {
+                            const login = formatDate(student.lastLogin) || '-';
+                            rowValues.push(`"${login.toString().replace(/"/g, '""')}"`);
+                        } else {
+                            const val = student[key];
+                            rowValues.push(`"${(val || '').toString().replace(/"/g, '""')}"`);
                         }
-                        const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
-                        rowValues.push(cleanP ? `\u200C${cleanP}` : '""');
-                    } else if (key === 'contact' || key === 'email') {
-                        const email = student.email || student.contact?.email || student.contact || '';
-                        rowValues.push(`"${(email || '').toString().replace(/"/g, '""')}"`);
-                    } else if (key === 'progress') {
-                        const prog = student.progress || '0%';
-                        rowValues.push(`"${prog.toString().replace(/"/g, '""')}"`);
-                    } else if (key === 'lastLogin') {
-                        const login = formatDate(student.lastLogin) || '-';
-                        rowValues.push(`"${login.toString().replace(/"/g, '""')}"`);
-                    } else {
-                        const val = student[key];
-                        rowValues.push(`"${(val || '').toString().replace(/"/g, '""')}"`);
-                    }
+                    });
+                    csvRows.push(rowValues.join(','));
                 });
-                csvRows.push(rowValues.join(','));
             });
-        });
 
-        const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `student_reports_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `student_reports_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to export students CSV:', err);
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handlePrintPDF = async () => {
+        setIsPrintDropdownOpen(false);
+        if (pagination.total <= students.length && pagination.page === 1) {
+            setPrintStudents(students);
+            setPendingPrint(true);
+            return;
+        }
+        setExporting(true);
+        try {
+            const exportRecords = await fetchAllForExport();
+            setPrintStudents(exportRecords);
+            setPendingPrint(true);
+        } catch (err) {
+            console.error('Failed to prepare PDF print:', err);
+        } finally {
+            setExporting(false);
+        }
     };
 
     // Format date for display
@@ -410,25 +423,6 @@ const ExportStudentReportsPage = () => {
         const d = new Date(dateStr);
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
-    };
-
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pages = [];
-        const total = pagination.totalPages;
-        const current = pagination.page;
-        if (total <= 5) {
-            for (let i = 1; i <= total; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            if (current > 3) pages.push('...');
-            for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
-                pages.push(i);
-            }
-            if (current < total - 2) pages.push('...');
-            pages.push(total);
-        }
-        return pages;
     };
     
     const toggleColumn = (col) => {
@@ -791,24 +785,25 @@ const ExportStudentReportsPage = () => {
                                         </button>
                                         <div className="relative">
                                             <button
+                                                disabled={exporting}
                                                 onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
-                                                className="flex items-center gap-2 px-4 h-[42px] bg-blue-100 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                                className="flex items-center gap-2 px-4 h-[42px] bg-blue-100 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden disabled:opacity-60"
                                             >
-                                                <Printer className="w-4 h-4" />
-                                                Print
+                                                {exporting ? <Loader className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                                {exporting ? 'Exporting...' : 'Print'}
                                             </button>
                                             {isPrintDropdownOpen && (
                                                 <>
                                                     <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
                                                     <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
                                                         <button
-                                                            onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                            onClick={handlePrintPDF}
                                                             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                         >
                                                             print as pdf
                                                         </button>
                                                         <button
-                                                            onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                            onClick={handleExportCSV}
                                                             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                         >
                                                             print as csv
@@ -834,24 +829,25 @@ const ExportStudentReportsPage = () => {
                                             </button>
                                             <div className="flex-1 relative">
                                                 <button
+                                                    disabled={exporting}
                                                     onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
-                                                    className="w-full flex items-center justify-center gap-2 px-3 h-10 sm:h-11 bg-blue-100 text-blue-600 font-bold text-xs sm:text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                                    className="w-full flex items-center justify-center gap-2 px-3 h-10 sm:h-11 bg-blue-100 text-blue-600 font-bold text-xs sm:text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden disabled:opacity-60"
                                                 >
-                                                    <Printer className="w-4 h-4" />
-                                                    Print
+                                                    {exporting ? <Loader className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                                    {exporting ? 'Exporting...' : 'Print'}
                                                 </button>
                                                 {isPrintDropdownOpen && (
                                                     <>
                                                         <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
                                                         <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
                                                             <button
-                                                                onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                                onClick={handlePrintPDF}
                                                                 className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                             >
                                                                 print as pdf
                                                             </button>
                                                             <button
-                                                                onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                                onClick={handleExportCSV}
                                                                 className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                             >
                                                                 print as csv
@@ -953,17 +949,12 @@ const ExportStudentReportsPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Screen View (Paginated to 10 items per page) */}
+                                {/* Screen View (Server-side paginated to 10 items per page) */}
                                 <div className="print:hidden">
                                     <SharedStudentTable
-                                        students={paginatedStudents}
+                                        students={students}
                                         loading={loading}
-                                        pagination={{
-                                            page: currentPage,
-                                            limit: itemsPerPage,
-                                            total: filteredStudents.length,
-                                            totalPages: totalPages
-                                        }}
+                                        pagination={pagination}
                                         onPageChange={goToPage}
                                         title={t("students_list", "Students List")}
                                         showDropdown={false}
@@ -974,10 +965,10 @@ const ExportStudentReportsPage = () => {
                                     />
                                 </div>
 
-                                {/* Print View (Shows all filtered students when printed) */}
+                                {/* Print View (Shows all filtered students fetched on-demand when printed) */}
                                 <div className="hidden print:block">
                                     <SharedStudentTable
-                                        students={filteredStudents}
+                                        students={printStudents.length > 0 ? printStudents : students}
                                         loading={false}
                                         title={t("students_list", "Students List")}
                                         showDropdown={false}

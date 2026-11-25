@@ -65,9 +65,9 @@ const BatchesPage = ({ filter = 'All', isMyBatches = false }) => {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center font-sans bg-[#F8F9FA]">
-            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col h-screen overflow-hidden gap-4">
+            <div className="relative w-full max-w-[1920px] mx-auto flex flex-col h-screen overflow-hidden gap-2 sm:gap-4">
                 <Navbar onMenuClick={toggleSidebar} />
-                <div className='flex flex-col lg:flex-row px-4 gap-4 flex-1 overflow-hidden relative pb-4'>
+                <div className='flex flex-col lg:flex-row px-2 sm:px-4 gap-3 sm:gap-4 flex-1 overflow-hidden relative min-h-0 pb-4'>
                     {isSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
@@ -79,45 +79,55 @@ const BatchesPage = ({ filter = 'All', isMyBatches = false }) => {
                         className={`transition-transform duration-300 ease-in-out z-40 lg:translate-x-0 lg:static lg:block fixed left-0 top-0 shadow-2xl ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`} 
                     />
                     
-                    <main className="flex-1 overflow-y-auto no-scrollbar pb-10">
-                        <div className="py-2 sm:py-4 px-2 sm:pr-2">
-                            <h2 className="text-[20px] sm:text-[24px] font-bold text-gray-900 mb-6">{filter} Batches</h2>
+                    <main className="flex-1 min-w-0 overflow-y-auto no-scrollbar pb-6 sm:pb-10 min-h-0">
+                        <div className="py-2 sm:py-4 px-1 sm:px-2">
+                            <h2 className="text-[18px] sm:text-[22px] xl:text-[24px] font-bold text-gray-900 mb-4 sm:mb-6">{filter} Batches</h2>
                             
                             {isLoading ? (
                                 <div className="flex justify-center items-center py-20">
                                     <Loader />
                                 </div>
                             ) : filteredBatches.length === 0 ? (
-                                <div className="text-center py-20 text-gray-500 font-medium bg-white rounded-xl border border-gray-100">
+                                <div className="text-center py-16 sm:py-20 px-4 text-sm sm:text-base text-gray-500 font-medium bg-white rounded-xl sm:rounded-2xl border border-gray-100">
                                     No {filter !== 'All' ? filter.toLowerCase() : ''} batches found.
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 xl:gap-6">
                                         {paginatedBatches.map(batch => (
-                                        <div key={batch.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col hover:shadow-md transition-shadow">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="text-xl font-bold text-gray-900">{batch.title}</h3>
-                                                <span className={`px-2.5 py-1 text-[11px] font-bold rounded-full shrink-0 ${batch.status === 'Running' ? 'bg-blue-100 text-[#3758EE]' : 'bg-emerald-100 text-emerald-600'}`}>
+                                        <div key={batch.id} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 xl:p-6 flex flex-col hover:shadow-md transition-shadow min-w-0">
+                                            <div className="flex justify-between items-start gap-2.5 mb-1.5 sm:mb-2 min-w-0">
+                                                <h3
+                                                    className="text-base sm:text-lg xl:text-xl font-bold text-gray-900 truncate min-w-0 flex-1"
+                                                    title={batch.title}
+                                                >
+                                                    {batch.title}
+                                                </h3>
+                                                <span className={`px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-bold rounded-full shrink-0 whitespace-nowrap ${batch.status === 'Running' ? 'bg-blue-100 text-[#3758EE]' : 'bg-emerald-100 text-emerald-600'}`}>
                                                     {batch.status}
                                                 </span>
                                             </div>
-                                            <p className="text-sm font-medium text-gray-500 mb-4 line-clamp-1">Course: <span className="text-gray-700">{batch.courseName}</span></p>
+                                            <p
+                                                className="text-xs sm:text-sm font-medium text-gray-500 mb-3 sm:mb-4 truncate"
+                                                title={`Course: ${batch.courseName}`}
+                                            >
+                                                Course: <span className="text-gray-700">{batch.courseName}</span>
+                                            </p>
 
-                                            <div className="bg-blue-50/50 rounded-xl p-4 flex justify-between mt-auto mb-5">
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Enrollments</span>
-                                                    <span className="text-[15px] font-bold text-[#3758EE]">{batch.enrolled}</span>
+                                            <div className="bg-blue-50/50 rounded-xl p-3 sm:p-4 flex items-center justify-between gap-3 mt-auto mb-4 sm:mb-5">
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-[10px] sm:text-[11px] xl:text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5 sm:mb-1 truncate">Enrollments</span>
+                                                    <span className="text-sm sm:text-[15px] font-bold text-[#3758EE]">{batch.enrolled}</span>
                                                 </div>
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Groups</span>
-                                                    <span className="text-[15px] font-bold text-[#3758EE]">{batch.groups}</span>
+                                                <div className="flex flex-col items-end min-w-0 shrink-0">
+                                                    <span className="text-[10px] sm:text-[11px] xl:text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5 sm:mb-1">Groups</span>
+                                                    <span className="text-sm sm:text-[15px] font-bold text-[#3758EE]">{batch.groups}</span>
                                                 </div>
                                             </div>
 
                                             <button 
                                                 onClick={() => navigate(isMyBatches ? `/my-batches/details/${batch.id}` : `/admin-batches/details/${batch.id}`)}
-                                                className="w-full py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white rounded-xl font-medium shadow-sm hover:opacity-90 transition-opacity"
+                                                className="w-full py-2 sm:py-2.5 bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white text-sm sm:text-base rounded-xl font-medium shadow-sm hover:opacity-90 transition-opacity"
                                             >
                                                 View Details
                                             </button>
@@ -125,7 +135,7 @@ const BatchesPage = ({ filter = 'All', isMyBatches = false }) => {
                                     ))}
                                     </div>
                                     {totalPages > 1 && (
-                                        <div className="mt-10">
+                                        <div className="mt-6 sm:mt-8 xl:mt-10 flex justify-center sm:justify-end">
                                             <CustomPagination 
                                                 currentPage={currentPage}
                                                 totalPages={totalPages}

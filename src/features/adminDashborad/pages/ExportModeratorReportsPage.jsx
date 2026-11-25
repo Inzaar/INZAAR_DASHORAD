@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '@/components/layouts/SideBar';
 import Navbar from '@/components/layouts/NavBar';
 import GradiantButton from '@/components/ui/buttons/GradiantButton';
@@ -13,22 +12,20 @@ import { useAuth } from '@/context/AuthContext';
 
 const ExportModeratorReportsPage = () => {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
-    // API Data State
-    const [moderators, setModerators] = useState([]);
-    const [totalModerators, setTotalModerators] = useState({ count: 0, trend: '+2.7%' });
-    const [overview, setOverview] = useState({ successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-    const [performance, setPerformance] = useState({ percentage: 0, trendingUp: 0 });
-    const [pagination, setPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
-
-    // Client-side Pagination State (10 items per page)
-    const [currentPage, setCurrentPage] = useState(1);
+    // Server-side Paginated API Data State (10 users per page)
     const itemsPerPage = 10;
+    const [moderators, setModerators] = useState([]);
+    const [printModerators, setPrintModerators] = useState([]);
+    const [pendingPrint, setPendingPrint] = useState(false);
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+    const latestRequestRef = useRef(0);
+    const skipNextSearchEffectRef = useRef(false);
 
     // Filter State (unified across top and table)
     const [filterStatus, setFilterStatus] = useState('');
@@ -55,61 +52,97 @@ const ExportModeratorReportsPage = () => {
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-    // Fetch report data from API
+    const buildReportParams = useCallback((page = 1, limit = itemsPerPage, customParams = {}) => {
+        const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
+        const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
+        const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
+        const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
+        const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
+
+        const params = new URLSearchParams();
+        params.append('page', page);
+        params.append('limit', limit);
+        params.append('includeStats', 'false');
+
+        if (user?.role === 'moderator' && user?.gender) {
+            params.append('gender', user.gender);
+        }
+
+        if (currentStatus) params.append('status', currentStatus);
+        if (currentFrom) params.append('from', currentFrom);
+        if (currentTo) params.append('to', currentTo);
+
+        if (currentSearch && currentSearch.trim()) {
+            params.append('search', currentSearch.trim());
+            params.append('searchType', currentSearchType);
+        }
+
+        return params;
+    }, [filterStatus, filterFrom, filterTo, tableSearch, tableSearchType, user, itemsPerPage]);
+
+    // Fetch paginated report data from API (10 moderators per page)
     const fetchReport = useCallback(async (page = 1, customParams = {}) => {
+        const requestId = ++latestRequestRef.current;
+        setPrintModerators([]);
         setLoading(true);
         try {
-            const currentStatus = customParams.status !== undefined ? customParams.status : filterStatus;
-            const currentFrom = customParams.from !== undefined ? customParams.from : filterFrom;
-            const currentTo = customParams.to !== undefined ? customParams.to : filterTo;
-            const currentSearch = customParams.search !== undefined ? customParams.search : tableSearch;
-            const currentSearchType = customParams.searchType !== undefined ? customParams.searchType : tableSearchType;
-
-            const params = new URLSearchParams();
-            params.append('page', page);
-            params.append('limit', 100000); // Fetch all records for export view
-
-            if (user?.role === 'moderator' && user?.gender) {
-                params.append('gender', user.gender);
-            }
-
-            if (currentStatus) params.append('status', currentStatus);
-            if (currentFrom) params.append('from', currentFrom);
-            if (currentTo) params.append('to', currentTo);
-
-            if (currentSearch && currentSearch.trim()) {
-                params.append('search', currentSearch.trim());
-                params.append('searchType', currentSearchType);
-            }
-
+            const params = buildReportParams(page, itemsPerPage, customParams);
             const res = await axiosInstance.get(`/admin/reports/moderators?${params.toString()}`);
-            const data = res.data.data;
+            if (requestId !== latestRequestRef.current) return;
 
+            const data = res.data?.data || {};
             setModerators(data.moderatorsList || []);
-            setTotalModerators(data.totalModerators || { count: 0, trend: '+2.7%' });
-            setOverview(data.overview || { successRate: '0%', inProgress: '0', activeStatus: 'Active' });
-            setPerformance(data.overallPerformance || { percentage: 0, trendingUp: 0 });
-            setPagination(data.pagination || { page: 1, limit: 5, total: 0, totalPages: 0 });
+            setPagination(data.pagination || { page, limit: itemsPerPage, total: 0, totalPages: 1 });
         } catch (err) {
-            console.error('Failed to fetch moderators report:', err);
+            if (requestId === latestRequestRef.current) {
+                console.error('Failed to fetch moderators report:', err);
+            }
         } finally {
-            setLoading(false);
+            if (requestId === latestRequestRef.current) {
+                setLoading(false);
+            }
         }
-    }, [filterStatus, filterFrom, filterTo, tableSearch, tableSearchType, user]);
+    }, [buildReportParams, itemsPerPage]);
+
+    const fetchReportRef = useRef(fetchReport);
+    useEffect(() => {
+        fetchReportRef.current = fetchReport;
+    }, [fetchReport]);
 
     // Initial mount and real-time search effect
     const isFirstMount = useRef(true);
     useEffect(() => {
         if (isFirstMount.current) {
             isFirstMount.current = false;
-            fetchReport(1);
+            fetchReportRef.current(1);
+            return;
+        }
+        if (skipNextSearchEffectRef.current) {
+            skipNextSearchEffectRef.current = false;
             return;
         }
         const timer = setTimeout(() => {
-            fetchReport(1);
+            fetchReportRef.current(1);
         }, 300);
         return () => clearTimeout(timer);
     }, [tableSearch, tableSearchType]);
+
+    // Trigger window.print() after full export records render in print container
+    useEffect(() => {
+        if (!pendingPrint) return;
+        const frame = requestAnimationFrame(() => {
+            setPendingPrint(false);
+            window.print();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [pendingPrint]);
+
+    // Clean up temporary print payload after print dialog closes
+    useEffect(() => {
+        const handleAfterPrint = () => setPrintModerators([]);
+        window.addEventListener('afterprint', handleAfterPrint);
+        return () => window.removeEventListener('afterprint', handleAfterPrint);
+    }, []);
 
     const handleStatusChange = (val) => {
         setFilterStatus(val);
@@ -139,6 +172,9 @@ const ExportModeratorReportsPage = () => {
     };
 
     const handleTopClear = () => {
+        if (tableSearch !== '') {
+            skipNextSearchEffectRef.current = true;
+        }
         setFilterStatus('');
         setFilterFrom('');
         setFilterTo('');
@@ -153,73 +189,11 @@ const ExportModeratorReportsPage = () => {
         handleTopClear();
     };
 
-    // Client-side filtering memo
-    const filteredModerators = useMemo(() => {
-        return (moderators || []).filter(mod => {
-            // 1. Status Filter: strictly match Active vs Inactive
-            if (filterStatus === 'active' && (mod.status || '').toLowerCase() !== 'active') {
-                return false;
-            }
-            if (filterStatus === 'inactive' && (mod.status || '').toLowerCase() === 'active') {
-                return false;
-            }
-
-            // 2. Date Filter
-            if (filterFrom || filterTo) {
-                const dateVal = mod.lastLogin || mod.joiningDate;
-                if (!dateVal) return false;
-                const d = new Date(dateVal);
-                if (isNaN(d.getTime())) return false;
-                const modDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if (filterFrom && modDateStr < filterFrom) return false;
-                if (filterTo && modDateStr > filterTo) return false;
-            }
-
-            // 3. Search Filter
-            if (tableSearch && tableSearch.trim()) {
-                const q = tableSearch.trim().toLowerCase();
-                if (tableSearchType === 'NAME') {
-                    const name = (mod.name || '').toLowerCase();
-                    const qWords = q.split(/\s+/).filter(Boolean);
-                    const matches = qWords.every(word => name.includes(word));
-                    if (!matches) return false;
-                } else if (tableSearchType === 'EMAIL') {
-                    const email = (mod.email || '').toLowerCase();
-                    if (!email.includes(q)) return false;
-                } else if (tableSearchType === 'PHONE') {
-                    const phone = (mod.phone || '').replace(/\D/g, '');
-                    const qPhone = q.replace(/\D/g, '');
-                    if (qPhone && !phone.includes(qPhone)) return false;
-                }
-            }
-
-            return true;
-        });
-    }, [moderators, filterStatus, filterFrom, filterTo, tableSearch, tableSearchType]);
-
-    // Client-side pagination calculations
-    const totalPages = Math.ceil(filteredModerators.length / itemsPerPage) || 1;
-
-    // Reset to page 1 when any filter or search changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filterStatus, filterFrom, filterTo, tableSearch, tableSearchType]);
-
-    // Ensure currentPage stays within valid range
-    useEffect(() => {
-        if (currentPage > totalPages) {
-            setCurrentPage(1);
-        }
-    }, [totalPages, currentPage]);
-
-    const paginatedModerators = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredModerators.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredModerators, currentPage, itemsPerPage]);
-
-    // Pagination
+    // Server-side pagination
     const goToPage = (page) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+        if (page >= 1 && page <= pagination.totalPages && page !== pagination.page) {
+            fetchReport(page);
+        }
     };
 
     const formatDate = (dateStr) => {
@@ -229,69 +203,112 @@ const ExportModeratorReportsPage = () => {
         return `${String(d.getDate()).padStart(2, '0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
     };
 
-    const handleExportCSV = () => {
-        const headers = [];
-        if (visibleColumns.name) headers.push('"Name"');
-        if (visibleColumns.contact) headers.push('"Email"');
-        if (visibleColumns.phone) headers.push('"Phone Number"');
-        if (visibleColumns.manageBatches) headers.push('"Manage Batch\'s"');
-        if (visibleColumns.progress) headers.push('"Progress"');
-        if (visibleColumns.lastLogin) headers.push('"Last Login"');
-        if (visibleColumns.status) headers.push('"Status"');
+    // Fetch all matching records on-demand only when exporting CSV or printing PDF
+    const fetchAllForExport = async () => {
+        if (pagination.total === 0 && moderators.length === 0) {
+            return [];
+        }
+        if (pagination.total > 0 && pagination.total <= moderators.length && pagination.page === 1) {
+            return moderators;
+        }
+        const exportLimit = Math.max(pagination.total || 0, 100000);
+        const params = buildReportParams(1, exportLimit);
+        const res = await axiosInstance.get(`/admin/reports/moderators?${params.toString()}`);
+        return res.data?.data?.moderatorsList || [];
+    };
 
-        const csvRows = [];
-        csvRows.push(headers.join(','));
+    const handleExportCSV = async () => {
+        setIsPrintDropdownOpen(false);
+        setExporting(true);
+        try {
+            const exportRecords = await fetchAllForExport();
 
-        filteredModerators.forEach(mod => {
-            const batches = Array.isArray(mod.batches)
-                ? mod.batches.filter(Boolean)
-                : (mod.batches ? [mod.batches] : []);
+            const headers = [];
+            if (visibleColumns.name) headers.push('"Name"');
+            if (visibleColumns.contact) headers.push('"Email"');
+            if (visibleColumns.phone) headers.push('"Phone Number"');
+            if (visibleColumns.manageBatches) headers.push('"Manage Batch\'s"');
+            if (visibleColumns.progress) headers.push('"Progress"');
+            if (visibleColumns.lastLogin) headers.push('"Last Login"');
+            if (visibleColumns.status) headers.push('"Status"');
 
-            const batchEntries = batches.length > 0 ? batches : ["N/A"];
-            const rowsToOutput = visibleColumns.manageBatches ? batchEntries : [null];
+            const csvRows = [];
+            csvRows.push(headers.join(','));
 
-            rowsToOutput.forEach(batchName => {
-                const row = [];
-                if (visibleColumns.name) {
-                    row.push(`"${(mod.name || '').toString().replace(/"/g, '""')}"`);
-                }
-                if (visibleColumns.contact) {
-                    row.push(`"${(mod.email || '').toString().replace(/"/g, '""')}"`);
-                }
-                if (visibleColumns.phone) {
-                    let p = String(mod.phone || '').trim();
-                    if (p && !p.startsWith('+') && p.startsWith('92')) {
-                        p = '+' + p;
+            exportRecords.forEach(mod => {
+                const batches = Array.isArray(mod.batches)
+                    ? mod.batches.filter(Boolean)
+                    : (mod.batches ? [mod.batches] : []);
+
+                const batchEntries = batches.length > 0 ? batches : ["N/A"];
+                const rowsToOutput = visibleColumns.manageBatches ? batchEntries : [null];
+
+                rowsToOutput.forEach(batchName => {
+                    const row = [];
+                    if (visibleColumns.name) {
+                        row.push(`"${(mod.name || '').toString().replace(/"/g, '""')}"`);
                     }
-                    const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
-                    row.push(cleanP ? `\u200C${cleanP}` : '""');
-                }
-                if (visibleColumns.manageBatches) {
-                    row.push(`"${(batchName || '').toString().replace(/"/g, '""')}"`);
-                }
-                if (visibleColumns.progress) {
-                    row.push(`"${(mod.progress || '').toString().replace(/"/g, '""')}"`);
-                }
-                if (visibleColumns.lastLogin) {
-                    row.push(`"${formatDate(mod.lastLogin)}"`);
-                }
-                if (visibleColumns.status) {
-                    row.push(`"${(mod.status || '').toString().replace(/"/g, '""')}"`);
-                }
-                csvRows.push(row.join(','));
+                    if (visibleColumns.contact) {
+                        row.push(`"${(mod.email || '').toString().replace(/"/g, '""')}"`);
+                    }
+                    if (visibleColumns.phone) {
+                        let p = String(mod.phone || '').trim();
+                        if (p && !p.startsWith('+') && p.startsWith('92')) {
+                            p = '+' + p;
+                        }
+                        const cleanP = p.replace(/"/g, '').replace(/,/g, '').trim();
+                        row.push(cleanP ? `\u200C${cleanP}` : '""');
+                    }
+                    if (visibleColumns.manageBatches) {
+                        row.push(`"${(batchName || '').toString().replace(/"/g, '""')}"`);
+                    }
+                    if (visibleColumns.progress) {
+                        row.push(`"${(mod.progress || '').toString().replace(/"/g, '""')}"`);
+                    }
+                    if (visibleColumns.lastLogin) {
+                        row.push(`"${formatDate(mod.lastLogin)}"`);
+                    }
+                    if (visibleColumns.status) {
+                        row.push(`"${(mod.status || '').toString().replace(/"/g, '""')}"`);
+                    }
+                    csvRows.push(row.join(','));
+                });
             });
-        });
 
-        const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `moderator_reports_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `moderator_reports_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to export moderators CSV:', err);
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    const handlePrintPDF = async () => {
+        setIsPrintDropdownOpen(false);
+        if (pagination.total <= moderators.length && pagination.page === 1) {
+            setPrintModerators(moderators);
+            setPendingPrint(true);
+            return;
+        }
+        setExporting(true);
+        try {
+            const exportRecords = await fetchAllForExport();
+            setPrintModerators(exportRecords);
+            setPendingPrint(true);
+        } catch (err) {
+            console.error('Failed to prepare moderators PDF:', err);
+        } finally {
+            setExporting(false);
+        }
     };
 
     const toggleColumn = (col) => {
@@ -516,24 +533,25 @@ const ExportModeratorReportsPage = () => {
                                         </button>
                                         <div className="relative">
                                             <button
+                                                disabled={exporting}
                                                 onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
-                                                className="flex items-center gap-2 px-4 h-[42px] bg-blue-100 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                                className="flex items-center gap-2 px-4 h-[42px] bg-blue-100 text-blue-600 font-bold text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden disabled:opacity-60"
                                             >
-                                                <Printer className="w-4 h-4" />
-                                                Print
+                                                {exporting ? <Loader className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                                {exporting ? 'Exporting...' : 'Print'}
                                             </button>
                                             {isPrintDropdownOpen && (
                                                 <>
                                                     <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
                                                     <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
                                                         <button
-                                                            onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                            onClick={handlePrintPDF}
                                                             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                         >
                                                             print as pdf
                                                         </button>
                                                         <button
-                                                            onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                            onClick={handleExportCSV}
                                                             className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                         >
                                                             print as csv
@@ -559,24 +577,25 @@ const ExportModeratorReportsPage = () => {
                                             </button>
                                             <div className="flex-1 relative">
                                                 <button
+                                                    disabled={exporting}
                                                     onClick={() => setIsPrintDropdownOpen(!isPrintDropdownOpen)}
-                                                    className="w-full flex items-center justify-center gap-2 px-3 h-10 sm:h-11 bg-blue-100 text-blue-600 font-bold text-xs sm:text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden"
+                                                    className="w-full flex items-center justify-center gap-2 px-3 h-10 sm:h-11 bg-blue-100 text-blue-600 font-bold text-xs sm:text-sm rounded-xl hover:bg-blue-200 transition-colors whitespace-nowrap print:hidden disabled:opacity-60"
                                                 >
-                                                    <Printer className="w-4 h-4" />
-                                                    Print
+                                                    {exporting ? <Loader className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                                                    {exporting ? 'Exporting...' : 'Print'}
                                                 </button>
                                                 {isPrintDropdownOpen && (
                                                     <>
                                                         <div className="fixed inset-0 z-40" onClick={() => setIsPrintDropdownOpen(false)} />
                                                         <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2">
                                                             <button
-                                                                onClick={() => { window.print(); setIsPrintDropdownOpen(false); }}
+                                                                onClick={handlePrintPDF}
                                                                 className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                             >
                                                                 print as pdf
                                                             </button>
                                                             <button
-                                                                onClick={() => { handleExportCSV(); setIsPrintDropdownOpen(false); }}
+                                                                onClick={handleExportCSV}
                                                                 className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
                                                             >
                                                                 print as csv
@@ -682,13 +701,13 @@ const ExportModeratorReportsPage = () => {
                                     <div className="flex items-center justify-center py-24">
                                         <Loader className="w-10 h-10 text-[#3758EE] animate-spin" />
                                     </div>
-                                ) : filteredModerators.length === 0 ? (
+                                ) : moderators.length === 0 ? (
                                     <div className="flex items-center justify-center py-16">
                                         <span className="text-gray-400 text-sm">{t("no_moderators_found", "No moderators found")}</span>
                                     </div>
                                 ) : (
                                     <>
-                                        {/* Screen View (Paginated to 10 items per page) */}
+                                        {/* Screen View (Server-side paginated to 10 items per page) */}
                                         <div className="print:hidden">
                                             <div className="overflow-x-auto flex-1 custom-scrollbar-thin">
                                                 <table className="w-full min-w-[650px] sm:min-w-[760px] xl:min-w-full border-separate border-spacing-y-1 sm:border-spacing-y-1.5 xl:border-spacing-y-2.5">
@@ -704,7 +723,7 @@ const ExportModeratorReportsPage = () => {
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {paginatedModerators.map((moderator) => (
+                                                        {moderators.map((moderator) => (
                                                             <tr key={moderator.id} className="bg-[#F8F9FA] transition-colors group">
                                                                 {visibleColumns.name && (
                                                                     <td className="py-1.5 sm:py-2.5 xl:py-3.5 px-2 sm:px-3 text-center first:rounded-l-xl last:rounded-r-xl">
@@ -767,18 +786,18 @@ const ExportModeratorReportsPage = () => {
                                             </div>
 
                                             {/* Pagination */}
-                                            {totalPages > 1 && (
+                                            {pagination.totalPages > 1 && (
                                                 <div className="flex justify-center sm:justify-end items-center mt-4 sm:mt-6 xl:mt-auto print:hidden">
                                                     <CustomPagination 
-                                                        currentPage={currentPage} 
-                                                        totalPages={totalPages} 
+                                                        currentPage={pagination.page} 
+                                                        totalPages={pagination.totalPages} 
                                                         onPageChange={goToPage} 
                                                     />
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Print View (Shows all filtered moderators when printed) */}
+                                        {/* Print View (Shows all filtered moderators fetched on-demand when printed) */}
                                         <div className="hidden print:block">
                                             <table className="w-full min-w-0 border-collapse border-spacing-0 border border-black text-[10px]">
                                                 <thead>
@@ -793,7 +812,7 @@ const ExportModeratorReportsPage = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {filteredModerators.map((moderator) => (
+                                                    {(printModerators.length > 0 ? printModerators : moderators).map((moderator) => (
                                                         <tr key={`print-${moderator.id}`}>
                                                             {visibleColumns.name && (
                                                                 <td className="py-1 border border-black text-center text-[10px] text-gray-800">
